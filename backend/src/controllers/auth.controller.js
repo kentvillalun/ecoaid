@@ -30,7 +30,7 @@ const listBarangays = async (req, res) => {
       select: {
         id: true,
         name: true,
-        city: true, // needed by frontend dropdown to distinguish same-name barangays
+        municipality: true, // needed by frontend dropdown to distinguish same-name barangays
       },
       orderBy: { name: "asc" },
       take: 10,
@@ -152,7 +152,7 @@ const register = async (req, res) => {
     // ── Validate barangay ─────────────────────────────────────
     const barangayRecord = await prisma.barangay.findFirst({
       where: { id: barangayId, isRegistered: true },
-      select: { id: true, code: true, name: true },
+      select: { id: true, zipCode: true, name: true },
     });
 
     if (!barangayRecord) {
@@ -248,7 +248,7 @@ const verifyOtp = async (req, res) => {
 
     const barangayRecord = await prisma.barangay.findFirst({
       where: { id: barangayId, isRegistered: true },
-      select: { id: true, code: true, name: true },
+      select: { id: true, zipCode: true, name: true },
     });
 
     if (!barangayRecord) {
@@ -288,7 +288,7 @@ const verifyOtp = async (req, res) => {
         id: true,
         phoneNumber: true,
         purok: true,
-        barangay: { select: { id: true, code: true, name: true } },
+        barangay: { select: { id: true, zipCode: true, name: true } },
         sitio: { select: { id: true, name: true } },
       },
     });
@@ -379,7 +379,7 @@ const login = async (req, res) => {
     const user = await prisma.user.findUnique({
       where: { username },
       include: {
-        barangay: { select: { id: true, name: true, code: true } },
+        barangay: { select: { id: true, name: true, zipCode: true } },
         sitio: { select: { id: true, name: true } },
       },
     });
@@ -632,7 +632,7 @@ const barangayLogin = async (req, res) => {
     const user = await prisma.user.findUnique({
       where: { username },
       include: {
-        barangay: { select: { id: true, name: true, code: true } },
+        barangay: { select: { id: true, name: true, zipCode: true } },
       },
     });
 
