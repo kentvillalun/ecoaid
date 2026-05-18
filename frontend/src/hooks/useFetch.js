@@ -43,7 +43,9 @@ export const useFetch = ({ url, refetchCount }) => {
             }
         }
 
-        fetchData()
+        if (!url) return;
+
+        if (url) fetchData()
     }, [url, refetchCount])
 
 

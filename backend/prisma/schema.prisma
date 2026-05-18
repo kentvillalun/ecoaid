@@ -189,6 +189,8 @@ model Material {
   pickupRequest PickupRequests[]
   collectionItem CollectionItem[]
   programMaterial ProgramMaterial[]
+
+  @@unique([name, barangayId])
 }
 
 enum Unit {

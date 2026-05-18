@@ -112,9 +112,88 @@ async function main() {
       where: { name: categoryName },
       update: {},
       create: {
-        name: categoryName
+        name: categoryName,
+      },
+    });
+  }
+
+  const categories = await prisma.category.findMany();
+
+  const metals = categories.find((c) => c.name === "Metals");
+  const papers = categories.find((c) => c.name === "Papers");
+  const bottles = categories.find((c) => c.name === "Bottles");
+  const plastics = categories.find((c) => c.name === "Plastics");
+
+  const DEV_METALS = ["Aluminum Cans", "Steel/Iron Scraps"]
+  const DEV_PAPERS = ["Newspaper", "Cardboard"]
+  const DEV_BOTTLES = ["Plastic Bottles (PET)", "Glass Bottles"]
+  const DEV_PLASTICS = ["Plastic Bags", "Hard Plastics"]
+
+  for (const metalsName of DEV_METALS) {
+    await prisma.material.upsert({
+      where: {
+        name_barangayId: {
+          name: metalsName,
+          barangayId: barangay.id,
+        }
+      },
+      update: {},
+      create: {
+       name: metalsName,
+       barangayId: barangay.id,
+       categoryId: metals.id
       }
-      
+    })
+  }
+
+  for (const papersName of DEV_PAPERS) {
+    await prisma.material.upsert({
+      where: {
+        name_barangayId: {
+          name: papersName,
+          barangayId: barangay.id,
+        }
+      },
+      update: {},
+      create: {
+       name: papersName,
+       barangayId: barangay.id,
+       categoryId: papers.id
+      }
+    })
+  }
+
+  for (const bottlesName of DEV_BOTTLES) {
+    await prisma.material.upsert({
+      where: {
+        name_barangayId: {
+          name: bottlesName,
+          barangayId: barangay.id,
+        }
+      },
+      update: {},
+      create: {
+       name: bottlesName,
+       barangayId: barangay.id,
+       categoryId: bottles.id
+      }
+    })
+  }
+
+  for (const plasticsName of DEV_PLASTICS) {
+    await prisma.material.upsert({
+      where: {
+        name_barangayId: {
+          name: plasticsName,
+          barangayId: barangay.id,
+        }
+      },
+      update: {},
+      create: {
+       name: plasticsName,
+       barangayId: barangay.id,
+       categoryId: plastics.id
+      }
     })
   }
 }

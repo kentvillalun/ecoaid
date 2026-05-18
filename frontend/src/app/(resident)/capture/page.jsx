@@ -10,21 +10,24 @@ import * as yup from "yup";
 import { Page } from "@/components/layout/Page";
 import { API_BASE_URL } from "@/lib/config";
 import { useRouter } from "next/navigation";
+import { useFetch } from "@/hooks/useFetch";
 
 const schema = yup.object().shape({
-  materialType: yup
-    .string()
-    .oneOf(["METALS", "PAPERS", "BOTTLES", "PLASTICS", "ASSORTED"], "Invalid material type")
-    .required("Material type is required"),
-  estimatedWeight: yup
+  estimatedValue: yup
     .number("Please input numbers only")
-    .required("Estimated weight is requried")
+    .required("Estimated value is requried")
     .positive("Please input positive numbers only"),
-  weightUnit: yup
+  estimatedUnit: yup
     .string()
-    .oneOf(["KG", "GRAMS", "LBS"], "Invalid weight unit type")
-    .required("Weight unit is required"),
+    .oneOf(["KG", "GRAMS", "LBS", "PIECE"], "Invalid unit")
+    .required("Unit is required"),
   notes: yup.string(),
+  isAssorted: yup.boolean(),
+  materialId: yup.string().when("isAssorted", {
+    is: false,
+    then: (m) => m.required("Material is required"),
+    otherwise: (m) => m.nullable(),
+  }),
 });
 
 export default function CapturePage() {
@@ -40,6 +43,22 @@ export default function CapturePage() {
   const [sitio, setSitio] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
+  const [category, setCategory] = useState("");
+  const categoriesUrl = `/api/material/categories`;
+  const [categoriesRefetchCount, setCategoriesRefetchCount] = useState(0);
+  const {
+    isLoading: isCategoriesLoading,
+    isError: isCategoriesError,
+    data: categoriesData,
+  } = useFetch({ url: categoriesUrl, refetchCount: categoriesRefetchCount });
+
+  const materialUrl = category ? `/api/material?categoryId=${category}` : null;
+  const [materialRefetchCount, setMaterialRefetchCount] = useState(0);
+  const { data: materialData } = useFetch({
+    url: materialUrl,
+    refetchCount: materialRefetchCount,
+  });
+  const [isAssortedCheck, setIsAssortedCheck] = useState(false);
 
   const openCamera = () => {
     fileInputRef.current.click();
@@ -103,13 +122,15 @@ export default function CapturePage() {
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
-      materialType: "",
-      estimatedWeight: "",
-      weightUnit: "",
+      estimatedValue: "",
+      estimatedUnit: "",
       notes: "",
+      materialId: "",
+      isAssorted: false,
     },
   });
 
@@ -280,36 +301,83 @@ export default function CapturePage() {
           >
             <div className="flex flex-col gap-3">
               <div className="flex flex-col gap-1">
-                <label className="font-medium text-sm text-[#727272] px-2">
-                  Type of material
-                </label>
-                <div className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-[#74C857] transition-colors">
-                  <select
-                    className="w-full outline-none"
-                    {...register("materialType")}
+                <div className="flex flex-row items-center gap-1 outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-[#74C857] transition-colors min-h-11">
+                  <input
+                    type="checkbox"
+                    onChange={(e) => {
+                      setIsAssortedCheck(e.target.checked);
+                      setValue("isAssorted", e.target.checked);
+                    }}
+                    id="mixed"
+                  />
+                  <label
+                    className="font-medium text-base text-[#727272] px-2 flex-1"
+                    htmlFor="mixed"
                   >
-                    <option value="" disabled hidden>
-                      Choose an option
-                    </option>
-                    <option value="METALS" className="">
-                      Metals
-                    </option>
-                    <option value="PAPERS">Papers</option>
-                    <option value="BOTTLES">Bottles</option>
-                    <option value="PLASTICS">Plastics</option>
-                    <option value="ASSORTED">Assorted</option>
-                  </select>
+                    Mixed/ Assorted materials
+                  </label>
                 </div>
-                {errors.materialType && (
-                  <p className="text-[14px] text-red-500 text-center md:text-start">
-                    {errors.materialType?.message}
+                {isAssortedCheck && (
+                  <p className="text-[14px] text-[#727272] text-start italic ">
+                    Collector will identify materials during pickup
                   </p>
                 )}
               </div>
 
+              {!isAssortedCheck && (
+                <>
+                  <div className="flex flex-col gap-1">
+                    <label className="font-medium text-sm text-[#727272] px-2">
+                      Material category
+                    </label>
+                    <div className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-[#74C857] transition-colors">
+                      <select
+                        className="w-full outline-none"
+                        onChange={(e) => setCategory(e.target.value)}
+                      >
+                        <option value="" disabled hidden>
+                          Choose a material category
+                        </option>
+                        {categoriesData?.categories.map((c) => (
+                          <option value={c.id} key={c.id}>
+                            {c.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label className="font-medium text-sm text-[#727272] px-2">
+                      Material
+                    </label>
+                    <div className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-[#74C857] transition-colors">
+                      <select
+                        className="w-full outline-none"
+                        {...register("materialId")}
+                      >
+                        <option value="" disabled hidden>
+                          Choose a material
+                        </option>
+                        {materialData?.materials.map((m) => (
+                          <option value={m.id} key={m.id}>
+                            {m.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    {errors.materialId && (
+                      <p className="text-[14px] text-red-500 text-center md:text-start">
+                        {errors.materialId?.message}
+                      </p>
+                    )}
+                  </div>
+                </>
+              )}
+
               <div className="flex flex-col gap-1">
                 <label className="font-medium text-sm text-[#727272] px-2">
-                  Estimated weight
+                  Estimated value
                 </label>
                 <div className="outline-1 py-2.5 pl-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-[#74C857] transition-colors flex items-center justify-between">
                   <div className="flex flex-row justify-center items-center w-full pr-4">
@@ -317,11 +385,11 @@ export default function CapturePage() {
                       type="number"
                       className="outline-none w-full"
                       placeholder="e.g. 1"
-                      {...register("estimatedWeight")}
+                      {...register("estimatedValue")}
                     />
                     <select
                       className="outline-none"
-                      {...register("weightUnit")}
+                      {...register("estimatedUnit")}
                     >
                       <option value="" hidden disabled>
                         kg
@@ -329,17 +397,18 @@ export default function CapturePage() {
                       <option value="KG">kg</option>
                       <option value="GRAMS">grams</option>
                       <option value="LBS">lbs</option>
+                      <option value="PIECE">piece/s</option>
                     </select>
                   </div>
                 </div>
-                {errors.estimatedWeight && (
+                {errors.estimatedValue && (
                   <p className="text-[14px] text-red-500 text-center md:text-start">
-                    {errors.estimatedWeight?.message}
+                    {errors.estimatedValue?.message}
                   </p>
                 )}
-                {errors.weightUnit && (
+                {errors.estimatedUnit && (
                   <p className="text-[14px] text-red-500 text-center md:text-start">
-                    {errors.weightUnit?.message}
+                    {errors.estimatedUnit?.message}
                   </p>
                 )}
               </div>
