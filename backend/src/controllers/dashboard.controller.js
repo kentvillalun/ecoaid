@@ -34,12 +34,22 @@ const getRecentTransactions = async (req, res) => {
         request: {
           select: {
             createdAt: true,
+            isAssorted: true,
             user: {
               select: {
                 firstName: true,
                 lastName: true,
               },
             },
+            material: {
+              select: {
+                category: {
+                  select: {
+                    name: true,
+                  }
+                }
+              }
+            }
           },
         },
       },

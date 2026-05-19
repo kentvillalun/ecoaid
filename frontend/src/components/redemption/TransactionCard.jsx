@@ -45,7 +45,7 @@ export const TransactionCard = ({
         <div className="md:hidden">
           <Error handleRefetchCount={handleRefetchCount} />
         </div>
-      ) : data?.length === 0 ? (
+      ) : data?.transactions.length === 0 ? (
         <div className="flex flex-col items-center justify-center min-h-full p-20 gap-1 md:hidden">
           <p className="text-sm font-medium uppercase tracking-[0.2em] text-[#74C857]">
             EcoProfit

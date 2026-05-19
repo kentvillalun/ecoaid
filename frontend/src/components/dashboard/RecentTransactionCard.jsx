@@ -72,7 +72,7 @@ export const RecentTransactionCard = ({
                 </div>
               </div>
               <div className="flex flex-col items-end gap-2">
-                <MaterialPill type={`${d?.materialType}`} />
+                <MaterialPill type={d?.request?.isAssorted === true ? "Assorted" : d?.request?.material?.category?.name} />
               </div>
             </div>
             <div className="flex flex-row items-center justify-between w-full pt-2 border-t border-gray-100">
@@ -82,7 +82,7 @@ export const RecentTransactionCard = ({
               <p className="text-xs text-gray-500 font-medium">
                 Actual weight: {d?.actualWeight}{" "}
                 <span className="capitalize">
-                  {(d?.weightUnit).toLowerCase()}
+                  {(d?.actualUnit).toLowerCase()}
                 </span>
               </p>
             </div>

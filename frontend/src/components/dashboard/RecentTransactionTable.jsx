@@ -12,8 +12,7 @@ export const RecentTransactionTable = ({
   isError,
   handleRefetchCount,
 }) => {
-    const router = useRouter()
-
+  const router = useRouter();
 
   const tableConfig = [
     {
@@ -33,13 +32,23 @@ export const RecentTransactionTable = ({
     },
     {
       header: "Material",
-      render: (data) => <MaterialPill type={data?.materialType} />,
+      render: (data) => (
+        <div className="flex items-center w-full justify-center">
+          <MaterialPill
+            type={
+              data?.request?.isAssorted === true
+                ? "Assorted"
+                : data?.request?.material?.category?.name
+            }
+          />
+        </div>
+      ),
     },
     {
-      header: "Actual weight",
+      header: "Actual values",
       render: (data) => (
-        <span className="">
-          {data?.actualWeight} {data?.weightUnit}
+        <span className="lowercase">
+          {data?.actualValue} {data?.actualUnit === "PIECE" ? "pcs" : data?.actualUnit}
         </span>
       ),
     },
@@ -86,7 +95,10 @@ export const RecentTransactionTable = ({
           ) : isError ? (
             <tr className="max-w-md">
               <td className="text-center" colSpan={6}>
-                <Error handleRefetchCount={handleRefetchCount} subtext={"We cannot get your recent intakes"}/>
+                <Error
+                  handleRefetchCount={handleRefetchCount}
+                  subtext={"We cannot get your recent intakes"}
+                />
               </td>
             </tr>
           ) : data?.recentTransactions?.length === 0 ? (
