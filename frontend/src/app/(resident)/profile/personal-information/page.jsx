@@ -25,7 +25,6 @@ export default function PersonalInformationPage() {
     firstName: "",
     lastName: "",
     phoneNumber: "",
-    address: "",
   });
 
   const { makeRequest } = useMutation();
@@ -38,7 +37,6 @@ export default function PersonalInformationPage() {
         firstName: data?.user?.firstName,
         lastName: data?.user?.lastName,
         phoneNumber: data?.user?.phoneNumber,
-        address: data?.user?.address,
       });
     }
   }, [data]);
@@ -196,20 +194,7 @@ export default function PersonalInformationPage() {
                   />
                 </div>
 
-                <div className="flex flex-col gap-1 border-b border-[#E7E3E0] p-2.5 text-sm">
-                  <label htmlFor="" className="text-start font-medium">
-                    Address
-                  </label>
-                  <input
-                    type="text"
-                    className={`outline-none ${!isEditing && "text-gray-400"}`}
-                    value={formData.address}
-                    disabled={!isEditing}
-                    onChange={(e) =>
-                      setFormData({ ...formData, address: e.target.value })
-                    }
-                  />
-                </div>
+                
 
                 <div className="flex flex-col gap-1 border-b border-[#E7E3E0] p-2.5 text-sm">
                   <label htmlFor="" className="text-start font-medium">

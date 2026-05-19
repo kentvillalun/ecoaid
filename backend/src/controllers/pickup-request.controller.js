@@ -271,6 +271,7 @@ const getMyRequest = async (req, res) => {
         estimatedValue: true,
         estimatedUnit: true,
         photoUrl: true,
+        isAssorted: true,
       },
       ...(take && { take }),
     });
@@ -312,6 +313,7 @@ const getMyRequestsById = async (req, res) => {
         isScheduled: true,
         collectedAt: true,
         rejectedAt: true,
+        isAssorted: true,
         collectionItems: {
           select: {
             material: {
@@ -324,7 +326,7 @@ const getMyRequestsById = async (req, res) => {
                 }
               }
             },
-            actualWeight: true,
+            actualValue: true,
             actualUnit: true,
           },
         },

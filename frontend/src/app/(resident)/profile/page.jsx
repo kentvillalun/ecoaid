@@ -72,7 +72,7 @@ export default function ProfilePage() {
             {isLoading ? (
               <div className="text-center ">
                 <Skeleton width={150}/>
-                <Skeleton width={180}/>
+                <Skeleton width={250}/>
               </div>
             ) : isError ? (
               <div className="text-center ">
@@ -83,7 +83,7 @@ export default function ProfilePage() {
                 <p className="font-semibold text-lg">
                   {data?.user?.firstName} {data?.user?.lastName}
                 </p>
-                <p className="text-sm text-[#727272]">{data?.user?.barangay}</p>
+                <p className="text-sm text-[#727272]">Brgy. {data?.user?.barangay}, {data?.user?.municipality}, {data?.user?.province}</p>
               </div>
             )}
           </div>

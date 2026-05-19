@@ -51,7 +51,7 @@ export default function RequestDetailPage() {
 
   return (
     <Page gradient={false} className="bg-[#F3F3FF]!">
-      <ResidentHeader title={"Request Detail"} />
+      <ResidentHeader title={"Request Details"} />
       <PageContent withBottomNav={false} className="gap-0 px-0 py-0">
         <Banner status={data?.request?.status} />
         {isLoading ? (
@@ -172,20 +172,28 @@ export default function RequestDetailPage() {
               <h3 className="font-semibold text-sm text-gray-600 border-b border-gray-100 w-full uppercase">
                 Request Information
               </h3>
+
               <div className="flex flex-col gap-1">
                 <div className="flex flex-row items-center justify-between">
-                  <p className="text-gray-600 text-sm font-medium">Material</p>
+                  <p className="text-gray-600 text-sm font-medium">Category</p>
                   <MaterialPill
-                    type={data?.request?.materialType}
+                    type={data?.request?.isAssorted === true ? "Assorted" : data?.request?.material?.category?.name}
                     className="w-auto"
                   />
                 </div>
+
+                <div className="flex flex-row items-center justify-between">
+                  <p className="text-gray-600 text-sm font-medium">Material name</p>
+                  <p className={`text-sm text-gray-600`}>
+                    {data?.request?.isAssorted === true ? "Assorted" : data?.request?.material?.category?.name}
+                  </p>
+                </div>
                 <div className="flex flex-row items-center justify-between">
                   <p className="text-gray-600 text-sm font-medium">
-                    Estimated weight
+                    Estimated value and unit
                   </p>
                   <p className={`text-sm text-gray-600 lowercase`}>
-                    {data?.request?.estimatedWeight} {data?.request?.weightUnit}
+                    {data?.request?.estimatedValue} {data?.request?.estimatedUnit === "PIECE" ? "pcs" : data?.request?.estimatedUnit}
                   </p>
                 </div>
                 <div className="flex flex-col items-start justify-between gap-2 pb-2">
@@ -255,23 +263,29 @@ export default function RequestDetailPage() {
                 </p>
               ) : (
                 <div className="w-full flex flex-col gap-2 px-4">
-                  <div className="flex flex-row items-center justify-between gap-2 w-full">
+                  <div className="grid grid-cols-3 items-center justify-between gap-2 w-full">
+                    <p className="text-xs text-gray-400 font-medium uppercase">
+                      Category
+                    </p>
                     <p className="text-xs text-gray-400 font-medium uppercase">
                       Material
                     </p>
                     <p className="text-xs text-gray-400 font-medium uppercase">
-                      Actual weight
+                      Actual values
                     </p>
                   </div>
                   {data?.request?.collectionItems.map((item, index) => (
                     <div
-                      className="flex flex-row items-center justify-between gap-2 w-full border-gray-100"
+                      className="grid grid-cols-3 items-center justify-between gap-2 w-full border-gray-100"
                       key={index}
                     >
-                      <MaterialPill type={item.materialType} />
+                      <MaterialPill type={item?.material?.category?.name} />
 
                       <p className="text-sm text-gray-700">
-                        {item.actualWeight} {item.weightUnit}
+                        {item?.material?.name}
+                      </p>
+                      <p className="text-sm text-gray-700 lowercase">
+                        {item.actualValue} {item.actualUnit === "PIECE" ? "pcs" : item.actualUnit}
                       </p>
                     </div>
                   ))}

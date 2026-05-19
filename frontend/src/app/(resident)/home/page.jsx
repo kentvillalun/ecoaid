@@ -74,12 +74,12 @@ export default function HomePage() {
             </div>
           ) : (
             <div className="">
-              <p className="font-medium text-sm">
+              <p className="font-semibold text-lg">
                 {" "}
                 Hi, {data?.user?.firstName} 👋
               </p>
               <p className="text-sm">
-                Contribute your recyclables to {data?.user?.barangay}
+                Contribute your recyclables to {data?.user?.barangay}, {data?.user?.municipality}, {data?.user?.province}    
               </p>
             </div>
           )}
@@ -117,10 +117,10 @@ export default function HomePage() {
               <div className="text-xs flex flex-col gap-2">
                 <p className="uppercase  text-gray-400">accepted materials</p>
                 <div className="grid grid-cols-2 gap-1 md:grid-cols-3">
-                  <MaterialPill type={"PLASTICS"} className="px-1! w-15!" />
-                  <MaterialPill type={"PAPERS"} className="px-1! w-15!" />
-                  <MaterialPill type={"BOTTLES"} className="px-1! w-15!" />
-                  <MaterialPill type={"METALS"} className="px-1! w-15!" />
+                  <MaterialPill type={"Plastics"} className="px-1! w-15!" />
+                  <MaterialPill type={"Papers"} className="px-1! w-15!" />
+                  <MaterialPill type={"Bottles"} className="px-1! w-15!" />
+                  <MaterialPill type={"Metals"} className="px-1! w-15!" />
                 </div>
               </div>
             </Card>
@@ -138,14 +138,25 @@ export default function HomePage() {
           <div className="flex flex-col gap-3">
             {requestLoading ? (
               Array.from({ length: 3 }).map((_, index) => (
-                <Card key={index} className="flex flex-col items-start">
+                <Card
+                  className={`flex flex-col items-start gap-3 transition-all hover:cursor-pointer hover:-translate-y-0.5 duration-200 ease-in-out`}
+                  key={index}
+                >
+                  {/* Top row */}
                   <div className="flex flex-row justify-between w-full">
-                    <Skeleton width={80} />
-                    <Skeleton width={120} />
+                    <div className="flex flex-col gap-0.5">
+                      <Skeleton width={80} />
+                      <Skeleton width={130} />
+                      <Skeleton width={150} />
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      <Skeleton width={120} />
+                      <Skeleton width={120} />
+                    </div>
                   </div>
-                  <Skeleton width={130} />
-                  <Skeleton width={150} />
-                  <div className="flex flex-row items-end justify-end w-full">
+
+                  {/* Footer row */}
+                  <div className="flex flex-row items-end justify-end w-full pt-2 border-t border-gray-100">
                     <Skeleton width={50} />
                   </div>
                 </Card>
@@ -172,8 +183,8 @@ export default function HomePage() {
                   {/* Top row */}
                   <div className="flex flex-row justify-between w-full">
                     <div className="flex flex-col gap-0.5">
-                      <h3 className="font-semibold text-[#1F2937] capitalize">
-                        {r.materialType.toLowerCase()}
+                      <h3 className="font-semibold text-[#1F2937]">
+                        {r?.isAssorted ? "Assorted Request" : r?.material?.name}
                       </h3>
                       <p className="text-sm text-gray-500">
                         {r.notes ? r.notes : "No notes available"}
@@ -184,14 +195,15 @@ export default function HomePage() {
                     </div>
                     <div className="flex flex-col items-end gap-2">
                       <Pill type={r.status} />
+                      <MaterialPill type={r?.isAssorted === true ? "Assorted" : r?.material?.category?.name}/>
                     </div>
                   </div>
 
                   {/* Footer row */}
                   <div className="flex flex-row items-end justify-end w-full pt-2 border-t border-gray-100">
                     <p className="text-xs text-gray-400">
-                      Est. {r.estimatedWeight}{" "}
-                      <span className="lowercase">{r.weightUnit}</span>
+                      Est. {r.estimatedValue}{" "}
+                      <span className="lowercase">{r.estimatedUnit === "PIECE" ? "pcs" : r.estimatedUnit}</span>
                     </p>
                   </div>
                 </Card>

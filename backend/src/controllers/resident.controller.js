@@ -10,6 +10,8 @@ const getResidentProfile = async (req, res) => {
         barangay: {
           select: {
             name: true,
+            municipality: true,
+            province: true,
           },
         },
         sitio: {
@@ -32,6 +34,8 @@ const getResidentProfile = async (req, res) => {
         sitio: user.sitio?.name,
         phoneNumber: user.phoneNumber,
         barangay: user.barangay.name,
+        municipality: user.barangay.municipality,
+        province: user.barangay.province,
         address: user.address,
       },
     });
@@ -77,7 +81,6 @@ const updateResidentProfile = async (req, res) => {
     if (firstName !== undefined) data.firstName = firstName;
     if (lastName !== undefined) data.lastName = lastName;
     if (phoneNumber !== undefined) data.phoneNumber = phoneNumber;
-    if (address !== undefined) data.address = address;
 
     if (Object.keys(data).length === 0) {
       return res.status(400).json("Invalid request");
@@ -89,7 +92,6 @@ const updateResidentProfile = async (req, res) => {
       select: {
         firstName: true, 
         lastName: true,
-        address: true,
         phoneNumber: true,
       }
     });

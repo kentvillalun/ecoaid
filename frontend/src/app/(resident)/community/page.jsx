@@ -21,7 +21,13 @@ export default function CommunityPage() {
   return (
     <Page gradient={true}>
       <ResidentHeader
-        title={isLoading ? <Skeleton width={200} /> : data?.barangay?.name}
+        title={
+          isLoading ? (
+            <Skeleton width={200} />
+          ) : (
+            `${data?.barangay?.name}, ${data?.barangay?.municipality}`
+          )
+        }
         subtitle={"EcoAid Program"}
         action={"notification"}
       />
@@ -53,10 +59,10 @@ export default function CommunityPage() {
               <p className="font-medium">Accepted Materials</p>
               <div className="flex flex-col gap-2">
                 <div className="grid gap-1 grid-cols-4">
-                  <MaterialPill type={"PLASTICS"} className="px-1! w-auto!" />
-                  <MaterialPill type={"PAPERS"} className="px-1! w-auto!" />
-                  <MaterialPill type={"BOTTLES"} className="px-1! w-auto!" />
-                  <MaterialPill type={"METALS"} className="px-1! w-auto!" />
+                  <MaterialPill type={"Plastics"} className="px-1! w-auto!" />
+                  <MaterialPill type={"Papers"} className="px-1! w-auto!" />
+                  <MaterialPill type={"Bottles"} className="px-1! w-auto!" />
+                  <MaterialPill type={"Metals"} className="px-1! w-auto!" />
                 </div>
                 <p className="text-xs text-gray-400 italic">
                   These are general material categories. Feel free to include
@@ -115,7 +121,7 @@ export default function CommunityPage() {
                     {isLoading ? (
                       <Skeleton width={150} />
                     ) : (
-                      data?.barangay?.name
+                      `Brgy. ${data?.barangay?.name}`
                     )}
                   </p>
                   {isLoading ? (
@@ -136,14 +142,19 @@ export default function CommunityPage() {
                     />
                   )}
                 </div>
-                {isLoading ? <Skeleton width={130}/> : (
-
+                {isLoading ? (
+                  <Skeleton width={130} />
+                ) : (
                   <p className="text-gray-400 text-sm">
-                  {data?.barangay?.city}, Ilocos Sur
-                </p>
+                    {`${data?.barangay?.municipality}, ${data?.barangay?.province}`}
+                  </p>
                 )}
                 <p className="text-gray-400 text-sm pb-2">
-                  {isLoading ? <Skeleton width={80}/> : data?.barangay?.contactNumber}
+                  {isLoading ? (
+                    <Skeleton width={80} />
+                  ) : (
+                    data?.barangay?.contactNumber
+                  )}
                 </p>
               </div>
             </div>

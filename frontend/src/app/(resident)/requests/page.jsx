@@ -14,13 +14,14 @@ import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { Empty } from "@/components/ui/Empty";
 import { useRouter } from "next/navigation";
+import { MaterialPill } from "@/components/ui/MateriaPill";
 
 export default function RequestsPage() {
   const [currentTab, setCurrectTab] = useState("ongoing"); // 'ongoing' || 'completed'
   const [refetchCount, setRefetchCount] = useState(0);
   const url = `/api/pickup-requests/my-requests`;
   const { isLoading, isError, data } = useFetch({ url, refetchCount });
-  const router = useRouter()
+  const router = useRouter();
 
   const filteredRequests =
     currentTab === "ongoing"
@@ -60,7 +61,7 @@ export default function RequestsPage() {
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, index) => (
                   <Card
-                    className={`flex flex-row items-start gap-3`}
+                    className={`flex flex-row items-start gap-3 transition-all hover:cursor-pointer hover:-translate-y-0.5 duration-200 ease-in-out`}
                     key={index}
                   >
                     {/* Top row */}
@@ -68,14 +69,17 @@ export default function RequestsPage() {
                       <Skeleton width={64} height={64} />
                     </div>
 
-                    <div className="flex flex-col w-full gap-3">
-                      <div className="flex flex-col gap-0.5">
-                        <div className="flex flex-row min-w-full items-center justify-between">
+                    <div className="flex flex-col flex-1">
+                      <div className="flex flex-row justify-between">
+                        <div className="flex flex-col  items-start justify-between">
                           <Skeleton width={55} />
                           <Skeleton width={100} />
+                          <Skeleton width={150} />
                         </div>
-                        <Skeleton width={100} />
-                        <Skeleton width={150} />
+                        <div className="flex flex-col gap-1">
+                          <Skeleton width={120} />
+                          <Skeleton width={120} />
+                        </div>
                       </div>
 
                       {/* Footer row */}
@@ -104,7 +108,6 @@ export default function RequestsPage() {
                     className={`flex flex-row items-start gap-3 transition-all hover:cursor-pointer hover:-translate-y-0.5 duration-200 ease-in-out`}
                     key={r.id}
                     handleClick={() => router.push(`/requests/${r.id}`)}
-                    
                   >
                     {/* Top row */}
                     <div className="flex flex-col items-start h-16 w-16 rounded-md overflow-hidden shrink-0">
@@ -117,28 +120,32 @@ export default function RequestsPage() {
                       />
                     </div>
 
-                    <div className="flex flex-col w-full gap-3">
-                      <div className="flex flex-col gap-0.5">
-                        <div className="flex flex-row min-w-full items-center justify-between">
+                    <div className="flex flex-col flex-1">
+                      <div className="flex flex-row justify-between">
+                        <div className="flex flex-col  items-start justify-between">
                           <h3 className="font-semibold text-[#1F2937] capitalize">
-                            {r.materialType.toLowerCase()}
+                            {r.isAssorted === true
+                              ? "Assorted Request"
+                              : r.material?.name}
                           </h3>
-
-                          <Pill type={r.status} />
+                          <p className="text-sm text-gray-500">
+                            {r.notes ? r.notes : "No notes available"}
+                          </p>
+                          <p className="text-sm text-gray-400">
+                            {formatDate(r.createdAt)}
+                          </p>
                         </div>
-                        <p className="text-sm text-gray-500">
-                          {r.notes ? r.notes : "No notes available"}
-                        </p>
-                        <p className="text-sm text-gray-400">
-                          {formatDate(r.createdAt)}
-                        </p>
+                        <div className="flex flex-col gap-1">
+                          <Pill type={r.status} />
+                          <MaterialPill type={r?.isAssorted === true ? "Assorted" : r?.material?.category?.name}/>
+                        </div>
                       </div>
 
                       {/* Footer row */}
                       <div className="flex flex-row items-end justify-end w-full pt-2 border-t border-gray-100">
                         <p className="text-xs text-gray-400">
-                          Est. {r.estimatedWeight}{" "}
-                          <span className="lowercase">{r.weightUnit}</span>
+                          Est. {r.estimatedValue}{" "}
+                          <span className="lowercase">{r.estimatedUnit === "PIECE" ? "pcs" : r.estimatedUnit}</span>
                         </p>
                       </div>
                     </div>
