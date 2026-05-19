@@ -288,12 +288,14 @@ export default function CapturePage() {
               </button>
             </div>
           ) : (
-            <button
-              className="bg-[#74C857] text-white p-3 rounded-lg text-sm shadow-md min-w-27"
-              onClick={openCamera}
-            >
-              Open Camera
-            </button>
+            <div className="grid w-full max-w-md gap-3 grid-cols-1 items-center justify-center">
+              <button
+                className="bg-[#74C857] text-white p-3 rounded-lg text-sm shadow-md min-w-27"
+                onClick={openCamera}
+              >
+                Open Camera
+              </button>
+            </div>
           )}
         </div>
 
