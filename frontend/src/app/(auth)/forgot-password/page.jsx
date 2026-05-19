@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { API_BASE_URL } from "@/lib/config";
+import { DesktopGuard } from "@/components/ui/DesktopGuard";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -58,73 +59,77 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <Page gradient={true}>
-      <div
-        className={`w-full max-w-md min-h-svh flex flex-col justify-between px-1 ${inter.className}`}
-      >
-        <div className=""></div>
-        <div className=""></div>
+    <>
+      <DesktopGuard />
 
-        <div className="flex justify-end items-end">
-          <img
-            src="/onboarding/Ecoprofit logo.svg"
-            alt="EcoProfit Logo"
-            className="aspect-4/2 object-cover"
-          />
-        </div>
-
-        <form
-          className="mx-1 mt-2 bg-white p-8 rounded-t-[20px] flex flex-col gap-8 max-w-full"
-          onSubmit={handleSubmit(onSubmit)}
+      <Page gradient={true} className="lg:hidden">
+        <div
+          className={`w-full max-w-md min-h-svh flex flex-col justify-between px-1 ${inter.className}`}
         >
-          <h3 className="font-semibold text-[20px]">Forgot Password</h3>
+          <div className=""></div>
+          <div className=""></div>
 
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-col gap-2">
-              <div className="flex flex-row gap-3 border-b border-[#E7E3E0] p-2.5">
-                <PhoneIcon className="h-6 w-6 shrink-0 stroke-[#4C5F66]" />
-                <input
-                  type="text"
-                  placeholder="Phone number"
-                  className="outline-none w-full min-w-0 max-w-full"
-                  {...register("phoneNumber")}
-                />
+          <div className="flex justify-end items-end">
+            <img
+              src="/onboarding/Ecoprofit logo.svg"
+              alt="EcoProfit Logo"
+              className="aspect-4/2 object-cover"
+            />
+          </div>
+
+          <form
+            className="mx-1 mt-2 bg-white p-8 rounded-t-[20px] flex flex-col gap-8 max-w-full"
+            onSubmit={handleSubmit(onSubmit)}
+          >
+            <h3 className="font-semibold text-[20px]">Forgot Password</h3>
+
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-2">
+                <div className="flex flex-row gap-3 border-b border-[#E7E3E0] p-2.5">
+                  <PhoneIcon className="h-6 w-6 shrink-0 stroke-[#4C5F66]" />
+                  <input
+                    type="text"
+                    placeholder="Phone number"
+                    className="outline-none w-full min-w-0 max-w-full"
+                    {...register("phoneNumber")}
+                  />
+                </div>
+                <p className="text-[14px] text-red-500">
+                  {errors.phoneNumber?.message}
+                </p>
               </div>
-              <p className="text-[14px] text-red-500">
-                {errors.phoneNumber?.message}
-              </p>
+
+              {submitError && (
+                <p className="text-[14px] text-red-500">{submitError}</p>
+              )}
             </div>
 
-            {submitError && (
-              <p className="text-[14px] text-red-500">{submitError}</p>
-            )}
-          </div>
+            <div className="flex flex-col gap-1.25 justify-center items-center">
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="bg-primary text-white font-medium py-4 px-24 rounded-[40px] max-w-63.75 disabled:opacity-50"
+              >
+                {isSubmitting ? "Sending..." : "Submit"}
+              </button>
 
-          <div className="flex flex-col gap-1.25 justify-center items-center">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="bg-primary text-white font-medium py-4 px-24 rounded-[40px] max-w-63.75 disabled:opacity-50"
-            >
-              {isSubmitting ? "Sending..." : "Submit"}
-            </button>
-
-            <Link
-              className="text-[14px] text-center text-[#4C5F66]"
-              href="/login"
-              onClick={() => {
-                sessionStorage.setItem("skipSplash", "true");
-              }}
-            >
-              Back to <span className="font-medium text-black">Log In</span>
-            </Link>
-          </div>
-          <div className=""></div>
-          <div className=""></div>
-          <div className=""></div>
-          <div className=""></div>
-        </form>
-      </div>
-    </Page>
+              <Link
+                className="text-[14px] text-center text-[#4C5F66]"
+                href="/login"
+                onClick={() => {
+                  sessionStorage.setItem("skipSplash", "true");
+                }}
+              >
+                Back to <span className="font-medium text-black">Log In</span>
+              </Link>
+            </div>
+            <div className=""></div>
+            <div className=""></div>
+            <div className=""></div>
+            <div className=""></div>
+          </form>
+        </div>
+      </Page>
+    </>
   );
 }

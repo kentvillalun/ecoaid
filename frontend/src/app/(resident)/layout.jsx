@@ -1,6 +1,7 @@
 "use client";
 
 import { ResidentBottomNav } from "@/components/navigation/ResidentBottomNav";
+import { DesktopGuard } from "@/components/ui/DesktopGuard";
 import { usePathname } from "next/navigation";
 import { Toaster } from "sonner";
 
@@ -21,9 +22,14 @@ export default function ResidentLayout({ children }) {
   return (
     <>
       <Toaster position="top-center" />
-      <main className="">{children}</main>
 
-      {!hideNav && <ResidentBottomNav />}
+      <DesktopGuard />
+
+
+
+      <main className="lg:hidden">{children}</main>
+
+      {!hideNav && <ResidentBottomNav classname="lg:hidden"/>}
     </>
   );
 }

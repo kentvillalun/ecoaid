@@ -11,6 +11,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { Page } from "@/components/layout/Page";
 import { API_BASE_URL } from "@/lib/config";
 import Image from "next/image";
+import { DesktopGuard } from "@/components/ui/DesktopGuard";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -123,29 +124,33 @@ export default function LoginPage() {
 
   if (isChecking)
     return (
-      <main
-        className={`min-h-svh overflow-x-hidden flex items-center justify-center bg-linear-to-b from-[#FFFFFF]  from-24% to-[#89D957] ${inter.className} ${isFading ? "opacity-0" : "opacity-100"} transition-opacity duration-500`}
-      >
-        <div
-          className={`flex flex-col items-center w-full max-w-md gap-25 p-2 justify-center`}
+      <>
+        <DesktopGuard />
+        <main
+          className={`min-h-svh overflow-x-hidden flex items-center justify-center bg-linear-to-b from-[#FFFFFF]  from-24% to-[#89D957] ${inter.className} ${isFading ? "opacity-0" : "opacity-100"} transition-opacity duration-500 lg:hidden`}
         >
-          <div className="max-w-108 relative w-full aspect-square">
-            <Image
-              src="/onboarding/Ecoprofit logo.svg"
-              alt="EcoProfit Logo"
-              fill
-              priority
-            />
+          <div
+            className={`flex flex-col items-center w-full max-w-md gap-25 p-2 justify-center`}
+          >
+            <div className="max-w-108 relative w-full aspect-square">
+              <Image
+                src="/onboarding/Ecoprofit logo.svg"
+                alt="EcoProfit Logo"
+                fill
+                priority
+              />
+            </div>
+            <div className=""></div>
           </div>
-          <div className=""></div>
-        </div>
-      </main>
+        </main>
+      </>
     );
 
   return (
     <>
+    <DesktopGuard />
       {!isChecking && (
-        <Page gradient={true}>
+        <Page gradient={true} className="lg:hidden">
           <div
             className={`w-full max-w-md min-h-svh flex flex-col justify-between px-1 ${inter.className}`}
           >

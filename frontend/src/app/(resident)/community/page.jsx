@@ -32,7 +32,7 @@ export default function CommunityPage() {
         action={"notification"}
       />
 
-      <PageContent>
+      <PageContent className="md:pl-3! top-18!">
         <div className="mt-4 flex flex-col gap-4">
           {/* Collection Schedule */}
           <Card className="flex gap-6 flex-row">

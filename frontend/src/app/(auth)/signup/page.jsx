@@ -7,7 +7,7 @@ import {
   MapPinIcon,
   BuildingOffice2Icon,
   UserIcon,
-  AtSymbolIcon
+  AtSymbolIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -18,6 +18,7 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Page } from "@/components/layout/Page";
 import { API_BASE_URL } from "@/lib/config";
+import { DesktopGuard } from "@/components/ui/DesktopGuard";
 
 // Defined outside the component so it never gets recreated on re-render
 const inter = Inter({
@@ -26,7 +27,15 @@ const inter = Inter({
 });
 
 const schema = yup.object().shape({
-  username: yup.string().required("Username is required").min(4, "Username must be at least 4 characters").max(20, "Username must be at most 20 characters").matches(/^[a-zA-Z0-9_-]+$/, "Username can only contain letters, numbers, underscores, and hyphens"),
+  username: yup
+    .string()
+    .required("Username is required")
+    .min(4, "Username must be at least 4 characters")
+    .max(20, "Username must be at most 20 characters")
+    .matches(
+      /^[a-zA-Z0-9_-]+$/,
+      "Username can only contain letters, numbers, underscores, and hyphens",
+    ),
   firstName: yup.string().required("First name is required"),
   lastName: yup.string().required("Last name is required"),
   phoneNumber: yup.string().required("Phone number is required"),
@@ -288,310 +297,317 @@ export default function SignupPage() {
           termsAccepted: true,
         }),
       );
-      sessionStorage.setItem("otpFlow", "signup")
+      sessionStorage.setItem("otpFlow", "signup");
 
       router.push("/otp");
     } catch {
-      setSubmitError("Something went wrong. Please try again.")
-    } 
+      setSubmitError("Something went wrong. Please try again.");
+    }
   };
-
 
   // Checks if the user have seen the onboarding screen
   useEffect(() => {
-    const hasSeen = localStorage.getItem("hasSeenOnboarding")
+    const hasSeen = localStorage.getItem("hasSeenOnboarding");
 
     if (!hasSeen) {
-      router.push("/onboarding")
+      router.push("/onboarding");
     }
-  }, [])
-  
+  }, []);
+
   return (
-    <Page gradient={true} className="from-10%!">
-      {isTermsOpen && (
-        <section className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <TermsModal
-            setIsTermsOpen={setIsTermsOpen}
-            isTermsOpen={isTermsOpen}
-          />
-        </section>
-      )}
-      <div className="w-full max-w-md min-h-svh flex flex-col justify-between px-1">
-        <div className=""></div>
-        <div className=""></div>
+    <>
+      <DesktopGuard />
+      <Page gradient={true} className="from-10%! lg:hidden">
+        {isTermsOpen && (
+          <section className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+            <TermsModal
+              setIsTermsOpen={setIsTermsOpen}
+              isTermsOpen={isTermsOpen}
+            />
+          </section>
+        )}
+        <div className="w-full max-w-md min-h-svh flex flex-col justify-between px-1">
+          <div className=""></div>
+          <div className=""></div>
 
-        <div className="flex justify-end items-end">
-          <img
-            src="/onboarding/Ecoprofit logo.svg"
-            alt="EcoProfit Logo"
-            className="aspect-4/2 object-cover"
-          />
-        </div>
+          <div className="flex justify-end items-end">
+            <img
+              src="/onboarding/Ecoprofit logo.svg"
+              alt="EcoProfit Logo"
+              className="aspect-4/2 object-cover"
+            />
+          </div>
 
-        <form className="mx-1 mt-2 bg-white p-8 rounded-t-[20px] flex flex-col gap-4 max-w-full" onSubmit={handleSubmit(onSubmit)}>
-          <div className="flex flex-col gap-8">
-            <h3 className={`font-semibold text-[20px] ${inter.className}`}>
-              Sign Up
-            </h3>
+          <form
+            className="mx-1 mt-2 bg-white p-8 rounded-t-[20px] flex flex-col gap-4 max-w-full"
+            onSubmit={handleSubmit(onSubmit)}
+          >
+            <div className="flex flex-col gap-8">
+              <h3 className={`font-semibold text-[20px] ${inter.className}`}>
+                Sign Up
+              </h3>
 
-            <div className="flex flex-col gap-2 text-[#717680]">
-              {/* First name */}
-              <div className="flex flex-row gap-3.25 border-b border-[#E7E3E0] p-2.5">
-                <UserIcon className="h-5.75 w-5.75 shrink-0 stroke-[#4C5F66]" />
-                <input
-                  type="text"
-                  placeholder="First name"
-                  className="outline-none max-w-full w-full min-w-0"
-                  {...register("firstName")}
-                />
-              </div>
-              <p className="text-[14px] text-red-500">
-                {errors.firstName?.message}
-              </p>
-              
-              {/* Last name */}
-              <div className="flex flex-row gap-3.25 border-b border-[#E7E3E0] p-2.5">
-                <UserIcon className="h-5.75 w-5.75 shrink-0 stroke-[#4C5F66]" />
-                <input
-                  type="text"
-                  placeholder="Last name"
-                  className="outline-none max-w-full w-full min-w-0"
-                  {...register("lastName")}
-                />
-              </div>
-              <p className="text-[14px] text-red-500">
-                {errors.lastName?.message}
-              </p>
-
-              {/* Username */}
-              <div className="flex flex-row gap-3.25 border-b border-[#E7E3E0] p-2.5">
-                <AtSymbolIcon className="h-5.75 w-5.75 shrink-0 stroke-[#4C5F66]" />
-                <input
-                  type="text"
-                  placeholder="Username"
-                  className="outline-none max-w-full w-full min-w-0"
-                  {...register("username")}
-                />
-              </div>
-              <p className="text-[14px] text-red-500">
-                {errors.username?.message}
-              </p>
-              
-              
-              
-              {/* Phone number */}
-              <div className="flex flex-row gap-3.25 border-b border-[#E7E3E0] p-2.5">
-                <PhoneIcon className="h-5.75 w-5.75 shrink-0 stroke-[#4C5F66]" />
-               
-                <input
-                  type="text"
-                  placeholder="Phone number"
-                  className="outline-none max-w-full w-full min-w-0"
-                  {...register("phoneNumber")}
-                />
-              </div>
-              <p className="text-[14px] text-red-500">
-                {errors.phoneNumber?.message}
-              </p>
-
-              {/* Barangay */}
-              <input type="hidden" {...register("barangayId")} />
-              <div className="relative">
+              <div className="flex flex-col gap-2 text-[#717680]">
+                {/* First name */}
                 <div className="flex flex-row gap-3.25 border-b border-[#E7E3E0] p-2.5">
-                  <BuildingOffice2Icon className="h-5.75 w-5.75 shrink-0 stroke-[#4C5F66]" />
+                  <UserIcon className="h-5.75 w-5.75 shrink-0 stroke-[#4C5F66]" />
                   <input
                     type="text"
-                    placeholder="Barangay"
+                    placeholder="First name"
                     className="outline-none max-w-full w-full min-w-0"
-                    autoComplete="off"
-                    value={barangayQuery}
-                    {...register("barangayName")}
-                    onChange={(e) => handleBarangayInputChange(e.target.value)}
-                    onFocus={() => {
-                      if (barangayQuery.trim()) setShowSuggestions(true);
-                    }}
-                    onBlur={() =>
-                      setTimeout(() => setShowSuggestions(false), 150)
-                    }
+                    {...register("firstName")}
                   />
                 </div>
+                <p className="text-[14px] text-red-500">
+                  {errors.firstName?.message}
+                </p>
 
-                {/* Dropdown will go here */}
-                {showSuggestions && barangayQuery.trim() && (
-                  <div className="absolute left-0 right-0 top-full z-20 mt-2 rounded-xl border border-[#E7E3E0] bg-white py-2 shadow-lg">
-                    {isBarangayLoading && (
-                      <p className="px-4 py-2 text-[14px] text-[#4C5F66]">
-                        Loading barangays...
-                      </p>
-                    )}
+                {/* Last name */}
+                <div className="flex flex-row gap-3.25 border-b border-[#E7E3E0] p-2.5">
+                  <UserIcon className="h-5.75 w-5.75 shrink-0 stroke-[#4C5F66]" />
+                  <input
+                    type="text"
+                    placeholder="Last name"
+                    className="outline-none max-w-full w-full min-w-0"
+                    {...register("lastName")}
+                  />
+                </div>
+                <p className="text-[14px] text-red-500">
+                  {errors.lastName?.message}
+                </p>
 
-                    {!isBarangayLoading && barangayError && (
-                      <p className="px-4 py-2 text-[14px] text-red-500">
-                        {barangayError}
-                      </p>
-                    )}
+                {/* Username */}
+                <div className="flex flex-row gap-3.25 border-b border-[#E7E3E0] p-2.5">
+                  <AtSymbolIcon className="h-5.75 w-5.75 shrink-0 stroke-[#4C5F66]" />
+                  <input
+                    type="text"
+                    placeholder="Username"
+                    className="outline-none max-w-full w-full min-w-0"
+                    {...register("username")}
+                  />
+                </div>
+                <p className="text-[14px] text-red-500">
+                  {errors.username?.message}
+                </p>
 
-                    {!isBarangayLoading &&
-                      !barangayError &&
-                      barangayOptions.length === 0 && (
+                {/* Phone number */}
+                <div className="flex flex-row gap-3.25 border-b border-[#E7E3E0] p-2.5">
+                  <PhoneIcon className="h-5.75 w-5.75 shrink-0 stroke-[#4C5F66]" />
+
+                  <input
+                    type="text"
+                    placeholder="Phone number"
+                    className="outline-none max-w-full w-full min-w-0"
+                    {...register("phoneNumber")}
+                  />
+                </div>
+                <p className="text-[14px] text-red-500">
+                  {errors.phoneNumber?.message}
+                </p>
+
+                {/* Barangay */}
+                <input type="hidden" {...register("barangayId")} />
+                <div className="relative">
+                  <div className="flex flex-row gap-3.25 border-b border-[#E7E3E0] p-2.5">
+                    <BuildingOffice2Icon className="h-5.75 w-5.75 shrink-0 stroke-[#4C5F66]" />
+                    <input
+                      type="text"
+                      placeholder="Barangay"
+                      className="outline-none max-w-full w-full min-w-0"
+                      autoComplete="off"
+                      value={barangayQuery}
+                      {...register("barangayName")}
+                      onChange={(e) =>
+                        handleBarangayInputChange(e.target.value)
+                      }
+                      onFocus={() => {
+                        if (barangayQuery.trim()) setShowSuggestions(true);
+                      }}
+                      onBlur={() =>
+                        setTimeout(() => setShowSuggestions(false), 150)
+                      }
+                    />
+                  </div>
+
+                  {/* Dropdown will go here */}
+                  {showSuggestions && barangayQuery.trim() && (
+                    <div className="absolute left-0 right-0 top-full z-20 mt-2 rounded-xl border border-[#E7E3E0] bg-white py-2 shadow-lg">
+                      {isBarangayLoading && (
                         <p className="px-4 py-2 text-[14px] text-[#4C5F66]">
-                          No registered barangays found.
+                          Loading barangays...
                         </p>
                       )}
 
-                    {!isBarangayLoading &&
-                      !barangayError &&
-                      barangayOptions.map((barangay) => (
-                        <button
-                          className="block w-full px-4 py-2 text-left text-[14px] text-[#1E1E1E] hover:bg-[#F4F2F0]"
-                          key={barangay.id}
-                          type="button"
-                          onMouseDown={() => handleBarangaySelect(barangay)}
-                        >
-                          <span>{barangay.name}</span>
-                          {barangay.city && (
-                            <span className="text-[#A3A3A3] ml-1 text-[12px]">
-                              — {barangay.city}
-                            </span>
-                          )}
-                        </button>
-                      ))}
-                  </div>
-                )}
-              </div>
-              <p className="text-[14px] text-red-500">
-                {errors.barangayName?.message ?? errors.barangayId?.message}
-              </p>
+                      {!isBarangayLoading && barangayError && (
+                        <p className="px-4 py-2 text-[14px] text-red-500">
+                          {barangayError}
+                        </p>
+                      )}
 
-              {/* Sitio */}
-              <div className="flex flex-row gap-3.25 border-b border-[#E7E3E0] p-2.5">
-                <MapPinIcon className="h-5.75 w-5.75 shrink-0 stroke-[#4C5F66]" />
-                <select
-                  className="outline-none max-w-full w-full min-w-0 bg-transparent disabled:text-[#A3A3A3]"
-                  defaultValue=""
-                  disabled={!selectedBarangay?.id || isSitioLoading}
-                  {...register("sitioId")}
-                  onChange={(e) => {
-                    clearErrors("sitioId");
-                    setSubmitError("");
-                  }}
-                >
-                  <option value="" disabled hidden>
-                    {!selectedBarangay?.id
-                      ? "Select barangay first"
-                      : isSitioLoading
-                        ? "Loading sitios..."
-                        : "Select Sitio/Purok"}
-                  </option>
+                      {!isBarangayLoading &&
+                        !barangayError &&
+                        barangayOptions.length === 0 && (
+                          <p className="px-4 py-2 text-[14px] text-[#4C5F66]">
+                            No registered barangays found.
+                          </p>
+                        )}
 
-                  {sitioOptions.map((sitio) => (
-                    <option key={sitio.id} value={sitio.id}>
-                      {sitio.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <p className="text-[14px] text-red-500">{errors.sitioId?.name}</p>
-
-              {/* Password */}
-              <div className="flex flex-row gap-3.25 border-b border-[#E7E3E0] p-2.5 justify-between">
-                <div className="flex flex-row gap-3 flex-1 min-w-0">
-                  <LockClosedIcon className="h-5.75 w-5.75 shrink-0 stroke-[#4C5F66]" />
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Password"
-                    className="outline-none w-full min-w-0 max-w-40 md:max-w-full"
-                    {...register("password")}
-                  />
+                      {!isBarangayLoading &&
+                        !barangayError &&
+                        barangayOptions.map((barangay) => (
+                          <button
+                            className="block w-full px-4 py-2 text-left text-[14px] text-[#1E1E1E] hover:bg-[#F4F2F0]"
+                            key={barangay.id}
+                            type="button"
+                            onMouseDown={() => handleBarangaySelect(barangay)}
+                          >
+                            <span>{barangay.name}</span>
+                            {barangay.city && (
+                              <span className="text-[#A3A3A3] ml-1 text-[12px]">
+                                — {barangay.city}
+                              </span>
+                            )}
+                          </button>
+                        ))}
+                    </div>
+                  )}
                 </div>
-                <button
-                  type="button"
-                  className="hover:cursor-pointer shrink-0"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                >
-                  {showPassword ? "Hide" : "Show"}
-                </button>
-              </div>
-              <p className="text-[14px] text-red-500">
-                {errors.password?.message}
-              </p>
-
-              {/* Confirm password */}
-              <div className="flex flex-row gap-3.25 border-b border-[#E7E3E0] p-2.5 justify-between">
-                <div className="flex flex-row gap-3 flex-1 min-w-0">
-                  <LockClosedIcon className="h-5.75 w-5.75 shrink-0 stroke-[#4C5F66]" />
-                  <input
-                    type={showConfirmPassword ? "text" : "password"}
-                    placeholder="Confirm Password"
-                    className="outline-none w-full min-w-0 max-w-40 md:max-w-full"
-                    {...register("confirmPassword")}
-                  />
-                </div>
-                <button
-                  type="button"
-                  className="hover:cursor-pointer shrink-0"
-                  onClick={() => setShowConfirmPassword((prev) => !prev)}
-                >
-                  {showConfirmPassword ? "Hide" : "Show"}
-                </button>
-              </div>
-              <p className="text-[14px] text-red-500">
-                {errors.confirmPassword?.message}
-              </p>
-
-              {/* Terms */}
-              <div className="ml-1 flex flex-row gap-3.25 p-2.25 justify-start items-center">
-                <input
-                  type="checkbox"
-                  className="h-4.25 w-4.25 shrink-0"
-                  {...register("termsAccepted")}
-                />
-                <p
-                  className="px-1 text-[13px] text-[#4C5F66]"
-                  onClick={() => setIsTermsOpen(true)}
-                >
-                  I accept{" "}
-                  <span className="font-medium text-black">
-                    Terms & conditions
-                  </span>{" "}
-                  and{" "}
-                  <span className="font-medium text-black">
-                    Privacy policy.
-                  </span>
+                <p className="text-[14px] text-red-500">
+                  {errors.barangayName?.message ?? errors.barangayId?.message}
                 </p>
+
+                {/* Sitio */}
+                <div className="flex flex-row gap-3.25 border-b border-[#E7E3E0] p-2.5">
+                  <MapPinIcon className="h-5.75 w-5.75 shrink-0 stroke-[#4C5F66]" />
+                  <select
+                    className="outline-none max-w-full w-full min-w-0 bg-transparent disabled:text-[#A3A3A3]"
+                    defaultValue=""
+                    disabled={!selectedBarangay?.id || isSitioLoading}
+                    {...register("sitioId")}
+                    onChange={(e) => {
+                      clearErrors("sitioId");
+                      setSubmitError("");
+                    }}
+                  >
+                    <option value="" disabled hidden>
+                      {!selectedBarangay?.id
+                        ? "Select barangay first"
+                        : isSitioLoading
+                          ? "Loading sitios..."
+                          : "Select Sitio/Purok"}
+                    </option>
+
+                    {sitioOptions.map((sitio) => (
+                      <option key={sitio.id} value={sitio.id}>
+                        {sitio.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <p className="text-[14px] text-red-500">
+                  {errors.sitioId?.name}
+                </p>
+
+                {/* Password */}
+                <div className="flex flex-row gap-3.25 border-b border-[#E7E3E0] p-2.5 justify-between">
+                  <div className="flex flex-row gap-3 flex-1 min-w-0">
+                    <LockClosedIcon className="h-5.75 w-5.75 shrink-0 stroke-[#4C5F66]" />
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Password"
+                      className="outline-none w-full min-w-0 max-w-40 md:max-w-full"
+                      {...register("password")}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    className="hover:cursor-pointer shrink-0"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                  >
+                    {showPassword ? "Hide" : "Show"}
+                  </button>
+                </div>
+                <p className="text-[14px] text-red-500">
+                  {errors.password?.message}
+                </p>
+
+                {/* Confirm password */}
+                <div className="flex flex-row gap-3.25 border-b border-[#E7E3E0] p-2.5 justify-between">
+                  <div className="flex flex-row gap-3 flex-1 min-w-0">
+                    <LockClosedIcon className="h-5.75 w-5.75 shrink-0 stroke-[#4C5F66]" />
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="Confirm Password"
+                      className="outline-none w-full min-w-0 max-w-40 md:max-w-full"
+                      {...register("confirmPassword")}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    className="hover:cursor-pointer shrink-0"
+                    onClick={() => setShowConfirmPassword((prev) => !prev)}
+                  >
+                    {showConfirmPassword ? "Hide" : "Show"}
+                  </button>
+                </div>
+                <p className="text-[14px] text-red-500">
+                  {errors.confirmPassword?.message}
+                </p>
+
+                {/* Terms */}
+                <div className="ml-1 flex flex-row gap-3.25 p-2.25 justify-start items-center">
+                  <input
+                    type="checkbox"
+                    className="h-4.25 w-4.25 shrink-0"
+                    {...register("termsAccepted")}
+                  />
+                  <p
+                    className="px-1 text-[13px] text-[#4C5F66]"
+                    onClick={() => setIsTermsOpen(true)}
+                  >
+                    I accept{" "}
+                    <span className="font-medium text-black">
+                      Terms & conditions
+                    </span>{" "}
+                    and{" "}
+                    <span className="font-medium text-black">
+                      Privacy policy.
+                    </span>
+                  </p>
+                </div>
+                <p className="text-[14px] text-red-500">
+                  {errors.termsAccepted?.message}
+                </p>
+
+                {submitError && (
+                  <p className="text-[14px] text-red-500">{submitError}</p>
+                )}
+                {/* error will go here */}
               </div>
-              <p className="text-[14px] text-red-500">
-                {errors.termsAccepted?.message}
-              </p>
-
-              {submitError && (
-                <p className="text-[14px] text-red-500">{submitError}</p>
-              )}
-              {/* error will go here */}
             </div>
-          </div>
 
-          <div className="flex flex-col gap-2.5 justify-center items-center">
-            <button
-              className="bg-primary text-white font-medium py-3.75 px-20 rounded-[40px] max-w-63.75"
-              type="submit"
-            >
-              Sign Up
-            </button>
+            <div className="flex flex-col gap-2.5 justify-center items-center">
+              <button
+                className="bg-primary text-white font-medium py-3.75 px-20 rounded-[40px] max-w-63.75"
+                type="submit"
+              >
+                Sign Up
+              </button>
 
-            <Link
-              className="text-[14px] text-center text-[#4C5F66]"
-              href="/login"
-              onClick={() => {
-                sessionStorage.setItem("skipSplash", "true")
-              }}
-            >
-              Already have an account?{" "}
-              <span className="font-medium text-black">Log In</span>
-            </Link>
-          </div>
-        </form>
-      </div>
-    </Page>
+              <Link
+                className="text-[14px] text-center text-[#4C5F66]"
+                href="/login"
+                onClick={() => {
+                  sessionStorage.setItem("skipSplash", "true");
+                }}
+              >
+                Already have an account?{" "}
+                <span className="font-medium text-black">Log In</span>
+              </Link>
+            </div>
+          </form>
+        </div>
+      </Page>
+    </>
   );
 }

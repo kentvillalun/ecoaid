@@ -35,10 +35,10 @@ export default function RequestsPage() {
   const handleRefetchCount = () => setRefetchCount((prev) => prev + 1);
 
   return (
-    <Page gradient={true}>
+    <Page gradient={true} className="overflow-hidden">
       <ResidentHeader title={"Requests & History"} notification={true} />
 
-      <PageContent className="overflow-hidden!" padding="py-4 px-3">
+      <PageContent className="overflow-hidden! md:top-18 md:pl-3!" padding="py-4 px-3">
         {/* Tab section */}
         <div className="flex flex-col gap-6">
           <div className="grid grid-cols-2 gap-2 ">
@@ -56,7 +56,7 @@ export default function RequestsPage() {
             </button>
           </div>
 
-          <PageContent>
+          <PageContent className="md:pl-3! md:top-18! ">
             <div className="flex flex-col gap-2">
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, index) => (

@@ -58,7 +58,7 @@ export default function HomePage() {
         </div>
       </header>
 
-      <PageContent>
+      <PageContent className="md:pl-3!">
         <div className="flex flex-col items-start">
           {isLoading ? (
             <div>

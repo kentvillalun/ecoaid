@@ -50,9 +50,9 @@ export default function RequestDetailPage() {
   const handleRefetchCount = () => setRefetchCount((prev) => prev + 1)
 
   return (
-    <Page gradient={false} className="bg-[#F3F3FF]!">
+    <Page gradient={false} className="bg-[#F3F3FF]! overflow-hidden">
       <ResidentHeader title={"Request Details"} />
-      <PageContent withBottomNav={false} className="gap-0 px-0 py-0">
+      <PageContent withBottomNav={false} className="gap-0 px-0 py-0 md:pl-0! md:top-18! ">
         <Banner status={data?.request?.status} />
         {isLoading ? (
           <>

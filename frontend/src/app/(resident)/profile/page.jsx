@@ -54,11 +54,11 @@ export default function ProfilePage() {
   const handleRefetchCount = () => setRefetchCount((prev) => prev + 1)
 
   return (
-    <Page gradient={true}>
+    <Page gradient={true} className="overflow-hidden">
       <Toaster position="top-center" />
       <ResidentHeader title={"Profile"} className="py-6" />
 
-      <PageContent className="pt-10">
+      <PageContent className="pt-10 md:pl-3! md:top-18!">
         <section className="flex flex-col gap-5">
           <div className="flex flex-col items-center gap-4">
             <div className="border-5 rounded-full max-h-40 max-w-40 border-[#74C857] shadow-xl overflow-hidden flex items-center justify-center">

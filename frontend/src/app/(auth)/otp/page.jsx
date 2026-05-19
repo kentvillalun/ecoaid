@@ -6,14 +6,13 @@ import { Page } from "@/components/layout/Page";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL } from "@/lib/config";
+import { DesktopGuard } from "@/components/ui/DesktopGuard";
 
 // Outside component — only created once, never recreated on rerender
 const inter = Inter({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
 });
-
-
 
 // How many seconds the user must wait before resending
 const RESEND_COOLDOWN = 60;
@@ -134,7 +133,10 @@ export default function OtpPage() {
     e.preventDefault(); // stop default paste behavior
 
     // Get pasted text, remove non-digits, take first 6 characters
-    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    const pasted = e.clipboardData
+      .getData("text")
+      .replace(/\D/g, "")
+      .slice(0, 6);
 
     if (!pasted) return;
 
@@ -194,7 +196,7 @@ export default function OtpPage() {
         termsAccepted: pendingData.termsAccepted,
         username: pendingData.username,
         lastName: pendingData.lastName,
-        firstName: pendingData.firstName
+        firstName: pendingData.firstName,
       }),
     });
 
@@ -211,18 +213,24 @@ export default function OtpPage() {
     sessionStorage.removeItem("otpFlow");
 
     // Registration complete — go to login
-    sessionStorage.setItem("authSuccessMessage", "Account created! You can now log in.");
-    sessionStorage.setItem("skipSplash", "true")
+    sessionStorage.setItem(
+      "authSuccessMessage",
+      "Account created! You can now log in.",
+    );
+    sessionStorage.setItem("skipSplash", "true");
     router.push("/login");
   };
 
   // ── Forgot-password OTP verification ─────────────────────────
   const handleForgotPasswordVerify = async (code) => {
-    const response = await fetch(`${API_BASE_URL}/auth/verify-forgot-password-otp`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phoneNumber: pendingPhone, code }),
-    });
+    const response = await fetch(
+      `${API_BASE_URL}/auth/verify-forgot-password-otp`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phoneNumber: pendingPhone, code }),
+      },
+    );
 
     const result = await response.json();
 
@@ -269,7 +277,6 @@ export default function OtpPage() {
       // Restart the cooldown
       setCountdown(RESEND_COOLDOWN);
       setResendMessage("A new code has been sent.");
-
     } catch {
       setSubmitError("Something went wrong. Please try again.");
     } finally {
@@ -279,107 +286,115 @@ export default function OtpPage() {
 
   // ── JSX ───────────────────────────────────────────────────────
   return (
-    <Page gradient={true} className="from-10%!">
-      <div
-        className={`w-full max-w-md min-h-svh flex flex-col justify-between px-1 ${inter.className}`}
-      >
-        <div className=""></div>
-        <div className=""></div>
+    <>
+      <DesktopGuard />
 
-        <div className="flex justify-end items-end">
-          <img
-            src="/onboarding/Ecoprofit logo.svg"
-            alt="EcoProfit Logo"
-            className="aspect-4/2 object-cover"
-          />
-        </div>
+      <Page gradient={true} className="from-10%! lg:hidden">
+        <div
+          className={`w-full max-w-md min-h-svh flex flex-col justify-between px-1 ${inter.className}`}
+        >
+          <div className=""></div>
+          <div className=""></div>
 
-        <div className="mx-1 mt-2 bg-white p-8 rounded-t-[20px] flex flex-col gap-8 max-w-full">
-          <div className="flex flex-col gap-2">
-            <h3 className="font-semibold text-[20px]">OTP Validation</h3>
-            <p className="text-[#4C5F66] text-[14px]">
-              We have sent a verification code to{" "}
-              {/* Show the phone number so user knows where the OTP was sent */}
-              <span className="font-medium text-black">
-                {pendingPhone || "your number"}
-              </span>
-            </p>
+          <div className="flex justify-end items-end">
+            <img
+              src="/onboarding/Ecoprofit logo.svg"
+              alt="EcoProfit Logo"
+              className="aspect-4/2 object-cover"
+            />
           </div>
 
-          {/* ── 6 digit inputs ── */}
-          <div className="flex flex-row justify-center gap-1.75 flex-wrap">
-            {digits.map((digit, index) => (
-              <input
-                key={index}
-                type="text"
-                inputMode="numeric"
-                // inputMode="numeric" shows the number keyboard on mobile
-                // without using type="number" which has unwanted behavior
-                maxLength={1}
-                value={digit}
-                className="outline h-10 w-10 outline-[#E7E3E0] rounded-[5px] p-3 text-center"
-                // ref callback: stores each input element in the array
-                // so we can call .focus() on them programmatically
-                ref={(el) => (inputRefs.current[index] = el)}
-                onChange={(e) => handleChange(index, e.target.value)}
-                onKeyDown={(e) => handleKeyDown(index, e)}
-                onPaste={handlePaste}
-              />
-            ))}
-          </div>
+          <div className="mx-1 mt-2 bg-white p-8 rounded-t-[20px] flex flex-col gap-8 max-w-full">
+            <div className="flex flex-col gap-2">
+              <h3 className="font-semibold text-[20px]">OTP Validation</h3>
+              <p className="text-[#4C5F66] text-[14px]">
+                We have sent a verification code to{" "}
+                {/* Show the phone number so user knows where the OTP was sent */}
+                <span className="font-medium text-black">
+                  {pendingPhone || "your number"}
+                </span>
+              </p>
+            </div>
 
-          {/* ── Error message ── */}
-          {submitError && (
-            <p className="text-[14px] text-red-500 text-center">{submitError}</p>
-          )}
+            {/* ── 6 digit inputs ── */}
+            <div className="flex flex-row justify-center gap-1.75 flex-wrap">
+              {digits.map((digit, index) => (
+                <input
+                  key={index}
+                  type="text"
+                  inputMode="numeric"
+                  // inputMode="numeric" shows the number keyboard on mobile
+                  // without using type="number" which has unwanted behavior
+                  maxLength={1}
+                  value={digit}
+                  className="outline h-10 w-10 outline-[#E7E3E0] rounded-[5px] p-3 text-center"
+                  // ref callback: stores each input element in the array
+                  // so we can call .focus() on them programmatically
+                  ref={(el) => (inputRefs.current[index] = el)}
+                  onChange={(e) => handleChange(index, e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(index, e)}
+                  onPaste={handlePaste}
+                />
+              ))}
+            </div>
 
-          {/* ── Resend success message ── */}
-          {resendMessage && (
-            <p className="text-[14px] text-green-600 text-center">{resendMessage}</p>
-          )}
+            {/* ── Error message ── */}
+            {submitError && (
+              <p className="text-[14px] text-red-500 text-center">
+                {submitError}
+              </p>
+            )}
 
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-col gap-2.5 justify-center items-center">
-              <button
-                className="bg-primary text-white font-medium py-3.75 px-24 rounded-[40px] max-w-63.75 disabled:opacity-50"
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-                type="button"
-              >
-                {isSubmitting ? "Verifying..." : "Continue"}
-              </button>
+            {/* ── Resend success message ── */}
+            {resendMessage && (
+              <p className="text-[14px] text-green-600 text-center">
+                {resendMessage}
+              </p>
+            )}
 
-              {/* ── Resend button with cooldown ── */}
-              <button
-                type="button"
-                onClick={handleResend}
-                disabled={countdown > 0 || isResending}
-                className="text-[14px] text-[#4C5F66] disabled:opacity-50"
-              >
-                {isResending
-                  ? "Sending..."
-                  : countdown > 0
-                  // Shows "Resend code in 60s" counting down to 0
-                  ? `Resend code in ${countdown}s`
-                  : "Resend code"}
-              </button>
-
-              <div className="text-center flex flex-col gap-5">
-                <Link
-                  className="text-[14px] text-center text-[#4C5F66]"
-                  href="/signup"
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-2.5 justify-center items-center">
+                <button
+                  className="bg-primary text-white font-medium py-3.75 px-24 rounded-[40px] max-w-63.75 disabled:opacity-50"
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
+                  type="button"
                 >
-                  Don&apos;t have an account?{" "}
-                  <span className="font-medium text-black">Sign Up</span>
-                </Link>
+                  {isSubmitting ? "Verifying..." : "Continue"}
+                </button>
+
+                {/* ── Resend button with cooldown ── */}
+                <button
+                  type="button"
+                  onClick={handleResend}
+                  disabled={countdown > 0 || isResending}
+                  className="text-[14px] text-[#4C5F66] disabled:opacity-50"
+                >
+                  {isResending
+                    ? "Sending..."
+                    : countdown > 0
+                      ? // Shows "Resend code in 60s" counting down to 0
+                        `Resend code in ${countdown}s`
+                      : "Resend code"}
+                </button>
+
+                <div className="text-center flex flex-col gap-5">
+                  <Link
+                    className="text-[14px] text-center text-[#4C5F66]"
+                    href="/signup"
+                  >
+                    Don&apos;t have an account?{" "}
+                    <span className="font-medium text-black">Sign Up</span>
+                  </Link>
+                </div>
               </div>
             </div>
+            <div className=""></div>
+            <div className=""></div>
+            <div className=""></div>
           </div>
-          <div className=""></div>
-          <div className=""></div>
-          <div className=""></div>
         </div>
-      </div>
-    </Page>
+      </Page>
+    </>
   );
 }
