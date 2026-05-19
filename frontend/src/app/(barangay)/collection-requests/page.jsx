@@ -25,9 +25,11 @@ export default function CollectionRequests() {
   const url = `/api/pickup-requests/collection-requests`;
   const { isLoading, isError, error, data } = useFetch({ url, refetchCount });
   const [currentTab, setCurrentTab] = useState("REQUESTED");
-  console.log(refetchCount)
+
   const { updateStatus } = useUpdate()
-  
+  const [categoriesRefetchCount, setCategotiesRefetchCount] = useState(0)
+  const { data: categoriesData } = useFetch({ url: `/api/material/categories`, refetchCount: categoriesRefetchCount})
+
 
   const [selectedApprovedRequests, setSelectedApprovedRequests] = useState([]);
 
@@ -121,6 +123,7 @@ export default function CollectionRequests() {
                   isError={isError}
                   error={error}
                   handleRefetchCount={handleRefetchCount}
+                  
                 />
               </div>
               
@@ -133,6 +136,7 @@ export default function CollectionRequests() {
                 isLoading={isLoading}
                 isError={isError}
                 error={error}
+                categories={categoriesData?.categories}
               />
             </div>
           )}

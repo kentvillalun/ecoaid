@@ -59,6 +59,7 @@ const listRequests = async (req, res) => {
         createdAt: true,
         material: {
           select: {
+            id: true,
             name: true,
             category: {
               select: {
@@ -74,6 +75,7 @@ const listRequests = async (req, res) => {
         isScheduled: true,
         rejectionReason: true,
         collectedAt: true,
+        isAssorted: true,
       },
     });
 
@@ -129,7 +131,7 @@ const updateStatus = async (req, res) => {
         data: items.map((item) => ({
           requestId: id,
           materialId: item.materialId,
-          actualWeight: item.actualWeight,
+          actualValue: item.actualValue,
           actualUnit: item.actualUnit,
         })),
         skipDuplicates: true,
@@ -192,6 +194,7 @@ const getRequest = async (req, res) => {
         },
         material: {
           select: {
+            id: true,
             name: true,
             category: {
               select: {
@@ -210,6 +213,7 @@ const getRequest = async (req, res) => {
         collectedAt: true,
         status: true,
         rejectionReason: true,
+        isAssorted: true,
         collectionItems: {
           select: {
             material: {
@@ -217,7 +221,7 @@ const getRequest = async (req, res) => {
                 name: true
               }
             },
-            actualWeight: true,
+            actualValue: true,
             actualUnit: true,
           },
         },

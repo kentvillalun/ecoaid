@@ -34,6 +34,7 @@ export const RequestCard = ({
             <div className="flex flex-col gap-0.5">
               <Skeleton width={120} />
               <Skeleton width={40} />
+              <Skeleton width={170} />
               <Skeleton width={190} />
             </div>
             <div className="flex flex-col items-end gap-2">
@@ -98,16 +99,19 @@ export const RequestCard = ({
                       <p className="text-sm text-gray-500">
                         {d.user.sitio.name}
                       </p>
+                      <p className="text-sm text-gray-500">
+                        {d?.isAssorted === true ? "Assorted" : d?.material?.name}
+                      </p>
                       <p className="text-sm text-gray-400">
-                        Estimated weight:{" "}
+                        Estimated value:{" "}
                         <span className="font-medium text-gray-600">
-                          {d.estimatedWeight} {d.weightUnit}
+                          {d.estimatedValue} {d.estimatedUnit === "PIECE" ? "pcs" : d.estimatedUnit}
                         </span>
                       </p>
                     </div>
                     <div className="flex flex-col items-end gap-2">
                       <Pill type={d.status} />
-                      <MaterialPill type={d.materialType} />
+                      <MaterialPill type={d.material?.category?.name ?? "Assorted"} />
                     </div>
                   </div>
 
@@ -146,16 +150,19 @@ export const RequestCard = ({
                       <p className="text-sm text-gray-500">
                         {d.user.sitio.name}
                       </p>
+                      <p className="text-sm text-gray-500">
+                        {d?.isAssorted === true ? "Assorted" : d?.material?.name}
+                      </p>
                       <p className="text-sm text-gray-400">
-                        Estimated weight:{" "}
+                        Estimated value:{" "}
                         <span className="font-medium text-gray-600">
-                          {d.estimatedWeight} {d.weightUnit}
+                          {d.estimatedValue} {d.estimatedUnit === "PIECE" ? "pcs" : d.estimatedUnit}
                         </span>
                       </p>
                     </div>
                     <div className="flex flex-col items-end gap-2">
                       <Pill type={d.status} />
-                      <MaterialPill type={d.materialType} />
+                      <MaterialPill type={d.isAssorted === true ? "Assorted" : d.material?.category?.name} />
                     </div>
                   </div>
 

@@ -27,6 +27,9 @@ export default function RequestDetails() {
 
   const handleRefetchCount = () => setRefetchCount((prev) => prev + 1);
 
+  const [categoriesRefetchCount, setCategotiesRefetchCount] = useState(0)
+  const { data: categoriesData } = useFetch({ url: `/api/material/categories`, refetchCount: categoriesRefetchCount})
+
   if (isLoading)
     return (
       <div className="text-center">
@@ -82,7 +85,7 @@ export default function RequestDetails() {
               </h3>
               <LabelValue
                 name={"Full name"}
-                value={`${req?.user?.firstName ? `${req.user.lastName}, ${req.user.firstName}` : "Name not set"}`}
+                value={`${req?.user?.firstName ? `${req.user.firstName} ${req.user.lastName}` : "Name not set"}`}
               />
               <LabelValue
                 name={"Contact number"}
@@ -95,10 +98,11 @@ export default function RequestDetails() {
               <h3 className="font-semibold text-sm text-gray-600 border-b border-gray-100 pb-2 w-full">
                 Request Information
               </h3>
-              <LabelValue name={"Material type"} value={req?.materialType} />
+              <LabelValue name={"Material category"} value={req?.isAssorted === true ? "Assorted" : req?.material?.category?.name} />
+              <LabelValue name={"Material name"} value={req?.isAssorted === true ? "Assorted" : req?.material?.name} />
               <LabelValue
-                name={"Estimated weight"}
-                value={`${req?.estimatedWeight} ${req?.weightUnit}`}
+                name={"Estimated values"}
+                value={`${req?.estimatedValue} ${req?.estimatedUnit === "PIECE" ? "pcs" : req?.estimatedUnit}`}
               />
               <LabelValue
                 name={"Notes"}
@@ -123,7 +127,7 @@ export default function RequestDetails() {
                       Material
                     </p>
                     <p className="text-xs text-gray-400 font-medium uppercase">
-                      Weight
+                      Value
                     </p>
                     <p className="text-xs text-gray-400 font-medium uppercase">
                       Unit
@@ -135,12 +139,12 @@ export default function RequestDetails() {
                       key={index}
                     >
                       <p className="text-sm text-gray-700">
-                        {item.materialType}
+                        {item?.material?.name}
                       </p>
                       <p className="text-sm text-gray-700">
-                        {item.actualWeight}
+                        {item.actualValue}
                       </p>
-                      <p className="text-sm text-gray-700">{item.weightUnit}</p>
+                      <p className="text-sm text-gray-700">{item.actualUnit === "PIECE" ? "pcs" : item.actualUnit}</p>
                     </div>
                   ))}
                 </div>
@@ -227,7 +231,9 @@ export default function RequestDetails() {
                 id={id}
                 variant={"detail"}
                 onSuccess={() => router.push("/collection-requests")}
-                materialType={req?.materialType}
+                material={req?.material}
+                isAssorted={req?.isAssorted}
+                categories={categoriesData.categories}
               />
             </Card>
           ) : null}

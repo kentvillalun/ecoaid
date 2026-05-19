@@ -11,19 +11,19 @@ export const MaterialPill = ({ type, points, className = "" }) => {
 
 
   const styles = {
-    PLASTICS: "bg-green-100 text-green-700",
-    METALS: "bg-gray-100 text-gray-600",
-    BOTTLES: "bg-emerald-100 text-emerald-700",
-    PAPERS: "bg-lime-100 text-lime-700",
-    ASSORTED: "bg-teal-100 text-teal-700",
+    Plastics: "bg-green-100 text-green-700",
+    Metals: "bg-gray-100 text-gray-600",
+    Bottles: "bg-emerald-100 text-emerald-700",
+    Papers: "bg-lime-100 text-lime-700",
+    Assorted: "bg-orange-100 text-orange-700"
   };
 
   const labels = {
-    PLASTICS : "Plastics",
-    METALS: "Metals",
-    BOTTLES: "Bottles",
-    PAPERS: "Papers",
-    ASSORTED: "Assorted",
+    Plastics : "Plastics",
+    Metals: "Metals",
+    Bottles: "Bottles",
+    Papers: "Papers",
+    Assorted: "Assorted",
   };
 
   return (

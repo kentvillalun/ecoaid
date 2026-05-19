@@ -217,7 +217,7 @@ model CollectionItem {
   materialId String @db.Uuid
   material Material @relation(fields: [materialId], references: [id])
 
-  actualWeight Float
+  actualValue Float
   actualUnit Unit
 
 }

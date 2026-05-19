@@ -25,6 +25,7 @@ export const RequestTable = ({
   handleRefetchCount,
   isLoading, 
   isError,
+  categories
 }) => {
 
   const router = useRouter()
@@ -42,13 +43,14 @@ export const RequestTable = ({
             : data.user.phoneNumber,
       },
       { header: "Sitio", render: (data) => data.user.sitio.name },
+      { header: "Material Name", render: (data) => data?.isAssorted === true ? "Assorted" : data?.material?.name },
       {
-        header: "Material Type",
-        render: (data) => data.materialType,
+        header: "Category",
+        render: (data) => data.isAssorted === true ? "Assorted" : data?.material?.category?.name,
       },
       {
-        header: "Est. Weight",
-        render: (data) => `${data.estimatedWeight} ${data.weightUnit}`,
+        header: "Est. Value",
+        render: (data) => `${data.estimatedValue} ${data.estimatedUnit === "PIECE" ? "pcs" : data.estimatedUnit}`,
       },
       {
         header: "Status",
@@ -98,10 +100,11 @@ export const RequestTable = ({
             : data.user.phoneNumber,
       },
       { header: "Sitio", render: (data) => data.user.sitio.name },
-      { header: "Material Type", render: (data) => data.materialType },
+      { header: "Material Name", render: (data) => data?.isAssorted === true ? "Assorted" : data?.material?.name },
+      { header: "Category", render: (data) => data.isAssorted === true ? "Assorted" : data?.material?.category?.name },
       {
-        header: "Est. Weight",
-        render: (data) => `${data.estimatedWeight} ${data.weightUnit}`,
+        header: "Est. Value",
+        render: (data) => `${data.estimatedValue} ${data.estimatedUnit === "PIECE" ? "pcs" : data.estimatedUnit}`,
       },
       {
         header: "Pickup Schedule",
@@ -134,10 +137,11 @@ export const RequestTable = ({
             : data.user.phoneNumber,
       },
       { header: "Sitio", render: (data) => data.user.sitio.name },
-      { header: "Material Type", render: (data) => data.materialType },
+      { header: "Material Name", render: (data) => data?.isAssorted === true ? "Assorted" : data?.material?.name },
+      { header: "Category", render: (data) => data.isAssorted === true ? "Assorted" : data?.material?.category?.name },
       {
-        header: "Est. Weight",
-        render: (data) => `${data.estimatedWeight} ${data.weightUnit}`,
+        header: "Est. Value",
+        render: (data) => `${data.estimatedValue} ${data.estimatedUnit === "PIECE" ? "pcs" : data.estimatedUnit}`,
       },
       {
         header: "Status",
@@ -162,8 +166,10 @@ export const RequestTable = ({
             <button className="text-gray-600 hover:underline" onClick={() => router.push(`/collection-requests/${data.id}`)}>View</button>
             <InProgressActions
               id={data.id}
-              materialType={data.materialType}
+              isAssorted={data.isAssorted}
+              material={data?.material}
               onSuccess={() => handleRefetchCount()}
+              categories={categories}
             />
           </div>
         ),
@@ -179,10 +185,11 @@ export const RequestTable = ({
             : data.user.phoneNumber,
       },
       { header: "Sitio", render: (data) => data.user.sitio.name },
-      { header: "Material Type", render: (data) => data.materialType },
+      { header: "Material Name", render: (data) => data?.isAssorted === true ? "Assorted" : data?.material?.name },
+      { header: "Category", render: (data) => data.isAssorted === true ? "Assorted" : data?.material?.category?.name },
       {
-        header: "Actual Weight",
-        render: (data) => `${data.estimatedWeight} ${data.weightUnit}`,
+        header: "Est. Value",
+        render: (data) => `${data.estimatedValue} ${data.estimatedUnit === "PIECE" ? "pcs" : data.estimatedUnit}`,
       },
       {
         header: "Action",
@@ -195,14 +202,19 @@ export const RequestTable = ({
     ],
     REJECTED: [
       { header: "Date Requested", render: (data) => formatDate(data.createdAt) },
-      { header: "Sitio", render: (data) => data.user.sitio.name },
       {
-        header: "Material Type",
-        render: (data) => data.materialType,
+        header: "Household",
+        render: (data) =>
+          data.user.firstName
+            ? `${data.user.firstName} ${data.user.lastName}`
+            : data.user.phoneNumber,
       },
+      { header: "Sitio", render: (data) => data.user.sitio.name },
+      { header: "Material Name", render: (data) => data?.isAssorted === true ? "Assorted" : data?.material?.name },
+      { header: "Category", render: (data) => data.isAssorted === true ? "Assorted" : data?.material?.category?.name },
       {
-        header: "Est. Weight",
-        render: (data) => `${data.estimatedWeight} ${data.weightUnit}`,
+        header: "Est. Value",
+        render: (data) => `${data.estimatedValue} ${data.estimatedUnit === "PIECE" ? "pcs" : data.estimatedUnit}`,
       },
       { header: "Rejection Reason", render: (data) => data.rejectionReason },
       {

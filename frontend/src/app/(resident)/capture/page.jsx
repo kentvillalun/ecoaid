@@ -129,7 +129,7 @@ export default function CapturePage() {
       estimatedValue: "",
       estimatedUnit: "",
       notes: "",
-      materialId: "",
+      materialId: null,
       isAssorted: false,
     },
   });
@@ -143,7 +143,11 @@ export default function CapturePage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ ...data, photoUrl: cloudinaryUrl }),
+        body: JSON.stringify({
+          ...data,
+          photoUrl: cloudinaryUrl,
+          materialId: data.isAssorted ? null : data.materialId,
+        }),
         credentials: "include",
       });
 
