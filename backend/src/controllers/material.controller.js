@@ -5,11 +5,19 @@ const getMaterials = async (req, res) => {
     const { barangayId } = req.user;
     const { categoryId } = req.query;
 
+    const where = { barangayId, isActive: true };
+    if (categoryId) where.categoryId = categoryId
+
     const materials = await prisma.material.findMany({
-      where: { categoryId, barangayId, isActive: true },
+      where,
       select: {
         name: true,
         id: true,
+        category: {
+          select: {
+            name: true
+          }
+        }
       },
     });
 

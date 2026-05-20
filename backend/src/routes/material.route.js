@@ -5,6 +5,7 @@ import { authenticateBarangay, authenticateResident, requireRoles } from "../mid
 const router = express.Router()
 
 router.get("/", authenticateResident, requireRoles(["RESIDENT"]), getMaterials)
+router.get("/", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY", "SK"]), getMaterials)
 router.get("/categories", authenticateResident, requireRoles(["RESIDENT"]), getCategories)
 
 

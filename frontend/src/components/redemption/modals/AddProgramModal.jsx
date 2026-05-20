@@ -7,7 +7,8 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation } from "@/hooks/useMutation";
 import { toast } from "sonner";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useFetch } from "@/hooks/useFetch";
 
 const schema = yup.object().shape({
   name: yup.string().required("Program name is required"),
@@ -43,6 +44,17 @@ export const AddProgramModal = ({
   const url = program
     ? `/api/redemption/programs/${id}`
     : "/api/redemption/programs";
+
+  const [materialRefetchCount, setMaterialRefetchCount] = useState(0);
+  const { data: materialsData } = useFetch({
+    url: `/api/material/`,
+    refetchCount: materialRefetchCount,
+  });
+
+  const papers = materialsData?.materials?.filter((m) => m.category.name === "Papers")
+  const metals = materialsData?.materials?.filter((m) => m.category.name === "Metals")
+  const plastics = materialsData?.materials?.filter((m) => m.category.name === "Plastics")
+  const bottles = materialsData?.materials?.filter((m) => m.category.name === "Bottles")
 
   const {
     register,
@@ -205,9 +217,35 @@ export const AddProgramModal = ({
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-gray-700 font-medium">Material Section</label>
+          <div className="">
+            <label className="text-gray-700 font-medium">
+              Materials & point values
+            </label>
+            <p className="text-gray-700 text-sm">
+              Check materials to include in this program and assign point
+              values.
+            </p>
+          </div>
 
-          <div className="grid grid-cols-2 gap-3 items-start">
+          <div className="grid grid-cols-1 gap-3">
+            <div className="">
+              <label
+                className="pr-6 text-gray-400 uppercase"
+                htmlFor="plastics"
+              >
+                Plastics
+              </label>
+              <div className="">
+                {plastics.map((p) => (
+                  <div className="">
+                    <input type="checkbox" className="" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* <div className="grid grid-cols-2 gap-3 items-start">
             <div className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-[#74C857] transition-colors flex flex-row gap-2 w-full min-h-11  max-h-11">
               <label className="pr-6 text-gray-400" htmlFor="plastics">
                 Plastics
@@ -263,7 +301,7 @@ export const AddProgramModal = ({
                 {...register("materials.PAPERS")}
               />
             </div>
-          </div>
+          </div> */}
           {errors.materials && (
             <p className="text-[14px] text-red-500 text-start">
               {errors.materials?.message}
@@ -283,40 +321,53 @@ export const AddProgramModal = ({
               className={`py-2.5 rounded-lg text-white mt-5 w-full hover:cursor-pointer transition-all duration-200 ease-in-out ${program?.isActive ? "bg-red-400 hover:bg-red-500" : "bg-[#74C857] hover:bg-primary"}`}
               type="button"
               onClick={async () => {
-                toast.loading(program?.isActive ? "Deactivating program" : "Reactivating program");
+                toast.loading(
+                  program?.isActive
+                    ? "Deactivating program"
+                    : "Reactivating program",
+                );
 
                 const success = await makeRequest({
                   url,
                   method: "PATCH",
                   body: {
-                    isActive: program?.isActive ? false : true
+                    isActive: program?.isActive ? false : true,
                   },
                 });
 
                 if (success) {
                   toast.dismiss();
-                  toast.success(program?.isActive ? "Program deactivated" : "Program reactivated");
+                  toast.success(
+                    program?.isActive
+                      ? "Program deactivated"
+                      : "Program reactivated",
+                  );
                   setIsProgramModalOpen(false);
                   setRefetchCount((prev) => prev + 1);
                   reset();
                 } else {
                   toast.dismiss();
-                  toast.error(program?.isActive ? "Deactivation failed" : "Reactivation failed");
+                  toast.error(
+                    program?.isActive
+                      ? "Deactivation failed"
+                      : "Reactivation failed",
+                  );
                 }
               }}
             >
               {program?.isActive ? "Deactivate Program" : "Reactivate Program"}
             </button>
             {program?.isActive ? (
-
               <p className="text-gray-700 text-sm">
-              <span className="font-medium">Caution: </span>This action will
-              deactivate the program. Existing transactions will not be affected
-            </p>
+                <span className="font-medium">Caution: </span>This action will
+                deactivate the program. Existing transactions will not be
+                affected
+              </p>
             ) : (
               <p className="text-gray-700 text-sm">
-              <span className="font-medium">Note: </span>Reactivating this program will allow new transactions to be recorded under it
-            </p>
+                <span className="font-medium">Note: </span>Reactivating this
+                program will allow new transactions to be recorded under it
+              </p>
             )}
           </div>
         )}

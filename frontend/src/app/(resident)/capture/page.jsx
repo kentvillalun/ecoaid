@@ -313,6 +313,10 @@ export default function CapturePage() {
                     onChange={(e) => {
                       setIsAssortedCheck(e.target.checked);
                       setValue("isAssorted", e.target.checked);
+                      if (e.target.checked) {
+                        setCategory("");
+                        setValue("materialId", null)
+                      }
                     }}
                     id="mixed"
                   />
@@ -340,6 +344,7 @@ export default function CapturePage() {
                       <select
                         className="w-full outline-none"
                         onChange={(e) => setCategory(e.target.value)}
+                        value={category}
                       >
                         <option value="" disabled hidden>
                           Choose a material category
