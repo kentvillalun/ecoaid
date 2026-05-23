@@ -171,11 +171,14 @@ async function main() {
           barangayId: barangay.id,
         }
       },
-      update: {},
+      update: {
+        defaultUnit: "PIECE"
+      },
       create: {
        name: bottlesName,
        barangayId: barangay.id,
-       categoryId: bottles.id
+       categoryId: bottles.id,
+       defaultUnit: "PIECE"
       }
     })
   }

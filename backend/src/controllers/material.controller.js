@@ -13,6 +13,7 @@ const getMaterials = async (req, res) => {
       select: {
         name: true,
         id: true,
+        defaultUnit: true,
         category: {
           select: {
             name: true

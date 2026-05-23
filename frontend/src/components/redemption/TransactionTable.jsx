@@ -52,7 +52,10 @@ export const TransactionTable = ({
       header: "Material",
       render: (data) => (
         <div className="flex items-center w-full flex-col">
-          <MaterialPill type={data?.programMaterial?.materialType} />
+          <MaterialPill className="w-auto!"
+            type={data?.programMaterial?.material?.category?.name}
+            materialName={data?.programMaterial?.material?.name}
+          />
         </div>
       ),
     },
@@ -61,10 +64,10 @@ export const TransactionTable = ({
       render: (data) => <span className="font-semibold">{data.quantity}</span>,
     },
     {
-      header: "Points",
+      header: "Values",
       render: (data) => (
         <span className="text-green-600 font-bold">
-          {data.quantity * data.currentPointValue} pts
+           {data?.programMaterial?.program?.isCashMode ? `₱${data.quantity * data.currentValue}` : `${data.quantity * data.currentValue} pts`}
         </span>
       ),
     },

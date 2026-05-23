@@ -91,7 +91,7 @@ const register = async (req, res) => {
       termsAccepted,
       username,
       lastName,
-      firstName
+      firstName,
     } = req.body ?? {};
     // ?? {} means "if req.body is null or undefined, use empty object"
     // prevents a crash when destructuring
@@ -139,15 +139,14 @@ const register = async (req, res) => {
     }
 
     // Duplicate username check
-    
+
     const usernameExist = await prisma.user.findUnique({
       where: { username },
-    })
+    });
 
     if (usernameExist) {
-      return res.status(400).json({error: "Username is already taken"})
+      return res.status(400).json({ error: "Username is already taken" });
     }
-
 
     // ── Validate barangay ─────────────────────────────────────
     const barangayRecord = await prisma.barangay.findFirst({
@@ -210,13 +209,20 @@ const register = async (req, res) => {
 // ─────────────────────────────────────────────
 const verifyOtp = async (req, res) => {
   try {
-    const { phoneNumber, code, barangayId, sitioId, password, termsAccepted, username, lastName, firstName } =
-      req.body ?? {};
+    const {
+      phoneNumber,
+      code,
+      barangayId,
+      sitioId,
+      password,
+      termsAccepted,
+      username,
+      lastName,
+      firstName,
+    } = req.body ?? {};
 
     if (!phoneNumber || !code || !username || !lastName || !firstName) {
-      return res
-        .status(400)
-        .json({ error: "Missing required fields" });
+      return res.status(400).json({ error: "Missing required fields" });
     }
 
     // ── Find a valid OTP record ───────────────────────────────
@@ -385,17 +391,13 @@ const login = async (req, res) => {
     });
 
     if (!user) {
-      return res
-        .status(401)
-        .json({ error: "Invalid username or password" });
+      return res.status(401).json({ error: "Invalid username or password" });
     }
 
     const passwordMatches = await bcrypt.compare(password, user.passwordHash);
 
     if (!passwordMatches) {
-      return res
-        .status(401)
-        .json({ error: "Invalid username or password" });
+      return res.status(401).json({ error: "Invalid username or password" });
     }
 
     if (!user.isActive) {
@@ -638,9 +640,7 @@ const barangayLogin = async (req, res) => {
 
     // If the user not found -> return error
     if (!user) {
-      return res
-        .status(401)
-        .json({ error: "Invalid username or password" });
+      return res.status(401).json({ error: "Invalid username or password" });
     }
 
     // Compare password with the hashed password using bcrypt
@@ -648,9 +648,7 @@ const barangayLogin = async (req, res) => {
 
     // If password wrong -> return error
     if (!passwordMatches) {
-      return res
-        .status(401)
-        .json({ error: "Invalid username or password" });
+      return res.status(401).json({ error: "Invalid username or password" });
     }
 
     // Check if user role is a barangay role
@@ -739,18 +737,40 @@ const me = async (req, res) => {
     });
 
     if (!user) {
-      return res.status(404).json({ error: "User not found"})
+      return res.status(404).json({ error: "User not found" });
     }
-  
+
     return res.status(200).json({
       message: "Verification successful",
       user: {
         id,
         role,
-        barangayId, 
-        sitio: user.sitio
+        barangayId,
+        sitio: user.sitio,
       },
     });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+const barangayMe = async (req, res) => {
+  try {
+    const { id, role, barangayId } = req.user ?? {};
+
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: {
+        firstName: true,
+        lastName: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    return res.status(200).json({ message: "Fetch succesfull", user });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -799,4 +819,5 @@ export {
   logoutBarangay,
   me,
   logoutResident,
+  barangayMe
 };

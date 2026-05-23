@@ -5,7 +5,7 @@ const inter = Inter({
   weight: ["400", "500", "600", "700"],
 });
 
-export const MaterialPill = ({ type, points, className = "" }) => {
+export const MaterialPill = ({ type = null, points, className = "", materialName = null }) => {
 
 
 
@@ -28,11 +28,11 @@ export const MaterialPill = ({ type, points, className = "" }) => {
 
   return (
     <div
-      className={`py-1 px-4 ${className} text-xs rounded-3xl font-medium w-30 text-center ${inter.className} ${
+      className={`py-1 px-4 ${className} text-xs rounded-3xl text-no font-medium w-30 text-center ${inter.className} ${
         styles[type] || "bg-gray-200 text-gray-700"
       }`}
     >
-      {labels[type] || type} {points != null ? `${points} pts` : ""}
+      {materialName ? materialName : labels[type] || type} {points != null ? `${points} ` : ""}
     </div>
   );
 };

@@ -16,7 +16,6 @@ const createProgram = async (req, res) => {
     if (
       !name ||
       !allotedBudget ||
-      !maxPoints ||
       !programMaterial ||
       !description
     ) {
@@ -52,7 +51,20 @@ const getPrograms = async (req, res) => {
     const programs = await prisma.program.findMany({
       where: { barangayId },
       include: {
-        programMaterial: true,
+        programMaterial: {
+          include: {
+            material: {
+              select: {
+                name: true,
+                category: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     });
 
@@ -74,11 +86,32 @@ const getProgram = async (req, res) => {
       include: {
         programMaterial: {
           include: {
+            material: {
+              select: {
+                name: true,
+                defaultUnit: true,
+                category: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
             redemptionTransaction: {
               include: {
                 programMaterial: {
                   include: {
                     program: true,
+                    material: {
+                      select: {
+                        name: true,
+                        category: {
+                          select: {
+                            name: true,
+                          }
+                        }
+                      }
+                    }
                   },
                 },
               },
@@ -191,7 +224,9 @@ const createTransaction = async (req, res) => {
         collectorName,
         beneficiaryName,
         educationalLevel,
-        currentValue: currentValue.program.isCashMode ? currentValue.cashValue : currentValue.pointValue,
+        currentValue: currentValue.program.isCashMode
+          ? currentValue.cashValue
+          : currentValue.pointValue,
         programMaterialId,
       },
     });
@@ -207,21 +242,30 @@ const createTransaction = async (req, res) => {
 
 const getTransactions = async (req, res) => {
   try {
-
-    const barangayId = req.user.barangayId
+    const barangayId = req.user.barangayId;
 
     const transactions = await prisma.redemptionTransaction.findMany({
       where: {
         programMaterial: {
           program: {
-            barangayId
-          }
-        }
+            barangayId,
+          },
+        },
       },
       include: {
         programMaterial: {
           include: {
             program: true,
+            material: {
+              select: {
+                name: true,
+                category: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
           },
         },
       },

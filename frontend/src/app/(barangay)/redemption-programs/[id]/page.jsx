@@ -46,7 +46,11 @@ const TABLE_COLUMNS = [
     header: "Material",
     render: (t) => (
       <div className="flex justify-center">
-        <MaterialPill type={t.programMaterial?.materialType} />
+        <MaterialPill
+          type={t?.programMaterial?.material?.category?.name}
+          materialName={t?.programMaterial?.material?.name}
+          className="w-auto!"
+        />
       </div>
     ),
   },
@@ -58,7 +62,7 @@ const TABLE_COLUMNS = [
     header: "Points",
     render: (t) => (
       <span className="text-green-600 font-bold">
-        {t.quantity * t.currentPointValue} pts
+        {t.quantity * t.currentValue} pts
       </span>
     ),
   },
@@ -88,6 +92,9 @@ export default function ProgramDetails() {
       </div>
     );
 
+  const { data: currentBarangayData } = useFetch({
+    url: "/api/auth/barangay/me",
+  });
   return (
     <Page gradient={true}>
       <BarangayTopBar title={"Program Details"} />
@@ -99,6 +106,7 @@ export default function ProgramDetails() {
               setIsTransactionModalOpen={setIsTransactionModalOpen}
               setTransactionRefetchCount={setRefetchCount}
               preselectedProgram={data?.program}
+              currentBarangayData={currentBarangayData}
             />,
             document.body,
           )}
@@ -163,9 +171,15 @@ export default function ProgramDetails() {
                     name="Allotted Budget"
                     value={`₱ ${data?.program?.allotedBudget.toLocaleString()}`}
                   />
+                  {!data?.program?.isCashMode && (
+                    <LabelValue
+                      name="Max Points"
+                      value={`${data?.program?.maxPoints.toLocaleString()} pts`}
+                    />
+                  )}
                   <LabelValue
-                    name="Max Points"
-                    value={`${data?.program?.maxPoints.toLocaleString()} pts`}
+                    name="Redemption Mode"
+                    value={data?.program?.isCashMode ? "Cash" : "Point"}
                   />
                 </div>
                 <LabelValue
@@ -182,7 +196,7 @@ export default function ProgramDetails() {
               {/* Section 2 — Material Points */}
               <Card className="flex flex-col items-start gap-3">
                 <h3 className="font-semibold text-sm text-gray-600 border-b border-gray-100 pb-2 w-full">
-                  Material Points
+                  Material Values
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-1 w-full">
                   {data?.program?.programMaterial.map((m, i) => (
@@ -190,12 +204,16 @@ export default function ProgramDetails() {
                       key={m.id}
                       className="flex flex-row items-center justify-between py-2.5 border-b border-gray-50 last:border-0 md:odd:border-r md:odd:pr-4 md:even:pl-4"
                     >
-                      <MaterialPill type={m.materialType} />
+                      <MaterialPill
+                        type={m?.material?.category?.name}
+                        materialName={m?.material?.name}
+                        className="w-auto!"
+                      />
                       <div className="flex flex-col items-end">
                         <p className="text-sm font-semibold text-gray-700">
-                          {m.pointValue} pts
+                           {data?.program?.isCashMode ? `₱${m?.cashValue}` : `${m?.pointValue} pts`}
                         </p>
-                        <p className="text-xs text-gray-400">per unit</p>
+                        <p className="text-xs text-gray-400">per {m?.material?.defaultUnit?.toLowerCase()}</p>
                       </div>
                     </div>
                   ))}

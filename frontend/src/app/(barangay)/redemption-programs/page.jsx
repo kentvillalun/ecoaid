@@ -40,6 +40,10 @@ export default function RedemptionProgramPage() {
     refetchCount: transactionRefetchCount,
   });
 
+  const { data: currentBarangayData } = useFetch({
+    url: "/api/auth/barangay/me",
+  });
+
   const handleTransactionRefetch = () =>
     setTransactionRefetchCount((prev) => prev + 1);
   const handleProgramRefetch = () => setRefetchCount((prev) => prev + 1);
@@ -72,6 +76,7 @@ export default function RedemptionProgramPage() {
               setIsTransactionModalOpen={setIsTransactionModalOpen}
               setTransactionRefetchCount={setTransactionRefetchCount}
               data={data.programs}
+              currentBarangayData={currentBarangayData}
             />,
             document.body,
           )}
@@ -122,19 +127,27 @@ export default function RedemptionProgramPage() {
                       name="Budget"
                       value={`₱ ${p.allotedBudget.toLocaleString()}`}
                     />
+                    {!p.isCashMode && (
+                      <LabelValue
+                        name="Max Points"
+                        value={`${p.maxPoints} pts`}
+                      />
+                    )}
                     <LabelValue
-                      name="Max Points"
-                      value={`${p.maxPoints} pts`}
+                      name="Redemption Mode"
+                      value={p.isCashMode ? "Cash" : "Point"}
                     />
                   </div>
 
                   <div
-                    className={`flex flex-row flex-wrap gap-2 pt-3 border-t border-gray-100 w-full ${data?.programs?.length === 1 ? "items-center justify-center" : ""}`}
+                    className={`flex flex-row flex-wrap gap-1 pt-3 border-t border-gray-100 w-full ${data?.programs?.length === 1 ? "items-center justify-center" : ""}`}
                   >
                     {p.programMaterial.map((m) => (
                       <MaterialPill
-                        type={m.materialType}
-                        points={m.pointValue}
+                        className="w-auto!"
+                        type={m?.material?.category?.name}
+                        materialName={m?.material?.name}
+                        points={p?.isCashMode ? `₱${m.cashValue}` : `${m.pointValue} pts`}
                         key={m.id}
                       />
                     ))}

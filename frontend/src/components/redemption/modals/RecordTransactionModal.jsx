@@ -29,6 +29,7 @@ export const RecordTransactionModal = ({
   setTransactionRefetchCount,
   data,
   preselectedProgram,
+  currentBarangayData
 }) => {
   const { makeRequest, isLoading, error, isError } = useMutation();
   const url = "/api/redemption/transactions";
@@ -81,6 +82,11 @@ export const RecordTransactionModal = ({
       toast.error("Creating transaction failed");
     }
   };
+
+  useEffect(() => {
+    if (!currentBarangayData) return;
+    setValue("collectorName", `${currentBarangayData.user.firstName} ${currentBarangayData.user.lastName}`)
+  }, [currentBarangayData])
 
   return (
     <Modal
@@ -148,7 +154,7 @@ export const RecordTransactionModal = ({
                 </option>
                 {selectedProgram?.programMaterial.map((m) => (
                   <option value={m.id} key={m.id}>
-                    {m.materialType}
+                    {m?.material?.name}
                   </option>
                 ))}
               </select>
@@ -220,8 +226,10 @@ export const RecordTransactionModal = ({
           <label className="text-gray-700 font-medium">Collector</label>
           <input
             type="text"
-            className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-[#74C857] transition-colors min-h-11 max-h-11"
+            className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg  transition-colors min-h-11 max-h-11 bg-gray-100 cursor-default"
             placeholder="Input collectors' name here"
+            readOnly
+            value={currentBarangayData ? `${currentBarangayData.user.firstName} ${currentBarangayData.user.lastName}` : "Loading..."}
             {...register("collectorName")}
           />
           {errors.collectorName && (

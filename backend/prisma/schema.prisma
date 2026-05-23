@@ -230,7 +230,7 @@ model Program {
 
   name String
   allotedBudget Float
-  maxPoints Float
+  maxPoints Int?
   description String?
   isActive Boolean @default(true)
   isCashMode Boolean @default(false)
@@ -247,7 +247,7 @@ model ProgramMaterial {
   materialId String @db.Uuid
   material Material @relation(fields: [materialId], references: [id])
 
-  pointValue Float
+  pointValue Float?
   cashValue Float?
   createdAt DateTime @default(now())
 
