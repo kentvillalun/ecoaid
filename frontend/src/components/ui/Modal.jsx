@@ -23,7 +23,8 @@ export const Modal = ({
   onConfirm,
   status,
   isPill,
-  cancelLabel = "Cancel"
+  cancelLabel = "Cancel",
+  buttonLabelSize = "text-md"
 }) => {
   return (
     // blur background
@@ -63,7 +64,7 @@ export const Modal = ({
               
 
               {/* buttons */}
-              <div className="grid grid-cols-2 text-md font-medium gap-3 p-6 border-t border-gray-200 ">
+              <div className={`grid grid-cols-2 font-medium gap-3 p-6 border-t border-gray-200 ${buttonLabelSize}`}>
                 <button
                   className="py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:cursor-pointer"
                   onClick={onClose}

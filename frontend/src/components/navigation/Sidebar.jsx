@@ -60,7 +60,7 @@ export const Sidebar = () => {
     {
       icon: RedemptionProgramIcon,
       label: "Redemption Management",
-      href: "/redemption-programs",
+      href: "/redemption",
     },
     {
       icon: RewardsIcon,

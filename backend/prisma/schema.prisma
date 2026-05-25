@@ -230,13 +230,14 @@ model Program {
 
   name String
   allotedBudget Float
-  maxPoints Int?
+ 
   description String?
   isActive Boolean @default(true)
   isCashMode Boolean @default(false)
   createdAt DateTime @default(now()) 
   
   programMaterial ProgramMaterial[]
+  redemptionTransaction RedemptionTransaction[]
 }
 
 model ProgramMaterial {
@@ -251,7 +252,7 @@ model ProgramMaterial {
   cashValue Float?
   createdAt DateTime @default(now())
 
-  redemptionTransaction RedemptionTransaction[]
+  redemptionTransactionItem RedemptionTransactionItem[]
 
   @@unique([programId, materialId])
 }
@@ -259,15 +260,30 @@ model ProgramMaterial {
 model RedemptionTransaction {
   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
 
-  programMaterialId String @db.Uuid
-  programMaterial ProgramMaterial @relation(fields: [programMaterialId], references: [id])
+  programId String @db.Uuid
+  program Program @relation(fields: [programId], references: [id])
 
-  quantity Int
   collectorName String
   beneficiaryName String
   createdAt DateTime @default(now())
+
+  educationalLevel EducationalLevel?
+
+  redemptionTransactionItem RedemptionTransactionItem[]
+}
+
+model RedemptionTransactionItem {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  transactionId String @db.Uuid
+  redemptionTransaction RedemptionTransaction @relation(fields: [transactionId], references: [id])
+
+  programMaterialId String @db.Uuid
+  programMaterial ProgramMaterial @relation(fields: [programMaterialId], references: [id])
+
+  amount Float
   currentValue Float
-  educationalLevel EducationalLevel
+  createdAt DateTime @default(now())
 }
 
 enum EducationalLevel {

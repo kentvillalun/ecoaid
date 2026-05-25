@@ -90,7 +90,7 @@ export default function RedemptionProgramPage() {
             onAction={() => setIsProgramModalOpen(true)}
           />
           <div
-            className={`grid gap-3 ${data?.programs.length === 1 && "grid-cols-1"} ${data?.programs.length === 2 && "md:grid-cols-2"} ${data?.programs.length >= 3 && "md:grid-cols-3"}`}
+            className={`grid gap-3 ${data?.programs.length === 1 && "grid-cols-1"} ${data?.programs.length === 2 && "md:grid-cols-2"} ${data?.programs.length >= 3 && "md:grid-cols-2 lg:grid-cols-3"}`}
           >
             {isLoading ? (
               <Spinner className="p-7!" />
@@ -109,7 +109,7 @@ export default function RedemptionProgramPage() {
                   className={`flex flex-col gap-2 p-5! hover:-translate-y-0.5 transition-all duration-200 ease-in-out hover:cursor-pointer ${data?.programs?.length === 1 ? "items-center" : "items-start"}`}
                   key={p.id}
                   handleClick={() =>
-                    router.push(`/redemption-programs/${p.id}`)
+                    router.push(`/redemption/programs/${p.id}`)
                   }
                 >
                   <div
@@ -127,15 +127,9 @@ export default function RedemptionProgramPage() {
                       name="Budget"
                       value={`₱ ${p.allotedBudget.toLocaleString()}`}
                     />
-                    {!p.isCashMode && (
-                      <LabelValue
-                        name="Max Points"
-                        value={`${p.maxPoints} pts`}
-                      />
-                    )}
                     <LabelValue
                       name="Redemption Mode"
-                      value={p.isCashMode ? "Cash" : "Point"}
+                      value={p.isCashMode ? "Cash" : "Points"}
                     />
                   </div>
 

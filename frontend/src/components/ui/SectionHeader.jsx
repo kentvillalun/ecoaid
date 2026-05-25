@@ -9,10 +9,12 @@ export const SectionHeader = ({
   buttonLabel,
   onAction,
   buttonIcon = <PlusIcon className="w-5 hidden md:flex" />,
-  buttonClassName
+  buttonClassName,
+  noButton = false,
+  className = ""
 }) => {
   return (
-    <header className="">
+    <header className={`${className}`}>
       <div className="flex flex-row items-center justify-between">
         <div className="flex flex-row gap-4 items-center">
           <div className="border p-3 border-gray-200 rounded-lg md:flex items-center hidden bg-white">
@@ -25,13 +27,15 @@ export const SectionHeader = ({
             <p className="text-gray-600 text-[14px]">{subtitle}</p>
           </div>
         </div>
-        <button
-          className={`bg-[#74C857] text-white px-3.5 rounded-lg py-2.5 flex flex-row items-center gap-2 justify-center hover:cursor-pointer hover:bg-primary transition-all duration-200 ease-in-out min-w-35 md:min-w-45 text-nowrap ${buttonClassName}`}
-          onClick={onAction}
-        >
-          {buttonIcon}
-          <p className="md:text-md text-sm ">{buttonLabel}</p>
-        </button>
+        {!noButton && (
+          <button
+            className={`bg-[#74C857] text-white px-3.5 rounded-lg py-2.5 flex flex-row items-center gap-2 justify-center hover:cursor-pointer hover:bg-primary transition-all duration-200 ease-in-out min-w-35 md:min-w-45 text-nowrap ${buttonClassName}`}
+            onClick={onAction}
+          >
+            {buttonIcon}
+            <p className="md:text-md text-sm ">{buttonLabel}</p>
+          </button>
+        )}
       </div>
     </header>
   );

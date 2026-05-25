@@ -7,6 +7,7 @@ import { MaterialPill } from "../ui/MateriaPill";
 import { Spinner } from "../ui/Spinner";
 import { Empty } from "../ui/Empty";
 import { Error } from "../ui/Error";
+import { useRouter } from "next/navigation";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -19,6 +20,9 @@ export const TransactionTable = ({
   isError,
   handleRefetchCount,
 }) => {
+
+  const router = useRouter()
+
   const tableConfig = [
     {
       header: "Beneficiary",
@@ -39,11 +43,11 @@ export const TransactionTable = ({
       header: "Program",
       render: (data) => (
         <div className="font-semibold">
-          {data?.programMaterial?.program?.name}{" "}
+          {data?.program?.name}{" "}
           <span
-            className={`text-xs font-medium px-3 py-1 rounded-full ${data?.programMaterial?.program?.isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
+            className={`text-xs font-medium px-3 py-1 rounded-full ${data.program?.isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
           >
-            {data?.programMaterial?.program?.isActive ? "Active" : "Inactive"}
+            {data?.program?.isActive ? "Active" : "Inactive"}
           </span>
         </div>
       ),
@@ -52,28 +56,38 @@ export const TransactionTable = ({
       header: "Material",
       render: (data) => (
         <div className="flex items-center w-full flex-col">
-          <MaterialPill className="w-auto!"
-            type={data?.programMaterial?.material?.category?.name}
-            materialName={data?.programMaterial?.material?.name}
-          />
+          {data?.redemptionTransactionItem?.length > 1
+            ? `${data?.redemptionTransactionItem?.length} materials`
+            : `${data?.redemptionTransactionItem?.length} material`}
         </div>
       ),
     },
     {
-      header: "Qty",
-      render: (data) => <span className="font-semibold">{data.quantity}</span>,
-    },
-    {
       header: "Values",
       render: (data) => (
-        <span className="text-green-600 font-bold">
-           {data?.programMaterial?.program?.isCashMode ? `₱${data.quantity * data.currentValue}` : `${data.quantity * data.currentValue} pts`}
+        <span className="">
+          {data?.isCashMode
+            ? `₱ ${data?.redemptionTransactionItem?.reduce((sum, item) => sum + item.amount * item.currentValue, 0)}`
+            : `${data?.redemptionTransactionItem?.reduce((sum, item) => sum + item.amount * item.currentValue, 0)} pts `}
         </span>
       ),
     },
     {
       header: "Date",
       render: (data) => formatDate(data.createdAt),
+    },
+    {
+      header: "Action",
+      render: (data) => (
+        <div className="flex items-center justify-center">
+          <button
+            className="text-gray-600 hover:underline hover:cursor-pointer"
+            onClick={() => router.push(`/redemption/transactions/${data.id}`)}
+          >
+            View Details
+          </button>
+        </div>
+      ),
     },
   ];
 

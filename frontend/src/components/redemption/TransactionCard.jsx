@@ -2,17 +2,21 @@
 
 import { formatDate } from "@/lib/formatDate";
 import { Card } from "../ui/Card";
-import { MaterialPill } from "../ui/MateriaPill";
 import { Error } from "../ui/Error";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+import { useRouter } from "next/navigation";
 
 export const TransactionCard = ({
   data,
   isLoading,
   isError,
   handleRefetchCount,
+  program = null,
 }) => {
+
+  const router = useRouter()
+
   return (
     <>
       {isLoading ? (
@@ -26,7 +30,6 @@ export const TransactionCard = ({
                 <Skeleton width={105} />
                 <div className="flex flex-row gap-1 items-center">
                   <Skeleton width={180} />
-                  <Skeleton width={70} />
                 </div>
                 <Skeleton width={105} />
                 <Skeleton width={100} />
@@ -60,33 +63,30 @@ export const TransactionCard = ({
       ) : (
         data?.transactions?.map((d) => (
           <Card
-            className={`flex flex-col md:hidden items-start gap-3 ${d?.programMaterial?.program?.isActive ? "" : "opacity-60"}`}
+            className={`flex flex-col md:hidden items-start gap-3 ${program ? program?.isActive : d?.program?.isActive ? "" : "opacity-60"}`}
             key={d?.id}
+            handleClick={() => {
+              router.push(`/redemption/transactions/${d?.id}`)
+            }}
           >
             <div className="flex flex-row justify-between w-full">
               <div className="flex flex-col w-full">
                 <div className="flex flex-row items-center justify-between mb-1">
                   <h3 className="font-semibold">{d?.beneficiaryName}</h3>
-                  <div className="flex flex-col items-end gap-2">
-                    <MaterialPill
-                      type={`${d?.programMaterial?.material?.category?.name}`}
-                      points={d?.programMaterial?.program?.isCashMode ? `₱${d?.quantity * d.currentValue}` : `${d?.quantity * d?.currentValue} pts`}
-                      materialName={d?.programMaterial?.material?.name}
-                      className="w-auto!"
-                    />
-                  </div>
                 </div>
                 <div className="flex flex-row gap-1 items-center">
-                  <p className="text-sm text-gray-500">
-                    {d?.programMaterial?.program?.name}
-                  </p>
-                  <span
-                    className={`text-xs font-medium px-3 py-1 rounded-full ${d?.programMaterial?.program?.isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
-                  >
-                    {d?.programMaterial?.program?.isActive
-                      ? "Active"
-                      : "Inactive"}
-                  </span>
+                  {!program && (
+                    <>
+                      <p className="text-sm text-gray-500">
+                        {d?.program?.name}
+                      </p>
+                      <span
+                        className={`text-xs font-medium px-3 py-1 rounded-full ${d?.program?.isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
+                      >
+                        {d?.program?.isActive ? "Active" : "Inactive"}
+                      </span>
+                    </>
+                  )}
                 </div>
                 <p className="text-sm text-gray-400">By: {d?.collectorName}</p>
                 <p className="text-sm text-gray-400 capitalize">
@@ -99,7 +99,9 @@ export const TransactionCard = ({
                 {formatDate(d?.createdAt)}
               </p>
               <p className="text-xs text-gray-500 font-medium">
-                Qty: {d?.quantity}
+                {d?.redemptionTransactionItem?.length > 1
+                  ? `${d?.redemptionTransactionItem?.length} materials`
+                  : `${d?.redemptionTransactionItem?.length} material`}
               </p>
             </div>
           </Card>

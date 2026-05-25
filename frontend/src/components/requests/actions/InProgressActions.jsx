@@ -71,8 +71,7 @@ export const InProgressActions = ({
       status: "COLLECTED",
       items: [{ materialId: material.id, actualValue, actualUnit }],
     });
-    console.log(material);
-
+ 
     if (success) {
       toast.dismiss();
       toast.success("Record finalize! Request collected!");

@@ -1,11 +1,15 @@
 @import "tailwindcss";
 
 @theme {
-    --color-primary: #49B02D;
-    
+  --color-primary: #49b02d;
 }
 
 .sidebar {
-    scrollbar-color: rgba(0, 128, 0, 0.337) transparent;
-    scrollbar-width: thin;
+  scrollbar-color: rgba(0, 128, 0, 0.337) transparent;
+  scrollbar-width: thin;
+}
+
+html,
+body {
+  overscroll-behavior: none;
 }

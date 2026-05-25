@@ -12,18 +12,24 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "EcoProfit",
-  description: "EcoProfit is a barangay waste management system that allows residents to contribute recyclable materials and enables the barangay to manage collections, track inventory, run redemption programs, and monitor finances.",
+  title: "EcoAid",
+  description: "EcoAid is a barangay waste management system that allows residents to contribute recyclable materials and enables the barangay to manage collections, track inventory, run redemption programs, and monitor finances.",
   appleWebApp: {
-    title: "EcoProfit"
-  }
+    title: "EcoAid"
+  },
+  
 };
+
+export const viewport = {
+  userScalable: false,
+  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
+}
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-auto`}
       >
         {children}
       </body>

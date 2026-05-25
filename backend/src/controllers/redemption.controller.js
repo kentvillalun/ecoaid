@@ -2,23 +2,12 @@ import { prisma } from "../config/db.js";
 
 const createProgram = async (req, res) => {
   try {
-    const {
-      name,
-      allotedBudget,
-      maxPoints,
-      programMaterial,
-      description,
-      isCashMode,
-    } = req.body ?? {};
+    const { name, allotedBudget, programMaterial, description, isCashMode } =
+      req.body ?? {};
 
     const barangayId = req.user.barangayId;
 
-    if (
-      !name ||
-      !allotedBudget ||
-      !programMaterial ||
-      !description
-    ) {
+    if (!name || !allotedBudget || !programMaterial || !description) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -27,7 +16,6 @@ const createProgram = async (req, res) => {
         barangayId,
         name,
         allotedBudget,
-        maxPoints,
         description,
         isCashMode,
         programMaterial: {
@@ -55,6 +43,7 @@ const getPrograms = async (req, res) => {
           include: {
             material: {
               select: {
+                defaultUnit: true,
                 name: true,
                 category: {
                   select: {
@@ -97,21 +86,25 @@ const getProgram = async (req, res) => {
                 },
               },
             },
-            redemptionTransaction: {
+          },
+        },
+        redemptionTransaction: {
+          include: {
+            redemptionTransactionItem: {
               include: {
                 programMaterial: {
-                  include: {
-                    program: true,
+                  select: {
                     material: {
                       select: {
                         name: true,
+                        defaultUnit: true,
                         category: {
                           select: {
                             name: true,
-                          }
-                        }
-                      }
-                    }
+                          },
+                        },
+                      },
+                    },
                   },
                 },
               },
@@ -184,50 +177,55 @@ const updateProgram = async (req, res) => {
 const createTransaction = async (req, res) => {
   try {
     const {
-      programMaterialId,
-      quantity,
+      programId,
+      items,
       collectorName,
       beneficiaryName,
       educationalLevel,
     } = req.body ?? {};
 
-    if (
-      !programMaterialId ||
-      !quantity ||
-      !collectorName ||
-      !beneficiaryName ||
-      !educationalLevel
-    ) {
+    if (!programId || !items || !collectorName || !beneficiaryName) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    const currentValue = await prisma.programMaterial.findUnique({
-      where: { id: programMaterialId },
-      select: {
-        pointValue: true,
-        cashValue: true,
-        program: {
+    const materials = await Promise.all(
+      items.map((i) =>
+        prisma.programMaterial.findUnique({
+          where: { id: i.programMaterialId },
           select: {
-            isCashMode: true,
+            pointValue: true,
+            cashValue: true,
+            program: {
+              select: {
+                isCashMode: true,
+              },
+            },
           },
-        },
-      },
-    });
+        }),
+      ),
+    );
 
-    if (!currentValue) {
-      return res.status(404).json({ error: "Material type not found" });
+    if (materials.some((m) => m === null)) {
+      return res.status(404).json({ error: "Program material not found" });
     }
 
     const transaction = await prisma.redemptionTransaction.create({
       data: {
-        quantity,
+        programId,
         collectorName,
         beneficiaryName,
         educationalLevel,
-        currentValue: currentValue.program.isCashMode
-          ? currentValue.cashValue
-          : currentValue.pointValue,
-        programMaterialId,
+        redemptionTransactionItem: {
+          createMany: {
+            data: items.map((item, index) => ({
+              programMaterialId: item.programMaterialId,
+              amount: item.amount,
+              currentValue: materials[index].program.isCashMode
+                ? materials[index].cashValue
+                : materials[index].pointValue,
+            })),
+          },
+        },
       },
     });
 
@@ -246,22 +244,24 @@ const getTransactions = async (req, res) => {
 
     const transactions = await prisma.redemptionTransaction.findMany({
       where: {
-        programMaterial: {
-          program: {
-            barangayId,
-          },
+        program: {
+          barangayId,
         },
       },
       include: {
-        programMaterial: {
+        program: true,
+        redemptionTransactionItem: {
           include: {
-            program: true,
-            material: {
+            programMaterial: {
               select: {
-                name: true,
-                category: {
+                material: {
                   select: {
                     name: true,
+                    category: {
+                      select: {
+                        name: true,
+                      },
+                    },
                   },
                 },
               },
@@ -280,6 +280,56 @@ const getTransactions = async (req, res) => {
   }
 };
 
+const getTransaction = async (req, res) => {
+  try {
+    const barangayId = req.user.barangayId;
+    const { id } = req.params;
+
+    const transaction = await prisma.redemptionTransaction.findUnique({
+      where: {
+        id,
+        program: {
+          barangayId,
+        },
+      },
+      include: {
+        program: true, 
+        redemptionTransactionItem: {
+          include: {
+            programMaterial: {
+              select: {
+                pointValue: true,
+                cashValue: true,
+                material: {
+                  select: {
+                    name: true,
+                    defaultUnit: true,
+                    category: {
+                      select: {
+                        name: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!transaction) {
+      return res.status(404).json({ error: "Transaction not found" });
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Fetch transaciton successful", transaction });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 export {
   createProgram,
   getPrograms,
@@ -287,4 +337,5 @@ export {
   createTransaction,
   getTransactions,
   updateProgram,
+  getTransaction,
 };

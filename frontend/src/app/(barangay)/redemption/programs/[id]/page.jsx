@@ -26,18 +26,21 @@ import { TransactionCard } from "@/components/redemption/TransactionCard";
 import { createPortal } from "react-dom";
 import { RecordTransactionModal } from "@/components/redemption/modals/RecordTransactionModal";
 import { AddProgramModal } from "@/components/redemption/modals/AddProgramModal";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
+import { useRouter } from "next/navigation";
 
 const TABLE_COLUMNS = [
   {
     header: "Beneficiary",
     render: (t) => (
       <div className="flex flex-col items-start">
-        <p className="font-semibold">{t.beneficiaryName}</p>
+        <p className="font-semibold">{t?.beneficiaryName}</p>
         <p className="text-gray-500 capitalize">
-          {t.educationalLevel.toLowerCase()} level
+          {t?.educationalLevel.toLowerCase()} level
         </p>
         <p className="text-gray-500 capitalize">
-          Collected By: {t.collectorName}
+          Collected By: {t?.collectorName}
         </p>
       </div>
     ),
@@ -46,29 +49,38 @@ const TABLE_COLUMNS = [
     header: "Material",
     render: (t) => (
       <div className="flex justify-center">
-        <MaterialPill
-          type={t?.programMaterial?.material?.category?.name}
-          materialName={t?.programMaterial?.material?.name}
-          className="w-auto!"
-        />
+        {t?.redemptionTransactionItem?.length > 1
+          ? `${t?.redemptionTransactionItem?.length} materials`
+          : `${t?.redemptionTransactionItem?.length} material`}
       </div>
     ),
   },
   {
-    header: "Qty",
-    render: (t) => <span className="font-semibold">{t.quantity}</span>,
-  },
-  {
-    header: "Points",
-    render: (t) => (
-      <span className="text-green-600 font-bold">
-        {t.quantity * t.currentValue} pts
+    header: "Values",
+    render: (t, isCashMode) => (
+      <span className="">
+        {isCashMode
+          ? `₱ ${t?.redemptionTransactionItem?.reduce((sum, item) => sum + item.amount * item.currentValue, 0)}`
+          : `${t?.redemptionTransactionItem?.reduce((sum, item) => sum + item.amount * item.currentValue, 0)} pts `}
       </span>
     ),
   },
   {
     header: "Date",
-    render: (t) => formatDate(t.createdAt),
+    render: (t) => formatDate(t?.createdAt),
+  },
+  {
+    header: "Action",
+    render: (t, isCashMode, router) => (
+      <div className="flex items-center justify-center">
+        <button
+          className="text-gray-600 hover:underline hover:cursor-pointer"
+          onClick={() => router.push(`/redemption/transactions/${t.id}`)}
+        >
+          View Details
+        </button>
+      </div>
+    ),
   },
 ];
 
@@ -81,24 +93,16 @@ export default function ProgramDetails() {
   const { isLoading, isError, data } = useFetch({ url, refetchCount });
 
   const handleRefetchCount = () => setRefetchCount((prev) => prev + 1);
-  const transactions = data?.program?.programMaterial
-    ?.map((m) => m.redemptionTransaction)
-    .flat();
-
-  if (isError)
-    return (
-      <div className="md:pl-77 flex items-center justify-center min-h-screen">
-        <Error handleRefetchCount={handleRefetchCount} />
-      </div>
-    );
+  const transactions = data?.program?.redemptionTransaction;
 
   const { data: currentBarangayData } = useFetch({
     url: "/api/auth/barangay/me",
   });
+  const router = useRouter()
   return (
     <Page gradient={true}>
       <BarangayTopBar title={"Program Details"} />
-      <PageContent className="md:pl-80 md:p-6 md:gap-7">
+      <PageContent className="md:pl-80 md:p-6 gap-3">
         {isTransactionModalOpen &&
           createPortal(
             <RecordTransactionModal
@@ -142,18 +146,61 @@ export default function ProgramDetails() {
           buttonLabel={"Edit Program"}
           buttonIcon={<PencilSquareIcon className="w-5 hidden md:flex" />}
           onAction={() => setIsEditModalOpen(true)}
+          className="mt-5"
         />
 
         <div className="grid grid-cols-1 gap-3">
           {/* Section 1 — Program Information */}
           {isLoading ? (
-            <div className="text-center">
-              <div className="md:hidden">
-                <SkeletonCard rowsCount={4} />
-              </div>
-              <div className="md:flex items-center justify-center hidden">
-                <Spinner />
-              </div>
+            <>
+              <Card className="flex flex-col items-start gap-3">
+                <h3 className="font-semibold text-sm text-gray-600 border-b border-gray-100 pb-2 w-full">
+                  Program Information
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                  <div className="flex flex-col">
+                    <Skeleton width={102} />
+                    <Skeleton width={160} />
+                  </div>
+                  <div className="flex flex-col">
+                    <Skeleton width={46} />
+                    <Skeleton width={53} />
+                  </div>
+                  <div className="flex flex-col">
+                    <Skeleton width={106} />
+                    <Skeleton width={85} />
+                  </div>
+
+                  <div className="flex flex-col">
+                    <Skeleton width={80} />
+                    <Skeleton width={300} />
+                  </div>
+
+                  <div className="flex flex-col">
+                    <Skeleton width={123} />
+                    <Skeleton width={46} />
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="flex flex-col items-start gap-3">
+                <h3 className="font-semibold text-sm text-gray-600 border-b border-gray-100 pb-2 w-full">
+                  Material Values
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-1 w-full">
+                  <div className="flex flex-row items-center justify-between py-2.5 border-b border-gray-50 last:border-0 md:odd:border-r md:odd:pr-4 md:even:pl-4">
+                    <Skeleton width={130} />
+                    <div className="flex flex-col items-end">
+                      <Skeleton width={46} />
+                      <Skeleton width={46} />
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </>
+          ) : isError ? (
+            <div className="flex items-center justify-center h-full">
+              <Error handleRefetchCount={handleRefetchCount} />
             </div>
           ) : (
             <>
@@ -171,12 +218,7 @@ export default function ProgramDetails() {
                     name="Allotted Budget"
                     value={`₱ ${data?.program?.allotedBudget.toLocaleString()}`}
                   />
-                  {!data?.program?.isCashMode && (
-                    <LabelValue
-                      name="Max Points"
-                      value={`${data?.program?.maxPoints.toLocaleString()} pts`}
-                    />
-                  )}
+
                   <LabelValue
                     name="Redemption Mode"
                     value={data?.program?.isCashMode ? "Cash" : "Point"}
@@ -211,9 +253,13 @@ export default function ProgramDetails() {
                       />
                       <div className="flex flex-col items-end">
                         <p className="text-sm font-semibold text-gray-700">
-                           {data?.program?.isCashMode ? `₱${m?.cashValue}` : `${m?.pointValue} pts`}
+                          {data?.program?.isCashMode
+                            ? `₱${m?.cashValue}`
+                            : `${m?.pointValue} pts`}
                         </p>
-                        <p className="text-xs text-gray-400">per {m?.material?.defaultUnit?.toLowerCase()}</p>
+                        <p className="text-xs text-gray-400">
+                          per {m?.material?.defaultUnit?.toLowerCase()}
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -259,7 +305,7 @@ export default function ProgramDetails() {
                     </tr>
                   )}
                   {isError && (
-                    <tr className="max-w-md">
+                    <tr className="max-w-md ">
                       <td className="text-center" colSpan={9}>
                         <Error handleRefetchCount={handleRefetchCount} />
                       </td>
@@ -279,12 +325,12 @@ export default function ProgramDetails() {
                   ) : (
                     transactions?.map((t) => (
                       <tr
-                        key={t.id}
+                        key={t?.id}
                         className="text-center hover:bg-[#f8f8f8] transition-all"
                       >
                         {TABLE_COLUMNS.map((col) => (
                           <td key={col.header} className="p-3">
-                            {col.render(t)}
+                            {col.render(t, data?.program?.isCashMode, router)}
                           </td>
                         ))}
                       </tr>
@@ -296,8 +342,15 @@ export default function ProgramDetails() {
 
             {isLoading ? (
               <SkeletonCard rowsCount={2} />
+            ) : isError ? (
+              <div className=" flex items-center justify-center h-full md:hidden">
+                <Error handleRefetchCount={handleRefetchCount} />
+              </div>
             ) : (
-              <TransactionCard data={{ transactions }} />
+              <TransactionCard
+                data={{ transactions }}
+                program={data?.program}
+              />
             )}
           </section>
         </div>

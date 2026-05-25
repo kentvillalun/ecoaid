@@ -16,14 +16,6 @@ const schema = yup.object().shape({
     .number("Please input a number only")
     .nullable()
     .required("Budget is required"),
-  maxPoints: yup
-    .number("Please input a number only")
-    .nullable()
-    .when("isCashMode", {
-      is: (val) => val === true || val === "true",
-      then: (schema) => schema.optional(),
-      otherwise: (schema) => schema.required("Maximum points is required"),
-    }),
   materials: yup
     .object()
     .test(
@@ -89,7 +81,6 @@ export const AddProgramModal = ({
     defaultValues: {
       name: program?.name ?? "",
       allotedBudget: program?.allotedBudget ?? null,
-      maxPoints: program?.maxPoints ?? null,
       materials: {} ?? "",
       description: program?.description ?? "",
       isCashMode: program?.isCashMode ?? false,
@@ -126,7 +117,6 @@ export const AddProgramModal = ({
       body: {
         name: formData.name,
         allotedBudget: formData.allotedBudget,
-        maxPoints: formData.maxPoints,
         description: formData.description,
         isCashMode:
           formData.isCashMode === true || formData.isCashMode === "true",
@@ -155,7 +145,6 @@ export const AddProgramModal = ({
       name: program.name,
       description: program.description,
       allotedBudget: program.allotedBudget,
-      maxPoints: program.maxPoints,
     });
   }, [program]);
 
@@ -279,7 +268,7 @@ export const AddProgramModal = ({
         </div>
 
         <div
-          className={`grid gap-3 ${isCashMode === true || isCashMode === "true" ? "grid-cols-1" : "grid-cols-2"}`}
+          className={`grid gap-3 grid-cols-1`}
         >
           <div className="flex flex-col gap-1 ">
             <label className="text-gray-700 font-medium">Allotted budget</label>
@@ -295,22 +284,7 @@ export const AddProgramModal = ({
               </p>
             )}
           </div>
-          <div
-            className={` flex-col gap-1 ${isCashMode === "true" || isCashMode === true ? "hidden" : "flex"}`}
-          >
-            <label className="text-gray-700 font-medium">Maximum points</label>
-            <input
-              type="number"
-              className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-[#74C857] transition-colors min-h-11  max-h-11"
-              placeholder="Input max points here"
-              {...register("maxPoints")}
-            />
-            {errors.maxPoints && (
-              <p className="text-[14px] text-red-500 text-start">
-                {errors.maxPoints?.message}
-              </p>
-            )}
-          </div>
+          
         </div>
 
         <div className="flex flex-col gap-1">
