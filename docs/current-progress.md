@@ -122,6 +122,21 @@
 - **`RecentTransactionCard` component** — `frontend/src/components/dashboard/RecentTransactionCard.jsx`; mobile card equivalent of `RecentTransactionTable`; tappable, navigates to `/collection-requests/:id`
 - **Dashboard page wired with real data** — `useFetch` drives both stats (`GET /api/dashboard/`) and recent transactions (`GET /api/dashboard/recent-transactions`); skeleton loading and `Error` states on both; "Pending Collection Requests", "Total Intake Transactions", and "Unverified Residents" cards show live DB data; "Total Recyclables Collected", "Total Program Expenses", and "Current Fund Balance" remain hardcoded pending MRF and Program Funds modules
 
+- **Schema overhaul** — `MaterialType` enum replaced by a `Material` DB model; `Category` model added for organizing materials by type; `Unit` enum (`KG`/`GRAMS`/`LBS`/`PIECE`) replaces `WeightUnit`; all FK references updated in `PickupRequests` (`materialId`, `estimatedValue`, `estimatedUnit`, `isAssorted`), `CollectionItem` (`materialId`, `actualValue`, `actualUnit`), and `ProgramMaterial` (`materialId`); migrations applied
+- **`Barangay` model extended** — `municipality`, `province`, `zipCode`, `logoUrl` fields added; `redemptionMode RedemptionMode` enum (`POINTS`/`CASH`/`BOTH`) added; feature flags: `hasCollectionRequests`, `hasRedemptionManagement`, `hasRewardInventory`, `hasLeaderboard`
+- **`Program` model updated** — `barangayId` FK added (programs scoped per barangay); `isCashMode Boolean @default(false)` added; `maxPoints` field removed
+- **`ProgramMaterial` model updated** — `materialType` enum replaced by `materialId` FK; both `pointValue Float?` and `cashValue Float?` present to support dual reward modes
+- **`RedemptionTransactionItem` model added** — stores line items per transaction (`transactionId`, `programMaterialId`, `amount`, `currentValue`); `RedemptionTransaction` now uses this instead of a single `programMaterialId`/`quantity`/`currentPointValue` row
+- **Material endpoints** — `backend/src/controllers/material.controller.js` and `backend/src/routes/material.route.js`; `GET /materials/` (resident), `GET /materials/barangay` (barangay staff), `GET /materials/categories` (resident)
+- **Pickup request module overhauled** — `InProgressActions`, `RequestCard`, `RequestTable`, and `MateriaPill` updated for `Material` DB records; capture page material selector fetches real materials from `GET /materials/`; assorted checkbox clears material input
+- **`DesktopGuard` component** — `frontend/src/components/ui/DesktopGuard.jsx`; blocks resident pages on desktop viewports
+- **Onboarding page overhauled** — onboarding flow content and structure restructured
+- **Redemption module restructured** — route moved from `/redemption-programs` to `/redemption`; sidebar and proxy updated; programs at `/redemption/programs/[id]`; transactions at `/redemption/transactions/[id]`
+- **`GET /redemption/transactions/:id` backend endpoint** — `getTransaction` controller; returns full transaction with nested `redemptionTransactionItem[]`; registered in `redemption.route.js`
+- **Transaction detail page** — `/redemption/transactions/[id]` built and wired; shows beneficiary, collector, program name, educational level, and per-item breakdown with amounts and computed values in ₱ or pts depending on program mode
+- **Redemption cash mode support** — `AddProgramModal` has `isCashMode` toggle; `RecordTransactionModal` handles multiple line items and sends `items[]` to backend; `TransactionCard`/`TransactionTable` display ₱ or pts totals based on program mode
+- **Resident side fixes** — home, community, profile, and request pages fixed for new material data shape; dashboard components updated; camera button fixed on capture page; responsivity fixes across all auth and resident pages
+
 ---
 
 ## In Progress

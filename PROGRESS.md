@@ -130,6 +130,21 @@
 - [x] `RecentTransactionTable` component — `frontend/src/components/dashboard/RecentTransactionTable.jsx`; desktop table (date, household name, material pill, actual weight, source, "View Details" link to `/collection-requests/:id`); loading/error/empty states
 - [x] `RecentTransactionCard` component — `frontend/src/components/dashboard/RecentTransactionCard.jsx`; mobile card version of recent transactions; tappable, navigates to `/collection-requests/:id`
 - [x] Dashboard page wired with real data — `useFetch` drives both stats (`GET /api/dashboard/`) and recent transactions (`GET /api/dashboard/recent-transactions`); skeleton loading and `Error` states; "Pending Collection Requests", "Total Intake Transactions", and "Unverified Residents" cards show live DB data; "Total Recyclables Collected", "Total Program Expenses", and "Current Fund Balance" remain hardcoded pending MRF and Program Funds modules
+- [x] **Schema overhaul** — `MaterialType` enum fully replaced by a `Material` DB model; `Category` model added; `Unit` enum (`KG`/`GRAMS`/`LBS`/`PIECE`) replaces `WeightUnit`; all FK references updated across `PickupRequests` (`materialId`, `estimatedValue`, `estimatedUnit`, `isAssorted`), `CollectionItem` (`materialId`, `actualValue`, `actualUnit`), and `ProgramMaterial` (`materialId`); migrations applied
+- [x] **`Barangay` model extended** — `municipality`, `province`, `zipCode`, `logoUrl` fields added; `redemptionMode RedemptionMode` enum (`POINTS`/`CASH`/`BOTH`) added; feature flags added: `hasCollectionRequests`, `hasRedemptionManagement`, `hasRewardInventory`, `hasLeaderboard`
+- [x] **`Program` model updated** — `barangayId` added (programs now scoped per barangay); `isCashMode Boolean @default(false)` added to support cash-equivalent reward programs; `maxPoints` field removed
+- [x] **`ProgramMaterial` model updated** — `materialType` enum replaced by `materialId` FK to `Material`; both `pointValue Float?` and `cashValue Float?` present to support dual reward modes
+- [x] **`RedemptionTransaction` restructured** — now uses `RedemptionTransactionItem` line-item model (`transactionId`, `programMaterialId`, `amount`, `currentValue`) instead of a single row per transaction; `quantity` and `currentPointValue` fields removed from the parent record
+- [x] **Material endpoints** — `backend/src/controllers/material.controller.js` + `backend/src/routes/material.route.js`; `GET /materials/` (resident, returns materials for their barangay), `GET /materials/barangay` (barangay staff), `GET /materials/categories` (resident, returns categories)
+- [x] **Pickup request module overhauled** — `InProgressActions`, `RequestCard`, `RequestTable`, and `MateriaPill` updated to work with `Material` DB records (name, category, unit) instead of the old `MaterialType` enum; capture page material selection now fetches real materials from `GET /materials/`; "mixed" (assorted) checkbox clears the material selection input
+- [x] **`DesktopGuard` component** — `frontend/src/components/ui/DesktopGuard.jsx`; blocks desktop-sized viewports on resident-side pages with a mobile-only message; used in resident layout
+- [x] **Onboarding page overhauled** — onboarding flow content restructured; steps rewritten for clarity
+- [x] **Redemption module restructured** — route moved from `/redemption-programs` to `/redemption`; barangay sidebar and proxy matcher updated; sub-routes: programs list at `/redemption`, program detail at `/redemption/programs/[id]`, transaction detail at `/redemption/transactions/[id]`
+- [x] **`GET /redemption/transactions/:id` backend endpoint** — `getTransaction` controller; returns full transaction with nested `redemptionTransactionItem[]` (each with `programMaterial`, `material`, `cashValue`/`pointValue`); registered in `redemption.route.js`
+- [x] **Transaction detail page `/redemption/transactions/[id]`** — fetches from `GET /redemption/transactions/:id`; shows Transaction Information card (beneficiary, collector, program name, educational level) and Redemption Items card (per-item material name, category pill, amount, computed value); total row at bottom; displays `₱` for cash-mode programs and `pts` for points-mode; skeleton loading and error states
+- [x] **Redemption cash mode** — `AddProgramModal` has an `isCashMode` toggle; `RecordTransactionModal` shows `cashValue` inputs when mode is cash; `TransactionCard` and `TransactionTable` display totals in ₱ or pts depending on program mode; program detail page respects mode for column labels and totals
+- [x] **`RecordTransactionModal` overhauled** — now supports multiple line items per transaction to match `RedemptionTransactionItem` schema; add/remove row UI; each row selects a material and enters an amount; sends `items[]` array to backend
+- [x] **Resident side UI fixes** — home, community, profile, and request pages fixed for new Material data shape; dashboard `RecentTransactionCard` and `RecentTransactionTable` updated for schema changes; camera open button fixed on capture page; responsivity fixes applied across all resident pages
 - [ ] Manual Collection Intake module (Sunday EcoAid manual entry with resident search)
 - [ ] Collection schedule module
 - [ ] Dashboard remaining hardcoded stats (Total Recyclables Collected, Total Program Expenses, Current Fund Balance) — pending MRF and Program Funds modules
@@ -139,36 +154,37 @@ App is deployed. Backend runs on Railway (`ecoprofit-production.up.railway.app`)
 Frontend proxies `/api/*` to the backend via `next.config.mjs` rewrites, switching
 between localhost and Railway based on `NODE_ENV`. CORS origin is now env-var
 controlled (`CORS_ORIGIN`). Cookies use `sameSite: "none"` so they work across
-origins in production. Pickup requests are fully end-to-end in both dev and prod.
+origins in production.
 
-Auth is now username-based for both residents and barangay staff. The `authenticate`
+Auth is username-based for both residents and barangay staff. The `authenticate`
 middleware is split into `authenticateResident` and `authenticateBarangay` to prevent
 cross-role token acceptance.
 
+**Schema overhaul is complete.** The `MaterialType` enum has been replaced by a proper
+`Material` DB model with a `Category` model. `WeightUnit` is replaced by a `Unit` enum.
+All pickup request, collection item, and redemption module fields now reference `materialId`
+(FK to `Material`) instead of the old enum. The `Barangay` model gained `redemptionMode`,
+feature flags, and additional address fields. `Program` is now scoped per barangay and
+supports a `isCashMode` flag. `RedemptionTransaction` now stores line items via the
+`RedemptionTransactionItem` model.
+
 The full pickup request lifecycle is end-to-end on the barangay side (list, approve,
-decline, schedule, collect, detail page with ASSORTED breakdown). The Redemption
-Management module is fully wired end-to-end — programs and transactions are fetched from
-real API data, `AddProgramModal` handles both create and edit (with deactivate/reactivate
-toggle), `RecordTransactionModal` supports a `preselectedProgram` prop, and the
-`/redemption-programs/[id]` detail page is fully built. The app ships a PWA-ready
-web manifest and the login page has a splash screen with session-aware redirect logic.
+decline, schedule, collect, detail page). The capture page fetches real materials from
+`GET /materials/` and uses a DB-driven material selector. A `DesktopGuard` component
+blocks resident pages on non-mobile viewports.
 
-The resident side now has working data-driven pages: the home page shows the resident's
-name, barangay, and recent pickup requests from real API calls; the community page shows
-EcoAid schedule, accepted materials, and live barangay contact info (name, registration
-status, city, contact number). The `Barangay` model gained a `contactNumber` field.
-The resident requests list page (`/requests`) and request detail page (`/requests/[id]`)
-are fully wired end-to-end — a new `GET /pickup-requests/my-requests/:id` endpoint scoped
-to the authenticated resident returns full request detail including `collectionItems`.
-Home page request cards navigate to the detail page.
+The Redemption Management module is fully wired and restructured. The route moved from
+`/redemption-programs` to `/redemption`. Programs support both points and cash reward
+modes. `RecordTransactionModal` handles multiple line items. The transaction detail page
+at `/redemption/transactions/[id]` is built and wired. The program detail page is at
+`/redemption/programs/[id]`.
 
-The barangay dashboard is now partially wired to real data. `GET /dashboard/` returns
-`requestedCount`, `totalRecords`, and `unverified` counts from the DB. `GET /dashboard/recent-transactions`
-returns the last 3 `CollectionItem` records with household name and material info.
-The `User` model gained an `isVerified` field. Three stat cards ("Total Recyclables
-Collected", "Total Program Expenses", "Current Fund Balance") remain hardcoded pending
-the MRF and Program Funds modules. Next focus: Manual Collection Intake module (Sunday
-EcoAid manual entry with resident search).
+The resident side has working data-driven pages: home, community, requests list, request
+detail, and profile pages all fetch real API data. The barangay dashboard is partially
+wired — three stat cards (Total Recyclables Collected, Total Program Expenses, Current Fund
+Balance) remain hardcoded pending the MRF and Program Funds modules.
+
+Next focus: Manual Collection Intake module (Sunday EcoAid manual entry with resident search).
 
 ## Key Decisions Made
 - httpOnly cookies over localStorage → XSS protection
@@ -187,19 +203,21 @@ EcoAid manual entry with resident search).
 
 ## Key Files
 - backend/src/controllers/auth.controller.js
-- backend/src/controllers/pickup-request.controller.js — pickup request creation
-- backend/src/controllers/redemption.controller.js — createProgram, updateProgram (partial update + upsert for ProgramMaterial), getPrograms, getProgram, createTransaction, getTransactions
+- backend/src/controllers/pickup-request.controller.js — pickup request creation and all collection-request lifecycle transitions
+- backend/src/controllers/redemption.controller.js — createProgram, updateProgram, getPrograms, getProgram, createTransaction, getTransaction, getTransactions
+- backend/src/controllers/material.controller.js — getMaterials, getCategories
 - backend/src/middlewares/authMiddleware.js — authenticateResident, authenticateBarangay, requireRoles
 - backend/src/routes/auth.route.js
 - backend/src/routes/pickup-request.route.js — POST /pickup-requests; GET/PATCH/GET-by-id collection-requests routes; COLLECTED transition creates CollectionItem records
-- backend/src/routes/redemption.route.js — redemption program and transaction endpoints
+- backend/src/routes/redemption.route.js — program and transaction endpoints; GET /transactions/:id added
+- backend/src/routes/material.route.js — GET /materials/, GET /materials/barangay, GET /materials/categories
 - backend/src/routes/dashboard.route.js
 - frontend/src/lib/roles.js — BARANGAY_ROLES array
 - backend/src/utils/generateToken.js
 - backend/prisma/schema.prisma
 - backend/package.json — postinstall: prisma generate (required for Railway deploy)
 - frontend/next.config.mjs — /api/* rewrites; env-based backend URL; allowedDevOrigins
-- frontend/src/proxy.js — Next.js middleware (Layer 1 route protection) with explicit matcher
+- frontend/src/proxy.js — Next.js middleware (Layer 1 route protection) with explicit matcher; /redemption/* paths included
 - frontend/src/lib/config.js — shared API_BASE_URL constant
 - frontend/src/app/(auth)/barangay/login/page.jsx — barangay login form
 - frontend/src/app/(barangay)/dashboard/page.jsx — server component with Layer 2 auth check
@@ -211,23 +229,26 @@ EcoAid manual entry with resident search).
 - frontend/src/components/ui/Spinner.jsx — inline loading spinner
 - frontend/src/components/ui/Error.jsx — error state with handleRefetchCount callback
 - frontend/src/components/ui/Empty.jsx — empty state with title and subtext
-- frontend/src/components/redemption/modals/AddProgramModal.jsx — handles create and edit; pre-fills via reset(); deactivate/reactivate toggle
-- frontend/src/components/redemption/modals/RecordTransactionModal.jsx — dependent selects, preselectedProgram prop, inactive programs filtered
-- frontend/src/app/(barangay)/redemption-programs/[id]/page.jsx — program detail with materials breakdown and transaction history
+- frontend/src/components/ui/DesktopGuard.jsx — blocks resident pages on non-mobile viewports
+- frontend/src/components/redemption/modals/AddProgramModal.jsx — handles create and edit; isCashMode toggle; deactivate/reactivate
+- frontend/src/components/redemption/modals/RecordTransactionModal.jsx — multi-item transaction form; preselectedProgram prop; inactive programs filtered
+- frontend/src/app/(barangay)/redemption/page.jsx — redemption programs list (was /redemption-programs)
+- frontend/src/app/(barangay)/redemption/programs/[id]/page.jsx — program detail with materials breakdown and transaction history
+- frontend/src/app/(barangay)/redemption/transactions/[id]/page.jsx — transaction detail with line items breakdown
 - frontend/src/app/(barangay)/collection-requests/page.jsx — tabbed collection requests management UI
 - frontend/src/app/(barangay)/collection-requests/[id]/page.jsx — full request detail page with timeline and action cards
 - frontend/src/lib/formatDate.js — ISO date → readable locale string
 - frontend/src/components/requests/RequestDetailHeader.jsx — header card with back button and status pill
 - frontend/src/components/ui/LabelValue.jsx — label/value pair display component
-- frontend/src/app/(resident)/capture/page.jsx — Cloudinary upload + pickup request submission
+- frontend/src/app/(resident)/capture/page.jsx — Cloudinary upload + pickup request submission; fetches materials from DB
 - frontend/src/app/(resident)/profile/page.jsx — resident logout
 - frontend/src/app/(resident)/home/page.jsx — resident home; fetches profile + recent requests from real API
 - frontend/src/app/(resident)/community/page.jsx — community page; fetches and displays live barangay info
 - frontend/src/components/navigation/Sidebar.jsx — sidebar with logout handler and leaderboard link
 - frontend/src/components/ui/Badge.jsx — reusable pill badge (label, color, className)
 - frontend/src/components/ui/SitioPill.jsx — sitio display pill component
-- backend/src/controllers/resident.controller.js — getResidentProfile, getBarangayInfo
-- backend/src/routes/resident.route.js — GET /resident/me, GET /resident/barangay-info
+- backend/src/controllers/resident.controller.js — getResidentProfile, updateResidentProfile, getBarangayInfo
+- backend/src/routes/resident.route.js — GET /resident/me, PATCH /resident/me, GET /resident/barangay-info
 - frontend/src/app/(resident)/requests/page.jsx — resident requests list with Ongoing/History tabs, live data, error/empty/skeleton states
 - frontend/src/app/(resident)/requests/[id]/page.jsx — resident request detail with photo, timeline, and collection items breakdown
 
@@ -235,9 +256,7 @@ EcoAid manual entry with resident search).
 - BlacklistedToken cleanup job needed (periodic deletion of expired tokens using the expiresAt field)
 - Dashboard partially wired — "Pending Collection Requests", "Total Intake Transactions", and "Unverified Residents" cards show real DB data; "Total Recyclables Collected", "Total Program Expenses", and "Current Fund Balance" are still hardcoded (pending MRF and Program Funds modules)
 - Resident Layer 2 auth check (server component calling GET /auth/me) still pending
-- POST /pickup-requests response has a typo: "submittion" → "submission"
-- `InProgressActions` ASSORTED modal: minimum 2 rows enforced (removeRow disabled when `items.length === 2`) but rows start empty — no validation before submit (empty materialType/weight are silently sent to backend)
-- Collection requests page returning 500 error — root cause not yet investigated
+- `InProgressActions` multi-row form: no client-side validation before submit — empty material/amount rows are silently sent to backend
 
 ## Mentor Instructions
 Act as a senior dev mentor — guide me, don't just give me answers.

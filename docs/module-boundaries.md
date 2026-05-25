@@ -16,7 +16,7 @@ Read-only view of recyclable materials derived from completed intake transaction
 ---
 
 ## Redemption Management
-SK creates and manages programs (e.g. basura to school supplies). Each program has a name, allocated budget, max points, and point values per material category stored in a junction table (ProgramMaterial). Redemption transactions are recorded here and frozen to the exact ProgramMaterial row. Designed to support future programs.
+SK creates and manages programs (e.g. basura to school supplies). Each program has a name, allocated budget, description, and an `isCashMode` flag for cash-equivalent vs. points reward mode. Per-material reward values (`pointValue` / `cashValue`) are stored in the `ProgramMaterial` junction table. Redemption transactions record beneficiary, collector, and educational level; line items are stored in `RedemptionTransactionItem` with a frozen `currentValue` snapshot per material. Programs are scoped per barangay.
 
 ---
 

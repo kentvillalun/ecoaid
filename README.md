@@ -134,18 +134,27 @@ Protected by `authenticateResident` middleware.
 | GET    | `/pickup-requests/collection-requests/:id` | CAPTAIN, SECRETARY, COLLECTOR    | Get single request detail             |
 | PATCH  | `/pickup-requests/collection-requests/:id` | CAPTAIN, SECRETARY, COLLECTOR    | Update request status                 |
 
+### Materials (`/materials`)
+
+| Method | Path                    | Required role                        | Description                              |
+|--------|-------------------------|--------------------------------------|------------------------------------------|
+| GET    | `/materials/`           | RESIDENT                             | List materials for resident's barangay   |
+| GET    | `/materials/barangay`   | CAPTAIN, SECRETARY, SK               | List materials for barangay staff        |
+| GET    | `/materials/categories` | RESIDENT                             | List material categories                 |
+
 ### Redemption (`/redemption`)
 
 Protected by `authenticateBarangay + requireRoles(["CAPTAIN","SECRETARY","SK"])`.
 
-| Method | Path                          | Description                                       |
-|--------|-------------------------------|---------------------------------------------------|
-| POST   | `/redemption/programs`        | Create redemption program                         |
-| GET    | `/redemption/programs`        | List all programs                                 |
-| GET    | `/redemption/programs/:id`    | Get program detail with materials and transactions |
-| PATCH  | `/redemption/programs/:id`    | Update program and upsert material point values   |
-| POST   | `/redemption/transactions`    | Record a redemption transaction                   |
-| GET    | `/redemption/transactions`    | List all redemption transactions                  |
+| Method | Path                          | Description                                            |
+|--------|-------------------------------|--------------------------------------------------------|
+| POST   | `/redemption/programs`        | Create redemption program                              |
+| GET    | `/redemption/programs`        | List all programs                                      |
+| GET    | `/redemption/programs/:id`    | Get program detail with materials and transactions     |
+| PATCH  | `/redemption/programs/:id`    | Update program and upsert material reward values       |
+| POST   | `/redemption/transactions`    | Record a redemption transaction (supports line items)  |
+| GET    | `/redemption/transactions`    | List all redemption transactions                       |
+| GET    | `/redemption/transactions/:id`| Get transaction detail with full line-item breakdown   |
 
 ### Dashboard (`/dashboard`)
 
@@ -160,17 +169,20 @@ Protected by `authenticateBarangay + requireRoles(["CAPTAIN"])`.
 
 ## Database Models
 
-- `Barangay` — Registered barangay organizations; fields include `name`, `city`, `code`, `isRegistered`, `contactNumber`
+- `Barangay` — Registered barangay organizations; fields include `name`, `municipality`, `province`, `zipCode`, `logoUrl`, `isRegistered`, `contactNumber`, `redemptionMode` (`POINTS`/`CASH`/`BOTH`), and feature flags (`hasCollectionRequests`, `hasRedemptionManagement`, `hasRewardInventory`, `hasLeaderboard`)
 - `Sitio` — Sub-divisions within a barangay (unique per barangay)
 - `User` — Residents and barangay staff; roles: `RESIDENT`, `CAPTAIN`, `SECRETARY`, `TREASURER`, `SK`, `COLLECTOR`, `SUPER_ADMIN`; `username` field for login; `isVerified` flag for resident account verification
 - `OtpVerification` — SMS OTP codes with expiration
 - `PasswordResetToken` — Tokens for forgot-password flow
 - `BlackListedToken` — Revoked JWTs; checked on every authenticated request
-- `PickupRequests` — Resident pickup requests with `MaterialType`, `WeightUnit`, `Status` enums
-- `CollectionItem` — Per-material breakdown recorded at collection time (child of `PickupRequests`)
-- `Program` — Redemption program with allotted budget, max points, description, and active flag
-- `ProgramMaterial` — Per-material point value scoped to a program (junction table)
-- `RedemptionTransaction` — Records each redemption event with a frozen `currentPointValue` snapshot
+- `Category` — Material categories (e.g. Plastic, Metal) for grouping `Material` records
+- `Material` — Individual recyclable material types scoped per barangay; replaces the old `MaterialType` enum; has `name`, `categoryId`, `barangayId`, `defaultUnit`, `isActive`, `acceptNonSellable`
+- `PickupRequests` — Resident pickup requests; `materialId` FK to `Material`; `estimatedValue`/`estimatedUnit` (`Unit` enum: KG/GRAMS/LBS/PIECE); `isAssorted` flag; `Status` enum (REQUESTED/APPROVED/IN_PROGRESS/COLLECTED/REJECTED)
+- `CollectionItem` — Per-material breakdown recorded at collection time; `materialId` FK; `actualValue`/`actualUnit` (child of `PickupRequests`)
+- `Program` — Redemption program scoped to a barangay; fields: `allotedBudget`, `description`, `isActive`, `isCashMode`
+- `ProgramMaterial` — Per-material reward value scoped to a program; both `pointValue` and `cashValue` to support dual reward modes; `materialId` FK to `Material`
+- `RedemptionTransaction` — Header record for a redemption event (beneficiary, collector, educational level, program)
+- `RedemptionTransactionItem` — Line-item detail per transaction; `programMaterialId` FK, `amount`, `currentValue` snapshot
 
 ---
 
@@ -180,18 +192,22 @@ Protected by `authenticateBarangay + requireRoles(["CAPTAIN"])`.
 |------------------|---------------------------------------------------------------------------------------------|
 | `(intro)`        | Onboarding flow                                                                             |
 | `(auth)`         | Login (with splash screen), signup, OTP verification, forgot password, reset password, barangay login |
-| `(resident)`     | Home (live data: profile + recent requests, cards navigate to detail), community (live barangay info), capture, requests list (Ongoing/History tabs, live data), request detail (photo, timeline, collection breakdown), profile (live name + barangay, logout), personal-information (edit mode, PATCH /resident/me, discard modal), notification settings (UI shell), settings (UI shell), help & support (FAQ accordion), announcements |
-| `(barangay)`     | Dashboard, collection requests (list + detail), redemption programs (list + detail)         |
+| `(resident)`     | Home (live data: profile + recent requests, cards navigate to detail), community (live barangay info), capture (DB-driven material selector, Cloudinary upload), requests list (Ongoing/History tabs, live data), request detail (photo, timeline, collection breakdown), profile (live name + barangay, logout), personal-information (edit mode, PATCH /resident/me, discard modal), notification settings (UI shell), settings (UI shell), help & support (FAQ accordion), announcements |
+| `(barangay)`     | Dashboard (partial live data), collection requests (list + detail), redemption programs list (`/redemption`), program detail (`/redemption/programs/[id]`), transaction detail (`/redemption/transactions/[id]`) |
 
 ---
 
 ## Current Status
 
-Both resident and barangay auth flows are complete and stable (username-based login, OTP, forgot password, split middleware). The full pickup request lifecycle is wired end-to-end on the barangay side (REQUESTED → APPROVED → IN_PROGRESS → COLLECTED or REJECTED, including batch collection and ASSORTED material breakdown). The Redemption Management module is fully wired end-to-end (programs with create/edit/deactivate via `PATCH /redemption/programs/:id`, transactions, program detail page). The resident home page and community page fetch live data from the backend (profile, recent requests, barangay contact info). The resident requests list and request detail pages are fully wired — a new `GET /pickup-requests/my-requests/:id` endpoint (ownership-scoped) returns full request detail including `collectionItems`; home page request cards navigate directly to the detail page. The app ships as a PWA with web manifests and a splash screen on login.
+Both resident and barangay auth flows are complete and stable (username-based login, OTP, forgot password, split `authenticateResident`/`authenticateBarangay` middleware). The app ships as a PWA with web manifests and a splash screen on login.
 
-The resident profile section is complete: the `/profile` page shows live name and barangay data; `/profile/personal-information` has a full edit mode wired to `PATCH /resident/me` with a discard-changes confirmation modal; profile sub-pages for notification settings, settings, and help & support exist as UI shells.
+**Schema overhaul is complete.** The `MaterialType` enum is fully replaced by a `Material` DB model with a `Category` model. `WeightUnit` is replaced by a `Unit` enum. All pickup request, collection item, and redemption module fields now use `materialId` (FK to `Material`). The `Barangay` model gained `redemptionMode`, feature flags, and additional address fields. `RedemptionTransaction` now uses a `RedemptionTransactionItem` line-item model.
 
-The barangay dashboard is now partially wired. `GET /dashboard/` returns real DB counts (pending requests, collected pickups, unverified residents). `GET /dashboard/recent-transactions` returns the last 3 `CollectionItem` records. Three stat cards remain hardcoded (Total Recyclables Collected, Total Program Expenses, Current Fund Balance) pending the MRF and Program Funds modules. The `User` model gained an `isVerified` field.
+The full pickup request lifecycle is wired end-to-end on the barangay side (REQUESTED → APPROVED → IN_PROGRESS → COLLECTED or REJECTED, including batch collection). Material selection in the capture page and collection flow now uses real `Material` DB records fetched from `GET /materials/`.
+
+The Redemption Management module is fully wired and restructured. The route is now `/redemption` (was `/redemption-programs`). Programs support both points and cash reward modes via `isCashMode`. `RecordTransactionModal` handles multiple line items per transaction. The transaction detail page (`/redemption/transactions/[id]`) and program detail page (`/redemption/programs/[id]`) are built and wired. A `DesktopGuard` component blocks resident pages on non-mobile viewports.
+
+All resident data-driven pages are working (home, community, requests list, request detail, profile with edit mode). The barangay dashboard is partially wired — three stat cards (Total Recyclables Collected, Total Program Expenses, Current Fund Balance) remain hardcoded pending the MRF and Program Funds modules.
 
 Next focus: Manual Collection Intake module (Sunday EcoAid manual entry with resident search).
 
