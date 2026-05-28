@@ -2,6 +2,9 @@
 
 @theme {
   --color-primary: #49b02d;
+  --color-new-primary: #092517;
+  --color-text-primary: #1a1a1a;
+  --color-cta-color: #14532D;
 }
 
 .sidebar {

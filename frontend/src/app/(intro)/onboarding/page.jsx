@@ -1,16 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Inter } from "next/font/google";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { DesktopGuard } from "@/components/ui/DesktopGuard";
+import { motion } from "motion/react";
+import { Page } from "@/components/layout/Page";
+import { PageTransition } from "@/components/ui/PageTransition";
+import { haptic } from "@/lib/haptics";
 
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
+
 
 export default function OnboardingPage() {
   const [step, setStep] = useState(1);
@@ -28,174 +28,270 @@ export default function OnboardingPage() {
     <>
       <DesktopGuard />
 
-      <main
-        className={`lg:hidden min-h-svh overflow-x-hidden flex items-center justify-center bg-linear-to-b from-[#FFFFFF]  from-24% to-[#89D957] ${inter.className}`}
-      >
-        <div
-          className={`${step === 1 ? "flex" : "hidden"} flex-col items-center w-full max-w-md gap-25 p-2 justify-center`}
+      <Page className="bg-[#F8F8F8]!">
+        <PageTransition
+          key={"page"}
+          className="flex flex-col items-center justify-between min-w-full pt-6 "
         >
-          <div className="max-w-108 relative w-full aspect-square">
-            <Image
-              src="/onboarding/Ecoprofit logo.svg"
-              alt="EcoProfit Logo"
-              fill
-              priority
-            />
+          <div className="w-full flex flex-col items-center gap-3.5 min-h-18.75">
+            <div className="w-full max-w-50 max-h-9.25 aspect-3/1 relative">
+              <Image
+                className="absolute"
+                src={"/ecoaid-logo/logo-wordmark.svg"}
+                fill
+                priority
+                alt="EcoAid logo"
+              />
+            </div>
+            <div className={`${step === 3 ? "hidden" : 'flex'} items-center justify-end w-full pr-4 md:px-15`}>
+              <button className="text-new-primary">Skip</button>
+            </div>
           </div>
-          <div className="">
-            <button
-              className="bg-primary min-w-63.75 min-h-13.5 rounded-[40px] font-poppins text-white font-medium text-base"
-              onClick={() => {
-                setStep(step + 1);
-              }}
+
+          <div className="overflow-hidden w-full flex-1">
+            <motion.div
+              key={"onboarding1"}
+              className="flex flex-row h-full  w-full"
+              animate={{ x: `${-(step - 1) * 100}vw` }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
             >
-              Get Started
-            </button>
-          </div>
-        </div>
+              {/* Onboarding 1 */}
 
-        <div
-          className={`flex-col justify-between min-h-svh w-full max-w-md p-4 pt-12 pb-10 overflow-x-hidden ${step === 2 ? "flex" : "hidden"}`}
-        >
-          <div className="flex flex-col items-center w-full max-w-md p-2 justify-center ">
-            <div className="max-w-108 relative w-full aspect-square">
-              <Image src={"/onboarding/step1.svg"} alt="Step 1" fill priority />
-            </div>
-            <h3 className="text-[22px] max-w-88.75 text-center mb-6.25 font-medium">
-              Recyclables Go to Waste Without a Clear System
-            </h3>
-            <p className="text-[14px] text-center">
-              Many households want to help, but without a proper way to collect
-              and track recyclables, usable materials end up in the trash
-              instead of benefiting the community.
-            </p>
-          </div>
-          <div className="">
-            <div className="flex justify-between p-6 text-[14px]">
-              <Link
-                className="font-medium"
-                href="/login"
-                onClick={() => {
-                  localStorage.setItem("hasSeenOnboarding", "true");
-                  sessionStorage.setItem("skipSplash", "true");
-                  document.cookie = "hasSeenOnboarding=true; path=/";
-                }}
-              >
-                Skip
-              </Link>
-              <button
-                className="font-medium"
-                onClick={() => {
-                  setStep(step + 1);
-                }}
-              >
-                Next
-              </button>
-            </div>
-            <div className="flex justify-center gap-3">
-              <div className="h-2.5 w-2.5 bg-black rounded-full"></div>
-              <div className="h-2.5 w-2.5 bg-[#48484856] rounded-full"></div>
-              <div className="h-2.5 w-2.5 bg-[#48484856] rounded-full"></div>
-            </div>
-          </div>
-        </div>
+              <div className="flex flex-col items-center justify-between h-full overflow-x-hidden min-w-full">
+                <div className="flex flex-col items-center justify-center h-full w-full gap-2">
+                  <div className="max-w-90 md:max-w-110 relative aspect-square w-full mx-auto">
+                    <Image
+                      src={"/onboarding-2.0/onb1.png"}
+                      alt="A girl beign frustrated that she is sorrounded by recyclable materials."
+                      fill
+                      priority
+                      loading="eager"
+                      className="z-50"
+                    />
 
-        <div
-          className={`flex-col justify-between min-h-svh w-full max-w-md p-4 pt-12 pb-10 overflow-x-hidden ${step === 3 ? "flex" : "hidden"}`}
-        >
-          <div className="flex flex-col items-center w-full max-w-md p-2 justify-center ">
-            <div className="max-w-108 relative w-full aspect-square">
-              <Image src={"/onboarding/step2.svg"} alt="Step 2" fill priority />
-            </div>
-            <h3 className="font-medium text-[22px] max-w-86 text-center mb-6.25">
-              Your recyclables have value. Benefit from them
-            </h3>
-            <p className="text-[14px] text-center">
-              Every recyclable counts. Turn yours into value and earn rewards,
-              recognition, or incentives along the way, all recorded and tracked
-              transparently.
-            </p>
-          </div>
-          <div className="">
-            <div className="flex justify-between p-6 text-[14px]">
-              <Link
-                className="font-medium"
-                href="/login"
-                onClick={() => {
-                  localStorage.setItem("hasSeenOnboarding", "true");
-                  sessionStorage.setItem("skipSplash", "true");
-                  document.cookie = "hasSeenOnboarding=true; path=/";
-                }}
-              >
-                Skip
-              </Link>
-              <button
-                className="font-medium"
-                onClick={() => {
-                  setStep(step + 1);
-                }}
-              >
-                Next
-              </button>
-            </div>
-            <div className="flex justify-center gap-3">
-              <div className="h-2.5 w-2.5 bg-[#48484856]  rounded-full"></div>
-              <div className="h-2.5 w-2.5 bg-black rounded-full"></div>
-              <div className="h-2.5 w-2.5 bg-[#48484856] rounded-full"></div>
-            </div>
-          </div>
-        </div>
+                    <div
+                      className="w-55 h-55 md:w-70 md:h-70 bg-[#74C85740] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                      style={{
+                        borderRadius: "60% 40% 55% 45% / 50% 60% 40% 50%",
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-col items-center justify-between gap-3.5 w-full">
+                  <div className="grid grid-cols-4 mx-auto items-center justify-center gap-1 w-full max-w-30">
+                    <div className="col-span-2 h-1.25 bg-cta-color rounded-xl"></div>
+                    <div className="h-1.25 bg-[#D1D5DB] col-span-1 rounded-xl"></div>
+                    <div className="h-1.25 bg-[#D1D5DB] col-span-1 rounded-xl"></div>
+                  </div>
+                  <div className="bg-white min-h-69 w-full rounded-t-4xl p-8.25">
+                    <div className="flex flex-col items-center gap-4 md:max-w-xl md:mx-auto md:gap-8">
+                      <div className="flex flex-col items-center gap-2">
+                        <motion.div
+                          key={`headline-${step}`}
+                          initial={{ opacity: 0, y: 12 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.5, delay: 0.35 }}
+                        >
+                          <h2 className="text-xl font-semibold text-center text-text-primary">
+                            Recyclable Go to Waste Without a Clear System
+                          </h2>
+                        </motion.div>
 
-        <div
-          className={`flex-col justify-between min-h-svh w-full max-w-md p-4 pt-12 pb-10 font-poppins overflow-x-hidden ${step === 4 ? "flex" : "hidden"}`}
-        >
-          <div className="flex flex-col items-center w-full max-w-md p-2 justify-center ">
-            <div className="max-w-108 relative w-full aspect-square">
-              <Image src={"/onboarding/step3.svg"} alt="Step 3" fill priority />
-            </div>
-            <h3 className="font-poppins font-medium text-[22px] max-w-86 text-center mb-6.25">
-              How EcoProfit Works
-            </h3>
-            <p className="text-[14px] text-center">
-              Submit a pickup request through the app, wait for barangay
-              approval, have your recyclables collected and sorted, then earn
-              rewards through your barangay's redemption program.
-            </p>
-          </div>
-          <div className="">
-            <div className="flex justify-between p-6 text-[14px]">
-              <Link
-                className="font-medium"
-                href="/login"
-                onClick={() => {
-                  localStorage.setItem("hasSeenOnboarding", "true");
-                  sessionStorage.setItem("skipSplash", "true");
-                  document.cookie = "hasSeenOnboarding=true; path=/";
-                }}
-              >
-                Skip
-              </Link>
+                        <motion.div
+                          key={`body-${step}`}
+                          initial={{ opacity: 0, y: 12 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.5, delay: 0.45 }}
+                        >
+                          <p className="text-xs text-text-primary text-center">
+                            Many households want to help, but without a proper
+                            way to collect and track recyclables, usable
+                            materials end up in the trash instead of benefiting
+                            the community.
+                          </p>
+                        </motion.div>
+                      </div>
+                      <motion.div
+                        className="w-full"
+                        key={`button-${step}`}
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.55 }}
+                      >
+                        <button
+                          className="bg-cta-color w-full text-white font-medium py-5 rounded-[14px]"
+                          onClick={() => {
+                            setStep(step + 1);
+                            haptic.light();
+                          }}
+                        >
+                          Next
+                        </button>
+                      </motion.div>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-              <Link
-                className="font-medium"
-                href="/login"
-                onClick={() => {
-                  localStorage.setItem("hasSeenOnboarding", "true");
-                  sessionStorage.setItem("skipSplash", "true");
-                  document.cookie = "hasSeenOnboarding=true; path=/";
-                }}
-              >
-                Next
-              </Link>
-            </div>
-            <div className="flex justify-center gap-3">
-              <div className="h-2.5 w-2.5 bg-[#48484856] rounded-full"></div>
-              <div className="h-2.5 w-2.5 bg-[#48484856] rounded-full"></div>
-              <div className="h-2.5 w-2.5 bg-black rounded-full"></div>
-            </div>
+              {/* Onboarding 2 */}
+
+              <div className="flex flex-col items-center justify-between h-full overflow-x-hidden min-w-full">
+                <div className="flex flex-col items-center justify-center h-full w-full gap-2">
+                  <div className="max-w-90 md:max-w-110 relative aspect-square w-full mx-auto">
+                    <Image
+                      src={"/onboarding-2.0/onb2.png"}
+                      alt="A girl and boy putting trashes in a container."
+                      fill
+                      priority
+                      loading="eager"
+                      className="z-50"
+                    />
+
+                    <div
+                      className="w-90 h-55 md:w-110 md:h-70 bg-[#74C85740] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                      style={{
+                        borderRadius: "52% 48% 58% 42% / 38% 42% 52% 48%",
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-col items-center justify-between gap-3.5 w-full">
+                  <div className="grid grid-cols-4 mx-auto items-center justify-center gap-1 w-full max-w-30">
+                    <div className="h-1.25 bg-[#D1D5DB] col-span-1 rounded-xl"></div>
+                    <div className="col-span-2 h-1.25 bg-cta-color rounded-xl"></div>
+                    <div className="h-1.25 bg-[#D1D5DB] col-span-1 rounded-xl"></div>
+                  </div>
+                  <div className="bg-white min-h-69 w-full rounded-t-4xl p-8.25">
+                    {step === 2 && (
+                      <div className="flex flex-col items-center gap-4 md:max-w-xl md:mx-auto md:gap-8">
+                        <div className="flex flex-col items-center gap-2">
+                          <motion.div
+                            key={`headline-${step}`}
+                            initial={{ opacity: 0, y: 12 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.35 }}
+                          >
+                            <h2 className="text-xl font-semibold text-center text-text-primary">
+                              Your recyclables have value. Benefit from them
+                            </h2>
+                          </motion.div>
+
+                          <motion.div
+                            key={`body-${step}`}
+                            initial={{ opacity: 0, y: 12 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.45 }}
+                          >
+                            <p className="text-xs text-text-primary text-center">
+                              Every recyclable counts. Turn yours into value and
+                              earn rewards, recognition, or incentives along the
+                              way, all recorded and tracked transparently.
+                            </p>
+                          </motion.div>
+                        </div>
+                        <motion.div
+                          className="w-full"
+                          key={`button-${step}`}
+                          initial={{ opacity: 0, y: 12 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.5, delay: 0.55 }}
+                        >
+                          <button
+                            className="bg-cta-color w-full text-white font-medium py-5 rounded-[14px]"
+                            onClick={() => {
+                              setStep(step + 1);
+                              haptic.light();
+                            }}
+                          >
+                            Next
+                          </button>
+                        </motion.div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Onboarding 2 */}
+
+              <div className="flex flex-col items-center justify-between h-full overflow-x-hidden min-w-full">
+                <div className="flex flex-col items-center justify-center h-full w-full gap-2">
+                  <div className="max-w-90 md:max-w-110 relative aspect-square w-full mx-auto">
+                    <Image
+                      src={"/onboarding-2.0/onb3.png"}
+                      alt="A girl and boy putting trashes in a container."
+                      fill
+                      priority
+                      loading="eager"
+                      className="z-50"
+                    />
+
+                    <div
+                      className="w-65 h-72 md:w-80 md:h-90 bg-[#74C85740] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                      style={{
+                        borderRadius: "45% 55% 50% 50% / 55% 45% 60% 40%",
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-col items-center justify-between gap-3.5 w-full">
+                  <div className="grid grid-cols-4 mx-auto items-center justify-center gap-1 w-full max-w-30">
+                    <div className="h-1.25 bg-[#D1D5DB] col-span-1 rounded-xl"></div>
+                    <div className="h-1.25 bg-[#D1D5DB] col-span-1 rounded-xl"></div>
+                    <div className="col-span-2 h-1.25 bg-cta-color rounded-xl"></div>
+                  </div>
+                  <div className="bg-white min-h-69 w-full rounded-t-4xl p-8.25">
+                    {step === 3 && (
+                      <div className="flex flex-col items-center gap-4 md:max-w-xl md:mx-auto md:gap-8">
+                        <div className="flex flex-col items-center gap-2">
+                          <motion.div
+                            key={`headline-${step}`}
+                            initial={{ opacity: 0, y: 12 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.35 }}
+                          >
+                            <h2 className="text-xl font-semibold text-center text-text-primary">
+                              How EcoAid Works
+                            </h2>
+                          </motion.div>
+
+                          <motion.div
+                            key={`body-${step}`}
+                            initial={{ opacity: 0, y: 12 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.45 }}
+                          >
+                            <p className="text-xs text-text-primary text-center">
+                              Snap a photo of your recyclables, requests a pickup, and get collected by the barangay. Every contribution earns your points, a spot on the communiity leaderboard, and keep community clean.
+                            </p>
+                          </motion.div>
+                        </div>
+                        <motion.div
+                          className="w-full"
+                          key={`button-${step}`}
+                          initial={{ opacity: 0, y: 12 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.5, delay: 0.55 }}
+                        >
+                          <button
+                            className="bg-cta-color w-full text-white font-medium py-5 rounded-[14px]"
+                            onClick={() => {
+                              setStep(step + 1);
+                              haptic.light();
+                            }}
+                          >
+                            Get Started
+                          </button>
+                        </motion.div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           </div>
-        </div>
-      </main>
+        </PageTransition>
+      </Page>
     </>
   );
 }
