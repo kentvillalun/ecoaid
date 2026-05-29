@@ -2,8 +2,6 @@
 
 import { ResidentHeader } from "@/components/navigation/ResidentHeader";
 import { PageContent } from "@/components/layout/PageContent";
-import { Inter } from "next/font/google";
-import Image from "next/image";
 import { Page } from "@/components/layout/Page";
 import { Card } from "@/components/ui/Card";
 import { useFetch } from "@/hooks/useFetch";
@@ -11,7 +9,14 @@ import { MaterialPill } from "@/components/ui/MateriaPill";
 import { useState } from "react";
 import Skeleton from "react-loading-skeleton";
 import { Badge } from "@/components/ui/Badge";
-import { SitioPill } from "@/components/ui/SitioPill";
+import {
+  CalendarDaysIcon,
+  ArrowPathIcon,
+  BuildingLibraryIcon,
+  ChevronRightIcon,
+} from "@heroicons/react/24/outline";
+import Link from "next/link";
+import { Empty } from "@/components/ui/Empty";
 
 export default function CommunityPage() {
   const [refetchCount, setRefetchCount] = useState(0);
@@ -19,7 +24,7 @@ export default function CommunityPage() {
   const { data, isLoading, isError } = useFetch({ url, refetchCount });
 
   return (
-    <Page gradient={true}>
+    <Page className="bg-new-bg">
       <ResidentHeader
         title={
           isLoading ? (
@@ -30,33 +35,46 @@ export default function CommunityPage() {
         }
         subtitle={"EcoAid Program"}
         action={"notification"}
+        className="shadow-none! bg-new-bg!"
       />
 
       <PageContent className="md:pl-3! top-18!">
-        <div className="mt-4 flex flex-col gap-4">
+        <div className="mt-4 flex flex-col gap-3">
           {/* Collection Schedule */}
-          <Card className="flex gap-6 flex-row">
-            <div className="w-auto">
-              <Image
-                src={"/calendar.svg"}
-                width={52}
-                height={52}
-                alt="Calendar"
-              />
-            </div>
-            <div className="flex flex-col gap-1 text-sm">
-              <p className="font-medium">EcoAid Collection Schedule</p>
-              <div className="">
-                <div className="text-[#727272]">Every Sunday</div>
-                <div className="text-gray-400">9:00 AM - 12:00 PM</div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <Card className="flex gap-2 flex-col w-full items-start new-border shadow-none!">
+              <div className="flex flex-row gap-3 items-center ">
+                <div className="border p-3 border-none rounded-xl items-center bg-[#EAF7E3]">
+                  <CalendarDaysIcon className="w-6 stroke-cta-color" />
+                </div>
+                <div className="text-text-primary">
+                  <p className="font-medium text-sm">Collection Schedule</p>
+                  <p className="text-xs text-gray-600">
+                    Regular Pickup Schedule
+                  </p>
+                </div>
               </div>
-            </div>
-          </Card>
+              <div className="flex flex-col text-sm">
+                <div className="text-text-primary font-medium text-sm">
+                  Every Sunday
+                </div>
+                <div className="text-gray-600 text-xs">9:00 AM - 12:00 PM</div>
+              </div>
+            </Card>
 
-          {/* Accepted Materials */}
-          <Card className="flex gap-6 flex-row">
-            <div className="flex flex-col gap-3 text-sm">
-              <p className="font-medium">Accepted Materials</p>
+            {/* Accepted Materials */}
+            <Card className="flex gap-2 flex-col items-start new-border shadow-none!">
+              <div className="flex flex-row gap-3 items-center ">
+                <div className="border p-3 border-none rounded-xl items-center bg-[#EAF7E3]">
+                  <ArrowPathIcon className="w-6 stroke-cta-color" />
+                </div>
+                <div className="text-text-primary">
+                  <p className="font-medium text-sm">Accepted Materials</p>
+                  <p className="text-xs text-gray-600">
+                    What you can contribute
+                  </p>
+                </div>
+              </div>
               <div className="flex flex-col gap-2">
                 <div className="grid gap-1 grid-cols-4">
                   <MaterialPill type={"Plastics"} className="px-1! w-auto!" />
@@ -69,96 +87,82 @@ export default function CommunityPage() {
                   anything you think can be recycled.
                 </p>
               </div>
-            </div>
-          </Card>
+            </Card>
+          </div>
 
-          {/* How It Works */}
-          <Card className="flex flex-col items-start gap-1 text-sm! justify-start w-full">
-            <p className="font-medium">How it Works</p>
-            <div className="flex flex-col gap-2 items-start">
-              <div className="flex flex-row items-center gap-4">
-                <div className="text-primary border-2 rounded-full min-h-8 min-w-8 text-center text-lg align font-medium">
-                  1
-                </div>
-                <p className="text-gray-400 text-sm">
-                  Post your recyclables using the camera button.
-                </p>
-              </div>
-              <div className="flex flex-row items-center gap-4">
-                <div className="text-primary border-2 rounded-full min-h-8 min-w-8 text-center text-lg align font-medium">
-                  2
-                </div>
-                <p className="text-gray-400 text-sm">
-                  Barangay reviews, approves, and picks up your materials.
-                </p>
-              </div>
-              <div className="flex flex-row items-center gap-4">
-                <div className="text-primary border-2 rounded-full min-h-8 min-w-8 text-center text-lg align font-medium">
-                  3
-                </div>
-                <p className="text-gray-400 text-sm">
-                  Earn rewards through your barangay's redemption program.
-                </p>
-              </div>
+          <div className="flex flex-col gap-3 justify-center">
+            <div className="text-base flex flex-row justify-between">
+              <p className="font-semibold">Annoucements</p>
+              <Link
+                className="flex flex-row text-sm items-center"
+                href={"/announcements"}
+              >
+                <p className="font-medium text-cta-color">View more</p>{" "}
+                <ChevronRightIcon className="w-3" />{" "}
+              </Link>
             </div>
-          </Card>
+            <div className="">
+              <Empty subtext={"No announcements available as of the moment."} className="min-h-0! p-5!" />
+            </div>
+          </div>
 
           {/* Barangay Contact Info */}
-          <Card className="flex-row gap-6">
-            <div className="">
-              <Image
-                src={"/contact.svg"}
-                width={52}
-                height={52}
-                alt="Calendar"
-              />
-            </div>
-            <div className="flex flex-col gap-2 text-sm">
-              <p className="font-medium">Barangay Information</p>
-              <div className="flex flex-col">
-                <div className="flex flex-row gap-2 items-center justify-between w-full">
-                  <p className="">
+          <div className="flex flex-col gap-2">
+            <p className="text-base text-text-primary font-semibold">
+              Barangay Contact
+            </p>
+            <Card className="flex-row gap-3 new-border shadow-none">
+              <div className="">
+                <div className="bg-cta-color p-4 rounded-full">
+                  <BuildingLibraryIcon className="stroke-white w-5" />
+                </div>
+              </div>
+              <div className="flex flex-col gap-2 text-sm flex-1">
+                <div className="flex flex-col">
+                  <div className="flex flex-row gap-2 items-center justify-between w-full">
+                    <p className="font-semibold text-base">
+                      {isLoading ? (
+                        <Skeleton width={150} />
+                      ) : (
+                        `Brgy. ${data?.barangay?.name}`
+                      )}
+                    </p>
                     {isLoading ? (
-                      <Skeleton width={150} />
+                      <Skeleton width={50} />
                     ) : (
-                      `Brgy. ${data?.barangay?.name}`
+                      <Badge
+                        label={
+                          data?.barangay?.isRegistered
+                            ? "Registered"
+                            : "Unregistered"
+                        }
+                        color={
+                          data?.barangay?.isRegistered
+                            ? "bg-[#dcfce7] text-[#15803d]"
+                            : "bg-[#fee2e2] text-[#b91c1c]"
+                        }
+                        className="px-2!"
+                      />
+                    )}
+                  </div>
+                  {isLoading ? (
+                    <Skeleton width={130} />
+                  ) : (
+                    <p className="text-gray-600 text-sm">
+                      {`${data?.barangay?.municipality}, ${data?.barangay?.province}`}
+                    </p>
+                  )}
+                  <p className="text-gray-600 text-sm pb-2">
+                    {isLoading ? (
+                      <Skeleton width={80} />
+                    ) : (
+                      data?.barangay?.contactNumber
                     )}
                   </p>
-                  {isLoading ? (
-                    <Skeleton width={50} />
-                  ) : (
-                    <Badge
-                      label={
-                        data?.barangay?.isRegistered
-                          ? "Registered"
-                          : "Unregistered"
-                      }
-                      color={
-                        data?.barangay?.isRegistered
-                          ? "bg-[#dcfce7] text-[#15803d]"
-                          : "bg-[#fee2e2] text-[#b91c1c]"
-                      }
-                      className="px-2!"
-                    />
-                  )}
                 </div>
-                {isLoading ? (
-                  <Skeleton width={130} />
-                ) : (
-                  <p className="text-gray-400 text-sm">
-                    {`${data?.barangay?.municipality}, ${data?.barangay?.province}`}
-                  </p>
-                )}
-                <p className="text-gray-400 text-sm pb-2">
-                  {isLoading ? (
-                    <Skeleton width={80} />
-                  ) : (
-                    data?.barangay?.contactNumber
-                  )}
-                </p>
               </div>
-            </div>
-          </Card>
+            </Card>
+          </div>
         </div>
       </PageContent>
     </Page>

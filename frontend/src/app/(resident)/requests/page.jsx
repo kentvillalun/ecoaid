@@ -35,21 +35,21 @@ export default function RequestsPage() {
   const handleRefetchCount = () => setRefetchCount((prev) => prev + 1);
 
   return (
-    <Page gradient={true} className="overflow-hidden">
-      <ResidentHeader title={"Requests & History"} notification={true} />
+    <Page className="overflow-hidden bg-new-bg">
+      <ResidentHeader title={"Requests & History"} action={"notification"} className="shadow-none bg-new-bg!"/>
 
       <PageContent className="overflow-hidden! md:top-18 md:pl-3!" padding="py-4 px-3">
         {/* Tab section */}
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 mt-2">
           <div className="grid grid-cols-2 gap-2 ">
             <button
-              className={`rounded-2xl shadow-lg py-3 font-medium text-[#727272] ${currentTab === "ongoing" ? "text-white bg-[#89D957]" : "bg-white"} transition-all duration-250 ease-out`}
+              className={`rounded-2xl py-3 font-medium text-gray-600 new-border ${currentTab === "ongoing" ? "text-white gradient-button" : "bg-white"} transition-all duration-250 ease-out`}
               onClick={() => setCurrectTab("ongoing")}
             >
               Ongoing
             </button>
             <button
-              className={`rounded-2xl shadow-lg py-3 font-medium text-[#727272] ${currentTab === "history" ? "text-white bg-[#89D957]" : "bg-white"} `}
+              className={`rounded-2xl py-3 font-medium new-border text-gray-600 ${currentTab === "history" ? "text-white gradient-button" : "bg-white"} `}
               onClick={() => setCurrectTab("history")}
             >
               History
@@ -61,7 +61,7 @@ export default function RequestsPage() {
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, index) => (
                   <Card
-                    className={`flex flex-row items-start gap-3 transition-all hover:cursor-pointer hover:-translate-y-0.5 duration-200 ease-in-out`}
+                    className={`flex flex-row items-start gap-3 transition-all hover:cursor-pointer hover:-translate-y-0.5 duration-200 ease-in-out shadow-none! new-border`}
                     key={index}
                   >
                     {/* Top row */}
@@ -105,7 +105,7 @@ export default function RequestsPage() {
               ) : (
                 filteredRequests?.map((r) => (
                   <Card
-                    className={`flex flex-row items-start gap-3 transition-all hover:cursor-pointer hover:-translate-y-0.5 duration-200 ease-in-out`}
+                    className={`flex flex-row items-start gap-3 transition-all hover:cursor-pointer hover:-translate-y-0.5 duration-200 ease-in-out shadow-none new-border`}
                     key={r.id}
                     handleClick={() => router.push(`/requests/${r.id}`)}
                   >

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { Inter } from "next/font/google";
 import { Page } from "@/components/layout/Page";
 import { useState, useEffect, useRef } from "react";
@@ -8,12 +7,9 @@ import { useRouter } from "next/navigation";
 import { API_BASE_URL } from "@/lib/config";
 import { DesktopGuard } from "@/components/ui/DesktopGuard";
 import Image from "next/image";
+import { motion } from "motion/react";
 
 // Outside component — only created once, never recreated on rerender
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
 
 // How many seconds the user must wait before resending
 const RESEND_COOLDOWN = 60;
@@ -305,7 +301,12 @@ export default function OtpPage() {
               </div>
             </div>
 
-            <div className="flex flex-col w-full relative justify-center md:max-w-xl mx-auto gap-10 mb-20">
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="flex flex-col w-full relative justify-center md:max-w-xl mx-auto gap-10 mb-20"
+            >
               <div className="flex flex-col gap-2">
                 <h3 className="font-semibold text-2xl mt-10">
                   OTP Verification
@@ -379,7 +380,7 @@ export default function OtpPage() {
                       : "Resend code"}
                 </button>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </Page>

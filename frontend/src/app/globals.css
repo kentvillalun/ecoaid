@@ -23,3 +23,7 @@ body {
 .gradient-button {
   background-image: linear-gradient(to bottom, #1f7a42, #14532D);
 }
+
+.new-border {
+  border: 0.5px solid #e5e7eb;
+}

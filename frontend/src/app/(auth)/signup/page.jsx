@@ -1,15 +1,7 @@
 "use client";
 
 import { Inter } from "next/font/google";
-import {
-  PhoneIcon,
-  LockClosedIcon,
-  MapPinIcon,
-  BuildingOffice2Icon,
-  UserIcon,
-  AtSymbolIcon,
-  ArrowLeftIcon,
-} from "@heroicons/react/24/outline";
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { TermsModal } from "@/components/auth/TermsModal";
@@ -21,6 +13,7 @@ import { Page } from "@/components/layout/Page";
 import { API_BASE_URL } from "@/lib/config";
 import { DesktopGuard } from "@/components/ui/DesktopGuard";
 import Image from "next/image";
+import { motion } from "motion/react";
 
 // Defined outside the component so it never gets recreated on re-render
 const inter = Inter({
@@ -346,12 +339,21 @@ export default function SignupPage() {
               </div>
             </div>
 
-            <div className="flex flex-col w-full relative justify-center md:max-w-xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="flex flex-col w-full relative justify-center md:max-w-xl mx-auto"
+            >
               <div className="flex flex-row gap-4 h-full w-full items-center mt-10">
-                <button className="" onClick={() => {
-                  history.back()
-                  sessionStorage.setItem("skipSplash", "true");
-                }} type="button">
+                <button
+                  className=""
+                  onClick={() => {
+                    history.back();
+                    sessionStorage.setItem("skipSplash", "true");
+                  }}
+                  type="button"
+                >
                   <ArrowLeftIcon className="w-7 stroke-cta-color" />
                 </button>
                 <h3 className="font-semibold text-2xl">Create Account</h3>
@@ -605,7 +607,10 @@ export default function SignupPage() {
 
                 {/* Confirm password */}
                 <div className="flex flex-col gap-2">
-                  <label htmlFor="confirmPassword" className="text-base text-text-primary font-medium">
+                  <label
+                    htmlFor="confirmPassword"
+                    className="text-base text-text-primary font-medium"
+                  >
                     Confirm password
                   </label>
                   <div className="flex flex-row items-center justify-between outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors text-base">
@@ -661,27 +666,26 @@ export default function SignupPage() {
                 )}
                 {/* error will go here */}
               </div>
-            </div>
+              <div className="flex flex-col gap-6 justify-center w-full md:max-w-xl mx-auto mb-15">
+                <button
+                  className="bg-cta-color text-white font-medium py-3.75 px-24 rounded-[14px] disabled:opacity-70 text-sm gradient-button"
+                  type="submit"
+                >
+                  Create Account
+                </button>
 
-            <div className="flex flex-col gap-6 justify-center w-full md:max-w-xl mx-auto mb-15">
-              <button
-                className="bg-cta-color text-white font-medium py-3.75 px-24 rounded-[14px] disabled:opacity-70 text-sm gradient-button"
-                type="submit"
-              >
-                Create Account
-              </button>
-
-              <Link
-                className="text-sm text-center text-text-primary"
-                href="/login"
-                onClick={() => {
-                  sessionStorage.setItem("skipSplash", "true");
-                }}
-              >
-                Already have an account?{" "}
-                <span className="font-medium text-cta-color">Sign In</span>
-              </Link>
-            </div>
+                <Link
+                  className="text-sm text-center text-text-primary"
+                  href="/login"
+                  onClick={() => {
+                    sessionStorage.setItem("skipSplash", "true");
+                  }}
+                >
+                  Already have an account?{" "}
+                  <span className="font-medium text-cta-color">Sign In</span>
+                </Link>
+              </div>
+            </motion.div>
           </form>
         </div>
       </Page>

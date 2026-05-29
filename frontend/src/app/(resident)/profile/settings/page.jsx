@@ -13,19 +13,19 @@ export default function SettingsPage() {
     {
       key: "language",
       title: "Laguage",
-      icon: <LanguageIcon className="h-6 w-6 stroke-[#74C857]" />,
+      icon: <LanguageIcon className="h-6 w-6 stroke-cta-color" />,
       isToggled: false,
     },
     {
       key: "dark-mode",
       title: "Dark Mode",
-      icon: <MoonIcon className="h-6 w-6 stroke-[#74C857]" />,
+      icon: <MoonIcon className="h-6 w-6 stroke-cta-color" />,
       isToggled: false,
     },
   ];
   return (
-    <Page>
-      <ResidentHeader title={"Settings"} />
+    <Page className="bg-new-bg!">
+      <ResidentHeader title={"Settings"} className="shadow-none bg-new-bg!" />
 
       <PageContent>
         <div className="">

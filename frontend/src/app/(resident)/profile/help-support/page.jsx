@@ -3,7 +3,8 @@
 import { Page } from "@/components/layout/Page";
 import { PageContent } from "@/components/layout/PageContent";
 import { ResidentHeader } from "@/components/navigation/ResidentHeader";
-import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
+import { ChevronUpIcon } from "@heroicons/react/24/outline";
+import { AnimatePresence, motion } from "motion/react";
 import { Card } from "@/components/ui/Card";
 import { useState } from "react";
 
@@ -58,8 +59,11 @@ export default function HelpAndSupportPage() {
   };
 
   return (
-    <Page gradient={true}>
-      <ResidentHeader title={"Help & Support"} />
+    <Page className="bg-new-bg!">
+      <ResidentHeader
+        title={"Help & Support"}
+        className="bg-new-bg! shadow-none!"
+      />
 
       <PageContent>
         <div className="">
@@ -70,26 +74,38 @@ export default function HelpAndSupportPage() {
                 const isOpen = openKey === faq.key;
 
                 return (
-                  <Card className="rounded-md! flex-col gap-5" key={faq.key}>
+                  <Card
+                    className="rounded-xl! shadow-none new-border flex-col gap-5"
+                    key={faq.key}
+                  >
                     <button
                       type="button"
                       className="flex flex-row min-w-full items-center justify-between gap-5 text-left"
                       onClick={() => toggleFaq(faq.key)}
                     >
                       <p className="">{faq.question}</p>
-                      {isOpen ? (
-                        <ChevronDownIcon className="h-6 w-6 stroke-[#74C857]" />
-                      ) : (
-                        <ChevronUpIcon className="h-6 w-6 stroke-[#74C857]" />
-                      )}
+
+                      <div
+                        className={`transform transition-transform duration-400 ease-in-out ${isOpen ? "" : "rotate-180"}`}
+                      >
+                        <ChevronUpIcon className="h-6 w-6 stroke-cta-color" />
+                      </div>
                     </button>
-                    {isOpen && (
-                      <p className="italic font-light p-2 ">{faq.answer}</p>
-                    )}
+                    <AnimatePresence>
+                      {isOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                          transition={{ duration: 0.3, ease: "easeOut" }}
+                        >
+                          <p className="italic font-light p-2 ">{faq.answer}</p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </Card>
                 );
               })}
-
             </div>
           </div>
         </div>

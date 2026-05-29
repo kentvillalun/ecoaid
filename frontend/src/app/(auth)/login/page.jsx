@@ -1,7 +1,6 @@
 "use client";
 
 import { Inter } from "next/font/google";
-import { LockClosedIcon, UserIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -12,6 +11,7 @@ import { Page } from "@/components/layout/Page";
 import { API_BASE_URL } from "@/lib/config";
 import Image from "next/image";
 import { DesktopGuard } from "@/components/ui/DesktopGuard";
+import { motion } from "motion/react";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -183,12 +183,20 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              <div className="flex flex-col w-full relative justify-center md:max-w-xl mx-auto">
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="flex flex-col w-full relative justify-center md:max-w-xl mx-auto"
+              >
                 <h3 className="font-semibold text-2xl mt-10">Sign In</h3>
 
                 <div className="flex flex-col gap-6 text-[#717680] my-10">
                   <div className="flex flex-col gap-2">
-                    <label htmlFor="" className="text-text-primary text-base font-medium">
+                    <label
+                      htmlFor=""
+                      className="text-text-primary text-base font-medium"
+                    >
                       Username
                     </label>
                     <div className="flex flex-col gap-2">
@@ -208,7 +216,10 @@ export default function LoginPage() {
                   </div>
 
                   <div className="flex flex-col gap-2">
-                    <label htmlFor="" className="text-base text-text-primary font-medium">
+                    <label
+                      htmlFor=""
+                      className="text-base text-text-primary font-medium"
+                    >
                       Password
                     </label>
                     <div className="flex flex-row gap-3.25 justify-between outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors text-base">
@@ -269,7 +280,7 @@ export default function LoginPage() {
                     <span className="font-medium text-cta-color">Sign Up</span>
                   </Link>
                 </div>
-              </div>
+              </motion.div>
             </form>
           </div>
         </Page>

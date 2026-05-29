@@ -47,12 +47,18 @@ export default function RequestDetailPage() {
     },
   ].filter((e) => e.show);
 
-  const handleRefetchCount = () => setRefetchCount((prev) => prev + 1)
+  const handleRefetchCount = () => setRefetchCount((prev) => prev + 1);
 
   return (
-    <Page gradient={false} className="bg-[#F3F3FF]! overflow-hidden">
-      <ResidentHeader title={"Request Details"} />
-      <PageContent withBottomNav={false} className="gap-0 px-0 py-0 md:pl-0! md:top-18! ">
+    <Page className="bg-new-bg! overflow-hidden">
+      <ResidentHeader
+        title={"Request Details"}
+        className="bg-new-bg! shadow-none"
+      />
+      <PageContent
+        withBottomNav={false}
+        className="gap-0 px-0 py-0 md:pl-0! md:top-18! "
+      >
         <Banner status={data?.request?.status} />
         {isLoading ? (
           <>
@@ -93,7 +99,7 @@ export default function RequestDetailPage() {
               <h3 className="font-semibold text-sm text-gray-600 border-b border-gray-100 w-full uppercase">
                 Status Timeline
               </h3>
-              
+
               <div className="flex flex-col w-full">
                 {timelineEvents.map((event, i) => (
                   <div
@@ -101,7 +107,7 @@ export default function RequestDetailPage() {
                     className={`flex flex-row gap-3 ${i < timelineEvents.length - 1 ? "pb-4" : ""}`}
                   >
                     <div className="flex flex-col items-center">
-                     <Skeleton width={20} />
+                      <Skeleton width={20} />
 
                       {i < timelineEvents.length - 1 && (
                         <div className="w-px flex-1 bg-gray-200 mt-1" />
@@ -109,8 +115,8 @@ export default function RequestDetailPage() {
                     </div>
 
                     <div className="flex flex-col items-start justify-between">
-                     <Skeleton width={100} />
-                    <Skeleton width={150} />
+                      <Skeleton width={100} />
+                      <Skeleton width={150} />
                     </div>
                   </div>
                 ))}
@@ -140,9 +146,8 @@ export default function RequestDetailPage() {
                       className="flex flex-row items-center justify-between gap-2 w-full border-gray-100"
                       key={index}
                     >
-                      <Skeleton width={150}/>
-                      <Skeleton width={40}/>
-                      
+                      <Skeleton width={150} />
+                      <Skeleton width={40} />
                     </div>
                   ))}
                 </div>
@@ -150,12 +155,15 @@ export default function RequestDetailPage() {
             </div>
           </>
         ) : isError ? (
-         
-          <Error subtext={"We couldn't load this requests"} buttonLabel={"Try again"} handleRefetchCount={handleRefetchCount} className="p-20" />
-        
+          <Error
+            subtext={"We couldn't load this requests"}
+            buttonLabel={"Try again"}
+            handleRefetchCount={handleRefetchCount}
+            className="p-20"
+          />
         ) : (
           <>
-            <div className="w-full h-70 ">
+            <div className="w-full h-70  ">
               {data?.request?.photoUrl && (
                 <Image
                   src={data.request.photoUrl}
@@ -169,45 +177,57 @@ export default function RequestDetailPage() {
               )}
             </div>
             <div className="p-3 border-b border-gray-300 flex flex-col gap-2">
-              <h3 className="font-semibold text-sm text-gray-600 border-b border-gray-100 w-full uppercase">
+              <h3 className="font-semibold text-xs text-gray-500 border-b border-gray-100 w-full uppercase">
                 Request Information
               </h3>
 
               <div className="flex flex-col gap-1">
                 <div className="flex flex-row items-center justify-between">
-                  <p className="text-gray-600 text-sm font-medium">Category</p>
+                  <p className="text-text-primary text-sm font-medium">
+                    Category
+                  </p>
                   <MaterialPill
-                    type={data?.request?.isAssorted === true ? "Assorted" : data?.request?.material?.category?.name}
+                    type={
+                      data?.request?.isAssorted === true
+                        ? "Assorted"
+                        : data?.request?.material?.category?.name
+                    }
                     className="w-auto"
                   />
                 </div>
 
                 <div className="flex flex-row items-center justify-between">
-                  <p className="text-gray-600 text-sm font-medium">Material name</p>
-                  <p className={`text-sm text-gray-600`}>
-                    {data?.request?.isAssorted === true ? "Assorted" : data?.request?.material?.category?.name}
+                  <p className="text-text-primary text-sm font-medium">
+                    Material name
+                  </p>
+                  <p className={`text-sm text-text-primary `}>
+                    {data?.request?.isAssorted === true
+                      ? "Assorted"
+                      : data?.request?.material?.category?.name}
                   </p>
                 </div>
                 <div className="flex flex-row items-center justify-between">
-                  <p className="text-gray-600 text-sm font-medium">
+                  <p className="text-text-primary text-sm font-medium">
                     Estimated value and unit
                   </p>
-                  <p className={`text-sm text-gray-600 lowercase`}>
-                    {data?.request?.estimatedValue} {data?.request?.estimatedUnit === "PIECE" ? "pcs" : data?.request?.estimatedUnit}
+                  <p className={`text-sm text-text-primary lowercase`}>
+                    {data?.request?.estimatedValue}{" "}
+                    {data?.request?.estimatedUnit === "PIECE"
+                      ? "pcs"
+                      : data?.request?.estimatedUnit}
                   </p>
                 </div>
                 <div className="flex flex-col items-start justify-between gap-2 pb-2">
-                  <p className="text-gray-600 text-sm font-medium">Notes</p>
-                  <textarea
-                    rows={3}
-                    value={data?.request?.notes ? data?.request?.notes : "There is no notes available for this request"}
-                    className="text-sm text-gray-600 lowercase w-full p-2 outline-none border rounded-md border-gray-300 "
-                    disabled
-                  ></textarea>
+                  <p className="text-text-primary text-sm font-medium">Notes</p>
+                  <p className="bg-new-bg text-sm p-2 new-border w-full rounded-lg min-h-25 text-text-primary">
+                    {data?.request?.notes
+                      ? data?.request?.notes
+                      : "There is no notes available for this request"}
+                  </p>
                 </div>
-                <div className="flex flex-row items-center justify-between">
-                  <p className="text-gray-600 text-sm font-medium">Submitted</p>
-                  <p className={`text-sm text-gray-600`}>
+                <div className="flex flex-row items-center justify-between text-text-primary">
+                  <p className=" text-sm font-medium">Submitted</p>
+                  <p className={`text-sm `}>
                     {formatDate(data?.request?.createdAt)}
                   </p>
                 </div>
@@ -215,7 +235,7 @@ export default function RequestDetailPage() {
             </div>
 
             <div className="p-3 border-b border-gray-300 flex flex-col gap-2">
-              <h3 className="font-semibold text-sm text-gray-600 border-b border-gray-100 w-full uppercase">
+              <h3 className="font-semibold text-xs text-gray-500 border-b border-gray-100 w-full uppercase">
                 Status Timeline
               </h3>
               <div className="flex flex-col w-full">
@@ -229,7 +249,7 @@ export default function RequestDetailPage() {
                         className={`w-2 h-2 rounded-full mt-1.5 ${
                           i === timelineEvents.length - 1
                             ? statusStyles[data?.request?.status]
-                            : "bg-primary"
+                            : "bg-cta-color"
                         }`}
                       />
 
@@ -239,7 +259,7 @@ export default function RequestDetailPage() {
                     </div>
 
                     <div className="flex flex-col items-start justify-between">
-                      <p className="text-gray-600 text-sm font-medium">
+                      <p className="text-text-primary text-sm font-medium">
                         {event.label}
                       </p>
                       <p className={`text-sm text-gray-600`}>
@@ -253,7 +273,7 @@ export default function RequestDetailPage() {
               </div>
             </div>
             <div className="p-3 flex flex-col gap-2">
-              <h3 className="font-semibold text-sm text-gray-600 border-b border-gray-100 w-full uppercase">
+              <h3 className="font-semibold text-xs text-gray-500 border-b border-gray-100 w-full uppercase">
                 Collection details
               </h3>
               {data?.request?.status !== "COLLECTED" ? (
@@ -264,13 +284,13 @@ export default function RequestDetailPage() {
               ) : (
                 <div className="w-full flex flex-col gap-2 px-4">
                   <div className="grid grid-cols-3 items-center justify-between gap-2 w-full">
-                    <p className="text-xs text-gray-400 font-medium uppercase">
+                    <p className="text-xs text-text-primary font-medium uppercase">
                       Category
                     </p>
-                    <p className="text-xs text-gray-400 font-medium uppercase">
+                    <p className="text-xs text-text-primary font-medium uppercase">
                       Material
                     </p>
-                    <p className="text-xs text-gray-400 font-medium uppercase">
+                    <p className="text-xs text-text-primary font-medium uppercase">
                       Actual values
                     </p>
                   </div>
@@ -279,13 +299,19 @@ export default function RequestDetailPage() {
                       className="grid grid-cols-3 items-center justify-between gap-2 w-full border-gray-100"
                       key={index}
                     >
-                      <MaterialPill type={item?.material?.category?.name} />
+                      <div className="flex items-center">
+                        <MaterialPill
+                          type={item?.material?.category?.name}
+                          className="w-auto!"
+                        />
+                      </div>
 
-                      <p className="text-sm text-gray-700">
+                      <p className="text-sm text-text-primary">
                         {item?.material?.name}
                       </p>
-                      <p className="text-sm text-gray-700 lowercase">
-                        {item.actualValue} {item.actualUnit === "PIECE" ? "pcs" : item.actualUnit}
+                      <p className="text-sm text-text-primary lowercase">
+                        {item.actualValue}{" "}
+                        {item.actualUnit === "PIECE" ? "pcs" : item.actualUnit}
                       </p>
                     </div>
                   ))}

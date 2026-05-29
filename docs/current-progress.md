@@ -137,6 +137,12 @@
 - **Redemption cash mode support** — `AddProgramModal` has `isCashMode` toggle; `RecordTransactionModal` handles multiple line items and sends `items[]` to backend; `TransactionCard`/`TransactionTable` display ₱ or pts totals based on program mode
 - **Resident side fixes** — home, community, profile, and request pages fixed for new material data shape; dashboard components updated; camera button fixed on capture page; responsivity fixes across all auth and resident pages
 
+- **InProgress modal max width** — `Modal.jsx` given a max-width constraint so the collection modal doesn't stretch on wider screens
+- **`PageTransition` component** — `frontend/src/components/ui/PageTransition.jsx`; wraps children in a `motion.div` with opacity + y-offset fade-in/out (duration 0.5s); used by onboarding and auth pages for smooth transitions
+- **`haptics.js` utility** — `frontend/src/lib/haptics.js`; wraps the `bzzz` library with named presets: `light` (casual nav), `medium` (form submit), `success`, `error`, `warning` (destructive confirm); `bzzz` and `motion` added as frontend dependencies
+- **Onboarding screens 2.0** — onboarding page fully redesigned; new illustrations at `public/onboarding-2.0/onb{1,2,3}.png`; horizontal slide animation between steps; 4-segment progress bar indicator; animated headline/body/button per step with staggered delays; new copy for all 3 steps; haptic feedback on Next via `haptic.light()`; entry animation via `PageTransition`
+- **Auth pages visual redesign** — login, signup, OTP, forgot-password, and reset-password pages redesigned; login uses a bottom-sheet card layout with `motion/react` animations; splash screen updated to show white EcoAid wordmark on brand green background with fade-out; Android devices skip the splash screen; new logo SVG assets added (`logo-wordmark.svg`, `white-logo-wordmark.svg`)
+
 ---
 
 ## In Progress

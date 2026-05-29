@@ -8,6 +8,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL } from "@/lib/config";
 import { BARANGAY_ROLES } from "@/lib/roles";
+import Image from "next/image";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -38,7 +39,6 @@ export default function BarangayLoginPage() {
   });
 
   const onSubmit = async (data) => {
-   
     try {
       setIsLoading(true);
       const response = await fetch(`${API_BASE_URL}/auth/barangay/login`, {
@@ -49,9 +49,9 @@ export default function BarangayLoginPage() {
         body: JSON.stringify(data),
         credentials: "include",
       });
-      
+
       const result = await response.json();
-     
+
       if (!response.ok) {
         setErrorMessage(result.error || "Login failed");
         return;
@@ -72,46 +72,49 @@ export default function BarangayLoginPage() {
   };
   return (
     <main
-      className={`min-h-svh flex justify-center bg-linear-to-b from-[#FFFFFF] from-24% to-[#89D957] ${inter.className} `}
+      className={`min-h-svh flex items-center justify-center w-full bg-new-bg  ${inter.className} `}
     >
-      <div className="grid md:justify-center md:items-center">
-        <div className="grid">
-          <div className="flex justify-center items-end">
-            <img
-              src="/onboarding/Ecoprofit logo.svg"
-              alt="EcoProfit Logo"
-              className="aspect-4/2 md:aspect-7/2 object-cover md:w-[40%]"
+      <div className="flex flex-col items-center justify-center gap-8">
+        <div className="flex flex-col items-center justify-center">
+          <div className="max-w-90 relative w-full aspect-4/1">
+            <Image
+              src="/ecoaid-logo/logo-wordmark.svg"
+              alt="EcoAid logo"
+              fill
+              priority
             />
           </div>
-          <div className="mx-2 mt-2 bg-white py-10 px-10 rounded-t-[20px] flex flex-col gap-8 md:rounded-2xl md:shadow-md md:min-w-171 md:max-w-172.5 md:m-auto">
-            {/* bg-white py-7.5 px-11.5 rounded-2xl border border-[#00000007] shadow-md flex flex-col gap-10 min-w-171 m-auto */}
-            <div className="flex flex-col gap-1.75 justify-center items-center">
-              <h3 className="text-[20px] font-semibold">
-                Barangay Admin Login
-              </h3>
-              <p className="text-[14px] text-[#4C5F66]">
-                Sign in to manage recycling operatins
-              </p>
-            </div>
-            <form
-              className="flex flex-col gap-6 "
-              onSubmit={handleSubmit(onSubmit)}
-            >
+          <p className="text-base md:text-base text-gray-600">
+            Barangay Admin Portal
+          </p>
+        </div>
+        <div className=" bg-white p-10 rounded-4xl flex flex-col gap-8 new-border md:min-w-171 md:max-w-172.5 text-text-primary">
+          <div className="flex flex-col justify-center items-start">
+            <h3 className="text-2xl font-semibold">Sign In</h3>
+            <p className="text-sm text-gray-600">
+              Manage your barangay's recycling program
+            </p>
+          </div>
+          <form
+            className="flex flex-col gap-8 "
+            onSubmit={handleSubmit(onSubmit)}
+          >
+            <div className="flex flex-col gap-3">
               <div className="flex flex-col gap-1.5">
                 <label
                   htmlFor=""
-                  className="text-gray-700 text-center md:text-start"
+                  className="text-text-primary font-medium text-base text-start"
                 >
                   Username
                 </label>
                 <input
                   type="text"
-                  className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-[#74C857] transition-colors"
+                  className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors duration-300 ease-in-out text-base"
                   placeholder="Enter your username"
-                  {...register("username")} 
+                  {...register("username")}
                 />
                 {errors.username && (
-                  <p className="text-[14px] text-red-500 text-center md:text-start">
+                  <p className="text-xs text-red-500 text-start">
                     {errors.username?.message}
                   </p>
                 )}
@@ -120,11 +123,11 @@ export default function BarangayLoginPage() {
               <div className="flex flex-col gap-1.5">
                 <label
                   htmlFor=""
-                  className="text-gray-700 text-center md:text-start"
+                  className="text-text-primary font-medium text-base text-start"
                 >
                   Password
                 </label>
-                <div className="flex flex-row justify-between outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-[#74C857] transition-colors">
+                <div className="flex flex-row justify-between outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors duration-300 ease-in-out">
                   <input
                     type={showPassword ? `text` : `password`}
                     className="outline-none max-w-full min-w-[70%] "
@@ -142,30 +145,30 @@ export default function BarangayLoginPage() {
                   </button>
                 </div>
                 {errors.password && (
-                  <p className="text-[14px] text-red-500 text-center md:text-start">
+                  <p className="text-xs text-red-500 text-start">
                     {errors.password?.message}
                   </p>
                 )}
               </div>
 
               {errorMessage && (
-                <p className="text-[14px] text-red-500 text-center md:text-start">
+                <p className="text-xs text-red-500 text-start">
                   {errorMessage}
                 </p>
               )}
-
-              <div className="flex flex-col gap-1 justify-center items-center ">
-                <button
-                  className="bg-primary text-white font-medium py-3.75 px-24 rounded-[40px] disabled:opacity-70 min-w-71.75"
-                  type="submit"
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Logging In..." : "Log In"}
-                </button>
-              </div>
-            </form>
-          </div>
+            </div>
+            <div className="flex flex-col gap-1 justify-center ">
+              <button
+                className="bg-cta-color text-white font-medium py-3.75 px-24 rounded-[14px] disabled:opacity-70 text-sm gradient-button hover:cursor-pointer"
+                type="submit"
+                disabled={isLoading}
+              >
+                {isLoading ? "Logging In..." : "Log In"}
+              </button>
+            </div>
+          </form>
         </div>
+        <p className="text-xs text-gray-400">EcoAid &copy; 2026 — Bararangay Recycling Management</p>
       </div>
     </main>
   );

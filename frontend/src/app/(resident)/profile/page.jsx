@@ -54,14 +54,14 @@ export default function ProfilePage() {
   const handleRefetchCount = () => setRefetchCount((prev) => prev + 1)
 
   return (
-    <Page gradient={true} className="overflow-hidden">
+    <Page className="overflow-hidden bg-new-bg!">
       <Toaster position="top-center" />
-      <ResidentHeader title={"Profile"} className="py-6" />
+      <ResidentHeader title={"Profile"} className="py-6 shadow-none bg-new-bg!" />
 
       <PageContent className="pt-10 md:pl-3! md:top-18!">
         <section className="flex flex-col gap-5">
           <div className="flex flex-col items-center gap-4">
-            <div className="border-5 rounded-full max-h-40 max-w-40 border-[#74C857] shadow-xl overflow-hidden flex items-center justify-center">
+            <div className="border-5 rounded-full max-h-40 max-w-40 border-cta-color shadow-xl overflow-hidden flex items-center justify-center">
               <Image
                 src={"/picture.jpg"}
                 width={143}
@@ -91,7 +91,7 @@ export default function ProfilePage() {
           <div className="flex flex-col gap-14">
             <div className="flex flex-col gap-2">
               <Link href={"/profile/personal-information"}>
-                <Card className="flex-row gap-5">
+                <Card className="flex-row gap-5 shadow-none new-border">
                   <div className="min-w-10 min-h-10 rounded-full bg-[#9DB2CE26] flex items-center justify-center">
                     <ListBulletIcon className="w-6 h-6" />
                   </div>
@@ -100,7 +100,7 @@ export default function ProfilePage() {
               </Link>
 
               <Link href={"/profile/notifications"}>
-                <Card className="flex-row gap-5">
+                <Card className="flex-row gap-5 shadow-none new-border">
                   <div className="min-w-10 min-h-10 rounded-full bg-[#9DB2CE26] flex items-center justify-center">
                     <BellIcon className="w-6 h-6" />
                   </div>
@@ -109,7 +109,7 @@ export default function ProfilePage() {
               </Link>
 
               <Link href={"/profile/settings"}>
-                <Card className="flex-row gap-5">
+                <Card className="flex-row gap-5 shadow-none new-border">
                   <div className="min-w-10 min-h-10 rounded-full bg-[#9DB2CE26] flex items-center justify-center">
                     <Cog8ToothIcon className="w-6 h-6" />
                   </div>
@@ -118,7 +118,7 @@ export default function ProfilePage() {
               </Link>
 
               <Link href={"/profile/help-support"}>
-                <Card className="flex-row gap-5">
+                <Card className="flex-row gap-5 shadow-none new-border">
                   <div className="min-w-10 min-h-10 rounded-full bg-[#9DB2CE26] flex items-center justify-center">
                     <QuestionMarkCircleIcon className="w-6 h-6" />
                   </div>
@@ -128,7 +128,7 @@ export default function ProfilePage() {
             </div>
 
             <button onClick={handleLogout}>
-              <Card className="flex-row gap-5">
+              <Card className="flex-row gap-5 shadow-none new-border">
                 <div className="min-w-10 min-h-10 rounded-full bg-[#9DB2CE26] flex items-center justify-center">
                   <ArrowLeftStartOnRectangleIcon className="w-6 h-6" />
                 </div>

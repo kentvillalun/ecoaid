@@ -199,7 +199,7 @@ Protected by `authenticateBarangay + requireRoles(["CAPTAIN"])`.
 
 ## Current Status
 
-Both resident and barangay auth flows are complete and stable (username-based login, OTP, forgot password, split `authenticateResident`/`authenticateBarangay` middleware). The app ships as a PWA with web manifests and a splash screen on login.
+Both resident and barangay auth flows are complete and stable (username-based login, OTP, forgot password, split `authenticateResident`/`authenticateBarangay` middleware). The app ships as a PWA with web manifests and a splash screen on login. Auth pages and the onboarding flow have been fully redesigned — login uses a bottom-sheet card layout with `motion/react` animations, the splash screen shows a white EcoAid wordmark on brand green, and onboarding uses new illustrations with a horizontal slide animation and haptic feedback (`bzzz`).
 
 **Schema overhaul is complete.** The `MaterialType` enum is fully replaced by a `Material` DB model with a `Category` model. `WeightUnit` is replaced by a `Unit` enum. All pickup request, collection item, and redemption module fields now use `materialId` (FK to `Material`). The `Barangay` model gained `redemptionMode`, feature flags, and additional address fields. `RedemptionTransaction` now uses a `RedemptionTransactionItem` line-item model.
 

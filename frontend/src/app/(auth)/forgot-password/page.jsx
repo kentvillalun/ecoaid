@@ -1,7 +1,6 @@
 "use client";
 
-import { ArrowLeftIcon, PhoneIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { Page } from "@/components/layout/Page";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -11,6 +10,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { API_BASE_URL } from "@/lib/config";
 import { DesktopGuard } from "@/components/ui/DesktopGuard";
 import Image from "next/image";
+import { motion } from "motion/react";
 
 const schema = yup.object().shape({
   phoneNumber: yup.string().required("Phone number is required"),
@@ -75,7 +75,12 @@ export default function ForgotPasswordPage() {
               </div>
             </div>
 
-            <div className="flex flex-col w-full relative justify-center md:max-w-xl mx-auto mb-40">
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="flex flex-col w-full relative justify-center md:max-w-xl mx-auto mb-40"
+            >
               <div className="flex flex-row gap-4 h-full w-full items-center mt-10">
                 <button
                   className=""
@@ -125,7 +130,7 @@ export default function ForgotPasswordPage() {
                   {isSubmitting ? "Sending..." : "Submit"}
                 </button>
               </div>
-            </div>
+            </motion.div>
           </form>
         </div>
       </Page>

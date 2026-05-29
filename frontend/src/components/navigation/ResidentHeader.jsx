@@ -27,12 +27,12 @@ export const ResidentHeader = ({
     switch (actions) {
       case "notification":
         return (
-          <Link href={"/announcements"}>
-            <BellIcon className="w-7.25 h-7.25" />
-          </Link>
+         <Link href={"/announcements"} className="bg-white rounded-full p-2" style={{ border: "0.5px solid #e5e7eb"}}>
+            <BellIcon className="w-5 h-5" />
+          </Link> 
         );
       case 'edit':
-        return <PencilSquareIcon className="w-6 h-6 text-[#727272]" onClick={() => setIsEditing((prev) => !prev)}/>
+        return <PencilSquareIcon className="w-5 h-5 text-[#727272]" onClick={() => setIsEditing((prev) => !prev)}/>
 
       default: 
        return <div className="w-6"></div> 
@@ -41,16 +41,16 @@ export const ResidentHeader = ({
 
   return (
     <header
-      className={`flex flex-row items-start justify-between min-w-full bg-white fixed top-0 py-6 px-8 ${inter.className} shadow-lg z-50 min-h-18`}
+      className={`flex flex-row items-start justify-between min-w-full bg-white fixed top-0 py-6 px-8 ${inter.className} shadow-lg z-50 min-h-18 ${className}`} style={{ borderBottom: "0.5px solid #e5e7eb" }}
     >
       <div className="flex flex-row items-center justify-between min-w-full">
         <ArrowLeftIcon
-          className="h-6 text-[#727272]"
+          className="h-6"
           onClick={handleClick}
         />
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center text-text-primary">
           <p className="font-semibold text-lg text-nowrap">{title}</p>
-          <p className="text-sm font-medium text-nowrap">{subtitle}</p>
+          <p className="text-sm text-nowrap">{subtitle}</p>
         </div>
         {actionItem()}
       </div>

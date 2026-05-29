@@ -35,8 +35,8 @@ export default function NotificationSettingPage() {
 
 
   return (
-    <Page>
-      <ResidentHeader title={"Notification Settings"} />
+    <Page className="bg-new-bg!">
+      <ResidentHeader title={"Notification Settings"} className="shadow-none! bg-new-bg!"/>
 
       <PageContent>
         <div className="">

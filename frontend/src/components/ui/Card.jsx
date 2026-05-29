@@ -1,9 +1,11 @@
-
-export const Card = ({children, className = '', handleClick}) => {
-
-    return (
-        <div className={`flex bg-white rounded-2xl shadow p-4 items-center ${className}`} onClick={handleClick}>
-            {children}
-        </div>
-    )
-}
+export const Card = ({ children, className = "", handleClick, customBorder = "" }) => {
+  return (
+    <div
+      className={`flex bg-white shadow p-4 items-center rounded-3xl ${className}`}
+      onClick={handleClick}
+      style={{ border: customBorder }}
+    >
+      {children}
+    </div>
+  );
+};

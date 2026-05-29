@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { Modal } from "@/components/ui/Modal";
 import { createPortal } from "react-dom";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import { AnimatePresence, motion } from "motion/react";
 
 export default function PersonalInformationPage() {
   const [isEditing, setIsEditing] = useState(false);
@@ -42,7 +43,7 @@ export default function PersonalInformationPage() {
   }, [data]);
 
   return (
-    <Page gradient={true}>
+    <Page className="bg-new-bg!">
       <ResidentHeader
         title={"Personal Information"}
         action={"edit"}
@@ -52,16 +53,17 @@ export default function PersonalInformationPage() {
           if (isEditing) {
             setIsModalOpen(true);
           } else {
-            history.back()
+            history.back();
           }
         }}
+        className="bg-new-bg! shadow-none"
       />
       {isEditing &&
         createPortal(
           <Modal
             isOpen={isModalOpen}
             icon={<ExclamationTriangleIcon className="w-6 stroke-black" />}
-            title={'Discard Changes?'}
+            title={"Discard Changes?"}
             subtitle={"You have unsaved changes that will be lost."}
             onClose={() => setIsModalOpen(false)}
             onConfirm={() => history.back()}
@@ -71,10 +73,10 @@ export default function PersonalInformationPage() {
           ></Modal>,
           document.body,
         )}
-      <main className="absolute left-0 right-0 top-18 bottom-0 h-[calc(100dvh-72px)] px-3 pt-3 flex flex-col gap-6 overflow-y-auto ">
+      <main className="absolute left-0 right-0 top-18 bottom-0 h-[calc(100dvh-72px)] pt-3 flex flex-col gap-6 overflow-y-auto ">
         <section className="grid grid-cols-1 gap-6 justify-between h-full ">
           <div className="flex flex-col items-center justify-end gap-4">
-            <div className="border-5 rounded-full max-h-40 max-w-40 border-[#74C857] shadow-xl overflow-hidden flex items-center justify-center ">
+            <div className="border-5 rounded-full max-h-40 max-w-40 border-cta-color shadow-xl overflow-hidden flex items-center justify-center ">
               <Image
                 src={"/picture.jpg"}
                 width={143}
@@ -95,9 +97,12 @@ export default function PersonalInformationPage() {
             </div>
           </div>
 
-          <div className="mt-2 bg-white p-8 rounded-t-[20px] flex flex-col gap-6">
+          <div
+            className="mt-2 bg-white p-8 rounded-t-4xl flex flex-col gap-6"
+            style={{ border: "0.5px solid #e5e7eb" }}
+          >
             {isLoading ? (
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-3 md:max-w-xl md:mx-auto">
                 <div className="flex flex-col gap-1 border-b border-[#E7E3E0] p-2.5 text-sm">
                   <label htmlFor="" className="text-start font-medium">
                     First name
@@ -148,44 +153,52 @@ export default function PersonalInformationPage() {
                 handleRefetchCount={handleRefetchCount}
               />
             ) : (
-              <div className="flex flex-col gap-3">
-                <div className="flex flex-col gap-1 border-b border-[#E7E3E0] p-2.5 text-sm">
-                  <label htmlFor="" className="text-start font-medium">
-                    First name
-                  </label>
-                  <input
-                    type="text"
-                    className={`outline-none ${!isEditing && "text-gray-400"}`}
-                    value={formData.firstName}
-                    disabled={!isEditing}
-                    onChange={(e) =>
-                      setFormData({ ...formData, firstName: e.target.value })
-                    }
-                  />
+              <div className="flex flex-col gap-3 md:max-w-xl md:mx-auto">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-2">
+                    <label
+                      htmlFor=""
+                      className="text-start font-medium text-base"
+                    >
+                      First name
+                    </label>
+                    <input
+                      type="text"
+                      className={` ${!isEditing && "text-gray-400"} outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors text-base`}
+                      value={formData.firstName}
+                      disabled={!isEditing}
+                      onChange={(e) =>
+                        setFormData({ ...formData, firstName: e.target.value })
+                      }
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <label
+                      htmlFor=""
+                      className="text-start font-medium text-base"
+                    >
+                      Last name
+                    </label>
+                    <input
+                      type="text"
+                      className={` ${!isEditing && "text-gray-400"} outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors text-base`}
+                      value={formData.lastName}
+                      disabled={!isEditing}
+                      onChange={(e) =>
+                        setFormData({ ...formData, lastName: e.target.value })
+                      }
+                    />
+                  </div>
                 </div>
 
-                <div className="flex flex-col gap-1 border-b border-[#E7E3E0] p-2.5 text-sm">
-                  <label htmlFor="" className="text-start font-medium">
-                    Last name
-                  </label>
-                  <input
-                    type="text"
-                    className={`outline-none ${!isEditing && "text-gray-400"}`}
-                    value={formData.lastName}
-                    disabled={!isEditing}
-                    onChange={(e) =>
-                      setFormData({ ...formData, lastName: e.target.value })
-                    }
-                  />
-                </div>
-
-                <div className="flex flex-col gap-1 border-b border-[#E7E3E0] p-2.5 text-sm">
+                <div className="flex flex-col gap-2">
                   <label htmlFor="" className="text-start font-medium">
                     Phone number
                   </label>
                   <input
                     type="number"
-                    className={`outline-none ${!isEditing && "text-gray-400"}`}
+                    className={` ${!isEditing && "text-gray-400"} outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors text-base`}
                     value={formData.phoneNumber}
                     disabled={!isEditing}
                     onChange={(e) =>
@@ -194,27 +207,25 @@ export default function PersonalInformationPage() {
                   />
                 </div>
 
-                
-
-                <div className="flex flex-col gap-1 border-b border-[#E7E3E0] p-2.5 text-sm">
+                <div className="flex flex-col gap-2">
                   <label htmlFor="" className="text-start font-medium">
                     Sitio
                   </label>
                   <input
                     type="text"
-                    className="outline-none text-gray-400"
+                    className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors text-base"
                     disabled={true}
                     value={data?.user?.sitio}
                   />
                 </div>
 
-                <div className="flex flex-col gap-1 border-b border-[#E7E3E0] p-2.5 text-sm">
+                <div className="flex flex-col gap-2">
                   <label htmlFor="" className="text-start font-medium">
                     Registered Barangay
                   </label>
                   <input
                     type="text"
-                    className="outline-none text-gray-400"
+                    className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors text-base"
                     disabled={true}
                     value={data?.user?.barangay}
                   />
@@ -223,33 +234,39 @@ export default function PersonalInformationPage() {
                   Sitio and barangay cannot be changed. Contact your barangay
                   for updates
                 </p>
-              </div>
-            )}
-            {isEditing && (
-              <button
-                className="bg-primary text-white text-center min-w-full py-3 rounded-3xl"
-                onClick={async () => {
-                  toast.loading("Updating personal information");
-                  console.log(formData);
-                  const success = await makeRequest({
-                    url,
-                    method: "PATCH",
-                    body: formData,
-                  });
+                <AnimatePresence>
+                  {isEditing && (
+                    <motion.button
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="w-full bg-cta-color text-white font-medium py-3.75 px-24 rounded-[14px] disabled:opacity-70 text-sm gradient-button"
+                      onClick={async () => {
+                        toast.loading("Updating personal information");
+                        console.log(formData);
+                        const success = await makeRequest({
+                          url,
+                          method: "PATCH",
+                          body: formData,
+                        });
 
-                  if (success) {
-                    toast.dismiss();
-                    toast.success("Update successful");
-                    handleRefetchCount();
-                    setIsEditing(false);
-                  } else {
-                    toast.dismiss();
-                    toast.error("Update failed");
-                  }
-                }}
-              >
-                Save Changes
-              </button>
+                        if (success) {
+                          toast.dismiss();
+                          toast.success("Update successful");
+                          handleRefetchCount();
+                          setIsEditing(false);
+                        } else {
+                          toast.dismiss();
+                          toast.error("Update failed");
+                        }
+                      }}
+                    >
+                      Save Changes
+                    </motion.button>
+                  )}
+                </AnimatePresence>
+              </div>
             )}
           </div>
         </section>

@@ -31,7 +31,7 @@ export const ResidentBottomNav = ({classname = ""}) => {
 
   return (
     <section
-      className={`min-h-18.75 bottom-0 bg-white min-w-screen pb-2.25 flex flex-row items-center justify-center px-3 z-1000 fixed ${inter.className} ${classname}`}
+      className={`min-h-18.75 bottom-0 bg-white min-w-screen pb-2.25 flex flex-row items-center justify-center px-3 z-1000 fixed ${inter.className} ${classname} new-border`}
     >
       <div className="grid grid-cols-3 gap-1 text-[#9DB2CE]">
         <div className="grid grid-cols-2 gap-3">
@@ -41,8 +41,8 @@ export const ResidentBottomNav = ({classname = ""}) => {
           >
             {isHome ? (
               <>
-                <HomeIconSolid className="h-6.25 w-6.25 fill-[#89d957]" />
-                <p className="text-[12px] text-[#89d957]">Home</p>
+                <HomeIconSolid className="h-6.25 w-6.25 fill-cta-color" />
+                <p className="text-[12px] text-cta-color">Home</p>
               </>
             ) : (
               <>
@@ -57,8 +57,8 @@ export const ResidentBottomNav = ({classname = ""}) => {
           >
             {isCommunity ? (
               <>
-                <MapPinIconSolid className="h-6.25 w-6.25 fill-[#89d957]" />
-                <p className="text-[12px] text-[#89d957]">Barangay</p>
+                <MapPinIconSolid className="h-6.25 w-6.25 fill-cta-color" />
+                <p className="text-[12px] text-cta-color">Barangay</p>
               </>
             ) : (
               <>
@@ -71,10 +71,10 @@ export const ResidentBottomNav = ({classname = ""}) => {
 
         <div className="">
           <Link
-            className="min-w-16 min-h-16 bg-[#89D957] flex items-center justify-center rounded-full border-2 border-white shadow-gray-400 shadow-lg trasform -translate-y-10"
+            className="min-w-16 min-h-16 gradient-button flex items-center justify-center rounded-full border-2 border-white shadow-gray-400 shadow-md trasform -translate-y-6"
             href="/capture"
           >
-            <CameraIcon className="fill-white h-7.75  w-7.75 " />
+            <CameraIcon className="fill-white h-8 w-8 mb-1 " />
           </Link>
         </div>
 
@@ -85,8 +85,8 @@ export const ResidentBottomNav = ({classname = ""}) => {
           >
             {isRequests ? (
               <>
-                <ClipboardIconSolid className="h-6.25 w-6.25 fill-[#89d957]" />
-                <p className="text-[12px] text-[#89d957]">Requests</p>
+                <ClipboardIconSolid className="h-6.25 w-6.25 fill-cta-color" />
+                <p className="text-[12px] text-cta-color">Requests</p>
               </>
             ) : (
               <>
@@ -101,8 +101,8 @@ export const ResidentBottomNav = ({classname = ""}) => {
           >
             {isProfile ? (
               <>
-                <UserIconSolid className="h-6.25 w-6.25 fill-[#89d957]" />
-                <p className="text-[12px] text-[#89d957]">Profile</p>
+                <UserIconSolid className="h-6.25 w-6.25 fill-cta-color" />
+                <p className="text-[12px] text-cta-color">Profile</p>
               </>
             ) : (
               <>

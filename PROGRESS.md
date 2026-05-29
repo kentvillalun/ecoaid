@@ -145,6 +145,11 @@
 - [x] **Redemption cash mode** — `AddProgramModal` has an `isCashMode` toggle; `RecordTransactionModal` shows `cashValue` inputs when mode is cash; `TransactionCard` and `TransactionTable` display totals in ₱ or pts depending on program mode; program detail page respects mode for column labels and totals
 - [x] **`RecordTransactionModal` overhauled** — now supports multiple line items per transaction to match `RedemptionTransactionItem` schema; add/remove row UI; each row selects a material and enters an amount; sends `items[]` array to backend
 - [x] **Resident side UI fixes** — home, community, profile, and request pages fixed for new Material data shape; dashboard `RecentTransactionCard` and `RecentTransactionTable` updated for schema changes; camera open button fixed on capture page; responsivity fixes applied across all resident pages
+- [x] InProgress modal max width — `Modal.jsx` given a max-width constraint so the in-progress collection modal doesn't stretch too wide on larger screens
+- [x] **`PageTransition` component** — `frontend/src/components/ui/PageTransition.jsx`; wraps children in a `motion.div` (from `motion/react`) with opacity + y-offset fade-in/out animation (duration 0.5s); used by onboarding and auth pages for smooth route transitions
+- [x] **`haptics.js` utility** — `frontend/src/lib/haptics.js`; wraps the `bzzz` haptics library with named presets: `light` (selection — casual nav/Next/back), `medium` (snap — form submit/confirm), `success`, `error`, `warning` (toggle — destructive confirm); added `bzzz@^0.1.1` and `motion@^12.40.0` to `frontend/package.json`
+- [x] **Onboarding screens 2.0** — `/onboarding` page fully redesigned; new illustrations at `public/onboarding-2.0/onb{1,2,3}.png`; horizontal slide animation between steps via `motion/react`; 4-segment progress bar indicator; animated headline, body text, and button per step (opacity + y fade-in with staggered delay); new copy: step 1 "Recyclables Go to Waste Without a Clear System", step 2 "Your recyclables have value. Benefit from them", step 3 "How EcoAid Works"; haptic feedback on Next button via `haptic.light()`; uses `PageTransition` for entry animation
+- [x] **Auth pages visual redesign** — login, signup, OTP, forgot-password, and reset-password pages redesigned; login uses a bottom-sheet card layout (white form rises from green background); `motion/react` animations on form content; new splash screen shows a white EcoAid wordmark on the brand green background and fades out; Android devices skip the splash screen entirely (detected via `navigator.userAgent`); new SVG assets added: `public/ecoaid-logo/logo-wordmark.svg` and `white-logo-wordmark.svg`; `DesktopGuard` now uses `lg:hidden` CSS class approach in auth pages (no separate blocking overlay)
 - [ ] Manual Collection Intake module (Sunday EcoAid manual entry with resident search)
 - [ ] Collection schedule module
 - [ ] Dashboard remaining hardcoded stats (Total Recyclables Collected, Total Program Expenses, Current Fund Balance) — pending MRF and Program Funds modules
@@ -183,6 +188,10 @@ The resident side has working data-driven pages: home, community, requests list,
 detail, and profile pages all fetch real API data. The barangay dashboard is partially
 wired — three stat cards (Total Recyclables Collected, Total Program Expenses, Current Fund
 Balance) remain hardcoded pending the MRF and Program Funds modules.
+
+**Onboarding and auth pages are fully redesigned.** Onboarding uses new illustrations,
+horizontal slide animation with `motion/react`, and haptic feedback via `bzzz`. Auth pages
+use a bottom-sheet card layout with motion animations and a revised splash screen.
 
 Next focus: Manual Collection Intake module (Sunday EcoAid manual entry with resident search).
 
@@ -230,6 +239,8 @@ Next focus: Manual Collection Intake module (Sunday EcoAid manual entry with res
 - frontend/src/components/ui/Error.jsx — error state with handleRefetchCount callback
 - frontend/src/components/ui/Empty.jsx — empty state with title and subtext
 - frontend/src/components/ui/DesktopGuard.jsx — blocks resident pages on non-mobile viewports
+- frontend/src/components/ui/PageTransition.jsx — motion.div wrapper with opacity+y fade-in/out (used by onboarding and auth)
+- frontend/src/lib/haptics.js — named haptic presets wrapping the bzzz library
 - frontend/src/components/redemption/modals/AddProgramModal.jsx — handles create and edit; isCashMode toggle; deactivate/reactivate
 - frontend/src/components/redemption/modals/RecordTransactionModal.jsx — multi-item transaction form; preselectedProgram prop; inactive programs filtered
 - frontend/src/app/(barangay)/redemption/page.jsx — redemption programs list (was /redemption-programs)
