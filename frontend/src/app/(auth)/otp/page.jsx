@@ -7,6 +7,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL } from "@/lib/config";
 import { DesktopGuard } from "@/components/ui/DesktopGuard";
+import Image from "next/image";
 
 // Outside component — only created once, never recreated on rerender
 const inter = Inter({
@@ -289,78 +290,78 @@ export default function OtpPage() {
     <>
       <DesktopGuard />
 
-      <Page gradient={true} className="from-10%! lg:hidden">
-        <div
-          className={`w-full max-w-md min-h-svh flex flex-col justify-between px-1 ${inter.className}`}
-        >
-          <div className=""></div>
-          <div className=""></div>
-
-          <div className="flex justify-end items-end">
-            <img
-              src="/onboarding/Ecoprofit logo.svg"
-              alt="EcoProfit Logo"
-              className="aspect-4/2 object-cover"
-            />
-          </div>
-
-          <div className="mx-1 mt-2 bg-white p-8 rounded-t-[20px] flex flex-col gap-8 max-w-full">
-            <div className="flex flex-col gap-2">
-              <h3 className="font-semibold text-[20px]">OTP Validation</h3>
-              <p className="text-[#4C5F66] text-[14px]">
-                We have sent a verification code to{" "}
-                {/* Show the phone number so user knows where the OTP was sent */}
-                <span className="font-medium text-black">
-                  {pendingPhone || "your number"}
-                </span>
-              </p>
-            </div>
-
-            {/* ── 6 digit inputs ── */}
-            <div className="flex flex-row justify-center gap-1.75 flex-wrap">
-              {digits.map((digit, index) => (
-                <input
-                  key={index}
-                  type="text"
-                  inputMode="numeric"
-                  // inputMode="numeric" shows the number keyboard on mobile
-                  // without using type="number" which has unwanted behavior
-                  maxLength={1}
-                  value={digit}
-                  className="outline h-10 w-10 outline-[#E7E3E0] rounded-[5px] p-3 text-center"
-                  // ref callback: stores each input element in the array
-                  // so we can call .focus() on them programmatically
-                  ref={(el) => (inputRefs.current[index] = el)}
-                  onChange={(e) => handleChange(index, e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(index, e)}
-                  onPaste={handlePaste}
+      <Page className="lg:hidden bg-new-bg!">
+        <div className={`min-w-full flex flex-col justify-end`}>
+          <div className="min-h-auto bg-white p-8 rounded-t-4xl flex flex-col relative justify-center max-w-full">
+            <div className="-top-6 left-6 absolute rounded-full bg-new-primary w-16 h-16 flex items-center justify-center">
+              <div className="w-8 relative aspect-square ">
+                <Image
+                  src="/ecoaid-logo/ecoaid-green-logo.svg"
+                  alt="EcoAid logo"
+                  fill
+                  priority
+                  loading="eager"
                 />
-              ))}
+              </div>
             </div>
 
-            {/* ── Error message ── */}
-            {submitError && (
-              <p className="text-[14px] text-red-500 text-center">
-                {submitError}
-              </p>
-            )}
+            <div className="flex flex-col w-full relative justify-center md:max-w-xl mx-auto gap-10 mb-20">
+              <div className="flex flex-col gap-2">
+                <h3 className="font-semibold text-2xl mt-10">
+                  OTP Verification
+                </h3>
+                <p className="text-text-primary text-base">
+                  We have sent a verification code to{" "}
+                  {/* Show the phone number so user knows where the OTP was sent */}
+                  <span className="font-medium text-black">
+                    {pendingPhone || "your number"}
+                  </span>
+                </p>
+              </div>
 
-            {/* ── Resend success message ── */}
-            {resendMessage && (
-              <p className="text-[14px] text-green-600 text-center">
-                {resendMessage}
-              </p>
-            )}
+              {/* ── 6 digit inputs ── */}
+              <div className="flex flex-row justify-center gap-1.75 flex-wrap">
+                {digits.map((digit, index) => (
+                  <input
+                    key={index}
+                    type="text"
+                    inputMode="numeric"
+                    // inputMode="numeric" shows the number keyboard on mobile
+                    // without using type="number" which has unwanted behavior
+                    maxLength={1}
+                    value={digit}
+                    className="outline h-10 w-10 outline-[#E7E3E0] focus:outline-cta-color transition-colors duration-150 ease-in-out rounded-[5px] p-3 text-center"
+                    // ref callback: stores each input element in the array
+                    // so we can call .focus() on them programmatically
+                    ref={(el) => (inputRefs.current[index] = el)}
+                    onChange={(e) => handleChange(index, e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(index, e)}
+                    onPaste={handlePaste}
+                  />
+                ))}
+              </div>
 
-            <div className="flex flex-col gap-6">
-              <div className="flex flex-col gap-2.5 justify-center items-center">
+              {/* ── Error message ── */}
+              {submitError && (
+                <p className="text-xs text-red-500 text-center">
+                  {submitError}
+                </p>
+              )}
+
+              {/* ── Resend success message ── */}
+              {resendMessage && (
+                <p className="text-xs text-green-600 text-center">
+                  {resendMessage}
+                </p>
+              )}
+              <div className="flex flex-col gap-6">
                 <button
-                  className="bg-primary text-white font-medium py-3.75 px-24 rounded-[40px] max-w-63.75 disabled:opacity-50"
+                  className="bg-cta-color text-white font-medium py-3.75 px-24 rounded-[14px] disabled:opacity-70 text-sm gradient-button"
                   onClick={handleSubmit}
                   disabled={isSubmitting}
                   type="button"
                 >
-                  {isSubmitting ? "Verifying..." : "Continue"}
+                  {isSubmitting ? "Verifying..." : "Verify Code"}
                 </button>
 
                 {/* ── Resend button with cooldown ── */}
@@ -368,7 +369,7 @@ export default function OtpPage() {
                   type="button"
                   onClick={handleResend}
                   disabled={countdown > 0 || isResending}
-                  className="text-[14px] text-[#4C5F66] disabled:opacity-50"
+                  className="text-sm text-text-primary font-medium disabled:opacity-50"
                 >
                   {isResending
                     ? "Sending..."
@@ -377,21 +378,8 @@ export default function OtpPage() {
                         `Resend code in ${countdown}s`
                       : "Resend code"}
                 </button>
-
-                <div className="text-center flex flex-col gap-5">
-                  <Link
-                    className="text-[14px] text-center text-[#4C5F66]"
-                    href="/signup"
-                  >
-                    Don&apos;t have an account?{" "}
-                    <span className="font-medium text-black">Sign Up</span>
-                  </Link>
-                </div>
               </div>
             </div>
-            <div className=""></div>
-            <div className=""></div>
-            <div className=""></div>
           </div>
         </div>
       </Page>

@@ -70,7 +70,7 @@ export default function LoginPage() {
     });
 
     const result = await response.json();
-    console.log("login result:", result);
+
     if (!response.ok) {
       setSubmitError(result.error || "Login failed");
       return;
@@ -87,16 +87,31 @@ export default function LoginPage() {
         JSON.stringify(result.data),
       );
     }
-    console.log("role check passed, redirecting...");
+
     router.push("/home");
   };
 
   useEffect(() => {
-    if (sessionStorage.getItem("skipSplash")) {
+    const isAndroid = /android/i.test(navigator.userAgent);
+
+    if (isAndroid || sessionStorage.getItem("skipSplash")) {
       sessionStorage.removeItem("skipSplash");
+
+      if (localStorage.getItem("ecoprofitResidentSession")) {
+        router.push("/home");
+        return;
+      }
+
+      // Checks if the user have seen the onboarding screen
+      if (!localStorage.getItem("hasSeenOnboarding")) {
+        router.push("/onboarding");
+        return;
+      }
+
       setIsChecking(false);
       return;
     }
+
     setTimeout(() => {
       setIsFading(true);
 
@@ -127,15 +142,15 @@ export default function LoginPage() {
       <>
         <DesktopGuard />
         <main
-          className={`min-h-svh overflow-x-hidden flex items-center justify-center bg-linear-to-b from-[#FFFFFF]  from-24% to-[#89D957] ${inter.className} ${isFading ? "opacity-0" : "opacity-100"} transition-opacity duration-500 lg:hidden`}
+          className={`min-h-svh overflow-x-hidden flex items-center justify-center bg-new-primary ${inter.className} ${isFading ? "opacity-0" : "opacity-100"} transition-opacity duration-500 lg:hidden`}
         >
           <div
             className={`flex flex-col items-center w-full max-w-md gap-25 p-2 justify-center`}
           >
-            <div className="max-w-108 relative w-full aspect-square">
+            <div className="max-w-55 relative w-full aspect-square">
               <Image
-                src="/onboarding/Ecoprofit logo.svg"
-                alt="EcoProfit Logo"
+                src="/ecoaid-logo/white-logo-wordmark.svg"
+                alt="EcoAid logo"
                 fill
                 priority
               />
@@ -148,106 +163,112 @@ export default function LoginPage() {
 
   return (
     <>
-    <DesktopGuard />
+      <DesktopGuard />
       {!isChecking && (
-        <Page gradient={true} className="lg:hidden">
-          <div
-            className={`w-full max-w-md min-h-svh flex flex-col justify-between px-1 ${inter.className}`}
-          >
-            <div className=""></div>
-            <div className=""></div>
-
-            <div className="flex justify-end items-end">
-              <img
-                src="/onboarding/Ecoprofit logo.svg"
-                alt="EcoProfit Logo"
-                className="aspect-4/2 object-cover "
-              />
-            </div>
+        <Page className="lg:hidden bg-new-bg!">
+          <div className={`min-w-full flex flex-col justify-end`}>
             <form
-              className="mx-1 mt-2 bg-white p-8 rounded-t-[20px] flex flex-col gap-8 max-w-full"
+              className="min-h-auto bg-white p-8 rounded-t-4xl flex flex-col relative justify-center max-w-full"
               onSubmit={handleSubmit(onSubmit)}
             >
-              <h3 className="font-semibold text-[20px]">Log In</h3>
-              <div className="flex flex-col gap-6 text-[#717680]">
-                <div className="flex flex-col gap-2">
-                  <div className=" flex flex-row gap-3 border-b border-[#E7E3E0] p-2.5">
-                    <UserIcon className="h-6 w-6 stroke-[#4C5F66]" />
-                    <input
-                      type="text"
-                      placeholder="Username"
-                      className="outline-none max-w-full w-full"
-                      {...register("username")}
-                    />
-                  </div>
-                  <p className="text-[14px] text-red-500">
-                    {errors.username?.message}
-                  </p>
+              <div className="-top-6 left-6 absolute rounded-full bg-new-primary w-16 h-16 flex items-center justify-center">
+                <div className="w-8 relative aspect-square ">
+                  <Image
+                    src="/ecoaid-logo/ecoaid-green-logo.svg"
+                    alt="EcoAid logo"
+                    fill
+                    priority
+                    loading="eager"
+                  />
                 </div>
+              </div>
 
-                <div className="flex flex-col gap-2">
-                  <div className="flex flex-row gap-3.25 border-b border-[#E7E3E0] p-2.5 text-[#717680] justify-between">
-                    <div className="flex flex-row gap-3 flex-1 min-w-0">
-                      <LockClosedIcon className="h-6 w-6 shrink-0 stroke-[#4C5F66]" />
+              <div className="flex flex-col w-full relative justify-center md:max-w-xl mx-auto">
+                <h3 className="font-semibold text-2xl mt-10">Sign In</h3>
+
+                <div className="flex flex-col gap-6 text-[#717680] my-10">
+                  <div className="flex flex-col gap-2">
+                    <label htmlFor="" className="text-text-primary text-base font-medium">
+                      Username
+                    </label>
+                    <div className="flex flex-col gap-2">
+                      <input
+                        type="text"
+                        placeholder="Input username"
+                        className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors text-base"
+                        {...register("username")}
+                      />
+
+                      {errors.username?.message && (
+                        <p className="text-xs text-red-500">
+                          {errors.username?.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <label htmlFor="" className="text-base text-text-primary font-medium">
+                      Password
+                    </label>
+                    <div className="flex flex-row gap-3.25 justify-between outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors text-base">
                       <input
                         type={showPassword ? "text" : "password"}
-                        placeholder="Password"
-                        className="outline-none w-full min-w-0 max-w-40 md:max-w-full"
+                        placeholder="Input password"
+                        className="outline-none w-full min-w-0  md:max-w-full text-base"
                         {...register("password")}
                       />
+
+                      <button
+                        type="button"
+                        className="hover:cursor-pointer"
+                        onClick={() => {
+                          setShowPassword((prev) => !prev);
+                        }}
+                      >
+                        Show
+                      </button>
                     </div>
-                    <button
-                      type="button"
-                      className="hover:cursor-pointer"
-                      onClick={() => {
-                        setShowPassword((prev) => !prev);
-                      }}
-                    >
-                      Show
-                    </button>
+                    {errors?.password?.message && (
+                      <p className="text-xs text-red-500">
+                        {errors.password?.message}
+                      </p>
+                    )}
                   </div>
-                  <p className="text-[14px] text-red-500">
-                    {errors.password?.message}
-                  </p>
-                </div>
 
-                {submitError ? (
-                  <p className="text-[14px] text-red-500">{submitError}</p>
-                ) : null}
+                  {submitError && (
+                    <p className="text-xs text-red-500">{submitError}</p>
+                  )}
 
-                {successMessage ? (
-                  <p className="text-[14px] text-green-600 text-center">
-                    {successMessage}
-                  </p>
-                ) : null}
+                  {successMessage && (
+                    <p className="text-xs text-green-600 text-center">
+                      {successMessage}
+                    </p>
+                  )}
 
-                <div className="flex items-end justify-end">
+                  <button
+                    className="bg-cta-color text-white font-medium py-3.75 px-24 rounded-[14px] disabled:opacity-70 text-sm gradient-button"
+                    type="submit"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "Signing In..." : "Sign In"}
+                  </button>
+
                   <Link
-                    className="text-right text-[14px]"
+                    className="text-center text-cta-color font-medium text-sm"
                     href="/forgot-password"
                   >
                     Forgot Password?
                   </Link>
-                </div>
-                <div className="flex flex-col gap-1 justify-center items-center">
-                  <button
-                    className="bg-primary text-white font-medium py-3.75 px-24 rounded-[40px] disabled:opacity-70"
-                    type="submit"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? "Logging In..." : "Log In"}
-                  </button>
 
                   <Link
-                    className="text-[14px] text-center text-[#4C5F66]"
+                    className=" text-center text-text-primary font-medium text-sm"
                     href="/signup"
                   >
                     Don't have an account?{" "}
-                    <span className="font-medium text-black">Sign Up</span>
+                    <span className="font-medium text-cta-color">Sign Up</span>
                   </Link>
                 </div>
-                <div className=""></div>
-                <div className=""></div>
               </div>
             </form>
           </div>

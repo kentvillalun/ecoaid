@@ -8,6 +8,7 @@ import {
   BuildingOffice2Icon,
   UserIcon,
   AtSymbolIcon,
+  ArrowLeftIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -19,6 +20,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { Page } from "@/components/layout/Page";
 import { API_BASE_URL } from "@/lib/config";
 import { DesktopGuard } from "@/components/ui/DesktopGuard";
+import Image from "next/image";
 
 // Defined outside the component so it never gets recreated on re-render
 const inter = Inter({
@@ -317,7 +319,7 @@ export default function SignupPage() {
   return (
     <>
       <DesktopGuard />
-      <Page gradient={true} className="from-10%! lg:hidden">
+      <Page className="bg-new-bg! lg:hidden">
         {isTermsOpen && (
           <section className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
             <TermsModal
@@ -326,94 +328,142 @@ export default function SignupPage() {
             />
           </section>
         )}
-        <div className="w-full max-w-md min-h-svh flex flex-col justify-between px-1">
-          <div className=""></div>
-          <div className=""></div>
 
-          <div className="flex justify-end items-end">
-            <img
-              src="/onboarding/Ecoprofit logo.svg"
-              alt="EcoProfit Logo"
-              className="aspect-4/2 object-cover"
-            />
-          </div>
-
+        <div className="min-w-full flex flex-col justify-end mt-10">
           <form
-            className="mx-1 mt-2 bg-white p-8 rounded-t-[20px] flex flex-col gap-4 max-w-full"
+            className="min-h-auto bg-white p-8 rounded-t-4xl flex flex-col relative justify-center max-w-full"
             onSubmit={handleSubmit(onSubmit)}
           >
-            <div className="flex flex-col gap-8">
-              <h3 className={`font-semibold text-[20px] ${inter.className}`}>
-                Sign Up
-              </h3>
+            <div className="-top-6 left-6 absolute rounded-full bg-new-primary w-16 h-16 flex items-center justify-center">
+              <div className="w-8 relative aspect-square ">
+                <Image
+                  src="/ecoaid-logo/ecoaid-green-logo.svg"
+                  alt="EcoAid logo"
+                  fill
+                  priority
+                  loading="eager"
+                />
+              </div>
+            </div>
 
-              <div className="flex flex-col gap-2 text-[#717680]">
+            <div className="flex flex-col w-full relative justify-center md:max-w-xl mx-auto">
+              <div className="flex flex-row gap-4 h-full w-full items-center mt-10">
+                <button className="" onClick={() => {
+                  history.back()
+                  sessionStorage.setItem("skipSplash", "true");
+                }} type="button">
+                  <ArrowLeftIcon className="w-7 stroke-cta-color" />
+                </button>
+                <h3 className="font-semibold text-2xl">Create Account</h3>
+              </div>
+
+              <div className="flex flex-col gap-4 text-[#717680] my-10">
                 {/* First name */}
-                <div className="flex flex-row gap-3.25 border-b border-[#E7E3E0] p-2.5">
-                  <UserIcon className="h-5.75 w-5.75 shrink-0 stroke-[#4C5F66]" />
-                  <input
-                    type="text"
-                    placeholder="First name"
-                    className="outline-none max-w-full w-full min-w-0"
-                    {...register("firstName")}
-                  />
-                </div>
-                <p className="text-[14px] text-red-500">
-                  {errors.firstName?.message}
-                </p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-2">
+                    <label
+                      htmlFor="fname"
+                      className="text-base text-text-primary font-medium"
+                    >
+                      First name
+                    </label>
+                    <input
+                      id="fname"
+                      type="text"
+                      placeholder="Juan"
+                      className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors text-base"
+                      {...register("firstName")}
+                    />
+                    {errors.firstName?.message && (
+                      <p className="text-xs text-red-500">
+                        {errors.firstName?.message}
+                      </p>
+                    )}
+                  </div>
 
-                {/* Last name */}
-                <div className="flex flex-row gap-3.25 border-b border-[#E7E3E0] p-2.5">
-                  <UserIcon className="h-5.75 w-5.75 shrink-0 stroke-[#4C5F66]" />
-                  <input
-                    type="text"
-                    placeholder="Last name"
-                    className="outline-none max-w-full w-full min-w-0"
-                    {...register("lastName")}
-                  />
+                  {/* Last name */}
+                  <div className="flex flex-col gap-2">
+                    <label
+                      htmlFor="lname"
+                      className="text-base text-text-primary font-medium"
+                    >
+                      Last name
+                    </label>
+                    <input
+                      id="lname"
+                      type="text"
+                      placeholder="Dela Cruz"
+                      className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors text-base"
+                      {...register("lastName")}
+                    />
+                    {errors.lastName?.message && (
+                      <p className="text-xs text-red-500">
+                        {errors.lastName?.message}
+                      </p>
+                    )}
+                  </div>
                 </div>
-                <p className="text-[14px] text-red-500">
-                  {errors.lastName?.message}
-                </p>
 
                 {/* Username */}
-                <div className="flex flex-row gap-3.25 border-b border-[#E7E3E0] p-2.5">
-                  <AtSymbolIcon className="h-5.75 w-5.75 shrink-0 stroke-[#4C5F66]" />
+                <div className="flex flex-col gap-2">
+                  <label
+                    htmlFor="username"
+                    className="text-text-primary text-base font-medium"
+                  >
+                    Username
+                  </label>
                   <input
+                    id="username"
                     type="text"
-                    placeholder="Username"
-                    className="outline-none max-w-full w-full min-w-0"
+                    placeholder="juandelacruz123"
+                    className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors text-base"
                     {...register("username")}
                   />
+                  {errors.username?.message && (
+                    <p className="text-xs text-red-500">
+                      {errors.username?.message}
+                    </p>
+                  )}
                 </div>
-                <p className="text-[14px] text-red-500">
-                  {errors.username?.message}
-                </p>
 
                 {/* Phone number */}
-                <div className="flex flex-row gap-3.25 border-b border-[#E7E3E0] p-2.5">
-                  <PhoneIcon className="h-5.75 w-5.75 shrink-0 stroke-[#4C5F66]" />
+                <div className="flex flex-col gap-2">
+                  <label
+                    htmlFor="contact"
+                    className="text-text-primary text-base font-medium"
+                  >
+                    Phone number
+                  </label>
 
                   <input
+                    id="contact"
                     type="text"
-                    placeholder="Phone number"
-                    className="outline-none max-w-full w-full min-w-0"
+                    placeholder="09xxxxxxxxx"
+                    className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors text-base"
                     {...register("phoneNumber")}
                   />
+                  {errors.phoneNumber?.message && (
+                    <p className="text-xs text-red-500">
+                      {errors.phoneNumber?.message}
+                    </p>
+                  )}
                 </div>
-                <p className="text-[14px] text-red-500">
-                  {errors.phoneNumber?.message}
-                </p>
 
                 {/* Barangay */}
                 <input type="hidden" {...register("barangayId")} />
                 <div className="relative">
-                  <div className="flex flex-row gap-3.25 border-b border-[#E7E3E0] p-2.5">
-                    <BuildingOffice2Icon className="h-5.75 w-5.75 shrink-0 stroke-[#4C5F66]" />
+                  <div className="flex flex-col gap-2">
+                    <label
+                      htmlFor="barangay"
+                      className="text-text-primary text-base font-medium"
+                    >
+                      Barangay
+                    </label>
                     <input
                       type="text"
-                      placeholder="Barangay"
-                      className="outline-none max-w-full w-full min-w-0"
+                      id="barangay"
+                      placeholder="Input your barangay name"
+                      className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors text-base"
                       autoComplete="off"
                       value={barangayQuery}
                       {...register("barangayName")}
@@ -427,19 +477,26 @@ export default function SignupPage() {
                         setTimeout(() => setShowSuggestions(false), 150)
                       }
                     />
+                    {(errors.barangayName?.message ||
+                      errors.barangayId?.message) && (
+                      <p className="text-xs text-red-500">
+                        {errors.barangayName?.message ??
+                          errors.barangayId?.message}
+                      </p>
+                    )}
                   </div>
 
                   {/* Dropdown will go here */}
                   {showSuggestions && barangayQuery.trim() && (
-                    <div className="absolute left-0 right-0 top-full z-20 mt-2 rounded-xl border border-[#E7E3E0] bg-white py-2 shadow-lg">
+                    <div className="absolute left-0 right-0 top-full z-20 rounded-xl border border-[#E7E3E0] bg-white py-2 shadow-lg">
                       {isBarangayLoading && (
-                        <p className="px-4 py-2 text-[14px] text-[#4C5F66]">
+                        <p className="px-4 py-2 text-xs text-text-primary">
                           Loading barangays...
                         </p>
                       )}
 
                       {!isBarangayLoading && barangayError && (
-                        <p className="px-4 py-2 text-[14px] text-red-500">
+                        <p className="px-4 py-2 text-xs text-red-500">
                           {barangayError}
                         </p>
                       )}
@@ -447,7 +504,7 @@ export default function SignupPage() {
                       {!isBarangayLoading &&
                         !barangayError &&
                         barangayOptions.length === 0 && (
-                          <p className="px-4 py-2 text-[14px] text-[#4C5F66]">
+                          <p className="px-4 py-2 text-xs text-[#4C5F66]">
                             No registered barangays found.
                           </p>
                         )}
@@ -463,7 +520,7 @@ export default function SignupPage() {
                           >
                             <span>{barangay.name}</span>
                             {barangay.city && (
-                              <span className="text-[#A3A3A3] ml-1 text-[12px]">
+                              <span className="text-[#A3A3A3] ml-1 text-xs">
                                 — {barangay.city}
                               </span>
                             )}
@@ -472,137 +529,157 @@ export default function SignupPage() {
                     </div>
                   )}
                 </div>
-                <p className="text-[14px] text-red-500">
-                  {errors.barangayName?.message ?? errors.barangayId?.message}
-                </p>
 
                 {/* Sitio */}
-                <div className="flex flex-row gap-3.25 border-b border-[#E7E3E0] p-2.5">
-                  <MapPinIcon className="h-5.75 w-5.75 shrink-0 stroke-[#4C5F66]" />
-                  <select
-                    className="outline-none max-w-full w-full min-w-0 bg-transparent disabled:text-[#A3A3A3]"
-                    defaultValue=""
-                    disabled={!selectedBarangay?.id || isSitioLoading}
-                    {...register("sitioId")}
-                    onChange={(e) => {
-                      clearErrors("sitioId");
-                      setSubmitError("");
-                    }}
+                <div className="flex flex-col gap-2">
+                  <label
+                    htmlFor="sitio"
+                    className="text-text-primary text-base font-medium"
                   >
-                    <option value="" disabled hidden>
-                      {!selectedBarangay?.id
-                        ? "Select barangay first"
-                        : isSitioLoading
-                          ? "Loading sitios..."
-                          : "Select Sitio/Purok"}
-                    </option>
-
-                    {sitioOptions.map((sitio) => (
-                      <option key={sitio.id} value={sitio.id}>
-                        {sitio.name}
+                    Sitio
+                  </label>
+                  <div className="px-2 w-full outline-1 py-2.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors text-base disabled:bg-gray-100">
+                    <select
+                      id="sitio"
+                      className=" w-full outline-none"
+                      defaultValue=""
+                      disabled={!selectedBarangay?.id || isSitioLoading}
+                      {...register("sitioId")}
+                      onChange={(e) => {
+                        clearErrors("sitioId");
+                        setSubmitError("");
+                      }}
+                    >
+                      <option value="" disabled hidden>
+                        {!selectedBarangay?.id
+                          ? "Select barangay first"
+                          : isSitioLoading
+                            ? "Loading sitios..."
+                            : "Select your sitio or purok"}
                       </option>
-                    ))}
-                  </select>
+
+                      {sitioOptions.map((sitio) => (
+                        <option key={sitio.id} value={sitio.id}>
+                          {sitio.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {errors.sitioId?.message && (
+                    <p className="text-xs text-red-500">
+                      {errors.sitioId?.message}
+                    </p>
+                  )}
                 </div>
-                <p className="text-[14px] text-red-500">
-                  {errors.sitioId?.name}
-                </p>
 
                 {/* Password */}
-                <div className="flex flex-row gap-3.25 border-b border-[#E7E3E0] p-2.5 justify-between">
-                  <div className="flex flex-row gap-3 flex-1 min-w-0">
-                    <LockClosedIcon className="h-5.75 w-5.75 shrink-0 stroke-[#4C5F66]" />
+                <div className="flex flex-col gap-2">
+                  <label
+                    htmlFor="password"
+                    className="text-text-primary text-base font-medium"
+                  >
+                    Password
+                  </label>
+                  <div className="flex flex-row items-center justify-between outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors text-base">
                     <input
                       type={showPassword ? "text" : "password"}
-                      placeholder="Password"
-                      className="outline-none w-full min-w-0 max-w-40 md:max-w-full"
+                      placeholder="Input your password"
+                      className="outline-none w-full min-w-0 md:max-w-full flex-1"
+                      id="password"
                       {...register("password")}
                     />
+                    <button
+                      type="button"
+                      className="hover:cursor-pointer shrink-0"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                    >
+                      {showPassword ? "Hide" : "Show"}
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    className="hover:cursor-pointer shrink-0"
-                    onClick={() => setShowPassword((prev) => !prev)}
-                  >
-                    {showPassword ? "Hide" : "Show"}
-                  </button>
+                  {errors.password?.message && (
+                    <p className="text-xs text-red-500">
+                      {errors.password?.message}
+                    </p>
+                  )}
                 </div>
-                <p className="text-[14px] text-red-500">
-                  {errors.password?.message}
-                </p>
 
                 {/* Confirm password */}
-                <div className="flex flex-row gap-3.25 border-b border-[#E7E3E0] p-2.5 justify-between">
-                  <div className="flex flex-row gap-3 flex-1 min-w-0">
-                    <LockClosedIcon className="h-5.75 w-5.75 shrink-0 stroke-[#4C5F66]" />
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="confirmPassword" className="text-base text-text-primary font-medium">
+                    Confirm password
+                  </label>
+                  <div className="flex flex-row items-center justify-between outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors text-base">
                     <input
                       type={showConfirmPassword ? "text" : "password"}
-                      placeholder="Confirm Password"
-                      className="outline-none w-full min-w-0 max-w-40 md:max-w-full"
+                      placeholder="Input your password"
+                      className="outline-none w-full min-w-0 md:max-w-full flex-1"
+                      id="confirmPassword"
                       {...register("confirmPassword")}
                     />
+                    <button
+                      type="button"
+                      className="hover:cursor-pointer shrink-0"
+                      onClick={() => setShowConfirmPassword((prev) => !prev)}
+                    >
+                      {showConfirmPassword ? "Hide" : "Show"}
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    className="hover:cursor-pointer shrink-0"
-                    onClick={() => setShowConfirmPassword((prev) => !prev)}
-                  >
-                    {showConfirmPassword ? "Hide" : "Show"}
-                  </button>
+                  {errors.confirmPassword?.message && (
+                    <p className="text-[14px] text-red-500">
+                      {errors.confirmPassword?.message}
+                    </p>
+                  )}
                 </div>
-                <p className="text-[14px] text-red-500">
-                  {errors.confirmPassword?.message}
-                </p>
 
                 {/* Terms */}
-                <div className="ml-1 flex flex-row gap-3.25 p-2.25 justify-start items-center">
+                <div className=" flex flex-row gap-3.25 p-2.25 pl-0 justify-start items-center">
                   <input
                     type="checkbox"
                     className="h-4.25 w-4.25 shrink-0"
                     {...register("termsAccepted")}
                   />
                   <p
-                    className="px-1 text-[13px] text-[#4C5F66]"
+                    className="px-1 text-[13px] text-text-primary"
                     onClick={() => setIsTermsOpen(true)}
                   >
                     I accept{" "}
-                    <span className="font-medium text-black">
+                    <span className="font-medium text-cta-color">
                       Terms & conditions
                     </span>{" "}
                     and{" "}
-                    <span className="font-medium text-black">
+                    <span className="font-medium text-cta-color">
                       Privacy policy.
                     </span>
                   </p>
                 </div>
-                <p className="text-[14px] text-red-500">
+                <p className="text-xs text-red-500">
                   {errors.termsAccepted?.message}
                 </p>
 
                 {submitError && (
-                  <p className="text-[14px] text-red-500">{submitError}</p>
+                  <p className="text-xs text-red-500">{submitError}</p>
                 )}
                 {/* error will go here */}
               </div>
             </div>
 
-            <div className="flex flex-col gap-2.5 justify-center items-center">
+            <div className="flex flex-col gap-6 justify-center w-full md:max-w-xl mx-auto mb-15">
               <button
-                className="bg-primary text-white font-medium py-3.75 px-20 rounded-[40px] max-w-63.75"
+                className="bg-cta-color text-white font-medium py-3.75 px-24 rounded-[14px] disabled:opacity-70 text-sm gradient-button"
                 type="submit"
               >
-                Sign Up
+                Create Account
               </button>
 
               <Link
-                className="text-[14px] text-center text-[#4C5F66]"
+                className="text-sm text-center text-text-primary"
                 href="/login"
                 onClick={() => {
                   sessionStorage.setItem("skipSplash", "true");
                 }}
               >
                 Already have an account?{" "}
-                <span className="font-medium text-black">Log In</span>
+                <span className="font-medium text-cta-color">Sign In</span>
               </Link>
             </div>
           </form>

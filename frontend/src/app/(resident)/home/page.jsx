@@ -33,7 +33,7 @@ export default function HomePage() {
   const [refetchCount, setRefetchCount] = useState(0);
   const url = `/api/resident/me`;
   const { isLoading, data, isError } = useFetch({ url, refetchCount });
-  const router = useRouter()
+  const router = useRouter();
 
   const [requestsRefetchCount, setRequestsRefetchCount] = useState(0);
   const requestsUrl = `/api/pickup-requests/my-requests?limit=3`;
@@ -45,13 +45,18 @@ export default function HomePage() {
 
   const handleRefetchCount = () => setRequestsRefetchCount((prev) => prev + 1);
 
-
-
   return (
     <Page gradient={true}>
-      <header className="flex flex-row items-start justify-between min-w-full max-h-18.75 bg-white fixed top-0 p-5 shadow-lg z-50">
+      <header className="flex flex-row items-start justify-between min-w-full max-h-18.75 bg-new-bg fixed top-0 p-5 z-50">
         <div className="flex flex-row justify-between min-w-full ">
-          <Image src="/logo-solo.svg" width={32} height={38} alt="Logo" />
+          <div className="max-w-40 relative w-full aspect-3/1">
+            <Image
+              src="/ecoaid-logo/white-logo-wordmark.svg"
+              alt="EcoAid logo"
+              fill
+              priority
+            />
+          </div>
           <Link href={"/announcements"}>
             <BellIcon className="w-7.25 h-7.25" />
           </Link>
@@ -79,7 +84,8 @@ export default function HomePage() {
                 Hi, {data?.user?.firstName} 👋
               </p>
               <p className="text-sm">
-                Contribute your recyclables to {data?.user?.barangay}, {data?.user?.municipality}, {data?.user?.province}    
+                Contribute your recyclables to {data?.user?.barangay},{" "}
+                {data?.user?.municipality}, {data?.user?.province}
               </p>
             </div>
           )}
@@ -195,7 +201,13 @@ export default function HomePage() {
                     </div>
                     <div className="flex flex-col items-end gap-2">
                       <Pill type={r.status} />
-                      <MaterialPill type={r?.isAssorted === true ? "Assorted" : r?.material?.category?.name}/>
+                      <MaterialPill
+                        type={
+                          r?.isAssorted === true
+                            ? "Assorted"
+                            : r?.material?.category?.name
+                        }
+                      />
                     </div>
                   </div>
 
@@ -203,7 +215,9 @@ export default function HomePage() {
                   <div className="flex flex-row items-end justify-end w-full pt-2 border-t border-gray-100">
                     <p className="text-xs text-gray-400">
                       Est. {r.estimatedValue}{" "}
-                      <span className="lowercase">{r.estimatedUnit === "PIECE" ? "pcs" : r.estimatedUnit}</span>
+                      <span className="lowercase">
+                        {r.estimatedUnit === "PIECE" ? "pcs" : r.estimatedUnit}
+                      </span>
                     </p>
                   </div>
                 </Card>

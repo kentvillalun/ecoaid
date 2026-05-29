@@ -5,6 +5,9 @@
   --color-new-primary: #092517;
   --color-text-primary: #1a1a1a;
   --color-cta-color: #14532D;
+  --breakpoint-xs: 360px;
+  --breakpoint-mobile: 390px;
+  --color-new-bg: #F8F8F8;
 }
 
 .sidebar {
@@ -15,4 +18,8 @@
 html,
 body {
   overscroll-behavior: none;
+}
+
+.gradient-button {
+  background-image: linear-gradient(to bottom, #1f7a42, #14532D);
 }

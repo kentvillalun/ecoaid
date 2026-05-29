@@ -1,7 +1,6 @@
 "use client";
 
-import { Inter } from "next/font/google";
-import { PhoneIcon } from "@heroicons/react/24/outline";
+import { ArrowLeftIcon, PhoneIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { Page } from "@/components/layout/Page";
 import { useState } from "react";
@@ -11,11 +10,7 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { API_BASE_URL } from "@/lib/config";
 import { DesktopGuard } from "@/components/ui/DesktopGuard";
-
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
+import Image from "next/image";
 
 const schema = yup.object().shape({
   phoneNumber: yup.string().required("Phone number is required"),
@@ -62,71 +57,75 @@ export default function ForgotPasswordPage() {
     <>
       <DesktopGuard />
 
-      <Page gradient={true} className="lg:hidden">
-        <div
-          className={`w-full max-w-md min-h-svh flex flex-col justify-between px-1 ${inter.className}`}
-        >
-          <div className=""></div>
-          <div className=""></div>
-
-          <div className="flex justify-end items-end">
-            <img
-              src="/onboarding/Ecoprofit logo.svg"
-              alt="EcoProfit Logo"
-              className="aspect-4/2 object-cover"
-            />
-          </div>
-
+      <Page className="lg:hidden bg-new-bg">
+        <div className={`min-w-full flex flex-col justify-end`}>
           <form
-            className="mx-1 mt-2 bg-white p-8 rounded-t-[20px] flex flex-col gap-8 max-w-full"
+            className="min-h-auto bg-white p-8 rounded-t-4xl flex flex-col relative justify-center max-w-full"
             onSubmit={handleSubmit(onSubmit)}
           >
-            <h3 className="font-semibold text-[20px]">Forgot Password</h3>
+            <div className="-top-6 left-6 absolute rounded-full bg-new-primary w-16 h-16 flex items-center justify-center">
+              <div className="w-8 relative aspect-square ">
+                <Image
+                  src="/ecoaid-logo/ecoaid-green-logo.svg"
+                  alt="EcoAid logo"
+                  fill
+                  priority
+                  loading="eager"
+                />
+              </div>
+            </div>
 
-            <div className="flex flex-col gap-6">
-              <div className="flex flex-col gap-2">
-                <div className="flex flex-row gap-3 border-b border-[#E7E3E0] p-2.5">
-                  <PhoneIcon className="h-6 w-6 shrink-0 stroke-[#4C5F66]" />
-                  <input
-                    type="text"
-                    placeholder="Phone number"
-                    className="outline-none w-full min-w-0 max-w-full"
-                    {...register("phoneNumber")}
-                  />
-                </div>
-                <p className="text-[14px] text-red-500">
-                  {errors.phoneNumber?.message}
-                </p>
+            <div className="flex flex-col w-full relative justify-center md:max-w-xl mx-auto mb-40">
+              <div className="flex flex-row gap-4 h-full w-full items-center mt-10">
+                <button
+                  className=""
+                  onClick={() => {
+                    history.back();
+                    sessionStorage.setItem("skipSplash", "true");
+                  }}
+                  type="button"
+                >
+                  <ArrowLeftIcon className="w-7 stroke-cta-color" />
+                </button>
+                <h3 className="font-semibold text-2xl">Forgot Password</h3>
               </div>
 
-              {submitError && (
-                <p className="text-[14px] text-red-500">{submitError}</p>
-              )}
-            </div>
+              <div className="flex flex-col gap-4 text-[#717680] my-10">
+                <div className="flex flex-col gap-2">
+                  <label
+                    htmlFor="contact"
+                    className="text-base text-text-primary font-medium"
+                  >
+                    Phone number
+                  </label>
+                  <input
+                    id="contact"
+                    type="text"
+                    placeholder="09xxxxxxxxx"
+                    className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors text-base"
+                    {...register("phoneNumber")}
+                  />
+                  {errors.phoneNumber?.message && (
+                    <p className="text-xs text-red-500">
+                      {errors.phoneNumber?.message}
+                    </p>
+                  )}
+                </div>
 
-            <div className="flex flex-col gap-1.25 justify-center items-center">
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="bg-primary text-white font-medium py-4 px-24 rounded-[40px] max-w-63.75 disabled:opacity-50"
-              >
-                {isSubmitting ? "Sending..." : "Submit"}
-              </button>
-
-              <Link
-                className="text-[14px] text-center text-[#4C5F66]"
-                href="/login"
-                onClick={() => {
-                  sessionStorage.setItem("skipSplash", "true");
-                }}
-              >
-                Back to <span className="font-medium text-black">Log In</span>
-              </Link>
+                {submitError && (
+                  <p className="text-xs text-red-500">{submitError}</p>
+                )}
+              </div>
+              <div className="flex flex-col gap-4 ">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="bg-cta-color text-white font-medium py-3.75 px-24 rounded-[14px] disabled:opacity-70 text-sm gradient-button"
+                >
+                  {isSubmitting ? "Sending..." : "Submit"}
+                </button>
+              </div>
             </div>
-            <div className=""></div>
-            <div className=""></div>
-            <div className=""></div>
-            <div className=""></div>
           </form>
         </div>
       </Page>

@@ -11,6 +11,7 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { API_BASE_URL } from "@/lib/config";
 import { DesktopGuard } from "@/components/ui/DesktopGuard";
+import Image from "next/image";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -103,104 +104,109 @@ export default function ResetPasswordPage() {
   return (
     <>
       <DesktopGuard />
-      <Page gradient={true} className="lg:hidden">
-        <div
-          className={`w-full max-w-md min-h-svh flex flex-col justify-between px-1 ${inter.className}`}
-        >
-          <div className=""></div>
-          <div className=""></div>
-
-          <div className="flex justify-end items-end">
-            <img
-              src="/onboarding/Ecoprofit logo.svg"
-              alt="EcoProfit Logo"
-              className="aspect-4/2 object-cover"
-            />
-          </div>
-
+      <Page className="lg:hidden bg-new-bg!">
+        <div className={`min-w-full flex flex-col justify-end`}>
           <form
-            className="mx-1 mt-2 bg-white p-8 rounded-t-[20px] flex flex-col gap-8 max-w-full"
+            className="min-h-auto bg-white p-8 rounded-t-4xl flex flex-col relative justify-center max-w-full"
             onSubmit={handleSubmit(onSubmit)}
           >
-            <h3 className="font-semibold text-[20px]">Reset Password</h3>
+            <div className="-top-6 left-6 absolute rounded-full bg-new-primary w-16 h-16 flex items-center justify-center">
+              <div className="w-8 relative aspect-square ">
+                <Image
+                  src="/ecoaid-logo/ecoaid-green-logo.svg"
+                  alt="EcoAid logo"
+                  fill
+                  priority
+                  loading="eager"
+                />
+              </div>
+            </div>
 
-            <div className="flex flex-col gap-6 text-[#717680]">
-              <div className="flex flex-col gap-2">
-                <div className="flex flex-row gap-3.25 border-b border-[#E7E3E0] p-2.5 justify-between">
-                  <div className="flex flex-row gap-3 flex-1 min-w-0">
-                    <LockClosedIcon className="h-6 w-6 shrink-0 stroke-[#4C5F66]" />
+            <div className="flex flex-col w-full relative justify-center md:max-w-xl mx-auto">
+              <h3 className="font-semibold text-2xl mt-10">Reset Password</h3>
+
+              <div className="flex flex-col gap-6 text-[#717680] my-10">
+                <div className="flex flex-col gap-2">
+                  <label
+                    htmlFor="newPassword"
+                    className="text-text-primary text-base font-medium"
+                  >
+                    New Password
+                  </label>
+                  <div className="flex flex-row justify-between outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors text-base">
                     <input
                       type={showPassword ? "text" : "password"}
-                      placeholder="New password"
-                      className="outline-none w-full min-w-0 max-w-40 md:max-w-full"
+                      placeholder="Input your new password"
+                      id="newPassword"
+                      className="outline-none w-full min-w-0 md:max-w-full flex-1 text-base"
                       {...register("password")}
                     />
+                    <button
+                      type="button"
+                      className="hover:cursor-pointer"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                    >
+                      {showPassword ? "Hide" : "Show"}
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    className="hover:cursor-pointer"
-                    onClick={() => setShowPassword((prev) => !prev)}
-                  >
-                    Show
-                  </button>
-                </div>
-                <p className="text-[14px] text-red-500">
-                  {errors.password?.message}
-                </p>
-              </div>
 
-              <div className="flex flex-col gap-2">
-                <div className="flex flex-row gap-3.25 border-b border-[#E7E3E0] p-2.5 justify-between">
-                  <div className="flex flex-row gap-3 flex-1 min-w-0">
-                    <LockClosedIcon className="h-6 w-6 shrink-0 stroke-[#4C5F66]" />
+                  {errors.password?.message && (
+                    <p className="text-xs text-red-500">
+                      {errors.password?.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="" className="text-base text-text-primary font-medium">
+                      Confirm new password
+                    </label>
+                  <div className="flex flex-row justify-between outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors text-base">
                     <input
                       type={showConfirmPassword ? "text" : "password"}
                       placeholder="Confirm new password"
-                      className="outline-none w-full min-w-0 max-w-40 md:max-w-full"
+                      className="outline-none w-full min-w-0 md:max-w-full text-base flex-1"
                       {...register("confirmPassword")}
                     />
+                    <button
+                      type="button"
+                      className="hover:cursor-pointer"
+                      onClick={() => setShowConfirmPassword((prev) => !prev)}
+                    >
+                      {showConfirmPassword ? "Hide" : "Show"}
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    className="hover:cursor-pointer"
-                    onClick={() => setShowConfirmPassword((prev) => !prev)}
-                  >
-                    Show
-                  </button>
+
+                  <p className="text-xs text-red-500">
+                    {errors.confirmPassword?.message}
+                  </p>
                 </div>
-                <p className="text-[14px] text-red-500">
-                  {errors.confirmPassword?.message}
-                </p>
+
+                {submitError && (
+                  <p className="text-xs text-red-500">{submitError}</p>
+                )}
               </div>
 
-              {submitError && (
-                <p className="text-[14px] text-red-500">{submitError}</p>
-              )}
-            </div>
+              <div className="flex flex-col gap-4 justify-center mb-15">
+                <button
+                  type="submit"
+                  disabled={isSubmitting || !resetToken}
+                  className="bg-cta-color text-white font-medium py-3.75 px-24 rounded-[14px] disabled:opacity-70 text-sm gradient-button"
+                >
+                  {isSubmitting ? "Resetting..." : "Reset Password"}
+                </button>
 
-            <div className="flex flex-col gap-1.25 justify-center items-center">
-              <button
-                type="submit"
-                disabled={isSubmitting || !resetToken}
-                className="bg-primary text-white font-medium py-4 px-24 rounded-[40px] disabled:opacity-50 text-center"
-              >
-                {isSubmitting ? "Resetting..." : "Reset Password"}
-              </button>
-
-              <Link
-                className="text-[14px] text-center text-[#4C5F66]"
-                href="/login"
-                onClick={() => {
-                  sessionStorage.setItem("skipSplash", "true");
-                }}
-              >
-                Back to <span className="font-medium text-black">Log In</span>
-              </Link>
+                <Link
+                  className="text-sm text-center text-text-primary"
+                  href="/login"
+                  onClick={() => {
+                    sessionStorage.setItem("skipSplash", "true");
+                  }}
+                >
+                  Back to <span className="font-medium text-cta-color text-sm">Log In</span>
+                </Link>
+              </div>
             </div>
-            <div className=""></div>
-            <div className=""></div>
-            <div className=""></div>
-            <div className=""></div>
           </form>
         </div>
       </Page>
