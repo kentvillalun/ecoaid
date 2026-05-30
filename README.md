@@ -1,8 +1,8 @@
-# ECOPROFIT
+# ECOAID
 
-Turning Waste Materials into Worth Through a Community Buyback and Management Platform.
+A Web Recycling Waste Management System with Image Recognition
 
-ECOPROFIT is a barangay waste management system that allows residents to contribute recyclable materials and enables the barangay to manage collections, track inventory, run redemption programs, and monitor finances. Based on real operations in Barangay Beddeng Laud, Vigan City.
+ECOAID is a barangay waste management system that allows residents to contribute recyclable materials and enables the barangay to manage collections, track inventory, run redemption programs, and monitor finances. Based on real operations in Barangay Beddeng Laud, Vigan City.
 
 ---
 

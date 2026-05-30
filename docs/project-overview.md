@@ -1,13 +1,13 @@
 # Project Overview
 
 ## Title
-ECOPROFIT: Turning Waste Materials into Worth Through a Community Buyback and Management Platform
+EcoAid: A Web Recycling Waste Management System with Image Recognition
 
 ---
 
 ## Description
 
-ECOPROFIT is a system designed to automate the process of collecting, managing, and utilizing recyclable materials in a barangay.
+EcoAid is a system designed to automate the process of collecting, managing, and utilizing recyclable materials in a barangay.
 
 The system supports:
 - community participation in waste contribution
