@@ -6,7 +6,7 @@ export const Spinner = ({ className = "" }) => {
       className={`flex flex-col items-center justify-center min-h-full p-20 text-center ${className}`}
     >
       <div className="animate-spin">
-        <ArrowPathIcon className="w-9 stroke-[#74c857]" />
+        <ArrowPathIcon className="w-9 stroke-cta-color" />
       </div>
       <div className="">
         <p className="text-xl font-semibold text-[#1F2937]">

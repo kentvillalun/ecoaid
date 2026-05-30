@@ -12,7 +12,7 @@ export const StatusChip = ({ STATUS_TABS, currentTab, setCurrentTab }) => {
         const isActive = currentTab === tab.key;
         return (
           <button
-            className={`${inter.className}  py-2 px-4 font-medium rounded-lg ${isActive ? "bg-[#89D957] text-white" : "bg-[#89D95712] text-[#74C857]"} transition-all ease-in-out hover:cursor-pointer duration-300 text-nowrap ` }
+            className={`${inter.className}  py-2 px-4 font-medium rounded-lg ${isActive ? "bg-cta-color text-white" : "bg-cta-color/10 text-cta-color"} transition-all ease-in-out hover:cursor-pointer duration-300 text-nowrap new-border` }
             key={tab.key}
             onClick={() => setCurrentTab(tab.key)}
           >

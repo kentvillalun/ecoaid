@@ -14,15 +14,14 @@ export const TransactionCard = ({
   handleRefetchCount,
   program = null,
 }) => {
-
-  const router = useRouter()
+  const router = useRouter();
 
   return (
     <>
       {isLoading ? (
         Array.from({ length: 3 }).map((_, index) => (
           <Card
-            className={`flex flex-col md:hidden items-start gap-3`}
+            className={`flex flex-col md:hidden items-start gap-3 shadow-none! new-border`}
             key={index}
           >
             <div className="flex flex-row justify-between w-full">
@@ -50,9 +49,6 @@ export const TransactionCard = ({
         </div>
       ) : data?.transactions?.length === 0 ? (
         <div className="flex flex-col items-center justify-center min-h-full p-10 gap-1 md:hidden">
-          <p className="text-sm font-medium uppercase tracking-[0.2em] text-[#74C857]">
-            EcoProfit
-          </p>
           <h1 className="text-3xl font-semibold text-[#1F2937] text-center">
             No transactions yet
           </h1>
@@ -63,10 +59,10 @@ export const TransactionCard = ({
       ) : (
         data?.transactions?.map((d) => (
           <Card
-            className={`flex flex-col md:hidden items-start gap-3 ${program ? program?.isActive : d?.program?.isActive ? "" : "opacity-60"}`}
+            className={`flex flex-col md:hidden items-start gap-3 shadow-none! new-border ${program ? program?.isActive : d?.program?.isActive ? "" : "opacity-60"}`}
             key={d?.id}
             handleClick={() => {
-              router.push(`/redemption/transactions/${d?.id}`)
+              router.push(`/redemption/transactions/${d?.id}`);
             }}
           >
             <div className="flex flex-row justify-between w-full">

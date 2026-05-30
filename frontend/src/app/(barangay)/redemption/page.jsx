@@ -49,9 +49,9 @@ export default function RedemptionProgramPage() {
   const handleProgramRefetch = () => setRefetchCount((prev) => prev + 1);
 
   return (
-    <Page>
+    <Page className="bg-new-bg!">
       <BarangayTopBar title={"Redemption Management"} />
-      <PageContent className="bg-[#F3F3FF]! md:pl-80 md:p-6 md:gap-7">
+      <PageContent className=" md:pl-70! md:p-6 md:gap-7">
         <BarangayHeaderCard
           title={"Redemption Management"}
           subtitle={"Create and manage redemption programs and transactions"}
@@ -85,7 +85,7 @@ export default function RedemptionProgramPage() {
           <SectionHeader
             title={"Programs"}
             subtitle={"Active redemption programs"}
-            icon={<GiftIcon className="w-6 stroke-black" />}
+            icon={<GiftIcon className="w-6 stroke-cta-color" />}
             buttonLabel={"Add Program"}
             onAction={() => setIsProgramModalOpen(true)}
           />
@@ -106,7 +106,7 @@ export default function RedemptionProgramPage() {
             ) : (
               data?.programs.map((p) => (
                 <Card
-                  className={`flex flex-col gap-2 p-5! hover:-translate-y-0.5 transition-all duration-200 ease-in-out hover:cursor-pointer ${data?.programs?.length === 1 ? "items-center" : "items-start"}`}
+                  className={`flex shadow-none! new-border flex-col gap-2 p-5! hover:-translate-y-0.5 transition-all duration-200 ease-in-out hover:cursor-pointer ${data?.programs?.length === 1 ? "items-center" : "items-start"}`}
                   key={p.id}
                   handleClick={() =>
                     router.push(`/redemption/programs/${p.id}`)
@@ -156,7 +156,7 @@ export default function RedemptionProgramPage() {
           <SectionHeader
             title={"Transaction history"}
             subtitle={"All recorded redemptions"}
-            icon={<Bars3BottomLeftIcon className="w-6 stroke-black" />}
+            icon={<Bars3BottomLeftIcon className="w-6 stroke-cta-color" />}
             buttonLabel={"Record transaction"}
             onAction={() => setIsTransactionModalOpen(true)}
           />

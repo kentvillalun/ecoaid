@@ -29,9 +29,10 @@ export default function RequestDetails() {
 
   const [categoriesRefetchCount, setCategotiesRefetchCount] = useState(0);
   const { data: categoriesData } = useFetch({
-    url: `/api/material/categories`,
+    url: `/api/material/categories/barangay`,
     refetchCount: categoriesRefetchCount,
   });
+  console.log(categoriesData)
 
   const router = useRouter();
   const req = data?.request;
@@ -54,9 +55,9 @@ export default function RequestDetails() {
   ].filter((e) => e.show);
 
   return (
-    <Page gradient={true}>
+    <Page className="bg-new-bg!">
       <BarangayTopBar title={"Collection Request"} />
-      <PageContent className="md:pl-80 md:p-6 md:gap-7">
+      <PageContent className="md:pl-70! md:p-6 md:gap-7">
         <RequestDetailHeader type={status} />
 
         {isLoading ? (
@@ -73,8 +74,8 @@ export default function RequestDetails() {
             <div
               className={`grid grid-cols-1 md:grid-cols-2 gap-3 ${status !== "COLLECTED" ? "lg:grid-cols-2" : "lg:grid-cols-3"}`}
             >
-              <Card className="flex flex-col items-start gap-3">
-                <h3 className="font-semibold text-sm text-gray-600 border-b border-gray-100 pb-2 w-full">
+              <Card className="flex flex-col items-start gap-3 shadow-none! new-border">
+                <h3 className="font-semibold text-xs md:text-sm text-gray-600 border-b border-gray-100 pb-2 w-full">
                   Resident Information
                 </h3>
                 <LabelValue
@@ -89,7 +90,7 @@ export default function RequestDetails() {
               </Card>
 
               <Card className="flex flex-col items-start gap-3">
-                <h3 className="font-semibold text-sm text-gray-600 border-b border-gray-100 pb-2 w-full">
+                <h3 className="font-semibold text-xs md:text-sm text-gray-600 border-b border-gray-100 pb-2 w-full">
                   Request Information
                 </h3>
                 <LabelValue
@@ -124,7 +125,7 @@ export default function RequestDetails() {
 
               {status === "COLLECTED" && (
                 <Card className="flex flex-col items-start gap-3 md:col-span-2 lg:col-span-1">
-                  <h3 className="font-semibold text-sm text-gray-600 border-b border-gray-100 pb-2 w-full">
+                  <h3 className="font-semibold text-xs md:text-sm text-gray-600 border-b border-gray-100 pb-2 w-full">
                     Finalized Collection
                   </h3>
                   <div className="w-full flex flex-col gap-2">
@@ -164,7 +165,7 @@ export default function RequestDetails() {
 
             {/* Photo evidence */}
             <Card className="flex flex-col items-start gap-3">
-              <h3 className="font-semibold text-sm text-gray-600 border-b border-gray-100 pb-2 w-full">
+              <h3 className="font-semibold text-xs md:text-sm text-gray-600 border-b border-gray-100 pb-2 w-full">
                 Photo Evidence
               </h3>
               <div className="flex flex-col items-center justify-center border border-gray-200 rounded-lg w-full overflow-hidden md:max-h-80">
@@ -185,7 +186,7 @@ export default function RequestDetails() {
 
             {/* Timeline */}
             <Card className="flex flex-col items-start gap-3">
-              <h3 className="font-semibold text-sm text-gray-600 border-b border-gray-100 pb-2 w-full">
+              <h3 className="font-semibold text-xs md:text-sm text-gray-600 border-b border-gray-100 pb-2 w-full">
                 Timeline
               </h3>
               <div className="flex flex-col w-full">
@@ -212,7 +213,7 @@ export default function RequestDetails() {
             {/* Actions */}
             {status === "REQUESTED" ? (
               <Card className="flex flex-col gap-3 items-start">
-                <h3 className="font-semibold text-sm text-gray-600 border-b border-gray-100 pb-2 w-full">
+                <h3 className="font-semibold text-xs md:text-sm text-gray-600 border-b border-gray-100 pb-2 w-full">
                   Actions
                 </h3>
                 <PendingActions

@@ -28,7 +28,7 @@ export default function CollectionRequests() {
 
   const { updateStatus } = useUpdate()
   const [categoriesRefetchCount, setCategotiesRefetchCount] = useState(0)
-  const { data: categoriesData } = useFetch({ url: `/api/material/categories`, refetchCount: categoriesRefetchCount})
+  const { data: categoriesData } = useFetch({ url: `/api/material/categories/barangay`, refetchCount: categoriesRefetchCount})
 
 
   const [selectedApprovedRequests, setSelectedApprovedRequests] = useState([]);
@@ -90,9 +90,9 @@ export default function CollectionRequests() {
 
 
   return (
-    <Page>
+    <Page className="bg-new-bg!">
       <BarangayTopBar title="Collection Requests" />
-      <PageContent className="bg-[#F3F3FF]! md:pl-80 md:p-6 md:gap-7">
+      <PageContent className=" md:pl-70! md:p-6 md:gap-7">
         <BarangayHeaderCard
           title={"Collection Requests"}
           subtitle={
@@ -144,7 +144,7 @@ export default function CollectionRequests() {
         {currentTab === "APPROVED" && selectedApprovedRequests.length > 0 && (
           <div className="fixed bottom-6 left-4 right-4 z-20 md:left-auto md:right-6">
             <button
-              className="w-full rounded-2xl bg-primary px-5 py-4 text-white shadow-lg transition-all duration-200 hover:cursor-pointer hover:opacity-90 md:w-auto"
+              className="w-full rounded-2xl gradient-button px-5 py-4 text-white shadow-lg transition-all duration-200 hover:cursor-pointer hover:opacity-90 md:w-auto"
               onClick={handleBatchCollection}
             >
               Create Batch Collection ({selectedApprovedRequests.length})

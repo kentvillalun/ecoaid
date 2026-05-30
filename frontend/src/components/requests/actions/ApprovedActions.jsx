@@ -8,7 +8,7 @@ export const ApprovedActions = ({ id, onSuccess, variant }) => {
       className={` ${variant === "detail" ? "grid grid-cols-1 w-full" : "flex items-center gap-3 text-sm"}`}
     >
       <button
-        className={` ${variant === "detail" ? "bg-blue-500 py-2.5 rounded-lg text-white hover:cursor-pointer hover:bg-blue-600 transition-all duration-200 ease-in-out" : "text-blue-600 hover:underline"}`}
+        className={` ${variant === "detail" ? " py-2.5 rounded-xl text-white hover:cursor-pointer gradient-button-blue transition-all duration-200 ease-in-out" : "text-blue-600 hover:underline"}`}
         onClick={async () => {
           toast.loading("Scheduling request...");
           const success = await updateStatus({ id, status: "IN_PROGRESS" });

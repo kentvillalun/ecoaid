@@ -15,6 +15,7 @@ export const InProgressActions = ({
   isAssorted,
   categories,
 }) => {
+  
   const [isOpen, setIsOpen] = useState(false);
   const [actualValue, setActualValue] = useState(null);
   const [actualUnit, setActualUnit] = useState("KG");
@@ -86,7 +87,7 @@ export const InProgressActions = ({
   const handleCategoryChange = async (index, categoryId) => {
     updateItem(index, "categoryId", categoryId);
 
-    const response = await fetch(`/api/material?categoryId=${categoryId}`, {
+    const response = await fetch(`/api/material/barangay?categoryId=${categoryId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -115,7 +116,7 @@ export const InProgressActions = ({
             status={"IN_PROGRESS"}
             confirmLabel={"Confirm"}
             confirmClassName={
-              "bg-[#74C857] hover:bg-primary transition-all duration-200 ease-in-out"
+              "gradient-button transition-all duration-200 ease-in-out "
             }
             onClose={() => {
               setIsOpen(false);
@@ -146,13 +147,13 @@ export const InProgressActions = ({
                 {/* Labels */}
 
                 <div className="md:grid w-full grid-cols-3 gap-2 hidden">
-                  <label className="font-medium text-sm text-[#727272] px-2">
+                  <label className="font-medium text-base text-text-primary px-2">
                     Category
                   </label>{" "}
-                  <label className="font-medium text-sm text-[#727272] px-2">
+                  <label className="font-medium text-base text-text-primary  px-2">
                     Material
                   </label>{" "}
-                  <label className="font-medium text-sm text-[#727272] px-2">
+                  <label className="font-medium text-base text-text-primary  px-2">
                     Actual value and unit
                   </label>{" "}
                   
@@ -166,10 +167,10 @@ export const InProgressActions = ({
                       key={index}
                     >
                       <div className="flex flex-col gap-1">
-                        <label className="text-gray-700 font-semibol md:hidden">
+                        <label className="text-text-primary font-medium md:hidden">
                           Category
                         </label>
-                        <div className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-[#74C857] transition-colors">
+                        <div className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors">
                           <select
                             className="w-full outline-none"
                             onChange={(e) =>
@@ -190,10 +191,10 @@ export const InProgressActions = ({
                       </div>
 
                       <div className="flex flex-col gap-1">
-                        <label className="text-gray-700 font-semibol md:hidden">
+                        <label className="text-text-color font-medium md:hidden">
                           Material name
                         </label>
-                        <div className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-[#74C857] transition-colors">
+                        <div className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors">
                           <select
                             className="w-full outline-none"
                             onChange={(e) =>
@@ -216,12 +217,12 @@ export const InProgressActions = ({
 
                       <div className=" gap-2 grid grid-cols-2">
                         <div className="flex flex-col gap-1">
-                          <label className="text-gray-700 font-semibol md:hidden">
+                          <label className="text-text-primary font-medium md:hidden">
                             Actual value
                           </label>
                           <input
                             type="number"
-                            className=" focus-within:outline-[#74C857] px-2 py-2.5 rounded-lg outline-1 outline-gray-300 transition-colors"
+                            className=" focus-within:outline-cta-color px-2 py-2.5 rounded-lg outline-1 outline-gray-300 transition-colors"
                             placeholder="e.g. 1"
                             min={0}
                             onChange={(e) =>
@@ -235,12 +236,12 @@ export const InProgressActions = ({
                         </div>
 
                         <div className="flex flex-col gap-1">
-                          <label className="text-gray-700 font-semibol md:hidden">
-                            Actual value
+                          <label className="text-text-primary font-medium md:hidden">
+                            Actual Unit
                           </label>
 
                           <div className="flex flex-row items-center gap-4">
-                            <div className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-[#74C857] transition-colors flex-1">
+                            <div className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors flex-1">
                               <select
                                 className="w-full outline-none"
                                 onChange={(e) =>
@@ -286,10 +287,10 @@ export const InProgressActions = ({
               </div>
             ) : (
               <div className="flex flex-col gap-1 p-6">
-                <label className="font-medium text-sm text-[#727272] px-2">
+                <label className="font-medium text-base text-text-primary px-2">
                   Actual Value
                 </label>
-                <div className="outline-1 py-2.5 pl-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-[#74C857] transition-colors flex items-center justify-between">
+                <div className="outline-1 py-2.5 pl-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors flex items-center justify-between">
                   <div className="flex flex-row justify-center items-center w-full pr-4">
                     <input
                       type="number"
@@ -323,7 +324,7 @@ export const InProgressActions = ({
         )}
 
       <button
-        className={` ${variant === "detail" ? "py-2.5 text-white rounded-lg hover:cursor-pointer hover:bg-primary bg-[#74C857] transition-all duration-200 ease-in-out" : "text-green-600 hover:underline"}`}
+        className={` ${variant === "detail" ? "py-2.5 text-white rounded-xl hover:cursor-pointer gradient-button transition-all duration-200 ease-in-out" : "text-green-600 hover:underline"}`}
         onClick={() => setIsOpen((prev) => !prev)}
       >
         Complete

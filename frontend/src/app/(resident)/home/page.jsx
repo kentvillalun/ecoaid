@@ -137,7 +137,7 @@ export default function HomePage() {
 
         <Card
           customBorder="0.5px solid #e5e7eb"
-          className="shadow-none! bg-new-primary! relative flex flex-col gap-2 items-start p-4! overflow-clip"
+          className="shadow-none! gradient-card! relative flex flex-col gap-2 items-start p-4! overflow-clip"
         >
           <div className="absolute w-30 md:w-35 md:h-35 bg-cta-color/60 rounded-full h-30 -right-8 -top-8 md:-top-10 md:-right-10"></div>
           <div className="absolute w-25 md:w-35 md:h-35 bg-cta-color/50 rounded-full h-25 right-18 -bottom-12 md:right-45 md:-bottom-16"></div>

@@ -100,9 +100,9 @@ export default function ProgramDetails() {
   });
   const router = useRouter()
   return (
-    <Page gradient={true}>
+    <Page className="bg-new-bg!">
       <BarangayTopBar title={"Program Details"} />
-      <PageContent className="md:pl-80 md:p-6 gap-3">
+      <PageContent className="md:pl-70! md:p-6 gap-3">
         {isTransactionModalOpen &&
           createPortal(
             <RecordTransactionModal
@@ -140,7 +140,7 @@ export default function ProgramDetails() {
         />
 
         <SectionHeader
-          icon={<GiftIcon className="w-6 stroke-black" />}
+          icon={<GiftIcon className="w-6 stroke-cta-color" />}
           title={"Program Details"}
           subtitle={"Review program details and material points"}
           buttonLabel={"Edit Program"}
@@ -153,7 +153,7 @@ export default function ProgramDetails() {
           {/* Section 1 — Program Information */}
           {isLoading ? (
             <>
-              <Card className="flex flex-col items-start gap-3">
+              <Card className="flex flex-col items-start gap-3 shadow-none! new-border">
                 <h3 className="font-semibold text-sm text-gray-600 border-b border-gray-100 pb-2 w-full">
                   Program Information
                 </h3>
@@ -183,7 +183,7 @@ export default function ProgramDetails() {
                 </div>
               </Card>
 
-              <Card className="flex flex-col items-start gap-3">
+              <Card className="flex flex-col items-start gap-3 shadow-none! new-border">
                 <h3 className="font-semibold text-sm text-gray-600 border-b border-gray-100 pb-2 w-full">
                   Material Values
                 </h3>
@@ -204,7 +204,7 @@ export default function ProgramDetails() {
             </div>
           ) : (
             <>
-              <Card className="flex flex-col items-start gap-3">
+              <Card className="flex flex-col items-start gap-3 shadow-none! new-border">
                 <h3 className="font-semibold text-sm text-gray-600 border-b border-gray-100 pb-2 w-full">
                   Program Information
                 </h3>
@@ -236,7 +236,7 @@ export default function ProgramDetails() {
               </Card>
 
               {/* Section 2 — Material Points */}
-              <Card className="flex flex-col items-start gap-3">
+              <Card className="flex flex-col items-start gap-3 shadow-none! new-border">
                 <h3 className="font-semibold text-sm text-gray-600 border-b border-gray-100 pb-2 w-full">
                   Material Values
                 </h3>
@@ -273,7 +273,7 @@ export default function ProgramDetails() {
             <SectionHeader
               title={"Transaction History"}
               subtitle={"Redemption transactions under this program"}
-              icon={<Bars3BottomLeftIcon className="w-6 stroke-black" />}
+              icon={<Bars3BottomLeftIcon className="w-6 stroke-cta-color" />}
               buttonLabel={"Record Transaction"}
               onAction={() => setIsTransactionModalOpen(true)}
               buttonClassName={data?.program?.isActive ? "flex!" : "hidden!"}
@@ -281,7 +281,7 @@ export default function ProgramDetails() {
 
             {/* Desktop: table */}
             <Card
-              className={` hidden md:flex md:flex-col px-8 overflow-x-auto md:gap-3 md:items-start`}
+              className={` hidden md:flex md:flex-col px-8 overflow-x-auto md:gap-3 md:items-start shadow-none! new-border`}
             >
               <table className="w-full text-sm border-collapse text-nowrap">
                 <thead className="border-b border-[#E6EFF5]">

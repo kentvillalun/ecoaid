@@ -195,46 +195,46 @@ export const AddProgramModal = ({
       }
       confirmLabel={program ? "Edit Program" : "Create Program"}
       confirmClassName={
-        "bg-[#74C857] hover:bg-primary transition-all duration-200 ease-in-out"
+        "gradient-button transition-all duration-200 ease-in-out"
       }
       onConfirm={() => handleSubmit(onSubmit)()}
     >
       <div className="p-6 flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <label className="text-gray-700 font-medium">Program name</label>
+          <label className="text-text-primary font-medium">Program name</label>
           <input
             type="text"
-            className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-[#74C857] transition-colors min-h-11  max-h-11"
+            className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11  max-h-11"
             placeholder="Input the program name here"
             {...register("name")}
           />
           {errors.name && (
-            <p className="text-[14px] text-red-500 text-start">
+            <p className="text-xs text-red-500 text-start">
               {errors.name?.message}
             </p>
           )}
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-gray-700 font-medium">
+          <label className="text-text-primary font-medium">
             Program description
           </label>
           <textarea
             type="text"
-            className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-[#74C857] transition-colors"
+            className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors"
             placeholder="Input a short description about the program"
             {...register("description")}
             rows={4}
           ></textarea>
           {errors.description && (
-            <p className="text-[14px] text-red-500 text-start">
+            <p className="text-xs text-red-500 text-start">
               {errors.description?.message}
             </p>
           )}
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-gray-700 font-medium">Redemption mode</label>
+          <label className="text-text-primary font-medium">Redemption mode</label>
           <div className="grid grid-cols-2 gap-3">
             <input
               type="radio"
@@ -271,15 +271,15 @@ export const AddProgramModal = ({
           className={`grid gap-3 grid-cols-1`}
         >
           <div className="flex flex-col gap-1 ">
-            <label className="text-gray-700 font-medium">Allotted budget</label>
+            <label className="text-text-primary font-medium">Allotted budget</label>
             <input
               type="number"
-              className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-[#74C857] transition-colors min-h-11  max-h-11"
+              className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11  max-h-11"
               placeholder="Input budget here"
               {...register("allotedBudget")}
             />
             {errors.allotedBudget && (
-              <p className="text-[14px] text-red-500 text-start">
+              <p className="text-xs text-red-500 text-start">
                 {errors.allotedBudget?.message}
               </p>
             )}
@@ -289,12 +289,12 @@ export const AddProgramModal = ({
 
         <div className="flex flex-col gap-1">
           <div className="">
-            <label className="text-gray-700 font-medium">
+            <label className="text-text-primary font-medium">
               {isCashMode === true || isCashMode === "true"
                 ? "Materials and cash values"
                 : "Materials and point values"}
             </label>
-            <p className="text-gray-700 text-sm">
+            <p className="text-text-primary text-sm">
               {isCashMode === true || isCashMode === "true"
                 ? "Check materials to include and assign cash values. "
                 : "Check materials to include and assign point values. "}
@@ -304,7 +304,7 @@ export const AddProgramModal = ({
           <div className="grid md:grid-cols-2 grid-cols-1 gap-3 md:gap-5">
             <div className="flex flex-col gap-2">
               <label
-                className="pr-6 text-gray-400 capitalized"
+                className="pr-6 text-text-primary capitalized"
                 htmlFor="plastics"
               >
                 Plastics
@@ -333,7 +333,7 @@ export const AddProgramModal = ({
                     />
 
                     <div
-                      className="flex flex-row items-center justify-between flex-1 outline-1 py-2.5 px-3.5 rounded-lg text-[#717680] outline-gray-300 focus-within:outline-[#74C857]"
+                      className="flex flex-row items-center justify-between flex-1 outline-1 py-2.5 px-3.5 rounded-lg text-[#717680] outline-gray-300 focus-within:outline-cta-color"
                       onClick={(e) =>
                         e.currentTarget.querySelector("input")?.focus()
                       }
@@ -374,7 +374,7 @@ export const AddProgramModal = ({
 
             <div className="flex flex-col gap-2">
               <label
-                className="pr-6 text-gray-400 capitalized"
+                className="pr-6 text-text-primary capitalized"
                 htmlFor="plastics"
               >
                 Metals
@@ -403,7 +403,7 @@ export const AddProgramModal = ({
                     />
 
                     <div
-                      className="flex flex-row items-center justify-between flex-1 outline-1 py-2.5 px-3.5 rounded-lg text-[#717680] outline-gray-300 focus-within:outline-[#74C857]"
+                      className="flex flex-row items-center justify-between flex-1 outline-1 py-2.5 px-3.5 rounded-lg text-[#717680] outline-gray-300 focus-within:outline-cta-color"
                       onClick={(e) =>
                         e.currentTarget.querySelector("input")?.focus()
                       }
@@ -444,7 +444,7 @@ export const AddProgramModal = ({
 
             <div className="flex flex-col gap-2">
               <label
-                className="pr-6 text-gray-400 capitalized"
+                className="pr-6 text-text-primary capitalized"
                 htmlFor="plastics"
               >
                 Papers
@@ -473,7 +473,7 @@ export const AddProgramModal = ({
                     />
 
                     <div
-                      className="flex flex-row items-center justify-between flex-1 outline-1 py-2.5 px-3.5 rounded-lg text-[#717680] outline-gray-300 focus-within:outline-[#74C857]"
+                      className="flex flex-row items-center justify-between flex-1 outline-1 py-2.5 px-3.5 rounded-lg text-[#717680] outline-gray-300 focus-within:outline-cta-color"
                       onClick={(e) =>
                         e.currentTarget.querySelector("input")?.focus()
                       }
@@ -514,7 +514,7 @@ export const AddProgramModal = ({
 
             <div className="flex flex-col gap-2">
               <label
-                className="pr-6 text-gray-400 capitalized"
+                className="pr-6 text-text-primary capitalized"
                 htmlFor="plastics"
               >
                 Bottles
@@ -543,7 +543,7 @@ export const AddProgramModal = ({
                     />
 
                     <div
-                      className="flex flex-row items-center justify-between flex-1 outline-1 py-2.5 px-3.5 rounded-lg text-[#717680] outline-gray-300 focus-within:outline-[#74C857]"
+                      className="flex flex-row items-center justify-between flex-1 outline-1 py-2.5 px-3.5 rounded-lg text-[#717680] outline-gray-300 focus-within:outline-cta-color"
                       onClick={(e) =>
                         e.currentTarget.querySelector("input")?.focus()
                       }
@@ -584,7 +584,7 @@ export const AddProgramModal = ({
           </div>
 
           {errors.materials && (
-            <p className="text-[14px] text-red-500 text-start">
+            <p className="text-xs text-red-500 text-start">
               {errors.materials?.message}
             </p>
           )}
@@ -607,7 +607,7 @@ export const AddProgramModal = ({
                   Cancel
                 </button>
                 <button
-                  className={`py-2.5 rounded-lg text-white w-full items-center justify-center hover:cursor-pointer transition-all duration-200 ease-in-out ${program?.isActive ? "bg-red-400 hover:bg-red-500" : "bg-[#74C857] hover:bg-primary"}`}
+                  className={`py-2.5 rounded-lg text-white w-full items-center justify-center hover:cursor-pointer transition-all duration-200 ease-in-out ${program?.isActive ? "gradient-button-red" : "gradient-button"}`}
                   type="button"
                   onClick={async () => {
                     toast.loading(
@@ -649,7 +649,7 @@ export const AddProgramModal = ({
               </div>
             ) : (
               <button
-                className={`py-2.5 rounded-lg text-white w-full items-center justify-center hover:cursor-pointer transition-all duration-200 ease-in-out ${program?.isActive ? "bg-red-400 hover:bg-red-500" : "bg-[#74C857] hover:bg-primary"}`} type="button" onClick={() => setIsConfirming(prev => !prev)}
+                className={`py-2.5 rounded-lg text-white w-full items-center justify-center hover:cursor-pointer transition-all duration-200 ease-in-out ${program?.isActive ? "gradient-button-red" : "gradient-button"}`} type="button" onClick={() => setIsConfirming(prev => !prev)}
               >
                 {program?.isActive ? "Deactivate Program" : "Reactivate Program"}
               </button>

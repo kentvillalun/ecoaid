@@ -27,9 +27,9 @@ export default function TransactionDetailPage() {
   const handleRefetchCount = () => setRefetchCount((prev) => prev + 1);
 
   return (
-    <Page gradient={true}>
+    <Page className="bg-new-bg!">
       <BarangayTopBar title={"Transaction Details"} />
-      <PageContent className="md:pl-80 md:p-6 gap-3">
+      <PageContent className="md:pl-70! md:p-6 gap-3">
         <DetailHeader
           title={"Transaction Details"}
           subtitle={"Review full details of this redemption transaction"}
@@ -45,7 +45,7 @@ export default function TransactionDetailPage() {
         />
 
         <SectionHeader
-          icon={<GiftIcon className="w-6 stroke-black" />}
+          icon={<GiftIcon className="w-6 stroke-cta-color" />}
           title={"Transaction Details"}
           subtitle={"Review transaction information and redemption items"}
           noButton={true}
@@ -55,7 +55,7 @@ export default function TransactionDetailPage() {
         <div className="grid grid-cols-1 gap-3">
           {isLoading ? (
             <>
-              <Card className="flex flex-col items-start gap-3">
+              <Card className="flex flex-col items-start gap-3 shadow-none! new-border">
                 <h3 className="font-semibold text-sm text-gray-600 border-b border-gray-100 pb-2 w-full">
                   Transaction Information
                 </h3>
@@ -82,7 +82,7 @@ export default function TransactionDetailPage() {
                 </div>
               </Card>
 
-              <Card className="flex flex-col gap-3">
+              <Card className="flex flex-col gap-3 shadow-none! new-border">
                 <h3 className="font-semibold text-sm text-gray-600 border-b border-gray-100 pb-2 min-w-full">
                   Redemption Items
                 </h3>
@@ -117,8 +117,8 @@ export default function TransactionDetailPage() {
             </div>
           ) : (
             <>
-              <Card className="flex flex-col items-start gap-3">
-                <h3 className="font-semibold text-sm text-gray-600 border-b border-gray-100 pb-2 w-full">
+              <Card className="flex flex-col items-start gap-3 shadow-none! new-border">
+                <h3 className="font-semibold text-xs md:text-sm text-gray-600 border-b border-gray-100 pb-2 w-full">
                   Transaction Information
                 </h3>
 
@@ -148,8 +148,8 @@ export default function TransactionDetailPage() {
                 </div>
               </Card>
 
-              <Card className="flex flex-col gap-3">
-                <h3 className="font-semibold text-sm text-gray-600 border-b border-gray-100 pb-2 min-w-full">
+              <Card className="flex flex-col gap-3 shadow-none! new-border">
+                <h3 className="font-semibold md:text-sm text-xs text-gray-600 border-b border-gray-100 pb-2 min-w-full">
                   Redemption Items
                 </h3>
                 <div className="grid grid-cols-1 w-full gap-1">

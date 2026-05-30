@@ -13,15 +13,17 @@ import {
   GiftIcon as RedemptionProgramIcon,
   ClipboardDocumentCheckIcon as RewardsIcon,
   WalletIcon as ProgramFundsIcon,
-  TrophyIcon as LeaderboardIcon
+  TrophyIcon as LeaderboardIcon,
 } from "@heroicons/react/24/solid";
-import { useContext, useState } from "react";
+import { useContext} from "react";
 import { DrawerContext } from "@/app/(barangay)/layout.jsx";
 import Link from "next/link";
 import { Inter } from "next/font/google";
 import { API_BASE_URL } from "@/lib/config";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { useFetch } from "@/hooks/useFetch";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -30,6 +32,7 @@ const inter = Inter({
 export const Sidebar = () => {
   const { sidebarOpen, setSidebarOpen } = useContext(DrawerContext);
   const router = useRouter();
+  // const {isLoading, data} = useFetch({ url: "/api/auth/barangay/me"})
 
   const sidebarItems = [
     {
@@ -44,7 +47,7 @@ export const Sidebar = () => {
     },
     {
       icon: CollectionSortingIcon,
-      label: "Manual Collection Intake",
+      label: "Manual Intake",
       href: "",
     },
     {
@@ -59,12 +62,12 @@ export const Sidebar = () => {
     },
     {
       icon: RedemptionProgramIcon,
-      label: "Redemption Management",
+      label: "Redemption",
       href: "/redemption",
     },
     {
       icon: RewardsIcon,
-      label: "Reward Inventory",
+      label: "Reward ",
       href: "",
     },
     {
@@ -120,17 +123,23 @@ export const Sidebar = () => {
     }
   };
 
+  
+
   return (
     <aside
-      className={`w-75 h-svh flex flex-col justify-between bg-[#74C857] fixed top-0 text-white left-0 z-50 md:shadow-xl ${inter.className} overflow-y-auto sidebar`}
+      className={`w-60 md:w-65 h-svh flex flex-col justify-between bg-new-primary fixed top-0 text-white left-0 z-50 md:shadow-xl ${inter.className} overflow-y-auto sidebar`}
     >
       <div className="p-4 flex flex-col gap-4 lg:gap-9">
+        
         <div className="flex flex-row justify-between items-center">
-          <img
-            src="/logo-labeled.svg"
-            alt="EcoProfit Logo"
-            className="aspect-6/2 object-cover max-w-40 md:max-w-50"
-          />
+          <div className="max-w-40 relative w-full aspect-3/1">
+            <Image
+              src="/ecoaid-logo/white-logo-wordmark.svg"
+              alt="EcoAid logo"
+              fill
+              priority
+            />
+          </div>
           <div className="md:hidden">
             <XMarkIcon
               className="w-6 h-6  hover:cursor-pointer"
@@ -142,7 +151,7 @@ export const Sidebar = () => {
         <div className="flex flex-col gap-2 pl-2 lg:gap-3">
           {sidebarItems.map((items) => (
             <Link
-              className="flex flex-row gap-3 hover:cursor-pointer p-2 rounded-lg hover:bg-primary transition-all ease-in-out items-center"
+              className="flex flex-row gap-3 hover:cursor-pointer p-2 rounded-lg hover:bg-cta-color/10  transition-all ease-in-out items-center"
               key={items.label}
               href={items.href}
             >

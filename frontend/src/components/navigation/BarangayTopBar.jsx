@@ -17,7 +17,8 @@ export const BarangayTopBar = ({ title }) => {
   return (
     <>
       <header
-        className={`flex flex-row items-center justify-between min-w-full max-h-24 bg-[#74C857] fixed top-0 py-6 px-8 ${inter.className} shadow-lg text-white md:hidden z-40`}
+        className={`flex flex-row items-center justify-between min-w-full  max-h-24 bg-new-bg fixed top-0 py-6 px-8 ${inter.className}text-text-primary md:hidden z-40 `}
+        style={{ borderBottom: "0.5px solid #e5e7eb" }}
       >
         <Bars3Icon
           className="w-6 h-6 hover:cursor-pointer"

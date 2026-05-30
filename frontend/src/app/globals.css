@@ -11,7 +11,7 @@
 }
 
 .sidebar {
-  scrollbar-color: rgba(0, 128, 0, 0.337) transparent;
+  scrollbar-color: #104028 transparent;
   scrollbar-width: thin;
 }
 
@@ -22,6 +22,18 @@ body {
 
 .gradient-button {
   background-image: linear-gradient(to bottom, #1f7a42, #14532D);
+}
+
+.gradient-button-red {
+  background-image: linear-gradient(to bottom, #ef4444, #dc2626);
+}
+
+.gradient-button-blue {
+  background-image: linear-gradient(to bottom, #3b82f6, #2563eb);
+}
+
+.gradient-card {
+  background-image: linear-gradient(to bottom, #0d3320, #092517);
 }
 
 .new-border {

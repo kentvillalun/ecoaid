@@ -59,13 +59,13 @@ export const PendingActions = ({ id, onSuccess, variant }) => {
           document.body,
         )}
       <button
-        className={` ${variant === "detail" ? "py-2.5 text-white rounded-lg hover:cursor-pointer bg-red-500 transition-all duration-200 ease-in-out hover:bg-red-600" : "text-red-500 hover:underline"}`}
+        className={` ${variant === "detail" ? "py-2.5 text-white rounded-xl hover:cursor-pointer gradient-button-red  transition-all duration-200 ease-in-out " : "text-red-500 hover:underline"}`}
         onClick={() => setIsOpen((prev) => !prev)}
       >
         Decline
       </button>
       <button
-        className={` ${variant === "detail" ? "py-2.5 text-white rounded-lg hover:cursor-pointer hover:bg-primary bg-[#74C857] transition-all duration-200 ease-in-out" : "text-green-600 hover:underline"}` }
+        className={` ${variant === "detail" ? "py-2.5 text-white rounded-xl hover:cursor-pointer gradient-button transition-all duration-200 ease-in-out" : "text-green-600 hover:underline"}` }
         onClick={async () => {
           toast.loading("Approving request...")
           const success = await updateStatus({ id, status: "APPROVED" });

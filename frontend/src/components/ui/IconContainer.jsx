@@ -1,6 +1,6 @@
-export const IconContainer = ({icon, containerColor}) => {
+export const IconContainer = ({icon, containerColor, className = ""}) => {
   return (
-    <div className={`border p-3 border-gray-100 rounded-lg flex items-center`} style={{ backgroundColor: containerColor}}>
+    <div className={` p-3 rounded-xl flex items-center ${className}`} style={{ backgroundColor: containerColor}}>
    
       {icon}
     </div>

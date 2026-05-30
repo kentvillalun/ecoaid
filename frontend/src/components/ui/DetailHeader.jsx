@@ -6,7 +6,7 @@ import { Badge } from "./Badge";
 
 export const DetailHeader = ({ icon, title, subtitle, badgeLabel, badgeColor }) => {
   return (
-    <Card className="flex flex-row items-center gap-4">
+    <Card className="flex flex-row items-center gap-4 shadow-none! new-border ">
       <button
         className="flex items-center justify-center w-9 h-9 rounded-lg  hover:bg-gray-50 transition-colors hover:cursor-pointer"
         onClick={() => history.back()}

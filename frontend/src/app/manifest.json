@@ -1,6 +1,6 @@
 {
-  "name": "EcoProfit",
-  "short_name": "EcoProfit",
+  "name": "EcoAid",
+  "short_name": "EcoAid",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",
@@ -12,12 +12,10 @@
       "src": "/web-app-manifest-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "maskable"
     }
   ],
-  "theme_color": "#a8e063",
-  "background_color": "#a8e063",
-  "display": "standalone",
-  "start_url": "/",
-  "description": "EcoProfit turns waste materials into worth through a Community Buyback and management platform."
+  "theme_color": "#092517",
+  "background_color": "#092517",
+  "display": "standalone"
 }

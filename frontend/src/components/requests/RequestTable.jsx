@@ -29,7 +29,7 @@ export const RequestTable = ({
 }) => {
 
   const router = useRouter()
-
+  console.log(categories)
   
 
   const tableConfig = {
@@ -236,7 +236,7 @@ export const RequestTable = ({
 
   return (
     <Card
-      className={`${inter.className} hidden md:flex md:flex-col px-8  overflow-x-auto md:gap-3 md:items-start`}
+      className={`${inter.className} hidden md:flex md:flex-col px-8  overflow-x-auto md:gap-3 md:items-start shadow-none! new-border`}
     >
       <table className="w-full text-sm border-collapse text-nowrap">
         <thead className="border-b border-[#E6EFF5]">

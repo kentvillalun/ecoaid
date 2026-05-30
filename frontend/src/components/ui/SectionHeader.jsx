@@ -17,7 +17,7 @@ export const SectionHeader = ({
     <header className={`${className}`}>
       <div className="flex flex-row items-center justify-between">
         <div className="flex flex-row gap-4 items-center">
-          <div className="border p-3 border-gray-200 rounded-lg md:flex items-center hidden bg-white">
+          <div className="new-border p-3  rounded-xl md:flex items-center hidden bg-white">
             {icon}
           </div>
           <div className="flex flex-col">
@@ -29,7 +29,7 @@ export const SectionHeader = ({
         </div>
         {!noButton && (
           <button
-            className={`bg-[#74C857] text-white px-3.5 rounded-lg py-2.5 flex flex-row items-center gap-2 justify-center hover:cursor-pointer hover:bg-primary transition-all duration-200 ease-in-out min-w-35 md:min-w-45 text-nowrap ${buttonClassName}`}
+            className={`gradient-button text-white new-border px-3.5 rounded-lg py-2.5 flex flex-row items-center gap-2 justify-center hover:cursor-pointer transition-all duration-200 ease-in-out min-w-35 md:min-w-45 text-nowrap ${buttonClassName}`}
             onClick={onAction}
           >
             {buttonIcon}

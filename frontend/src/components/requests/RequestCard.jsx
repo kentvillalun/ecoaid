@@ -25,7 +25,7 @@ export const RequestCard = ({
     return (
       Array.from({ length: 3}).map((_, index) => (
         <Card
-          className={`flex flex-col items-start gap-3 transition-all hover:cursor-pointer hover:-translate-y-0.5 duration-200 ease-in-out
+          className={`flex flex-col items-start gap-3 transition-all hover:cursor-pointer hover:-translate-y-0.5 duration-200 ease-in-out shadow-none! new-border
         }`}
           key={index}
         >
@@ -84,8 +84,8 @@ export const RequestCard = ({
               )}
               {d.status === "APPROVED" ? (
                 <Card
-                  className={`flex flex-col items-start gap-3 transition-all hover:cursor-pointer hover:-translate-y-0.5 duration-200 ease-in-out ${
-                    isSelected ? "bg-[#F0FAF0] ring-2 ring-[#74C857]" : ""
+                  className={`flex flex-col shadow-none! new-border items-start gap-3 transition-all hover:cursor-pointer hover:-translate-y-0.5 duration-200 ease-in-out ${
+                    isSelected ? "bg-[#F0FAF0] ring-1 ring-cta-color" : ""
                   }`}
                 >
                   {/* Top row */}
@@ -121,7 +121,7 @@ export const RequestCard = ({
                       {formatDate(d.createdAt)}
                     </p>
                     <button
-                      className="text-sm text-[#74C857] pr-5 font-medium"
+                      className="text-sm text-cta-color pr-5 font-medium"
                       onClick={() =>
                         router.push(`/collection-requests/${d.id}`)
                       }
@@ -132,7 +132,7 @@ export const RequestCard = ({
                 </Card>
               ) : (
                 <Card
-                  className={`flex flex-col items-start gap-3 transition-all hover:cursor-pointer hover:-translate-y-0.5 duration-200 ease-in-out ${
+                  className={`flex flex-col items-start gap-3 shadow-none! new-border transition-all hover:cursor-pointer hover:-translate-y-0.5 duration-200 ease-in-out ${
                     isSelected ? "bg-[#F0FAF0] ring-2 ring-[#74C857]" : ""
                   }`}
                   handleClick={() =>
