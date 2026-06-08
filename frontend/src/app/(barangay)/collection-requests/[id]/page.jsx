@@ -14,7 +14,7 @@ import { ApprovedActions } from "@/components/requests/actions/ApprovedActions";
 import { InProgressActions } from "@/components/requests/actions/InProgressActions";
 import { useRouter } from "next/navigation";
 import { CameraIcon } from "@heroicons/react/24/outline";
-import { SkeletonCard } from "@/components/ui/SkeletonCard";
+import { MaterialTag } from "@/components/ui/MaterialTag";
 import { Spinner } from "@/components/ui/Spinner";
 import { useState } from "react";
 import { Error } from "@/components/ui/Error";
@@ -32,7 +32,7 @@ export default function RequestDetails() {
     url: `/api/material/categories/barangay`,
     refetchCount: categoriesRefetchCount,
   });
-  console.log(categoriesData)
+  console.log(categoriesData);
 
   const router = useRouter();
   const req = data?.request;
@@ -89,27 +89,45 @@ export default function RequestDetails() {
                 <LabelValue name={"Sitio"} value={req?.user?.sitio?.name} />
               </Card>
 
-              <Card className="flex flex-col items-start gap-3">
+              <Card className="flex flex-col items-start gap-3 shadow-none! new-border">
                 <h3 className="font-semibold text-xs md:text-sm text-gray-600 border-b border-gray-100 pb-2 w-full">
                   Request Information
                 </h3>
                 <LabelValue
                   name={"Material category"}
                   value={
-                    req?.isAssorted === true
-                      ? "Assorted"
-                      : req?.material?.category?.name
+                    <MaterialTag
+                      type={
+                        req?.isAssorted === true
+                          ? "Assorted"
+                          : req?.material?.category?.name
+                      }
+                      textOnly={true}
+                    />
                   }
                 />
-                <LabelValue
-                  name={"Material name"}
-                  value={
-                    req?.isAssorted === true ? "Assorted" : req?.material?.name
-                  }
-                />
+                {req?.isAssorted === true ? (
+                  <LabelValue
+                    name={"Materials"}
+                    value={"See finalized collection below"}
+                    valueClassName="text-sm text-gray-500 italic"
+                  />
+                ) : (
+                  <LabelValue
+                    name={"Material name"}
+                    value={
+                      <MaterialTag
+                        type={req?.material?.category?.name}
+                        textOnly={true}
+                        materialName={req?.material?.name}
+                      />
+                    }
+                  />
+                )}
                 <LabelValue
                   name={"Estimated values"}
                   value={`${req?.estimatedValue} ${req?.estimatedUnit === "PIECE" ? "pcs" : req?.estimatedUnit}`}
+                  valueClassName="lowercase"
                 />
                 <LabelValue
                   name={"Notes"}
@@ -124,34 +142,36 @@ export default function RequestDetails() {
               </Card>
 
               {status === "COLLECTED" && (
-                <Card className="flex flex-col items-start gap-3 md:col-span-2 lg:col-span-1">
+                <Card className="flex flex-col items-start gap-3 md:col-span-2 lg:col-span-1 shadow-none! new-border">
                   <h3 className="font-semibold text-xs md:text-sm text-gray-600 border-b border-gray-100 pb-2 w-full">
                     Finalized Collection
                   </h3>
                   <div className="w-full flex flex-col gap-2">
-                    <div className="grid grid-cols-3 gap-2 w-full">
-                      <p className="text-xs text-gray-400 font-medium uppercase">
+                    <div className="grid grid-cols-4 gap-2 w-full">
+                      <p className="text-xs text-gray-600 font-medium col-span-2">
                         Material
                       </p>
-                      <p className="text-xs text-gray-400 font-medium uppercase">
+                      <p className="text-xs text-gray-600 font-medium">
                         Value
                       </p>
-                      <p className="text-xs text-gray-400 font-medium uppercase">
+                      <p className="text-xs text-gray-600 font-medium">
                         Unit
                       </p>
                     </div>
                     {req?.collectionItems.map((item, index) => (
                       <div
-                        className="grid grid-cols-3 gap-2 w-full pt-2 border-t border-gray-100"
+                        className="grid grid-cols-4 gap-2 w-full pt-2 border-t border-gray-100"
                         key={index}
                       >
-                        <p className="text-sm text-gray-700">
+
+                        {/* <p className="text-sm text-gray-700 col-span-2">
                           {item?.material?.name}
-                        </p>
-                        <p className="text-sm text-gray-700">
+                        </p> */}
+                        <MaterialTag materialName={item?.material?.name} textOnly={true} type={item?.material?.category?.name} className="col-span-2"/>
+                        <p className="text-sm text-text-primary">
                           {item.actualValue}
                         </p>
-                        <p className="text-sm text-gray-700">
+                        <p className="text-sm text-test-primary">
                           {item.actualUnit === "PIECE"
                             ? "pcs"
                             : item.actualUnit}
@@ -164,7 +184,7 @@ export default function RequestDetails() {
             </div>
 
             {/* Photo evidence */}
-            <Card className="flex flex-col items-start gap-3">
+            <Card className="flex flex-col items-start gap-3 shadow-none! new-border">
               <h3 className="font-semibold text-xs md:text-sm text-gray-600 border-b border-gray-100 pb-2 w-full">
                 Photo Evidence
               </h3>
@@ -185,7 +205,7 @@ export default function RequestDetails() {
             </Card>
 
             {/* Timeline */}
-            <Card className="flex flex-col items-start gap-3">
+            <Card className="flex flex-col items-start gap-3 shadow-none! new-border">
               <h3 className="font-semibold text-xs md:text-sm text-gray-600 border-b border-gray-100 pb-2 w-full">
                 Timeline
               </h3>
@@ -212,7 +232,7 @@ export default function RequestDetails() {
 
             {/* Actions */}
             {status === "REQUESTED" ? (
-              <Card className="flex flex-col gap-3 items-start">
+              <Card className="flex flex-col gap-3 items-start shadow-none! new-border">
                 <h3 className="font-semibold text-xs md:text-sm text-gray-600 border-b border-gray-100 pb-2 w-full">
                   Actions
                 </h3>
@@ -223,7 +243,7 @@ export default function RequestDetails() {
                 />
               </Card>
             ) : status === "APPROVED" ? (
-              <Card className="flex flex-col gap-3 items-start">
+              <Card className="flex flex-col gap-3 items-start shadow-none! new-border">
                 <h3 className="font-semibold text-sm text-gray-600 border-b border-gray-100 pb-2 w-full">
                   Actions
                 </h3>
@@ -234,7 +254,7 @@ export default function RequestDetails() {
                 />
               </Card>
             ) : status === "IN_PROGRESS" ? (
-              <Card className="flex flex-col gap-3 items-start">
+              <Card className="flex flex-col gap-3 items-start shadow-none! new-border">
                 <h3 className="font-semibold text-sm text-gray-600 border-b border-gray-100 pb-2 w-full">
                   Actions
                 </h3>

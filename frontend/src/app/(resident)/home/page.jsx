@@ -1,8 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { BellIcon, TrophyIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { CameraIcon } from "@heroicons/react/24/solid";
+import { TrophyIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { PageContent } from "@/components/layout/PageContent.jsx";
 import { Page } from "@/components/layout/Page.jsx";
@@ -16,8 +15,8 @@ import {
   ArrowPathIcon,
   ChevronRightIcon,
 } from "@heroicons/react/24/outline";
-import { MaterialPill } from "@/components/ui/MateriaPill";
-import { Pill } from "@/components/ui/Pill";
+import { MaterialTag } from "@/components/ui/MaterialTag";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import { formatDate } from "@/lib/formatDate";
 import { Error } from "@/components/ui/Error";
 import { Empty } from "@/components/ui/Empty";
@@ -137,7 +136,7 @@ export default function HomePage() {
 
         <Card
           customBorder="0.5px solid #e5e7eb"
-          className="shadow-none! gradient-card! relative flex flex-col gap-2 items-start p-4! overflow-clip"
+          className="shadow-none! gradient-card relative flex flex-col gap-2 items-start p-4! overflow-clip min-h-37"
         >
           <div className="absolute w-30 md:w-35 md:h-35 bg-cta-color/60 rounded-full h-30 -right-8 -top-8 md:-top-10 md:-right-10"></div>
           <div className="absolute w-25 md:w-35 md:h-35 bg-cta-color/50 rounded-full h-25 right-18 -bottom-12 md:right-45 md:-bottom-16"></div>
@@ -168,7 +167,9 @@ export default function HomePage() {
                 <CalendarDaysIcon className="w-6 stroke-cta-color" />
               </div>
               <div className="text-xs flex flex-col gap-1">
-                <p className="uppercase  text-gray-400 font-medium">EcoAid Collection</p>
+                <p className="uppercase  text-gray-400 font-medium">
+                  EcoAid Collection
+                </p>
                 <div className="text-text-primary font-medium text-sm">
                   <p className="">Every Sunday</p>
                   <p className=" ">8:00 AM - 12:00 PM</p>
@@ -182,12 +183,14 @@ export default function HomePage() {
                 <ArrowPathIcon className="w-6 stroke-cta-color" />
               </div>
               <div className="text-xs flex flex-col gap-1">
-                <p className="uppercase  text-gray-400 font-medium">accepted materials</p>
+                <p className="uppercase  text-gray-400 font-medium">
+                  accepted materials
+                </p>
                 <div className="flex flex-wrap gap-1">
-                  <MaterialPill type={"Plastics"} className="px-1!  w-auto min-w-16" />
-                  <MaterialPill type={"Papers"} className="px-1! w-auto min-w-16" />
-                  <MaterialPill type={"Bottles"} className="px-1! w-auto min-w-16" />
-                  <MaterialPill type={"Metals"} className="px-1! w-auto min-w-16" />
+                  <MaterialTag type={"Plastics"} />
+                  <MaterialTag type={"Papers"} />
+                  <MaterialTag type={"Bottles"} />
+                  <MaterialTag type={"Metals"} />
                 </div>
               </div>
             </Card>
@@ -197,7 +200,10 @@ export default function HomePage() {
         <div className="flex flex-col gap-2 justify-center">
           <div className="text-base flex flex-row justify-between">
             <p className="font-semibold">Recent Requests</p>
-            <Link className="flex flex-row text-sm items-center" href={"/requests"}>
+            <Link
+              className="flex flex-row text-sm items-center"
+              href={"/requests"}
+            >
               <p className="font-medium text-cta-color">View all</p>{" "}
               <ChevronRightIcon className="w-3" />{" "}
             </Link>
@@ -261,8 +267,8 @@ export default function HomePage() {
                       </p>
                     </div>
                     <div className="flex flex-col items-end gap-2">
-                      <Pill type={r.status} />
-                      <MaterialPill
+                      <StatusBadge type={r.status} />
+                      <MaterialTag
                         type={
                           r?.isAssorted === true
                             ? "Assorted"

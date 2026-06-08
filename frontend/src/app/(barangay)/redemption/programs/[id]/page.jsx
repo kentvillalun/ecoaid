@@ -5,7 +5,7 @@ import { PageContent } from "@/components/layout/PageContent";
 import { BarangayTopBar } from "@/components/navigation/BarangayTopBar";
 import { Card } from "@/components/ui/Card";
 import { LabelValue } from "@/components/ui/LabelValue";
-import { MaterialPill } from "@/components/ui/MateriaPill";
+import { MaterialTag } from "@/components/ui/MaterialTag";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import {
   GiftIcon,
@@ -98,7 +98,7 @@ export default function ProgramDetails() {
   const { data: currentBarangayData } = useFetch({
     url: "/api/auth/barangay/me",
   });
-  const router = useRouter()
+  const router = useRouter();
   return (
     <Page className="bg-new-bg!">
       <BarangayTopBar title={"Program Details"} />
@@ -246,10 +246,11 @@ export default function ProgramDetails() {
                       key={m.id}
                       className="flex flex-row items-center justify-between py-2.5 border-b border-gray-50 last:border-0 md:odd:border-r md:odd:pr-4 md:even:pl-4"
                     >
-                      <MaterialPill
+                      <MaterialTag
                         type={m?.material?.category?.name}
                         materialName={m?.material?.name}
-                        className="w-auto!"
+                        textOnly={true}
+                      
                       />
                       <div className="flex flex-col items-end">
                         <p className="text-sm font-semibold text-gray-700">

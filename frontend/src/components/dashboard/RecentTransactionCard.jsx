@@ -1,7 +1,7 @@
 import Skeleton from "react-loading-skeleton";
 import { Card } from "../ui/Card";
 import { Error } from "../ui/Error";
-import { MaterialPill } from "../ui/MateriaPill";
+import { MaterialTag } from "../ui/MaterialTag";
 import { formatDate } from "@/lib/formatDate";
 import { useRouter } from "next/navigation";
 
@@ -69,7 +69,7 @@ export const RecentTransactionCard = ({
                 </div>
               </div>
               <div className="flex flex-col items-end gap-2">
-                <MaterialPill
+                <MaterialTag
                   type={
                     d?.request?.isAssorted === true
                       ? "Assorted"
@@ -83,9 +83,9 @@ export const RecentTransactionCard = ({
                 {formatDate(d?.request?.createdAt)}
               </p>
               <p className="text-xs text-gray-500 font-medium">
-                Actual weight: {d?.actualWeight}{" "}
-                <span className="capitalize">
-                  {(d?.actualUnit).toLowerCase()}
+                Actual value: {d?.actualValue}{" "}
+                <span className="">
+                  {d?.actualUnit === "PIECE" ? "pcs" : d?.actualUnit.toLowerCase()}
                 </span>
               </p>
             </div>

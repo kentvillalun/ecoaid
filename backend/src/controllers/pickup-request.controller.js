@@ -72,6 +72,7 @@ const listRequests = async (req, res) => {
         estimatedUnit: true,
         status: true,
         approvedAt: true,
+        rejectedAt: true,
         isScheduled: true,
         rejectionReason: true,
         collectedAt: true,
@@ -218,6 +219,11 @@ const getRequest = async (req, res) => {
           select: {
             material: {
               select: {
+                category: {
+                  select: {
+                    name: true,
+                  }
+                },
                 name: true
               }
             },

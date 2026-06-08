@@ -67,7 +67,7 @@ export default function PersonalInformationPage() {
             subtitle={"You have unsaved changes that will be lost."}
             onClose={() => setIsModalOpen(false)}
             onConfirm={() => history.back()}
-            confirmClassName={"bg-red-500"}
+            confirmClassName={"gradient-button-red"}
             confirmLabel={"Discard"}
             cancelLabel={"Keep Editing"}
           ></Modal>,

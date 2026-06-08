@@ -164,7 +164,7 @@ export const Sidebar = () => {
         </div>
       </div>
       <button className="pl-6 p-4 mb-15" onClick={handleLogout}>
-        <div className="flex flex-row gap-3 hover:cursor-pointer p-2 rounded-lg hover:bg-primary transition-all ease-in-out">
+        <div className="flex flex-row gap-3 hover:cursor-pointer p-2 rounded-lg hover:bg-cta-color/10 transition-all ease-in-out">
           <LogoutIcon className="h-6 w-6 md:block hidden hover:cursor-pointer" />
           <label className="font-medium text-md hover:cursor-pointer">
             Logout

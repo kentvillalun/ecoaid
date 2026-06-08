@@ -14,7 +14,7 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import { AddProgramModal } from "@/components/redemption/modals/AddProgramModal";
 import { useFetch } from "@/hooks/useFetch";
-import { MaterialPill } from "@/components/ui/MateriaPill";
+import { MaterialTag } from "@/components/ui/MaterialTag";
 import { RecordTransactionModal } from "@/components/redemption/modals/RecordTransactionModal";
 import { Error } from "@/components/ui/Error";
 import { Spinner } from "@/components/ui/Spinner";
@@ -122,12 +122,13 @@ export default function RedemptionProgramPage() {
                       {p.isActive ? "Active" : "Inactive"}
                     </span>
                   </div>
-                  <div className="flex flex-row gap-6">
+                  <div className="flex flex-row gap-6 ">
                     <LabelValue
                       name="Budget"
                       value={`₱ ${p.allotedBudget.toLocaleString()}`}
                     />
                     <LabelValue
+                    className="text-nowrap"
                       name="Redemption Mode"
                       value={p.isCashMode ? "Cash" : "Points"}
                     />
@@ -137,11 +138,14 @@ export default function RedemptionProgramPage() {
                     className={`flex flex-row flex-wrap gap-1 pt-3 border-t border-gray-100 w-full ${data?.programs?.length === 1 ? "items-center justify-center" : ""}`}
                   >
                     {p.programMaterial.map((m) => (
-                      <MaterialPill
-                        className="w-auto!"
+                      <MaterialTag
                         type={m?.material?.category?.name}
                         materialName={m?.material?.name}
-                        points={p?.isCashMode ? `₱${m.cashValue}` : `${m.pointValue} pts`}
+                        points={
+                          p?.isCashMode
+                            ? `₱${m.cashValue}`
+                            : `${m.pointValue} pts`
+                        }
                         key={m.id}
                       />
                     ))}

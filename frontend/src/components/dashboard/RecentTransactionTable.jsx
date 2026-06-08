@@ -3,7 +3,7 @@ import { Spinner } from "../ui/Spinner";
 import { Error } from "../ui/Error";
 import { Empty } from "../ui/Empty";
 import { formatDate } from "@/lib/formatDate";
-import { MaterialPill } from "../ui/MateriaPill";
+import { MaterialTag } from "../ui/MaterialTag";
 import { useRouter } from "next/navigation";
 
 export const RecentTransactionTable = ({
@@ -16,45 +16,52 @@ export const RecentTransactionTable = ({
 
   const tableConfig = [
     {
-      header: "Date created",
-      render: (data) => (
-        <span className=""> {formatDate(data?.request?.createdAt)} </span>
-      ),
-    },
-    {
       header: "Household",
       render: (data) => (
-        <span className="">
+        <span className="font-semibold text-text-primary">
           {" "}
           {data?.request?.user?.firstName} {data?.request?.user?.lastName}
         </span>
       ),
     },
     {
-      header: "Material",
+      header: "Materials",
       render: (data) => (
-        <div className="flex items-center w-full justify-center">
-          <MaterialPill
-            type={
-              data?.request?.isAssorted === true
-                ? "Assorted"
-                : data?.request?.material?.category?.name
-            }
-          />
-        </div>
+        <div className="flex  items-center">
+            {data?.request?.isAssorted === true ? (
+              <MaterialTag
+                materialName={"Assorted"}
+                type={"Assorted"}
+                textOnly={true}
+              />
+            ) : (
+              <MaterialTag
+                materialName={data?.request?.material?.name}
+                type={data?.request?.material?.category?.name}
+                textOnly={true}
+              />
+            )}
+          </div>
       ),
     },
     {
       header: "Actual values",
       render: (data) => (
         <span className="lowercase">
-          {data?.actualValue} {data?.actualUnit === "PIECE" ? "pcs" : data?.actualUnit}
+          {data?.actualValue}{" "}
+          {data?.actualUnit === "PIECE" ? "pcs" : data?.actualUnit}
         </span>
       ),
     },
     {
       header: "Source",
       render: () => <span className="">Pickup Request</span>,
+    },
+    {
+      header: "Date created",
+      render: (data) => (
+        <span className=""> {formatDate(data?.request?.createdAt)} </span>
+      ),
     },
     {
       header: "Action",
@@ -79,13 +86,13 @@ export const RecentTransactionTable = ({
         <thead className="border-b border-[#E6EFF5]">
           <tr className="">
             {tableConfig.map((col) => (
-              <th className="font-medium text-base p-4" key={col.header}>
+              <th className="font-medium p-4 text-start text-gray-500" key={col.header}>
                 {col.header}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody>
+        <tbody className="divide-y divide-gray-100 text-gray-600">
           {isLoading ? (
             <tr className="max-w-md">
               <td className="text-center" colSpan={6}>
@@ -115,11 +122,11 @@ export const RecentTransactionTable = ({
               console.log(t);
               return (
                 <tr
-                  className="text-center hover:bg-[#f8f8f8] transition-all transform"
+                  className="text-start hover:bg-[#f8f8f8] transition-all transform"
                   key={t.id}
                 >
                   {tableConfig.map((col) => (
-                    <td key={col.header} className="p-3">
+                    <td key={col.header} className="p-4">
                       {col.render(t)}
                     </td>
                   ))}

@@ -1,5 +1,5 @@
 import { Inter } from "next/font/google";
-import { statusStyles, StatusLabels, statusLabels } from "@/lib/statusStyles";
+import { statusStyles, statusLabels } from "@/lib/statusStyles";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -7,11 +7,11 @@ const inter = Inter({
 });
 
 // pending || approved || in_progress || collected || rejected 
-export const Pill = ({ type }) => {
+export const StatusBadge = ({ type }) => {
 
   return (
     <div
-      className={`py-1 px-4 text-xs rounded-3xl font-medium w-30 text-center ${inter.className} capitalize ${
+      className={`py-1 px-2 text-xs rounded-3xl font-medium inline-block ${inter.className} capitalize ${
         statusStyles[type] || "bg-gray-200 text-gray-700"
       }`}
     >

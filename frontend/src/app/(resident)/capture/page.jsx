@@ -126,7 +126,7 @@ export default function CapturePage() {
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
-      estimatedValue: "",
+      estimatedValue: 0,
       estimatedUnit: "",
       notes: "",
       materialId: null,
@@ -196,7 +196,7 @@ export default function CapturePage() {
   }, []);
 
   return (
-    <Page>
+    <Page className="bg-new-bg!">
       <Toaster position="top-center" />
       <ResidentHeader title={"Capture Recyclables"} />
 
@@ -210,7 +210,7 @@ export default function CapturePage() {
         >
           <div className="bg-white shadow-lg p-4 rounded-lg flex flex-col gap-4 items-center justify-center">
             <div className="flex flex-col items-center justify-center py-4">
-              <CheckCircleIcon className="fill-[#74C857] h-10 w-10" />
+              <CheckCircleIcon className="fill-cta-color h-10 w-10" />
               <p className="text-md font-medium">Request Sent!</p>
               <p className="text-sm text-[#727272] max-w-55 text-center">
                 Your barangay will review your collection soon.
@@ -219,7 +219,7 @@ export default function CapturePage() {
           </div>
         </section>
       )}
-      <section className="absolute left-0 right-0 top-18 h-[calc(100dvh-72px)] p-3 flex flex-col gap-6 overflow-y-auto pb-[calc(120px+env(safe-area-inset-bottom))]  ">
+      <section className="absolute left-0 right-0 top-18 h-[calc(100dvh-72px)] p-3 flex flex-col gap-6 overflow-y-auto  ">
         <div className="flex flex-col items-center gap-3">
           {/* The hidden file input will go here */}
           <input
@@ -236,7 +236,9 @@ export default function CapturePage() {
             className="w-full max-w-md overflow-hidden rounded-2xl border-6 border-dashed border-gray-200 text-center"
             onClick={openCamera}
           >
-            <div className="flex min-h-70 flex-col items-center justify-center">
+            <div
+              className={`flex flex-col items-center justify-center ${capturedImageUrl ? "h-auto" : "min-h-70"}`}
+            >
               {capturedImageUrl ? (
                 <img
                   src={capturedImageUrl}
@@ -261,7 +263,7 @@ export default function CapturePage() {
           {capturedImageUrl ? (
             <div className="grid w-full max-w-md gap-3 grid-cols-2 items-center justify-center">
               <button
-                className="text-[#727272] p-3 rounded-lg text-sm shadow-md min-w-27 bg-white"
+                className="text-gray-600 p-3 rounded-xl text-sm new-border min-w-27 bg-white"
                 onClick={() => {
                   setCloudinaryUrl(null);
                   openCamera();
@@ -270,7 +272,7 @@ export default function CapturePage() {
                 Retake
               </button>
               <button
-                className="bg-[#74C857] text-white p-3 rounded-lg text-sm shadow-md min-w-27 disabled:bg-[#5c9648]"
+                className="gradient-button text-white p-3 rounded-xl text-sm new-border min-w-27 disabled:opacity-50"
                 disabled={isLoading}
                 onClick={async () => {
                   const url = await uploadToCloudinary();
@@ -290,7 +292,7 @@ export default function CapturePage() {
           ) : (
             <div className="grid w-full max-w-md gap-3 grid-cols-1 items-center justify-center">
               <button
-                className="bg-[#74C857] text-white p-3 rounded-lg text-sm shadow-md min-w-27"
+                className="gradient-button text-white p-3 rounded-xl text-sm shadow-md min-w-27"
                 onClick={openCamera}
               >
                 Open Camera
@@ -307,7 +309,7 @@ export default function CapturePage() {
           >
             <div className="flex flex-col gap-3">
               <div className="flex flex-col gap-1">
-                <div className="flex flex-row items-center gap-1 outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-[#74C857] transition-colors min-h-11">
+                <div className="flex flex-row items-center gap-1 outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11">
                   <input
                     type="checkbox"
                     onChange={(e) => {
@@ -315,20 +317,20 @@ export default function CapturePage() {
                       setValue("isAssorted", e.target.checked);
                       if (e.target.checked) {
                         setCategory("");
-                        setValue("materialId", null)
+                        setValue("materialId", null);
                       }
                     }}
                     id="mixed"
                   />
                   <label
-                    className="font-medium text-base text-[#727272] px-2 flex-1"
+                    className="font-medium text-base text-gray-600 px-2 flex-1"
                     htmlFor="mixed"
                   >
                     Mixed/ Assorted materials
                   </label>
                 </div>
                 {isAssortedCheck && (
-                  <p className="text-[14px] text-[#727272] text-start italic ">
+                  <p className="text-xs text-gray-600 text-start italic ">
                     Collector will identify materials during pickup
                   </p>
                 )}
@@ -337,10 +339,10 @@ export default function CapturePage() {
               {!isAssortedCheck && (
                 <>
                   <div className="flex flex-col gap-1">
-                    <label className="font-medium text-sm text-[#727272] px-2">
+                    <label className="font-medium text-sm text-[#727272] ">
                       Material category
                     </label>
-                    <div className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-[#74C857] transition-colors">
+                    <div className="outline-1 py-2.5 px-3.5 text-[#717680] text-base outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors">
                       <select
                         className="w-full outline-none"
                         onChange={(e) => setCategory(e.target.value)}
@@ -359,10 +361,10 @@ export default function CapturePage() {
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <label className="font-medium text-sm text-[#727272] px-2">
+                    <label className="font-medium text-sm text-[#727272]">
                       Material
                     </label>
-                    <div className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-[#74C857] transition-colors">
+                    <div className="outline-1 py-2.5 px-3.5 text-[#717680] text-base outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors">
                       <select
                         className="w-full outline-none"
                         {...register("materialId")}
@@ -378,7 +380,7 @@ export default function CapturePage() {
                       </select>
                     </div>
                     {errors.materialId && (
-                      <p className="text-[14px] text-red-500 text-center md:text-start">
+                      <p className="text-xs text-red-500 text-start">
                         {errors.materialId?.message}
                       </p>
                     )}
@@ -387,10 +389,10 @@ export default function CapturePage() {
               )}
 
               <div className="flex flex-col gap-1">
-                <label className="font-medium text-sm text-[#727272] px-2">
+                <label className="font-medium text-sm text-[#727272] ">
                   Estimated value
                 </label>
-                <div className="outline-1 py-2.5 pl-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-[#74C857] transition-colors flex items-center justify-between">
+                <div className="outline-1 py-2.5 pl-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors flex items-center justify-between">
                   <div className="flex flex-row justify-center items-center w-full pr-4">
                     <input
                       type="number"
@@ -403,7 +405,7 @@ export default function CapturePage() {
                       {...register("estimatedUnit")}
                     >
                       <option value="" hidden disabled>
-                        kg
+                        e.g. kg
                       </option>
                       <option value="KG">kg</option>
                       <option value="GRAMS">grams</option>
@@ -412,20 +414,24 @@ export default function CapturePage() {
                     </select>
                   </div>
                 </div>
-                {errors.estimatedValue && (
-                  <p className="text-[14px] text-red-500 text-center md:text-start">
-                    {errors.estimatedValue?.message}
-                  </p>
-                )}
-                {errors.estimatedUnit && (
-                  <p className="text-[14px] text-red-500 text-center md:text-start">
-                    {errors.estimatedUnit?.message}
-                  </p>
+                {(errors.estimatedValue || errors.estimatedUnit) && (
+                  <div className="flex flex-row items-center justify-between">
+                    {errors.estimatedValue && (
+                      <p className="text-xs text-red-500 text-start">
+                        {errors.estimatedValue?.message}
+                      </p>
+                    )}
+                    {errors.estimatedUnit && (
+                      <p className="text-xs text-red-500 text-start pr-7">
+                        {errors.estimatedUnit?.message}
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
 
               <div className="flex flex-col gap-1">
-                <label className="font-medium text-sm text-[#727272] px-2">
+                <label className="font-medium text-sm text-[#727272] ">
                   Purok / Sitio
                 </label>
                 <input
@@ -438,17 +444,17 @@ export default function CapturePage() {
               </div>
 
               <div className="flex flex-col gap-1">
-                <label className="font-medium text-sm text-[#727272] px-2">
+                <label className="font-medium text-sm text-[#727272]">
                   Notes (Optional)
                 </label>
                 <input
                   type="text"
-                  className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-[#74C857] transition-colors"
+                  className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors"
                   placeholder="Enter your notes here"
                   {...register("notes")}
                 />
                 {errors.notes && (
-                  <p className="text-[14px] text-red-500 text-center md:text-start">
+                  <p className="text-xs text-red-500 text-start">
                     {errors.notes?.message}
                   </p>
                 )}
@@ -456,7 +462,7 @@ export default function CapturePage() {
             </div>
 
             <button
-              className="bg-[#74C857] text-white py-2.5 rounded-lg"
+              className="gradient-button text-white py-2.5 rounded-xl mb-10"
               type="submit"
             >
               Submit Request

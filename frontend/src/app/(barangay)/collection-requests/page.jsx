@@ -14,25 +14,25 @@ import { useFetch } from "@/hooks/useFetch.js";
 import { useUpdate } from "@/hooks/useUpdate";
 import { toast } from "sonner";
 
-
 const inter = Inter({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
 });
 
 export default function CollectionRequests() {
-  const [refetchCount, setRefetchCount] = useState(1)
+  const [refetchCount, setRefetchCount] = useState(1);
   const url = `/api/pickup-requests/collection-requests`;
   const { isLoading, isError, error, data } = useFetch({ url, refetchCount });
-  const [currentTab, setCurrentTab] = useState("REQUESTED");
+  const [currentTab, setCurrentTab] = useState("ALL");
 
-  const { updateStatus } = useUpdate()
-  const [categoriesRefetchCount, setCategotiesRefetchCount] = useState(0)
-  const { data: categoriesData } = useFetch({ url: `/api/material/categories/barangay`, refetchCount: categoriesRefetchCount})
-
+  const { updateStatus } = useUpdate();
+  const [categoriesRefetchCount, setCategotiesRefetchCount] = useState(0);
+  const { data: categoriesData } = useFetch({
+    url: `/api/material/categories/barangay`,
+    refetchCount: categoriesRefetchCount,
+  });
 
   const [selectedApprovedRequests, setSelectedApprovedRequests] = useState([]);
-
 
   const handleApprovedRequestSelect = (requestId) => {
     setSelectedApprovedRequests((currentSelected) =>
@@ -43,34 +43,35 @@ export default function CollectionRequests() {
   };
 
   // setter function for fecth count
-  const handleRefetchCount = () => setRefetchCount(prev => prev + 1)
- 
+  const handleRefetchCount = () => setRefetchCount((prev) => prev + 1);
 
   const handleBatchCollection = async () => {
     try {
-      toast.loading("Creating batch collection...")
-      const results = await Promise.all(selectedApprovedRequests.map(async (id) => {
-        return await updateStatus({ id, status: "IN_PROGRESS"})
-      }))
+      toast.loading("Creating batch collection...");
+      const results = await Promise.all(
+        selectedApprovedRequests.map(async (id) => {
+          return await updateStatus({ id, status: "IN_PROGRESS" });
+        }),
+      );
 
       if (results.every(Boolean)) {
-        toast.dismiss()
+        toast.dismiss();
         toast.success("Batch collection created");
-        handleRefetchCount()
-        setSelectedApprovedRequests([])
-        return true
+        handleRefetchCount();
+        setSelectedApprovedRequests([]);
+        return true;
       } else {
-        toast.error("Batch creation failed")
-        return false
+        toast.error("Batch creation failed");
+        return false;
       }
     } catch (error) {
-      toast.dismiss()
-      toast.error("Something went wrong")
+      toast.dismiss();
+      toast.error("Something went wrong");
     }
-
   };
 
   const STATUS_TABS = [
+    { key: "ALL", label: "All" },
     { key: "REQUESTED", label: "Pending" },
     { key: "APPROVED", label: "Approved" },
     { key: "IN_PROGRESS", label: "In Progress" },
@@ -79,15 +80,13 @@ export default function CollectionRequests() {
   ];
 
   const titles = {
+    ALL: "All Requests",
     REQUESTED: "Pending Requests",
     APPROVED: "Approved Requests",
     IN_PROGRESS: "In Progress Requests",
     COLLECTED: "Collected Requests",
     REJECTED: "Rejected Requests",
   };
-
-  
-
 
   return (
     <Page className="bg-new-bg!">
@@ -100,12 +99,14 @@ export default function CollectionRequests() {
           }
         />
         <SearchInput />
-        <div className="flex flex-col gap-3">
-          <StatusChip
-            STATUS_TABS={STATUS_TABS}
-            currentTab={currentTab}
-            setCurrentTab={setCurrentTab}
-          />
+        <div className="flex flex-col gap-3 relative">
+          <div className="sticky -top-5 z-30 bg-new-bg pt-4">
+            <StatusChip
+              STATUS_TABS={STATUS_TABS}
+              currentTab={currentTab}
+              setCurrentTab={setCurrentTab}
+            />
+          </div>
 
           {currentTab && (
             <div className={`${inter.className}`}>
@@ -123,10 +124,9 @@ export default function CollectionRequests() {
                   isError={isError}
                   error={error}
                   handleRefetchCount={handleRefetchCount}
-                  
                 />
               </div>
-              
+
               <RequestTable
                 data={data?.requests}
                 status={currentTab}
@@ -151,8 +151,6 @@ export default function CollectionRequests() {
             </button>
           </div>
         )}
-
-        
       </PageContent>
     </Page>
   );

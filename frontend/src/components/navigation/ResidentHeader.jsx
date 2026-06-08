@@ -41,7 +41,7 @@ export const ResidentHeader = ({
 
   return (
     <header
-      className={`flex flex-row items-start justify-between min-w-full bg-white fixed top-0 py-6 px-8 ${inter.className} shadow-lg z-50 min-h-18 ${className}`} style={{ borderBottom: "0.5px solid #e5e7eb" }}
+      className={`flex flex-row items-start justify-between min-w-full bg-new-bg fixed top-0 py-6 px-8 ${inter.className} z-50 min-h-18 ${className}`} style={{ borderBottom: "0.5px solid #e5e7eb" }}
     >
       <div className="flex flex-row items-center justify-between min-w-full">
         <ArrowLeftIcon

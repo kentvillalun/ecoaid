@@ -66,7 +66,7 @@ export default function ForgotPasswordPage() {
             <div className="-top-6 left-6 absolute rounded-full bg-new-primary w-16 h-16 flex items-center justify-center">
               <div className="w-8 relative aspect-square ">
                 <Image
-                  src="/ecoaid-logo/ecoaid-green-logo.svg"
+                  src="/ecoaid-logo/ecoaid-green-logo.png"
                   alt="EcoAid logo"
                   fill
                   priority

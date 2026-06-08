@@ -1,5 +1,5 @@
 import { Inter } from "next/font/google";
-import { Pill } from "../ui/Pill";
+import { StatusBadge } from "../ui/StatusBadge";
 import { PendingActions } from "./actions/PendingActions";
 import { ApprovedActions } from "./actions/ApprovedActions";
 import { Card } from "../ui/Card";
@@ -9,7 +9,8 @@ import { useRouter } from "next/navigation";
 import { Spinner } from "../ui/Spinner";
 import { Empty } from "../ui/Empty";
 import { Error } from "../ui/Error";
-
+import { MaterialTag } from "../ui/MaterialTag";
+import { p } from "motion/react-client";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -23,47 +24,164 @@ export const RequestTable = ({
   onToggleSelect,
   handleBatchCollection,
   handleRefetchCount,
-  isLoading, 
+  isLoading,
   isError,
-  categories
+  categories,
 }) => {
-
-  const router = useRouter()
-  console.log(categories)
-  
+  const router = useRouter();
 
   const tableConfig = {
-    REQUESTED: [
-      { header: "Date Requested", render: (data) => formatDate(data.createdAt) },
+    ALL: [
       {
         header: "Household",
-        render: (data) =>
-          data.user.firstName
-            ? `${data.user.firstName} ${data.user.lastName}`
-            : data.user.phoneNumber,
-      },
-      { header: "Sitio", render: (data) => data.user.sitio.name },
-      { header: "Material Name", render: (data) => data?.isAssorted === true ? "Assorted" : data?.material?.name },
-      {
-        header: "Category",
-        render: (data) => data.isAssorted === true ? "Assorted" : data?.material?.category?.name,
+        render: (data) => (
+          <p className="font-semibold text-text-primary">
+            {data.user.firstName
+              ? `${data.user.firstName} ${data.user.lastName}`
+              : data.user.phoneNumber}
+          </p>
+        ),
       },
       {
-        header: "Est. Value",
-        render: (data) => `${data.estimatedValue} ${data.estimatedUnit === "PIECE" ? "pcs" : data.estimatedUnit}`,
+        header: "Sitio",
+        render: (data) => (
+          <p className="text-gray-600">{data.user.sitio.name}</p>
+        ),
+      },
+      {
+        header: "Materials",
+        render: (data) => (
+          <div className="flex  items-center">
+            {data?.isAssorted === true ? (
+              <MaterialTag
+                materialName={"Assorted"}
+                type={"Assorted"}
+                textOnly={true}
+              />
+            ) : (
+              <MaterialTag
+                materialName={data?.material?.name}
+                type={data?.material?.category?.name}
+                textOnly={true}
+              />
+            )}
+          </div>
+        ),
+      },
+      {
+        header: "Value",
+        render: (data) => (
+          <p className="text-gray-600">
+            {`${data.estimatedValue} ${data.estimatedUnit === "PIECE" ? "pcs" : data.estimatedUnit.toLowerCase()}`}
+          </p>
+        ),
       },
       {
         header: "Status",
+        render: (data) => <StatusBadge type={data.status} />,
+      },
+      {
+        header: "Date Requested",
         render: (data) => (
-          <div className="flex items-center justify-center">
-            <Pill type={data.status} />
-          </div>
+          <p className="text-gray-600">{formatDate(data.createdAt)}</p>
         ),
       },
       {
         header: "Action",
         render: (data) => (
-          <div className="flex items-center justify-center flex-row gap-3">
+          <div className="flex items-center justify-start flex-row gap-3">
+            <button
+              className="text-gray-600 hover:underline"
+              onClick={() => {
+                router.push(`/collection-requests/${data.id}`);
+              }}
+            >
+              {data?.status !== "REQUESTED" &&
+              data?.status !== "APPROVED" &&
+              data?.status !== "IN_PROGRESS"
+                ? "View Details"
+                : "View"}
+            </button>
+            {data.status === "REQUESTED" ? (
+              <PendingActions
+                id={data.id}
+                onSuccess={() => handleRefetchCount()}
+              />
+            ) : data.status === "APPROVED" ? (
+              <ApprovedActions
+                id={data.id}
+                onSuccess={() => handleRefetchCount()}
+              />
+            ) : data.status === "IN_PROGRESS" ? (
+              <InProgressActions
+                id={data.id}
+                isAssorted={data.isAssorted}
+                material={data?.material}
+                onSuccess={() => handleRefetchCount()}
+                categories={categories}
+              />
+            ) : (
+              <></>
+            )}
+          </div>
+        ),
+      },
+    ],
+    REQUESTED: [
+      {
+        header: "Household",
+        render: (data) => (
+          <p className="font-semibold text-text-primary">
+            {data.user.firstName
+              ? `${data.user.firstName} ${data.user.lastName}`
+              : data.user.phoneNumber}
+          </p>
+        ),
+      },
+      {
+        header: "Sitio",
+        render: (data) => (
+          <p className="text-gray-600">{data.user.sitio.name}</p>
+        ),
+      },
+      {
+        header: "Materials",
+        render: (data) => (
+          <div className="flex items-center">
+            {data?.isAssorted === true ? (
+              <MaterialTag
+                materialName={"Assorted"}
+                type={"Assorted"}
+                textOnly={true}
+              />
+            ) : (
+              <MaterialTag
+                materialName={data?.material?.name}
+                type={data?.material?.category?.name}
+                textOnly={true}
+              />
+            )}
+          </div>
+        ),
+      },
+      {
+        header: "Estimated Value",
+        render: (data) => (
+          <p className="text-gray-600">
+            {`${data.estimatedValue} ${data.estimatedUnit === "PIECE" ? "pcs" : data.estimatedUnit.toLowerCase()}`}
+          </p>
+        ),
+      },
+      {
+        header: "Date Requested",
+        render: (data) => (
+          <p className="text-gray-600">{formatDate(data.createdAt)}</p>
+        ),
+      },
+      {
+        header: "Action",
+        render: (data) => (
+          <div className="flex items-center justify-start flex-row gap-3">
             <button
               className="text-gray-600 hover:underline"
               onClick={() => {
@@ -91,34 +209,75 @@ export const RequestTable = ({
           />
         ),
       },
-      { header: "Approved Date", render: (data) => formatDate(data.approvedAt) },
+
       {
         header: "Household",
-        render: (data) =>
-          data.user.firstName
-            ? `${data.user.firstName} ${data.user.lastName}`
-            : data.user.phoneNumber,
+        render: (data) => (
+          <p className="font-semibold text-text-primary">
+            {data.user.firstName
+              ? `${data.user.firstName} ${data.user.lastName}`
+              : data.user.phoneNumber}
+          </p>
+        ),
       },
-      { header: "Sitio", render: (data) => data.user.sitio.name },
-      { header: "Material Name", render: (data) => data?.isAssorted === true ? "Assorted" : data?.material?.name },
-      { header: "Category", render: (data) => data.isAssorted === true ? "Assorted" : data?.material?.category?.name },
       {
-        header: "Est. Value",
-        render: (data) => `${data.estimatedValue} ${data.estimatedUnit === "PIECE" ? "pcs" : data.estimatedUnit}`,
+        header: "Sitio",
+        render: (data) => (
+          <p className="text-gray-600">{data.user.sitio.name}</p>
+        ),
+      },
+      {
+        header: "Materials",
+        render: (data) => (
+          <div className="flex items-center">
+            {data?.isAssorted === true ? (
+              <MaterialTag
+                materialName={"Assorted"}
+                type={"Assorted"}
+                textOnly={true}
+              />
+            ) : (
+              <MaterialTag
+                materialName={data?.material?.name}
+                type={data?.material?.category?.name}
+                textOnly={true}
+              />
+            )}
+          </div>
+        ),
+      },
+      {
+        header: "Estimated Value",
+        render: (data) => (
+          <p className="text-gray-600">
+            {`${data.estimatedValue} ${data.estimatedUnit === "PIECE" ? "pcs" : data.estimatedUnit.toLowerCase()}`}
+          </p>
+        ),
       },
       {
         header: "Pickup Schedule",
         render: (data) => (
-          <div className="flex items-center justify-center">
-            <Pill type={data.isScheduled ? "SCHEDULED" : "NOT_SCHEDULED"} />
-          </div>
+          <StatusBadge
+            type={data.isScheduled ? "SCHEDULED" : "NOT_SCHEDULED"}
+          />
+        ),
+      },
+      {
+        header: "Date Approved",
+        render: (data) => (
+          <p className="text-gray-600">{formatDate(data.approvedAt)}</p>
         ),
       },
       {
         header: "Action",
         render: (data) => (
-          <div className="flex items-center justify-center flex-row gap-3">
-             <button className="text-gray-600 hover:underline" onClick={() => router.push(`/collection-requests/${data.id}`)}>View</button>
+          <div className="flex items-center justify-start flex-row gap-3">
+            <button
+              className="text-gray-600 hover:underline"
+              onClick={() => router.push(`/collection-requests/${data.id}`)}
+            >
+              View
+            </button>
             <ApprovedActions
               id={data.id}
               onSuccess={() => handleRefetchCount()}
@@ -128,42 +287,75 @@ export const RequestTable = ({
       },
     ],
     IN_PROGRESS: [
-      { header: "Approved Date", render: (data) => formatDate(data.approvedAt) },
       {
         header: "Household",
-        render: (data) =>
-          data.user.firstName
-            ? `${data.user.firstName} ${data.user.lastName}`
-            : data.user.phoneNumber,
-      },
-      { header: "Sitio", render: (data) => data.user.sitio.name },
-      { header: "Material Name", render: (data) => data?.isAssorted === true ? "Assorted" : data?.material?.name },
-      { header: "Category", render: (data) => data.isAssorted === true ? "Assorted" : data?.material?.category?.name },
-      {
-        header: "Est. Value",
-        render: (data) => `${data.estimatedValue} ${data.estimatedUnit === "PIECE" ? "pcs" : data.estimatedUnit}`,
-      },
-      {
-        header: "Status",
         render: (data) => (
-          <div className="flex items-center justify-center">
-            <Pill type={data.status} />
+          <p className="font-semibold text-text-primary">
+            {data.user.firstName
+              ? `${data.user.firstName} ${data.user.lastName}`
+              : data.user.phoneNumber}
+          </p>
+        ),
+      },
+      {
+        header: "Sitio",
+        render: (data) => (
+          <p className="text-gray-600">{data.user.sitio.name}</p>
+        ),
+      },
+      {
+        header: "Materials",
+        render: (data) => (
+          <div className="flex items-center">
+            {data?.isAssorted === true ? (
+              <MaterialTag
+                materialName={"Assorted"}
+                type={"Assorted"}
+                textOnly={true}
+              />
+            ) : (
+              <MaterialTag
+                materialName={data?.material?.name}
+                type={data?.material?.category?.name}
+                textOnly={true}
+              />
+            )}
           </div>
+        ),
+      },
+
+      {
+        header: "Estimated Value",
+        render: (data) => (
+          <p className="text-gray-600">
+            {`${data.estimatedValue} ${data.estimatedUnit === "PIECE" ? "pcs" : data.estimatedUnit.toLowerCase()}`}
+          </p>
         ),
       },
       {
         header: "Pickup Schedule",
         render: (data) => (
-          <div className="flex items-center justify-center">
-            <Pill type={data.isScheduled ? "SCHEDULED" : "NOT_SCHEDULED"} />
-          </div>
+          <StatusBadge
+            type={data.isScheduled ? "SCHEDULED" : "NOT_SCHEDULED"}
+          />
+        ),
+      },
+      {
+        header: "Date Approved",
+        render: (data) => (
+          <p className="text-gray-600">{formatDate(data.approvedAt)}</p>
         ),
       },
       {
         header: "Action",
         render: (data) => (
-          <div className="flex items-center justify-center flex-row gap-3">
-            <button className="text-gray-600 hover:underline" onClick={() => router.push(`/collection-requests/${data.id}`)}>View</button>
+          <div className="flex items-center justify-start flex-row gap-3">
+            <button
+              className="text-gray-600 hover:underline"
+              onClick={() => router.push(`/collection-requests/${data.id}`)}
+            >
+              View
+            </button>
             <InProgressActions
               id={data.id}
               isAssorted={data.isAssorted}
@@ -176,52 +368,139 @@ export const RequestTable = ({
       },
     ],
     COLLECTED: [
-      { header: "Collection Date", render: (data) => formatDate(data.collectedAt) },
       {
         header: "Household",
-        render: (data) =>
-          data.user.firstName
-            ? `${data.user.firstName} ${data.user.lastName}`
-            : data.user.phoneNumber,
+        render: (data) => (
+          <p className="font-semibold text-text-primary">
+            {data.user.firstName
+              ? `${data.user.firstName} ${data.user.lastName}`
+              : data.user.phoneNumber}
+          </p>
+        ),
       },
-      { header: "Sitio", render: (data) => data.user.sitio.name },
-      { header: "Material Name", render: (data) => data?.isAssorted === true ? "Assorted" : data?.material?.name },
-      { header: "Category", render: (data) => data.isAssorted === true ? "Assorted" : data?.material?.category?.name },
       {
-        header: "Est. Value",
-        render: (data) => `${data.estimatedValue} ${data.estimatedUnit === "PIECE" ? "pcs" : data.estimatedUnit}`,
+        header: "Sitio",
+        render: (data) => (
+          <p className="text-gray-600">{data.user.sitio.name}</p>
+        ),
+      },
+      {
+        header: "Materials",
+        render: (data) => (
+          <div className="flex items-center">
+            {data?.isAssorted === true ? (
+              <MaterialTag
+                materialName={"Assorted"}
+                type={"Assorted"}
+                textOnly={true}
+              />
+            ) : (
+              <MaterialTag
+                materialName={data?.material?.name}
+                type={data?.material?.category?.name}
+                textOnly={true}
+              />
+            )}
+          </div>
+        ),
+      },
+
+      {
+        header: "Estimated Value",
+        render: (data) => (
+          <p className="text-gray-600">
+            {`${data.estimatedValue} ${data.estimatedUnit === "PIECE" ? "pcs" : data.estimatedUnit.toLowerCase()}`}
+          </p>
+        ),
+      },
+      {
+        header: "Date Collected",
+        render: (data) => (
+          <p className="text-gray-600">{formatDate(data.collectedAt)}</p>
+        ),
       },
       {
         header: "Action",
         render: (data) => (
-          <div className="flex items-center justify-center">
-            <button className="text-gray-600 hover:underline" onClick={() => router.push(`/collection-requests/${data.id}`)}>View Details</button>
+          <div className="flex items-center justify-start">
+            <button
+              className="text-gray-600 hover:underline"
+              onClick={() => router.push(`/collection-requests/${data.id}`)}
+            >
+              View Details
+            </button>
           </div>
         ),
       },
     ],
     REJECTED: [
-      { header: "Date Requested", render: (data) => formatDate(data.createdAt) },
       {
         header: "Household",
-        render: (data) =>
-          data.user.firstName
-            ? `${data.user.firstName} ${data.user.lastName}`
-            : data.user.phoneNumber,
+        render: (data) => (
+          <p className="font-semibold text-text-primary">
+            {data.user.firstName
+              ? `${data.user.firstName} ${data.user.lastName}`
+              : data.user.phoneNumber}
+          </p>
+        ),
       },
-      { header: "Sitio", render: (data) => data.user.sitio.name },
-      { header: "Material Name", render: (data) => data?.isAssorted === true ? "Assorted" : data?.material?.name },
-      { header: "Category", render: (data) => data.isAssorted === true ? "Assorted" : data?.material?.category?.name },
+      {
+        header: "Sitio",
+        render: (data) => (
+          <p className="text-gray-600">{data.user.sitio.name}</p>
+        ),
+      },
+      {
+        header: "Material Name",
+        render: (data) => (
+          <div className="flex items-center">
+            {data?.isAssorted === true ? (
+              <MaterialTag
+                materialName={"Assorted"}
+                type={"Assorted"}
+                textOnly={true}
+              />
+            ) : (
+              <MaterialTag
+                materialName={data?.material?.name}
+                type={data?.material?.category?.name}
+                textOnly={true}
+              />
+            )}
+          </div>
+        ),
+      },
+
       {
         header: "Est. Value",
-        render: (data) => `${data.estimatedValue} ${data.estimatedUnit === "PIECE" ? "pcs" : data.estimatedUnit}`,
+        render: (data) => (
+          <p className="text-gray-600">
+            {`${data.estimatedValue} ${data.estimatedUnit === "PIECE" ? "pcs" : data.estimatedUnit.toLowerCase()}`}{" "}
+          </p>
+        ),
       },
-      { header: "Rejection Reason", render: (data) => data.rejectionReason },
+      {
+        header: "Rejection Reason",
+        render: (data) => (
+          <p className="text-gray-600">{data.rejectionReason}</p>
+        ),
+      },
+      {
+        header: "Date Rejected",
+        render: (data) => (
+          <p className="text-gray-600">{formatDate(data.rejectedAt)}</p>
+        ),
+      },
       {
         header: "Action",
         render: (data) => (
-          <div className="flex items-center justify-center">
-            <button className="text-gray-600 hover:underline" onClick={() => router.push(`/collection-requests/${data.id}`)}>View Details</button>
+          <div className="flex items-center justify-start">
+            <button
+              className="text-gray-600 hover:underline"
+              onClick={() => router.push(`/collection-requests/${data.id}`)}
+            >
+              View Details
+            </button>
           </div>
         ),
       },
@@ -230,9 +509,8 @@ export const RequestTable = ({
 
   const columns = tableConfig[status];
 
-  const filteredRequest = data?.filter((req) => req.status === status);
-
-  
+  const filteredRequest =
+    status === "ALL" ? data : data?.filter((req) => req.status === status);
 
   return (
     <Card
@@ -242,14 +520,17 @@ export const RequestTable = ({
         <thead className="border-b border-[#E6EFF5]">
           <tr className="">
             {columns?.map((col) => (
-              <th className="font-medium text-base p-4" key={col.header}>
+              <th
+                className="font-medium p-4 text-start text-gray-500"
+                key={col.header}
+              >
                 {col.header}
               </th>
             ))}
           </tr>
         </thead>
 
-        <tbody className="">
+        <tbody className="divide-y divide-gray-100">
           {isLoading && (
             <tr className="max-w-md">
               <td className="text-center" colSpan={9}>
@@ -260,24 +541,29 @@ export const RequestTable = ({
           {isError && (
             <tr className="max-w-md">
               <td className="text-center" colSpan={9}>
-                <Error handleRefetchCount={handleRefetchCount}/>
+                <Error handleRefetchCount={handleRefetchCount} />
               </td>
             </tr>
           )}
           {filteredRequest?.length === 0 ? (
             <tr className="max-w-md">
               <td className="text-center" colSpan={9}>
-                <Empty text={"No items"} subtext={"There are no item in this tab yet. Please go to the Pending tab to update status of pickup requests"}/>
+                <Empty
+                  text={"No items"}
+                  subtext={
+                    "There are no item in this tab yet. Please go to the Pending tab to update status of pickup requests"
+                  }
+                />
               </td>
             </tr>
           ) : (
             filteredRequest?.map((req) => (
               <tr
-                className={`text-center hover:bg-[#f8f8f8] transition-all transform ${isLoading && "hidden"}`}
+                className={`text-start hover:bg-[#f8f8f8] transition-all transform ${isLoading && "hidden"}`}
                 key={req.id}
               >
                 {columns?.map((col) => (
-                  <td key={col.header} className="p-3">
+                  <td key={col.header} className="p-4">
                     {col.render(req)}
                   </td>
                 ))}

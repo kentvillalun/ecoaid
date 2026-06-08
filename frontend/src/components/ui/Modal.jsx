@@ -4,7 +4,7 @@ import { Inter } from "next/font/google";
 import {
   XCircleIcon,
 } from "@heroicons/react/24/outline";
-import { Pill } from "./Pill";
+import { StatusBadge } from "./StatusBadge";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -44,7 +44,7 @@ export const Modal = ({
                   <div className="flex flex-col gap-1">
                     <div className="flex flex-row gap-4 items-center">
                       <h4 className="font-semibold text-[16px]">{title}</h4>
-                      {isPill && <Pill type={status} />}
+                      {isPill && <StatusBadge type={status} />}
                     </div>
                     <p className="text-gray-600 text-[14px]">{subtitle}</p>
                   </div>

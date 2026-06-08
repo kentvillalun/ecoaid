@@ -3,7 +3,7 @@
 import { formatDate } from "@/lib/formatDate";
 import { Card } from "../ui/Card";
 import { Inter } from "next/font/google";
-import { MaterialPill } from "../ui/MateriaPill";
+
 import { Spinner } from "../ui/Spinner";
 import { Empty } from "../ui/Empty";
 import { Error } from "../ui/Error";
@@ -20,15 +20,16 @@ export const TransactionTable = ({
   isError,
   handleRefetchCount,
 }) => {
-
-  const router = useRouter()
+  const router = useRouter();
 
   const tableConfig = [
     {
       header: "Beneficiary",
       render: (data) => (
         <div className="flex flex-col items-start justify-center">
-          <p className="text-md font-semibold">{data.beneficiaryName}</p>
+          <p className="font-semibold text-text-primary">
+            {data.beneficiaryName}
+          </p>
           <p className="capitalize text-gray-400">
             {" "}
             {data.educationalLevel.toLowerCase()} level
@@ -42,7 +43,7 @@ export const TransactionTable = ({
     {
       header: "Program",
       render: (data) => (
-        <div className="font-semibold">
+        <div className="">
           {data?.program?.name}{" "}
           <span
             className={`text-xs font-medium px-3 py-1 rounded-full ${data.program?.isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
@@ -53,9 +54,9 @@ export const TransactionTable = ({
       ),
     },
     {
-      header: "Material",
+      header: "Materials",
       render: (data) => (
-        <div className="flex items-center w-full flex-col">
+        <div className="flex items-start w-full flex-col">
           {data?.redemptionTransactionItem?.length > 1
             ? `${data?.redemptionTransactionItem?.length} materials`
             : `${data?.redemptionTransactionItem?.length} material`}
@@ -79,7 +80,7 @@ export const TransactionTable = ({
     {
       header: "Action",
       render: (data) => (
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-start">
           <button
             className="text-gray-600 hover:underline hover:cursor-pointer"
             onClick={() => router.push(`/redemption/transactions/${data.id}`)}
@@ -95,17 +96,17 @@ export const TransactionTable = ({
     <Card
       className={`${inter.className} hidden md:flex md:flex-col px-8  overflow-x-auto md:gap-3 md:items-start shadow-none! new-border`}
     >
-      <table className="w-full text-sm border-collapse text-nowrap">
+      <table className="w-full text-sm border-collapse text-nowrap text-gray-600">
         <thead className="border-b border-[#E6EFF5]">
           <tr className="">
             {tableConfig.map((col) => (
-              <th className="font-medium text-base p-4" key={col.header}>
+              <th className="font-medium text-start p-4" key={col.header}>
                 {col.header}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody>
+        <tbody className="divide-y divide-gray-100">
           {isLoading && (
             <tr className="max-w-md">
               <td className="text-center" colSpan={6}>
@@ -133,11 +134,11 @@ export const TransactionTable = ({
           ) : (
             data?.transactions?.map((t) => (
               <tr
-                className="text-center hover:bg-[#f8f8f8] transition-all transform"
+                className="text-start hover:bg-[#f8f8f8] transition-all transform"
                 key={t.id}
               >
                 {tableConfig.map((col) => (
-                  <td key={col.header} className="p-3">
+                  <td key={col.header} className="p-4">
                     {col.render(t)}
                   </td>
                 ))}

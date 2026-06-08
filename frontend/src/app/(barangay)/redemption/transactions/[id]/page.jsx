@@ -6,7 +6,7 @@ import { BarangayTopBar } from "@/components/navigation/BarangayTopBar";
 import { Card } from "@/components/ui/Card";
 import { DetailHeader } from "@/components/ui/DetailHeader";
 import { LabelValue } from "@/components/ui/LabelValue";
-import { MaterialPill } from "@/components/ui/MateriaPill";
+import { MaterialTag } from "@/components/ui/MaterialTag";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { useFetch } from "@/hooks/useFetch";
 import { DocumentIcon, GiftIcon } from "@heroicons/react/24/outline";
@@ -153,7 +153,7 @@ export default function TransactionDetailPage() {
                   Redemption Items
                 </h3>
                 <div className="grid grid-cols-1 w-full gap-1">
-                  <div className="text-sm text-gray-700 flex flex-row items-center justify-between pb-2 p-3">
+                  <div className="text-sm text-gray-500 flex flex-row items-center justify-between pb-2 p-3 font-medium">
                     <p className="">Material</p>
 
                     <p className="">Amount & value</p>
@@ -165,10 +165,10 @@ export default function TransactionDetailPage() {
                       key={t.id}
                     >
                       <div className="flex flex-col md:flex-row gap-1 items-start">
-                        <p className="">{t?.programMaterial?.material?.name}</p>
-                        <MaterialPill
+                        <MaterialTag
                           type={t?.programMaterial?.material?.category?.name}
-                          className="w-auto"
+                          materialName={t?.programMaterial?.material?.name}
+                          textOnly={true}
                         />
                       </div>
                       <div className="flex flex-row gap-5">
@@ -195,7 +195,7 @@ export default function TransactionDetailPage() {
                     </div>
                   ))}
                   <div className="p-3 text-sm text-gray-700 flex flex-row items-center justify-between">
-                    <p className="">Total</p>
+                    <p className="font-medium">Total</p>
                     <p className="">
                       {data?.transaction?.program?.isCashMode && "₱"}{" "}
                       {data?.transaction?.redemptionTransactionItem?.reduce(

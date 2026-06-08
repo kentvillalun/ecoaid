@@ -1,4 +1,4 @@
-# EcoProfit - AI Context File
+# EcoAid - AI Context File
 
 ## Stack
 - Frontend: Next.js (PWA for resident, dashboard for barangay)
@@ -276,3 +276,22 @@ I've tried, flag shortcuts that hurt my learning. I'm a 3rd year
 BS IT student focused on becoming a full stack developer. My main 
 concern is AI over-reliance — make sure I actually understand what 
 I'm building.
+
+## Vacation Roadmap (Jun 8 – Jul 19, 2025)
+> 3 hrs/day target. AI handles frontend UI scaffolding, Haru handles wiring + backend.
+> SplitPals = overflow/break only, no fixed schedule.
+> Teachable Machine = during sem (blocked on groupmates' dataset).
+
+- [ ] Week 1 (Jun 8–14)   — Manual Collection Intake (end-to-end)
+- [ ] Week 2 (Jun 15–21)  — Material Stock + Junkshop Sales
+- [ ] Week 3 (Jun 22–28)  — Reward Inventory + Program Funds
+- [ ] Week 4 (Jun 29–Jul 5) — Leaderboard (admin + resident)
+- [ ] Week 5 (Jul 6–12)   — Announcements + Reports
+- [ ] Week 6 (Jul 13–19)  — Dashboard wiring + Settings fixes + tech debt
+
+## During Sem (Jul 20 onwards)
+- [ ] Teachable Machine (image recognition on pickup request)
+- [ ] Multi-barangay registration flow
+- [ ] Pilot testing prep
+- [ ] Deployment hardening
+- [ ] SuperAdmin / system configurability (tackle when clearer)

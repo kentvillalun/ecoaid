@@ -4,7 +4,7 @@ import { Page } from "@/components/layout/Page";
 import { PageContent } from "@/components/layout/PageContent";
 import { ResidentHeader } from "@/components/navigation/ResidentHeader";
 import { Card } from "@/components/ui/Card";
-import { Pill } from "@/components/ui/Pill";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import { useState } from "react";
 import { useFetch } from "@/hooks/useFetch";
 import { Error } from "@/components/ui/Error";
@@ -14,7 +14,7 @@ import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { Empty } from "@/components/ui/Empty";
 import { useRouter } from "next/navigation";
-import { MaterialPill } from "@/components/ui/MateriaPill";
+import { MaterialTag } from "@/components/ui/MaterialTag";
 
 export default function RequestsPage() {
   const [currentTab, setCurrectTab] = useState("ongoing"); // 'ongoing' || 'completed'
@@ -36,9 +36,16 @@ export default function RequestsPage() {
 
   return (
     <Page className="overflow-hidden bg-new-bg">
-      <ResidentHeader title={"Requests & History"} action={"notification"} className="shadow-none bg-new-bg!"/>
+      <ResidentHeader
+        title={"Requests & History"}
+        action={"notification"}
+        className="shadow-none bg-new-bg!"
+      />
 
-      <PageContent className="overflow-hidden! md:top-18 md:pl-3!" padding="py-4 px-3">
+      <PageContent
+        className="overflow-hidden! md:top-18 md:pl-3!"
+        padding="py-4 px-3"
+      >
         {/* Tab section */}
         <div className="flex flex-col gap-6 mt-2">
           <div className="grid grid-cols-2 gap-2 ">
@@ -135,9 +142,15 @@ export default function RequestsPage() {
                             {formatDate(r.createdAt)}
                           </p>
                         </div>
-                        <div className="flex flex-col gap-1">
-                          <Pill type={r.status} />
-                          <MaterialPill type={r?.isAssorted === true ? "Assorted" : r?.material?.category?.name}/>
+                        <div className="flex flex-col gap-1 items-end">
+                          <StatusBadge type={r.status} />
+                          <MaterialTag
+                            type={
+                              r?.isAssorted === true
+                                ? "Assorted"
+                                : r?.material?.category?.name
+                            }
+                          />
                         </div>
                       </div>
 
@@ -145,7 +158,11 @@ export default function RequestsPage() {
                       <div className="flex flex-row items-end justify-end w-full pt-2 border-t border-gray-100">
                         <p className="text-xs text-gray-400">
                           Est. {r.estimatedValue}{" "}
-                          <span className="lowercase">{r.estimatedUnit === "PIECE" ? "pcs" : r.estimatedUnit}</span>
+                          <span className="lowercase">
+                            {r.estimatedUnit === "PIECE"
+                              ? "pcs"
+                              : r.estimatedUnit}
+                          </span>
                         </p>
                       </div>
                     </div>

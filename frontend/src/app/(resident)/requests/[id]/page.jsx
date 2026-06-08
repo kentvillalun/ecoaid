@@ -8,7 +8,7 @@ import { useState } from "react";
 import { useFetch } from "@/hooks/useFetch";
 import { Banner } from "@/components/ui/Banner";
 import Image from "next/image";
-import { MaterialPill } from "@/components/ui/MateriaPill";
+import { MaterialTag } from "@/components/ui/MaterialTag";
 import { formatDate } from "@/lib/formatDate";
 import { statusStyles } from "@/lib/statusStyles";
 import Skeleton from "react-loading-skeleton";
@@ -186,7 +186,7 @@ export default function RequestDetailPage() {
                   <p className="text-text-primary text-sm font-medium">
                     Category
                   </p>
-                  <MaterialPill
+                  <MaterialTag
                     type={
                       data?.request?.isAssorted === true
                         ? "Assorted"
@@ -203,7 +203,7 @@ export default function RequestDetailPage() {
                   <p className={`text-sm text-text-primary `}>
                     {data?.request?.isAssorted === true
                       ? "Assorted"
-                      : data?.request?.material?.category?.name}
+                      : data?.request?.material?.name}
                   </p>
                 </div>
                 <div className="flex flex-row items-center justify-between">
@@ -300,7 +300,7 @@ export default function RequestDetailPage() {
                       key={index}
                     >
                       <div className="flex items-center">
-                        <MaterialPill
+                        <MaterialTag
                           type={item?.material?.category?.name}
                           className="w-auto!"
                         />

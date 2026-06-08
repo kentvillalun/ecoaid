@@ -27,13 +27,13 @@ export default function OnboardingPage() {
     <>
       <DesktopGuard />
 
-      <Page className="bg-[#F8F8F8]!">
+      <Page className="bg-new-bg!">
         <PageTransition
           key={"page"}
           className="flex flex-col items-center justify-between min-w-full pt-6 "
         >
           <div className="w-full flex flex-col items-center gap-3.5 min-h-18.75">
-            <div className="w-full max-w-50 max-h-9.25 aspect-3/1 relative">
+            <div className="w-full max-w-30 max-h-9.25 aspect-3/1 relative">
               <Image
                 className="absolute"
                 src={"/ecoaid-logo/logo-wordmark.svg"}
@@ -72,7 +72,7 @@ export default function OnboardingPage() {
                 <div className="flex flex-col items-center justify-center h-full w-full gap-2">
                   <div className="xs:max-w-64 mobile:max-w-90 md:max-w-110 relative aspect-square w-full mx-auto">
                     <Image
-                      src={"/onboarding-2.0/onb1.png"}
+                      src={"/onboarding-2.0/onb1.webp"}
                       alt="A girl beign frustrated that she is sorrounded by recyclable materials."
                       fill
                       priority
@@ -151,7 +151,7 @@ export default function OnboardingPage() {
                 <div className="flex flex-col items-center justify-center h-full w-full gap-2">
                   <div className="xs:max-w-64 mobile:max-w-90 md:max-w-110 relative aspect-square w-full mx-auto">
                     <Image
-                      src={"/onboarding-2.0/onb2.png"}
+                      src={"/onboarding-2.0/onb2.webp"}
                       alt="A girl and boy putting trashes in a container."
                       fill
                       priority
@@ -231,7 +231,7 @@ export default function OnboardingPage() {
                 <div className="flex flex-col items-center justify-center h-full w-full gap-2">
                   <div className="xs:max-w-64 mobile:max-w-90 md:max-w-110 relative aspect-square w-full mx-auto">
                     <Image
-                      src={"/onboarding-2.0/onb3.png"}
+                      src={"/onboarding-2.0/onb3.webp"}
                       alt="A girl and boy putting trashes in a container."
                       fill
                       priority

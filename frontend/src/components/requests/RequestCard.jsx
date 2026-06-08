@@ -1,9 +1,8 @@
 import { Card } from "../ui/Card";
 import { useRouter } from "next/navigation";
-import { Pill } from "../ui/Pill";
-import { MaterialPill } from "../ui/MateriaPill";
+import { StatusBadge } from "../ui/StatusBadge";
+import { MaterialTag } from "../ui/MaterialTag";
 import { formatDate } from "@/lib/formatDate";
-import { SkeletonCard } from "../ui/SkeletonCard";
 import { Error } from "../ui/Error";
 import { Empty } from "../ui/Empty";
 import Skeleton from "react-loading-skeleton";
@@ -18,40 +17,37 @@ export const RequestCard = ({
   isError,
   handleRefetchCount,
 }) => {
-  const filteredRequest = data?.filter((req) => req.status === status);
+  const filteredRequest =
+    status === "ALL" ? data : data?.filter((req) => req.status === status);
   const router = useRouter();
 
   if (isLoading)
-    return (
-      Array.from({ length: 3}).map((_, index) => (
-        <Card
-          className={`flex flex-col items-start gap-3 transition-all hover:cursor-pointer hover:-translate-y-0.5 duration-200 ease-in-out shadow-none! new-border
+    return Array.from({ length: 3 }).map((_, index) => (
+      <Card
+        className={`flex flex-col items-start gap-3 transition-all hover:cursor-pointer hover:-translate-y-0.5 duration-200 ease-in-out shadow-none! new-border
         }`}
-          key={index}
-        >
-          {/* Top row */}
-          <div className="flex flex-row justify-between w-full">
-            <div className="flex flex-col gap-0.5">
-              <Skeleton width={120} />
-              <Skeleton width={40} />
-              <Skeleton width={170} />
-              <Skeleton width={190} />
-            </div>
-            <div className="flex flex-col items-end gap-2">
-              <Skeleton width={120} />
-              <Skeleton width={120} />
-            </div>
+        key={index}
+      >
+        {/* Top row */}
+        <div className="flex flex-row justify-between w-full">
+          <div className="flex flex-col gap-0.5">
+            <Skeleton width={120} />
+            <Skeleton width={40} />
+            <Skeleton width={170} />
+            <Skeleton width={190} />
           </div>
+          <div className="flex flex-col items-end gap-2">
+            <Skeleton width={120} />
+            <Skeleton width={120} />
+          </div>
+        </div>
 
-          {/* Footer row */}
-          <div className="flex flex-row items-center justify-between w-full pt-2 border-t border-gray-100">
-            <Skeleton width={130} />
-          </div>
-        </Card>
-      ))
-    )
-        
-     
+        {/* Footer row */}
+        <div className="flex flex-row items-center justify-between w-full pt-2 border-t border-gray-100">
+          <Skeleton width={130} />
+        </div>
+      </Card>
+    ));
 
   if (isError) return <Error handleRefetchCount={handleRefetchCount} />;
 
@@ -82,7 +78,7 @@ export const RequestCard = ({
                   className="sr-only"
                 />
               )}
-              {d.status === "APPROVED" ? (
+              {status === "APPROVED" ? (
                 <Card
                   className={`flex flex-col shadow-none! new-border items-start gap-3 transition-all hover:cursor-pointer hover:-translate-y-0.5 duration-200 ease-in-out ${
                     isSelected ? "bg-[#F0FAF0] ring-1 ring-cta-color" : ""
@@ -100,18 +96,25 @@ export const RequestCard = ({
                         {d.user.sitio.name}
                       </p>
                       <p className="text-sm text-gray-500">
-                        {d?.isAssorted === true ? "Assorted" : d?.material?.name}
+                        {d?.isAssorted === true
+                          ? "Assorted materials"
+                          : d?.material?.name}
                       </p>
                       <p className="text-sm text-gray-400">
                         Estimated value:{" "}
-                        <span className="font-medium text-gray-600">
-                          {d.estimatedValue} {d.estimatedUnit === "PIECE" ? "pcs" : d.estimatedUnit}
+                        <span className="font-medium text-gray-600 lowercase">
+                          {d.estimatedValue}{" "}
+                          {d.estimatedUnit === "PIECE"
+                            ? "pcs"
+                            : d.estimatedUnit}
                         </span>
                       </p>
                     </div>
                     <div className="flex flex-col items-end gap-2">
-                      <Pill type={d.status} />
-                      <MaterialPill type={d.material?.category?.name ?? "Assorted"} />
+                      {status === "ALL" && <StatusBadge type={d.status} />}
+                      <MaterialTag
+                        type={d.material?.category?.name ?? "Assorted"}
+                      />
                     </div>
                   </div>
 
@@ -121,7 +124,7 @@ export const RequestCard = ({
                       {formatDate(d.createdAt)}
                     </p>
                     <button
-                      className="text-sm text-cta-color pr-5 font-medium"
+                      className="text-xs text-gray-600 font-medium new-border px-3 py-1.5 rounded-xl"
                       onClick={() =>
                         router.push(`/collection-requests/${d.id}`)
                       }
@@ -151,18 +154,29 @@ export const RequestCard = ({
                         {d.user.sitio.name}
                       </p>
                       <p className="text-sm text-gray-500">
-                        {d?.isAssorted === true ? "Assorted" : d?.material?.name}
+                        {d?.isAssorted === true
+                          ? "Assorted"
+                          : d?.material?.name}
                       </p>
                       <p className="text-sm text-gray-400">
                         Estimated value:{" "}
-                        <span className="font-medium text-gray-600">
-                          {d.estimatedValue} {d.estimatedUnit === "PIECE" ? "pcs" : d.estimatedUnit}
+                        <span className="font-medium text-gray-600 lowercase">
+                          {d.estimatedValue}{" "}
+                          {d.estimatedUnit === "PIECE"
+                            ? "pcs"
+                            : d.estimatedUnit}
                         </span>
                       </p>
                     </div>
                     <div className="flex flex-col items-end gap-2">
-                      <Pill type={d.status} />
-                      <MaterialPill type={d.isAssorted === true ? "Assorted" : d.material?.category?.name} />
+                      {status === "ALL" && <StatusBadge type={d.status} />}
+                      <MaterialTag
+                        type={
+                          d.isAssorted === true
+                            ? "Assorted"
+                            : d.material?.category?.name
+                        }
+                      />
                     </div>
                   </div>
 

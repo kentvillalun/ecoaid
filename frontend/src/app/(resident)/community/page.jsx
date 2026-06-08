@@ -5,7 +5,7 @@ import { PageContent } from "@/components/layout/PageContent";
 import { Page } from "@/components/layout/Page";
 import { Card } from "@/components/ui/Card";
 import { useFetch } from "@/hooks/useFetch";
-import { MaterialPill } from "@/components/ui/MateriaPill";
+import { MaterialTag } from "@/components/ui/MaterialTag";
 import { useState } from "react";
 import Skeleton from "react-loading-skeleton";
 import { Badge } from "@/components/ui/Badge";
@@ -76,11 +76,11 @@ export default function CommunityPage() {
                 </div>
               </div>
               <div className="flex flex-col gap-2">
-                <div className="grid gap-1 grid-cols-4">
-                  <MaterialPill type={"Plastics"} className="px-1! w-auto!" />
-                  <MaterialPill type={"Papers"} className="px-1! w-auto!" />
-                  <MaterialPill type={"Bottles"} className="px-1! w-auto!" />
-                  <MaterialPill type={"Metals"} className="px-1! w-auto!" />
+                <div className="flex gap-1.5 flex-wrap">
+                  <MaterialTag type={"Plastics"}  />
+                  <MaterialTag type={"Papers"}  />
+                  <MaterialTag type={"Bottles"}  />
+                  <MaterialTag type={"Metals"}  />
                 </div>
                 <p className="text-xs text-gray-400 italic">
                   These are general material categories. Feel free to include
@@ -102,7 +102,10 @@ export default function CommunityPage() {
               </Link>
             </div>
             <div className="">
-              <Empty subtext={"No announcements available as of the moment."} className="min-h-0! p-5!" />
+              <Empty
+                subtext={"No announcements available as of the moment."}
+                className="min-h-0! p-5!"
+              />
             </div>
           </div>
 

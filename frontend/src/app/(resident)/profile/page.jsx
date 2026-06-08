@@ -51,14 +51,17 @@ export default function ProfilePage() {
     }
   };
 
-  const handleRefetchCount = () => setRefetchCount((prev) => prev + 1)
+  const handleRefetchCount = () => setRefetchCount((prev) => prev + 1);
 
   return (
-    <Page className="overflow-hidden bg-new-bg!">
+    <Page className="bg-new-bg!">
       <Toaster position="top-center" />
-      <ResidentHeader title={"Profile"} className="py-6 shadow-none bg-new-bg!" />
+      <ResidentHeader
+        title={"Profile"}
+        className="py-6 shadow-none bg-new-bg!"
+      />
 
-      <PageContent className="pt-10 md:pl-3! md:top-18!">
+      <PageContent className="pt-10 md:pl-3! md:top-18! ">
         <section className="flex flex-col gap-5">
           <div className="flex flex-col items-center gap-4">
             <div className="border-5 rounded-full max-h-40 max-w-40 border-cta-color shadow-xl overflow-hidden flex items-center justify-center">
@@ -71,19 +74,30 @@ export default function ProfilePage() {
             </div>
             {isLoading ? (
               <div className="text-center ">
-                <Skeleton width={150}/>
-                <Skeleton width={250}/>
+                <Skeleton width={150} />
+                <Skeleton width={250} />
               </div>
             ) : isError ? (
               <div className="text-center ">
-                <div className="text-sm text-[#727272]">Something went wrong. <button className="text-[#74C857] hover:underline" onClick={handleRefetchCount}>Please try again</button></div>
+                <div className="text-sm text-[#727272]">
+                  Something went wrong.{" "}
+                  <button
+                    className="text-[#74C857] hover:underline"
+                    onClick={handleRefetchCount}
+                  >
+                    Please try again
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="text-center ">
                 <p className="font-semibold text-lg">
                   {data?.user?.firstName} {data?.user?.lastName}
                 </p>
-                <p className="text-sm text-[#727272]">Brgy. {data?.user?.barangay}, {data?.user?.municipality}, {data?.user?.province}</p>
+                <p className="text-sm text-[#727272]">
+                  Brgy. {data?.user?.barangay}, {data?.user?.municipality},{" "}
+                  {data?.user?.province}
+                </p>
               </div>
             )}
           </div>
@@ -127,14 +141,15 @@ export default function ProfilePage() {
               </Link>
             </div>
 
-            <button onClick={handleLogout}>
-              <Card className="flex-row gap-5 shadow-none new-border">
-                <div className="min-w-10 min-h-10 rounded-full bg-[#9DB2CE26] flex items-center justify-center">
-                  <ArrowLeftStartOnRectangleIcon className="w-6 h-6" />
-                </div>
-                <p className="font-medium ">Log out</p>
-              </Card>
-            </button>
+            <Card
+              className="flex-row gap-5 shadow-none new-border mb-20"
+              handleClick={handleLogout}
+            >
+              <div className="min-w-10 min-h-10 rounded-full bg-[#9DB2CE26] flex items-center justify-center">
+                <ArrowLeftStartOnRectangleIcon className="w-6 h-6" />
+              </div>
+              <p className="font-medium ">Log out</p>
+            </Card>
           </div>
         </section>
       </PageContent>

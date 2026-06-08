@@ -2,7 +2,7 @@
 
 import { Card } from "../ui/Card";
 import { ArrowLeftIcon, ClipboardDocumentListIcon } from "@heroicons/react/24/outline";
-import { Pill } from "../ui/Pill";
+import { StatusBadge } from "../ui/StatusBadge";
 
 export const RequestDetailHeader = ({ type }) => {
   return (
@@ -21,7 +21,7 @@ export const RequestDetailHeader = ({ type }) => {
         <div className="flex flex-col flex-1">
           <div className="flex flex-row items-center gap-3">
             <h2 className="font-semibold text-xl">Request Details</h2>
-            <Pill type={type} />
+            <StatusBadge type={type} />
           </div>
           <p className="text-sm text-gray-500">Review the full details of this pickup request</p>
         </div>
