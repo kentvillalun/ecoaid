@@ -48,7 +48,7 @@ export const Sidebar = () => {
     {
       icon: CollectionSortingIcon,
       label: "Manual Intake",
-      href: "",
+      href: "/manual-intake",
     },
     {
       icon: ResidentsIcon,
