@@ -3,6 +3,7 @@
 import { Sidebar } from "@/components/navigation/Sidebar";
 import { useState, createContext } from "react";
 import { Toaster } from "sonner";
+import { motion, AnimatePresence } from "motion/react";
 
 export const DrawerContext = createContext();
 
@@ -15,14 +16,33 @@ export default function BarangayLayout({ children }) {
         <Toaster position="top-center" />
         <main className="">{children}</main>
         {sidebarOpen && (
-          <>
-            <div
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={"sidebar-backdrop"}
               className="fixed inset-0 bg-black/40 z-40 md:hidden"
               onClick={() => setSidebarOpen(!sidebarOpen)}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{
+                opacity: 0,
+                transition: { duration: 0.15, ease: "easeIn" },
+              }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
             >
-              <Sidebar />
-            </div>
-          </>
+              <motion.div
+                key={"sidebar"}
+                initial={{ x: "-100%" }}
+                animate={{ x: 0 }}
+                exit={{
+                  x: "-100%",
+                  transition: { duration: 0.25, ease: "easeIn" },
+                }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
+              >
+                <Sidebar />
+              </motion.div>
+            </motion.div>
+          </AnimatePresence>
         )}
         <aside className="hidden md:block">
           <Sidebar />

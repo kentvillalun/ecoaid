@@ -67,6 +67,7 @@ model Barangay {
 
   material Material[]
   program Program[]
+  manualIntakeTransaction ManualIntakeTransaction[]
 }
 
 enum RedemptionMode {
@@ -130,6 +131,8 @@ model User {
   updatedAt DateTime @updatedAt
 
   pickupRequest PickupRequests[]
+  manualIntakeTransaction ManualIntakeTransaction[] @relation("ResidentIntakes")
+  collectedIntakeTransaction ManualIntakeTransaction[] @relation("CollectorIntakes")
 
   @@index([barangayId])
   @@index([sitioId])
@@ -189,6 +192,7 @@ model Material {
   pickupRequest PickupRequests[]
   collectionItem CollectionItem[]
   programMaterial ProgramMaterial[]
+  manualIntakeItems ManualIntakeItems[]
 
   @@unique([name, barangayId])
 }
@@ -291,4 +295,39 @@ enum EducationalLevel {
   SECONDARY
   TERTIARY
 }
+
+model ManualIntakeTransaction {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  userId String? @db.Uuid
+  user User? @relation("ResidentIntakes", fields: [userId], references: [id])
+
+  collectorId String @db.Uuid
+  collector User @relation("CollectorIntakes", fields: [collectorId], references: [id])
+
+  barangayId String @db.Uuid
+  barangay Barangay @relation(fields: [barangayId], references: [id])
+
+  householdName String? 
+  collectorName String?
+
+  createdAt DateTime @default(now())
+
+  manualIntakeItems ManualIntakeItems[]
+}
+
+model ManualIntakeItems {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  
+  transactionId String @db.Uuid
+  manualIntakeTransaction ManualIntakeTransaction @relation(fields: [transactionId], references: [id])
+
+  materialId String @db.Uuid
+  material Material @relation(fields: [materialId], references: [id])
+
+  quantity Float
+  unit Unit @default(KG)
+}
+
+
 
