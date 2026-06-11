@@ -6,11 +6,19 @@ import { BarangayTopBar } from "@/components/navigation/BarangayTopBar";
 import { BarangayHeaderCard } from "@/components/ui/BarangayHeaderCard";
 import { Card } from "@/components/ui/Card";
 import { MaterialTag } from "@/components/ui/MaterialTag";
+import { Modal } from "@/components/ui/Modal";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { formatDate } from "@/lib/formatDate";
-import { Bars3BottomLeftIcon } from "@heroicons/react/24/outline";
+import {
+  Bars3BottomLeftIcon,
+  InboxArrowDownIcon,
+  PlusIcon,
+  TrashIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import { Inter } from "next/font/google";
 import { useState } from "react";
+import { createPortal } from "react-dom";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -72,7 +80,12 @@ const MOCK_INTAKES = [
     isRegistered: false,
     sitio: null,
     materials: [
-      { name: "Plastic Containers", type: "Plastics", quantity: 1.5, unit: "kg" },
+      {
+        name: "Plastic Containers",
+        type: "Plastics",
+        quantity: 1.5,
+        unit: "kg",
+      },
       { name: "White Paper", type: "Papers", quantity: 2, unit: "kg" },
     ],
     intakeDate: "2026-06-05T16:20:00",
@@ -100,10 +113,7 @@ function MaterialsCell({ materials }) {
           </p>
           <div className="flex flex-col gap-1">
             {materials.map((m, i) => (
-              <div
-                key={i}
-                className="flex items-center justify-between gap-6"
-              >
+              <div key={i} className="flex items-center justify-between gap-6">
                 <MaterialTag type={m.type} materialName={m.name} />
                 <span className="text-xs text-gray-500 text-nowrap">
                   {m.quantity} {m.unit}
@@ -131,6 +141,23 @@ function ResidentNameCell({ name, isRegistered }) {
 }
 
 export default function ManualIntakePage() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showHousehold, setShowHousehold] = useState(false);
+
+  const [materialRows, setMaterialRows] = useState([
+    { materialId: "", amount: "", unit: "" },
+  ]);
+
+  const removeRow = (index) => {
+    const removed = materialRows.filter((_, i )=> i !== index)
+    setMaterialRows(removed);
+  }
+
+  const updateRow = (index, field, value) => {
+    const updated = [...materialRows];
+    updated[index][field] = value;
+    setMaterialRows(updated)
+  }
   return (
     <Page className="bg-new-bg!">
       <BarangayTopBar title="Manual Collection Intake" />
@@ -140,13 +167,137 @@ export default function ManualIntakePage() {
           subtitle="Record recyclable material contributions from all sources"
         />
 
+        {isModalOpen &&
+          createPortal(
+            <Modal
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              icon={<InboxArrowDownIcon className="w-6 stroke-new-primary" />}
+              title={"Record Intake"}
+              subtitle={
+                "Record collected materials for a resident or household."
+              }
+              confirmLabel={"Record Intake"}
+              confirmClassName={"gradient-button"}
+            >
+              <div className="flex flex-col gap-3 p-6">
+                <div className="flex flex-col gap-1">
+                  <label htmlFor="searchResident" className="label">
+                    Resident
+                  </label>
+                  <input
+                    type="text"
+                    className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11  max-h-11"
+                    id="searchResident"
+                    placeholder="Search and select resident name"
+
+                  />
+                </div>
+
+                {showHousehold && (
+                  <div className="flex flex-col gap-1">
+                    <label htmlFor="household" className="label">
+                      Household name
+                    </label>
+                    <input
+                      type="text"
+                      className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11  max-h-11"
+                      id="household"
+                      placeholder="Input resident name"
+                    />
+                  </div>
+                )}
+
+                <div className="flex flex-col gap-1">
+                  <label htmlFor="" className="label">
+                    Materials
+                  </label>
+
+                  <div className="flex flex-col gap-3">
+                    {materialRows.map((material, index) => (
+                      <div
+                        key={index}
+                        className="new-border bg-white rounded-xl p-4"
+                      >
+                        <div className="flex flex-row items-center justify-between mb-3">
+                          <span className="text-sm font-medium text-gray-700">
+                            Material 
+                          </span>
+                          <button
+                            type="button"
+                            className="hover:cursor-pointer"
+                            onClick={() => {
+                              removeRow(index)
+                            }}
+                          >
+                            <XMarkIcon className="w-5 stroke-gray-400" />
+                          </button>
+                        </div>
+
+                        <div className="w-full outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 mb-2">
+                          <select className="w-full outline-none" onChange={(e) => updateRow(index, "materialId", e.target.value) }>
+                            <option value="" disabled hidden>
+                              Select material
+                            </option>
+                          </select>
+                        </div>
+
+                        <div className="flex flex-row gap-2">
+                          <div className="flex-1 outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11">
+                            <input
+                              type="text"
+                              className="outline-none w-full"
+                              placeholder="Amount, e.g. 20"
+                              onChange={(e) => {
+                                updateRow(index, "amount", e.target.value)
+                              } }
+                            />
+                          </div>
+                          <div className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 min-w-28">
+                            <select className="w-full outline-none" onChange={(e) => {
+                              updateRow(index, 'unit', e.target.value)
+                            }}>
+                              <option value="" disabled hidden>
+                                Unit
+                              </option>
+                              <option>kg</option>
+                              <option>lbs</option>
+                              <option>gram</option>
+                              <option>piece</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <button
+                  className="flex flex-row items-center justify-center text-base py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:cursor-pointer gap-2 mt-3"
+                  type="button"
+                  onClick={() => {
+                    setMaterialRows([
+                      ...materialRows,
+                      { materialId: "", amount: "", unit: "" },
+                    ]);
+                  }}
+                >
+                  <PlusIcon className="text-gray-600 w-4" />
+                  <p className="text-gray-600">Add material</p>
+                </button>
+              </div>
+            </Modal>,
+            document.body,
+          )}
+
         <section className="flex flex-col gap-3">
           <SectionHeader
             title="Intake History"
             subtitle="All recorded manual intake entries"
             icon={<Bars3BottomLeftIcon className="w-6 stroke-cta-color" />}
             buttonLabel="Record Intake"
-            onAction={() => {}}
+            onAction={() => {
+              setIsModalOpen(true);
+            }}
           />
 
           {/* Desktop table */}
@@ -157,7 +308,10 @@ export default function ManualIntakePage() {
               <thead className="border-b border-[#E6EFF5]">
                 <tr>
                   {TABLE_HEADERS.map((h) => (
-                    <th key={h} className="font-medium text-start p-4 text-nowrap">
+                    <th
+                      key={h}
+                      className="font-medium text-start p-4 text-nowrap"
+                    >
                       {h}
                     </th>
                   ))}
@@ -179,7 +333,9 @@ export default function ManualIntakePage() {
                     <td className="p-4">
                       <MaterialsCell materials={row.materials} />
                     </td>
-                    <td className="p-4 text-nowrap">{formatDate(row.intakeDate)}</td>
+                    <td className="p-4 text-nowrap">
+                      {formatDate(row.intakeDate)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -209,8 +365,15 @@ export default function ManualIntakePage() {
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 mt-1.5 w-full">
                     {row.materials.map((m, i) => (
-                      <div key={i} className="flex items-center justify-between gap-2">
-                        <MaterialTag type={m.type} materialName={m.name} textOnly />
+                      <div
+                        key={i}
+                        className="flex items-center justify-between gap-2"
+                      >
+                        <MaterialTag
+                          type={m.type}
+                          materialName={m.name}
+                          textOnly
+                        />
                         <span className="text-xs text-gray-500 text-nowrap">
                           {m.quantity} {m.unit}
                         </span>
