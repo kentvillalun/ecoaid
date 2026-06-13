@@ -35,7 +35,7 @@ export const MaterialTag = ({
 
   return (
     <div
-      className={` ${className} ${twMerge("text-xs", className) }  text-no font-medium inline-flex items-center gap-1.5 ${inter.className}  ${styles[type]?.text ?? "text-gray-700"} ${textOnly && 
+      className={` ${className} ${twMerge("text-xs", className) }  text-no font-medium inline-flex text-nowrap items-center gap-1.5 ${inter.className}  ${styles[type]?.text ?? "text-gray-700"} ${textOnly && 
         styles[type]?.bg ? "" : `${styles[type]?.bg} py-1 px-2 rounded-3xl`
       }`}
     >

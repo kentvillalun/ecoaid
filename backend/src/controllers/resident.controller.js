@@ -90,10 +90,10 @@ const updateResidentProfile = async (req, res) => {
       where: { id },
       data,
       select: {
-        firstName: true, 
+        firstName: true,
         lastName: true,
         phoneNumber: true,
-      }
+      },
     });
 
     return res.status(200).json({
@@ -105,4 +105,49 @@ const updateResidentProfile = async (req, res) => {
   }
 };
 
-export { getResidentProfile, getBarangayInfo, updateResidentProfile };
+const searchResident = async (req, res) => {
+  try {
+    const barangayId = req.user.barangayId;
+    const { name } = req.query;
+
+    // const users = await prisma.user.findMany({
+    //   where: {
+    //     barangayId,
+    //     role: "RESIDENT",
+    //     OR: [
+    //       {
+    //         firstName: {
+    //           contains: name,
+    //           mode: "insensitive",
+    //         },
+    //       },
+    //       {
+    //         lastName: {
+    //           contains: name,
+    //           mode: "insensitive",
+    //         },
+    //       },
+    //     ],
+    //   },
+    //   select: {
+    //     id: true,
+    //     firstName: true,
+    //     lastName: true,
+    //   },
+    // });
+    const users = await prisma.$queryRaw`
+      SELECT id, "firstName", "lastName"
+      FROM "User"
+      WHERE "barangayId" = ${barangayId} AND "role" = 'RESIDENT' AND CONCAT("firstName", ' ', "lastName") ILIKE ${'%' + name + '%'}
+    `
+
+    return res.status(200).json({
+      message: "Fetch success",
+      users,
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+export { getResidentProfile, getBarangayInfo, updateResidentProfile, searchResident };

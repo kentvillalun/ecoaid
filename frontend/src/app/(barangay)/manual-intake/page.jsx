@@ -8,16 +8,17 @@ import { Card } from "@/components/ui/Card";
 import { MaterialTag } from "@/components/ui/MaterialTag";
 import { Modal } from "@/components/ui/Modal";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import { useFetch } from "@/hooks/useFetch";
 import { formatDate } from "@/lib/formatDate";
 import {
   Bars3BottomLeftIcon,
   InboxArrowDownIcon,
   PlusIcon,
-  TrashIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
+
 import { Inter } from "next/font/google";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 const inter = Inter({
@@ -96,33 +97,48 @@ const TABLE_HEADERS = ["Resident Name", "Sitio", "Materials", "Intake Date"];
 
 function MaterialsCell({ materials }) {
   const [show, setShow] = useState(false);
+  const [positionTop, setPositionTop] = useState(0);
+  const [positionLeft, setPositionLeft] = useState(0);
 
   return (
     <div
-      className="relative flex flex-wrap gap-1"
-      onMouseEnter={() => setShow(true)}
+      className="relative flex flex-wrap gap-1 min-h-full"
+      onMouseEnter={(e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        setPositionTop(rect.top);
+        setPositionLeft(rect.left);
+        setShow(true);
+      }}
       onMouseLeave={() => setShow(false)}
     >
       {materials.map((m, i) => (
         <MaterialTag key={i} type={m.type} materialName={m.name} />
       ))}
-      {show && (
-        <div className="absolute bottom-full left-0 mb-2 z-50 bg-white rounded-xl shadow-lg new-border p-3 min-w-56">
-          <p className="text-xs font-semibold text-gray-500 mb-2">
-            Materials & Quantity
-          </p>
-          <div className="flex flex-col gap-1">
-            {materials.map((m, i) => (
-              <div key={i} className="flex items-center justify-between gap-6">
-                <MaterialTag type={m.type} materialName={m.name} />
-                <span className="text-xs text-gray-500 text-nowrap">
-                  {m.quantity} {m.unit}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {show &&
+        createPortal(
+          <div
+            className="fixed left-0 z-50 bg-white rounded-xl  new-border p-3 min-w-56 "
+            style={{ top: positionTop, left: positionLeft }}
+          >
+            <p className="text-xs font-semibold text-gray-500 mb-2">
+              Materials & Quantity
+            </p>
+            <div className="flex flex-col gap-1">
+              {materials.map((m, i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between gap-6"
+                >
+                  <MaterialTag type={m.type} materialName={m.name} />
+                  <span className="text-xs text-gray-500 text-nowrap">
+                    {m.quantity} {m.unit}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
@@ -133,7 +149,7 @@ function ResidentNameCell({ name, isRegistered }) {
       <p className="font-semibold text-text-primary text-nowrap">{name}</p>
       {!isRegistered && (
         <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-100 text-nowrap">
-          Unregistered
+          No Account
         </span>
       )}
     </div>
@@ -149,15 +165,94 @@ export default function ManualIntakePage() {
   ]);
 
   const removeRow = (index) => {
-    const removed = materialRows.filter((_, i )=> i !== index)
+    const removed = materialRows.filter((_, i) => i !== index);
     setMaterialRows(removed);
-  }
+  };
 
   const updateRow = (index, field, value) => {
     const updated = [...materialRows];
     updated[index][field] = value;
-    setMaterialRows(updated)
-  }
+    setMaterialRows(updated);
+  };
+
+  const [name, setName] = useState("");
+  const [residentsList, setResidentsList] = useState([]);
+  const [isSearchLoading, setIsSearchLoading] = useState(false);
+  const [IsSearchError, setIsSearchError] = useState(false);
+  const [searchError, setSearchError] = useState("");
+  const timer = useRef(null);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [selectedResident, setSelectedResident] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const dropdownRef = useRef(null);
+  const [materialRefetchCount, setMaterialRefetchCount] = useState(0);
+  const { data } = useFetch({
+    url: "/api/material/barangay",
+    refetchCount: materialRefetchCount,
+  });
+
+  const resetModal = () => {
+    setName("");
+    setResidentsList([]);
+    setIsSearchLoading(false);
+    setIsSearchError(false);
+    setSearchError("");
+    setShowDropdown(false);
+    setSelectedResident(null);
+    setSearchTerm("");
+    setMaterialRows([{ materialId: "", amount: "", unit: "" }]);
+    setShowHousehold(false);
+  };
+
+  const searchResidents = async (name) => {
+    try {
+      setIsSearchLoading(true);
+      setIsSearchError(false);
+
+      const response = await fetch(`/api/resident/search?name=${name.trim()}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        setSearchError("There is a problem searching residents");
+        setIsSearchError(true);
+        return;
+      }
+
+      setIsSearchLoading(false);
+      setResidentsList(result.users);
+
+      if (residentsList.length === 0) setShowHousehold(true);
+
+      setShowDropdown(true);
+      return true;
+    } catch (error) {
+      setIsSearchError(true);
+      setSearchError("Fetching failed");
+      return false;
+    } finally {
+      setIsSearchLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (!dropdownRef?.current?.contains(e.target)) setShowDropdown(false);
+    };
+
+    document.addEventListener("mousedown", handler);
+
+    return () => {
+      document.removeEventListener("mousedown", handler);
+    };
+  }, []);
+
   return (
     <Page className="bg-new-bg!">
       <BarangayTopBar title="Manual Collection Intake" />
@@ -171,7 +266,10 @@ export default function ManualIntakePage() {
           createPortal(
             <Modal
               isOpen={isModalOpen}
-              onClose={() => setIsModalOpen(false)}
+              onClose={() => {
+                resetModal()
+                setIsModalOpen(false)
+              }}
               icon={<InboxArrowDownIcon className="w-6 stroke-new-primary" />}
               title={"Record Intake"}
               subtitle={
@@ -185,13 +283,79 @@ export default function ManualIntakePage() {
                   <label htmlFor="searchResident" className="label">
                     Resident
                   </label>
-                  <input
-                    type="text"
-                    className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11  max-h-11"
-                    id="searchResident"
-                    placeholder="Search and select resident name"
-
-                  />
+                  <div className="flex flex-row relative w-full outline-1 py-2.5  text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11">
+                    <input
+                      type="text"
+                      className="w-full outline-none px-3.5"
+                      id="searchResident"
+                      placeholder="Search and select resident name"
+                      onChange={(e) => {
+                        setSearchTerm(e.target.value);
+                        if (!e.target.value) {
+                          setShowDropdown(false);
+                          setResidentsList([]);
+                        } else {
+                          setShowHousehold(false);
+                          if (selectedResident !== null)
+                            setSelectedResident(null);
+                          clearTimeout(timer.current);
+                          timer.current = setTimeout(() => {
+                            searchResidents(e.target.value);
+                          }, 500);
+                        }
+                      }}
+                      value={searchTerm}
+                      onFocus={() => {
+                        if (residentsList.length > 0 || searchTerm)
+                          setShowDropdown(true);
+                      }}
+                    />
+                    {selectedResident !== null && (
+                      <button
+                        className="pr-3.5 hover:cursor-pointer"
+                        type="button"
+                        onClick={() => {
+                          setSearchTerm("");
+                          setSelectedResident(null);
+                          setResidentsList([]);
+                        }}
+                      >
+                        <XMarkIcon className="w-5 stroke-gray-400" />
+                      </button>
+                    )}
+                    {showDropdown && (
+                      <div
+                        className="absolute bg-white flex flex-col w-full items-start z-40 rounded-lg new-border text-sm py-2.5 top-11.5"
+                        ref={dropdownRef}
+                      >
+                        {residentsList.length === 0 ? (
+                          <div className="px-3.5 w-full py-1">
+                            No residents found. You may enter a household name
+                            below.
+                          </div>
+                        ) : (
+                          residentsList.map((r) => (
+                            <div
+                              className="px-3.5 hover:cursor-pointer hover:bg-gray-50 w-full py-1"
+                              key={r.id}
+                              onClick={() => {
+                                setSelectedResident({
+                                  id: r.id,
+                                  displayName: `${r.firstName} ${r.lastName}`,
+                                });
+                                setSearchTerm(`${r.firstName} ${r.lastName}`);
+                                setShowDropdown(false);
+                              }}
+                            >
+                              <p className="">
+                                {r.firstName} {r.lastName}
+                              </p>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {showHousehold && (
@@ -221,13 +385,13 @@ export default function ManualIntakePage() {
                       >
                         <div className="flex flex-row items-center justify-between mb-3">
                           <span className="text-sm font-medium text-gray-700">
-                            Material 
+                            Material and amount
                           </span>
                           <button
                             type="button"
                             className="hover:cursor-pointer"
                             onClick={() => {
-                              removeRow(index)
+                              removeRow(index);
                             }}
                           >
                             <XMarkIcon className="w-5 stroke-gray-400" />
@@ -235,10 +399,21 @@ export default function ManualIntakePage() {
                         </div>
 
                         <div className="w-full outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 mb-2">
-                          <select className="w-full outline-none" onChange={(e) => updateRow(index, "materialId", e.target.value) }>
+                          <select
+                            className="w-full outline-none"
+                            onChange={(e) =>
+                              updateRow(index, "materialId", e.target.value)
+                            }
+                            defaultValue=""
+                          >
                             <option value="" disabled hidden>
                               Select material
                             </option>
+                            {data?.materials?.map((m) => (
+                              <option value={m.id} className="" key={m.id}>
+                                {m.name}
+                              </option>
+                            ))}
                           </select>
                         </div>
 
@@ -249,14 +424,17 @@ export default function ManualIntakePage() {
                               className="outline-none w-full"
                               placeholder="Amount, e.g. 20"
                               onChange={(e) => {
-                                updateRow(index, "amount", e.target.value)
-                              } }
+                                updateRow(index, "amount", e.target.value);
+                              }}
                             />
                           </div>
                           <div className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 min-w-28">
-                            <select className="w-full outline-none" onChange={(e) => {
-                              updateRow(index, 'unit', e.target.value)
-                            }}>
+                            <select
+                              className="w-full outline-none"
+                              onChange={(e) => {
+                                updateRow(index, "unit", e.target.value);
+                              }}
+                            >
                               <option value="" disabled hidden>
                                 Unit
                               </option>
@@ -301,10 +479,11 @@ export default function ManualIntakePage() {
           />
 
           {/* Desktop table */}
+
           <Card
             className={`${inter.className} hidden md:flex md:flex-col px-8 overflow-x-auto md:gap-3 md:items-start shadow-none! new-border`}
           >
-            <table className="w-full text-sm border-collapse text-gray-600">
+            <table className="w-full text-sm border-collapse text-gray-600 overflow-x-auto">
               <thead className="border-b border-[#E6EFF5]">
                 <tr>
                   {TABLE_HEADERS.map((h) => (
@@ -330,7 +509,7 @@ export default function ManualIntakePage() {
                       />
                     </td>
                     <td className="p-4 text-nowrap">{row.sitio ?? "—"}</td>
-                    <td className="p-4">
+                    <td className="p-4 ">
                       <MaterialsCell materials={row.materials} />
                     </td>
                     <td className="p-4 text-nowrap">
