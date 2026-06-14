@@ -1,7 +1,7 @@
 import { Modal } from "@/components/ui/Modal";
 import { useState } from "react";
 import { createPortal } from "react-dom";
-import { ScaleIcon, XMarkIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { ScaleIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useUpdate } from "@/hooks/useUpdate";
 import { toast } from "sonner";
 import { useFetch } from "@/hooks/useFetch";
@@ -141,141 +141,98 @@ export const InProgressActions = ({
             isPill={true}
           >
             {isAssorted === true ? (
-              <div className="flex flex-col md:gap-4 gap-7 p-6 ">
-                {/* <div className="outline-1 py-2.5 pl-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-[#74C857] transition-colors flex items-center justify-between"> */}
-                {/* </div> */}
-                {/* Labels */}
+              <div className="flex flex-col gap-3 p-6">
+                {items.map((item, index) => (
+                  <div key={index} className="new-border bg-white rounded-xl p-4">
+                    <div className="flex flex-row items-center justify-between mb-3">
+                      <span className="text-sm font-medium text-gray-700">
+                        Material {index + 1}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => removeRow(index)}
+                        disabled={items.length === 2}
+                        className="hover:cursor-pointer"
+                      >
+                        <XMarkIcon className="w-5 stroke-gray-400" />
+                      </button>
+                    </div>
 
-                <div className="md:grid w-full grid-cols-3 gap-2 hidden">
-                  <label className="font-medium text-base text-text-primary px-2">
-                    Category
-                  </label>{" "}
-                  <label className="font-medium text-base text-text-primary  px-2">
-                    Material
-                  </label>{" "}
-                  <label className="font-medium text-base text-text-primary  px-2">
-                    Actual value and unit
-                  </label>{" "}
-                  
-                </div>
-
-                {/* Fields */}
-                <div className="flex flex-col md:gap-2 gap-6">
-                  {items.map((item, index) => (
-                    <div
-                      className="grid md:grid-cols-3 grid-cols-1 pr-2 md:gap-2 gap-1"
-                      key={index}
-                    >
-                      <div className="flex flex-col gap-1">
-                        <label className="text-text-primary font-medium md:hidden">
+                    <div className="w-full outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 mb-2">
+                      <select
+                        className="w-full outline-none"
+                        onChange={(e) =>
+                          handleCategoryChange(index, e.target.value)
+                        }
+                        value={item.categoryId}
+                      >
+                        <option value="" disabled hidden>
                           Category
-                        </label>
-                        <div className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors">
-                          <select
-                            className="w-full outline-none"
-                            onChange={(e) =>
-                              handleCategoryChange(index, e.target.value)
-                            }
-                            value={item.categoryId}
-                          >
-                            <option value="" disabled hidden>
-                              Category
-                            </option>
-                            {categories?.map((c) => (
-                              <option key={c.id} value={c.id}>
-                                {c.name}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
+                        </option>
+                        {categories?.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="w-full outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 mb-2">
+                      <select
+                        className="w-full outline-none"
+                        onChange={(e) =>
+                          updateItem(index, "materialId", e.target.value)
+                        }
+                        disabled={!item.categoryId}
+                        value={item.materialId}
+                      >
+                        <option value="" disabled hidden>
+                          Material
+                        </option>
+                        {materialOptions[index]?.map((m) => (
+                          <option value={m.id} key={m.id}>
+                            {m.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="flex flex-row gap-2">
+                      <div className="flex-1 outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11">
+                        <input
+                          type="number"
+                          className="outline-none w-full"
+                          placeholder="e.g. 1"
+                          min={0}
+                          onChange={(e) =>
+                            updateItem(
+                              index,
+                              "actualValue",
+                              parseFloat(e.target.value),
+                            )
+                          }
+                        />
                       </div>
-
-                      <div className="flex flex-col gap-1">
-                        <label className="text-text-color font-medium md:hidden">
-                          Material name
-                        </label>
-                        <div className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors">
-                          <select
-                            className="w-full outline-none"
-                            onChange={(e) =>
-                              updateItem(index, "materialId", e.target.value)
-                            }
-                            disabled={!item.categoryId}
-                            value={item.materialId}
-                          >
-                            <option value="" disabled hidden>
-                              Material
-                            </option>
-                            {materialOptions[index]?.map((m) => (
-                              <option value={m.id} key={m.id}>
-                                {m.name}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-
-                      <div className=" gap-2 grid grid-cols-2">
-                        <div className="flex flex-col gap-1">
-                          <label className="text-text-primary font-medium md:hidden">
-                            Actual value
-                          </label>
-                          <input
-                            type="number"
-                            className=" focus-within:outline-cta-color px-2 py-2.5 rounded-lg outline-1 outline-gray-300 transition-colors"
-                            placeholder="e.g. 1"
-                            min={0}
-                            onChange={(e) =>
-                              updateItem(
-                                index,
-                                "actualValue",
-                                parseFloat(e.target.value),
-                              )
-                            }
-                          />
-                        </div>
-
-                        <div className="flex flex-col gap-1">
-                          <label className="text-text-primary font-medium md:hidden">
-                            Actual Unit
-                          </label>
-
-                          <div className="flex flex-row items-center gap-4">
-                            <div className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors flex-1">
-                              <select
-                                className="w-full outline-none"
-                                onChange={(e) =>
-                                  updateItem(
-                                    index,
-                                    "actualUnit",
-                                    e.target.value,
-                                  )
-                                }
-                                value={item.actualUnit}
-                              >
-                                <option value="" hidden disabled>
-                                  kg
-                                </option>
-                                <option value="KG">kg</option>
-                                <option value="GRAMS">grams</option>
-                                <option value="LBS">lbs</option>
-                                <option value="PIECE">piece/s</option>
-                              </select>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => removeRow(index)}
-                              disabled={items.length === 2}
-                              className="hover:cursor-pointer"
-                            >
-                              <TrashIcon className="w-6 stroke-gray-400" />
-                            </button>
-                          </div>
-                        </div>
+                      <div className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 min-w-28">
+                        <select
+                          className="w-full outline-none"
+                          onChange={(e) =>
+                            updateItem(index, "actualUnit", e.target.value)
+                          }
+                          value={item.actualUnit}
+                        >
+                          <option value="" hidden disabled>
+                            kg
+                          </option>
+                          <option value="KG">kg</option>
+                          <option value="GRAMS">grams</option>
+                          <option value="LBS">lbs</option>
+                          <option value="PIECE">piece/s</option>
+                        </select>
                       </div>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
 
                 <button
                   className="py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:cursor-pointer"

@@ -20,6 +20,13 @@ import {
 import { Inter } from "next/font/google";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useMutation } from "@/hooks/useMutation";
+import { toast } from "sonner";
+import { Spinner } from "@/components/ui/Spinner";
+import { Error } from "@/components/ui/Error";
+import { Empty } from "@/components/ui/Empty";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -111,8 +118,12 @@ function MaterialsCell({ materials }) {
       }}
       onMouseLeave={() => setShow(false)}
     >
-      {materials.map((m, i) => (
-        <MaterialTag key={i} type={m.type} materialName={m.name} />
+      {materials?.map((m) => (
+        <MaterialTag
+          key={m.id}
+          type={m?.material?.category?.name}
+          materialName={m?.material?.name}
+        />
       ))}
       {show &&
         createPortal(
@@ -124,14 +135,18 @@ function MaterialsCell({ materials }) {
               Materials & Quantity
             </p>
             <div className="flex flex-col gap-1">
-              {materials.map((m, i) => (
+              {materials.map((m) => (
                 <div
-                  key={i}
+                  key={m?.id}
                   className="flex items-center justify-between gap-6"
                 >
-                  <MaterialTag type={m.type} materialName={m.name} />
-                  <span className="text-xs text-gray-500 text-nowrap">
-                    {m.quantity} {m.unit}
+                  <MaterialTag
+                    type={m?.material?.category?.name}
+                    materialName={m?.material?.name}
+                    textOnly
+                  />
+                  <span className="text-xs text-gray-500 text-nowrap lowercase">
+                    {m?.quantity} {m?.unit === "PIECE" ? "pcs" : m?.unit}
                   </span>
                 </div>
               ))}
@@ -143,7 +158,7 @@ function MaterialsCell({ materials }) {
   );
 }
 
-function ResidentNameCell({ name, isRegistered }) {
+function ResidentNameCell({ name, isRegistered = true }) {
   return (
     <div className="flex flex-row items-center gap-2 flex-wrap">
       <p className="font-semibold text-text-primary text-nowrap">{name}</p>
@@ -190,6 +205,62 @@ export default function ManualIntakePage() {
     url: "/api/material/barangay",
     refetchCount: materialRefetchCount,
   });
+  const { makeRequest } = useMutation();
+  const [householdName, setHouseholdName] = useState("");
+  const [transactionsRefetchCount, setTransactionsRefetchCount] = useState(0);
+  const {
+    data: transactionsData,
+    isLoading,
+    isError,
+  } = useFetch({
+    url: "/api/manual-intake/",
+    refetchCount: transactionsRefetchCount,
+  });
+
+  const handleTransactionRefetchCount = () =>
+    setTransactionsRefetchCount((prev) => prev + 1);
+
+  const onSubmit = async () => {
+    if (!selectedResident && !householdName.trim()) {
+      return toast.error(
+        "Please select a resident or enter a household/ resident name",
+      );
+    }
+
+    if (
+      materialRows.length === 0 ||
+      materialRows.some((row) => !row.materialId || !row.amount || !row.unit)
+    ) {
+      return toast.error(
+        "Creation failed. Please add at least one material item",
+      );
+    }
+
+    toast.loading("Creating intake transaction");
+
+    const success = await makeRequest({
+      url: "/api/manual-intake/",
+      body: {
+        userId: selectedResident?.id,
+        householdName,
+        items: materialRows.map((row) => ({
+          materialId: row.materialId,
+          quantity: parseFloat(row.amount),
+          unit: row.unit,
+        })),
+      },
+    });
+
+    if (success) {
+      toast.dismiss();
+      toast.success("Intake transaction created");
+      handleTransactionRefetchCount();
+      resetModal();
+    } else {
+      toast.dismiss();
+      toast.error("Creating intake transaction failed");
+    }
+  };
 
   const resetModal = () => {
     setName("");
@@ -202,6 +273,7 @@ export default function ManualIntakePage() {
     setSearchTerm("");
     setMaterialRows([{ materialId: "", amount: "", unit: "" }]);
     setShowHousehold(false);
+    setIsModalOpen(false);
   };
 
   const searchResidents = async (name) => {
@@ -228,7 +300,7 @@ export default function ManualIntakePage() {
       setIsSearchLoading(false);
       setResidentsList(result.users);
 
-      if (residentsList.length === 0) setShowHousehold(true);
+      if (result.users.length === 0) setShowHousehold(true);
 
       setShowDropdown(true);
       return true;
@@ -267,8 +339,8 @@ export default function ManualIntakePage() {
             <Modal
               isOpen={isModalOpen}
               onClose={() => {
-                resetModal()
-                setIsModalOpen(false)
+                resetModal();
+                setIsModalOpen(false);
               }}
               icon={<InboxArrowDownIcon className="w-6 stroke-new-primary" />}
               title={"Record Intake"}
@@ -277,6 +349,7 @@ export default function ManualIntakePage() {
               }
               confirmLabel={"Record Intake"}
               confirmClassName={"gradient-button"}
+              onConfirm={() => onSubmit()}
             >
               <div className="flex flex-col gap-3 p-6">
                 <div className="flex flex-col gap-1">
@@ -368,6 +441,7 @@ export default function ManualIntakePage() {
                       className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11  max-h-11"
                       id="household"
                       placeholder="Input resident name"
+                      onChange={(e) => setHouseholdName(e.target.value)}
                     />
                   </div>
                 )}
@@ -385,7 +459,7 @@ export default function ManualIntakePage() {
                       >
                         <div className="flex flex-row items-center justify-between mb-3">
                           <span className="text-sm font-medium text-gray-700">
-                            Material and amount
+                            Material {index + 1}
                           </span>
                           <button
                             type="button"
@@ -420,7 +494,7 @@ export default function ManualIntakePage() {
                         <div className="flex flex-row gap-2">
                           <div className="flex-1 outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11">
                             <input
-                              type="text"
+                              type="number"
                               className="outline-none w-full"
                               placeholder="Amount, e.g. 20"
                               onChange={(e) => {
@@ -438,10 +512,10 @@ export default function ManualIntakePage() {
                               <option value="" disabled hidden>
                                 Unit
                               </option>
-                              <option>kg</option>
-                              <option>lbs</option>
-                              <option>gram</option>
-                              <option>piece</option>
+                              <option value={"KG"}>kg</option>
+                              <option value={"LBS"}>lbs</option>
+                              <option value={"GRAMS"}>grams</option>
+                              <option value={"PIECE"}>piece</option>
                             </select>
                           </div>
                         </div>
@@ -497,80 +571,162 @@ export default function ManualIntakePage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {MOCK_INTAKES.map((row) => (
-                  <tr
-                    key={row.id}
-                    className="text-start hover:bg-[#f8f8f8] transition-all transform"
-                  >
-                    <td className="p-4">
-                      <ResidentNameCell
-                        name={row.residentName}
-                        isRegistered={row.isRegistered}
-                      />
-                    </td>
-                    <td className="p-4 text-nowrap">{row.sitio ?? "—"}</td>
-                    <td className="p-4 ">
-                      <MaterialsCell materials={row.materials} />
-                    </td>
-                    <td className="p-4 text-nowrap">
-                      {formatDate(row.intakeDate)}
+                {isLoading ? (
+                  <tr className="max-w-md">
+                    <td className="text-center" colSpan={4}>
+                      <Spinner />
                     </td>
                   </tr>
-                ))}
+                ) : isError ? (
+                  <tr className="max-w-md">
+                    <td className="text-center" colSpan={4}>
+                      <Error
+                        handleRefetchCount={handleTransactionRefetchCount}
+                        text={"Unable to get your intake transactions"}
+                      />
+                    </td>
+                  </tr>
+                ) : transactionsData?.transactions?.length === 0 ? (
+                  <tr className="max-w-md">
+                    <td className="text-center" colSpan={9}>
+                      <Empty
+                        text={"No items"}
+                        subtext={
+                          "There are no intake transactions yet. Please tap the record intake button to make a trasaction."
+                        }
+                      />
+                    </td>
+                  </tr>
+                ) : (
+                  transactionsData?.transactions?.map((row) => (
+                    <tr
+                      key={row.id}
+                      className="text-start hover:bg-[#f8f8f8] transition-all transform"
+                    >
+                      <td className="p-4">
+                        {row.user ? (
+                          <ResidentNameCell
+                            name={`${row?.user?.firstName} ${row?.user?.lastName}`}
+                          />
+                        ) : (
+                          <ResidentNameCell
+                            name={row?.householdName}
+                            isRegistered={false}
+                          />
+                        )}
+                      </td>
+                      <td className="p-4 text-nowrap">
+                        {row?.user?.sitio?.name ?? "—"}
+                      </td>
+                      <td className="p-4">
+                        <MaterialsCell materials={row?.manualIntakeItems} />
+                      </td>
+                      <td className="p-4 text-nowrap">
+                        {formatDate(row.createdAt)}
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </Card>
 
           {/* Mobile cards */}
           <div className="flex md:hidden flex-col gap-2">
-            {MOCK_INTAKES.map((row) => (
-              <Card
-                key={row.id}
-                className="flex flex-col items-start gap-3 shadow-none! new-border"
-              >
-                <div className="flex flex-col gap-0.5 w-full">
-                  <div className="flex flex-row items-center gap-2 flex-wrap">
-                    <h3 className="font-semibold text-text-primary">
-                      {row.residentName}
-                    </h3>
-                    {!row.isRegistered && (
-                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-100">
-                        Unregistered
-                      </span>
-                    )}
+            {isLoading ? (
+              Array.from({ length: 3 }).map((_, index) => (
+                <Card
+                  className="flex flex-col items-start gap-3 shadow-none! new-border"
+                  key={index}
+                >
+                  <div className="flex flex-col gap-0.5 w-full">
+                    <div className="flex flex-row items-center gap-2 flex-wrap">
+                      <Skeleton width={200} />
+                      <Skeleton width={115} />
+                    </div>
+                    <Skeleton width={80} />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 mt-1.5 w-full">
+                      {Array.from({ length: 2 }).map((_, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between gap-2"
+                        >
+                          <Skeleton width={130} />
+                          <Skeleton width={60} />
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <p className="text-sm text-gray-500">
-                    Sitio: {row.sitio ?? "—"}
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 mt-1.5 w-full">
-                    {row.materials.map((m, i) => (
-                      <div
-                        key={i}
-                        className="flex items-center justify-between gap-2"
-                      >
-                        <MaterialTag
-                          type={m.type}
-                          materialName={m.name}
-                          textOnly
-                        />
-                        <span className="text-xs text-gray-500 text-nowrap">
-                          {m.quantity} {m.unit}
+                  <div className="flex flex-row items-center justify-between w-full pt-2 border-t border-gray-100">
+                    <Skeleton width={175} />
+                    <Skeleton width={95} />
+                  </div>
+                </Card>
+              ))
+            ) : isError ? (
+              <Error handleRefetchCount={handleTransactionRefetchCount} />
+            ) : transactionsData?.transactions?.length === 0 ? (
+              <Empty
+                text={"No items"}
+                subtext={
+                  "There are no intake transactions yet. Please tap the record intake button to make a trasaction."
+                }
+              />
+            ) : (
+              transactionsData?.transactions?.map((row) => (
+                <Card
+                  key={row.id}
+                  className="flex flex-col items-start gap-3 shadow-none! new-border"
+                >
+                  <div className="flex flex-col gap-0.5 w-full">
+                    <div className="flex flex-row items-center gap-2 flex-wrap">
+                      <h3 className="font-semibold text-text-primary">
+                        {row?.user
+                          ? `${row?.user?.firstName} ${row?.user?.lastName}`
+                          : row?.householdName}
+                      </h3>
+                      {!row?.user && (
+                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-100">
+                          No Account
                         </span>
-                      </div>
-                    ))}
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-500">
+                      Sitio: {row?.user?.sitio?.name ?? "—"}
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 mt-1.5 w-full">
+                      {row?.manualIntakeItems?.map((m) => (
+                        <div
+                          key={m?.id}
+                          className="flex items-center justify-between gap-2"
+                        >
+                          <MaterialTag
+                            type={m?.material?.category?.name}
+                            materialName={m?.material?.name}
+                            textOnly
+                          />
+                          <span className="text-xs text-gray-500 text-nowrap lowercase">
+                            {m?.quantity}{" "}
+                            {m?.unit === "PIECE" ? "pcs" : m?.unit}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-                <div className="flex flex-row items-center justify-between w-full pt-2 border-t border-gray-100">
-                  <p className="text-xs text-gray-400">
-                    {formatDate(row.intakeDate)}
-                  </p>
-                  <p className="text-xs text-gray-500 font-medium">
-                    {row.materials.length}{" "}
-                    {row.materials.length === 1 ? "material" : "materials"}
-                  </p>
-                </div>
-              </Card>
-            ))}
+                  <div className="flex flex-row items-center justify-between w-full pt-2 border-t border-gray-100">
+                    <p className="text-xs text-gray-400">
+                      {formatDate(row?.createdAt)}
+                    </p>
+                    <p className="text-xs text-gray-500 font-medium">
+                      {row?.manualIntakeItems?.length}{" "}
+                      {row?.manualIntakeItems?.length === 1
+                        ? "material"
+                        : "materials"}
+                    </p>
+                  </div>
+                </Card>
+              ))
+            )}
           </div>
         </section>
       </PageContent>

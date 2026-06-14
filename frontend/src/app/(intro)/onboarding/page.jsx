@@ -27,7 +27,7 @@ export default function OnboardingPage() {
     <>
       <DesktopGuard />
 
-      <Page className="bg-new-bg!">
+      <Page className="bg-new-bg! lg:hidden!">
         <PageTransition
           key={"page"}
           className="flex flex-col items-center justify-between min-w-full pt-6 "

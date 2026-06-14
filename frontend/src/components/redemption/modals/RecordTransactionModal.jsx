@@ -3,7 +3,7 @@
 import { Modal } from "@/components/ui/Modal";
 import {
   Bars3BottomLeftIcon,
-  TrashIcon,
+  XMarkIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
 import { useForm } from "react-hook-form";
@@ -69,7 +69,7 @@ export const RecordTransactionModal = ({
       materialRows.some((row) => !row.programMaterialId || !row.amount)
     ) {
       return toast.error(
-        "Creation failed. Please add at least oen material item",
+        "Creation failed. Please add at least one material item",
       );
     }
 
@@ -121,15 +121,20 @@ export const RecordTransactionModal = ({
   };
 
   const totalValue = materialRows.reduce((sum, row) => {
-    const material = selectedProgram?.programMaterial.find(p => p.id === row.programMaterialId)
+    const material = selectedProgram?.programMaterial.find(
+      (p) => p.id === row.programMaterialId,
+    );
     if (!material) {
-      sum += 0
-      return sum
+      sum += 0;
+      return sum;
     }
 
-    return sum + (selectedProgram?.isCashMode ? material.cashValue : material.pointValue) * row.amount
-    
-  }, 0)
+    return (
+      sum +
+      (selectedProgram?.isCashMode ? material.cashValue : material.pointValue) *
+        row.amount
+    );
+  }, 0);
 
   return (
     <Modal
@@ -203,7 +208,9 @@ export const RecordTransactionModal = ({
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-text-primary font-medium">Beneficiary name</label>
+          <label className="text-text-primary font-medium">
+            Beneficiary name
+          </label>
           <input
             type="text"
             className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11  max-h-11"
@@ -218,7 +225,9 @@ export const RecordTransactionModal = ({
         </div>
 
         <div className="flex flex-col gap-1 col-span-2">
-          <label className="text-text-primary font-medium">Educational level</label>
+          <label className="text-text-primary font-medium">
+            Educational level
+          </label>
           <div className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11  max-h-11 flex items-center">
             <select
               className="w-full outline-none"
@@ -243,68 +252,66 @@ export const RecordTransactionModal = ({
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-text-primary font-medium">Material items</label>
+          <label className="text-text-primary font-medium">
+            Material items
+          </label>
 
-          <div className="md:grid grid-cols-2 hidden gap-2 ">
-            <label className="text-sm text-text-primary">Material name</label>
-            <label className="text-sm text-text-primary">Amount</label>
-          </div>
-
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-3">
             {materialRows.map((material, index) => (
-              <div className="flex flex-col gap-1" key={index}>
-                <label className="text-sm text-text-primary md:hidden flex">
-                  Material name and amount
-                </label>
-                <div className="md:grid-cols-2 grid-cols-1 grid gap-2">
-                  <div className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11  max-h-11 flex items-center">
-                    <select
-                      className="w-full outline-none"
-                      disabled={selectedProgramId === ""}
-                      onChange={(e) => {
-                        updateRow(index, "programMaterialId", e.target.value);
-                      }}
-                      value={material.programMaterialId}
-                    >
-                      <option value="" disabled hidden>
-                        {selectedProgramId === ""
-                          ? "Select program first"
-                          : "Select material"}
-                      </option>
-                      {selectedProgram?.programMaterial.map((m) => (
-                        <option value={m.id} key={m.id}>
-                          {m?.material?.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="flex flex-row items-center justify-between gap-4 max-w-full">
-                    <div className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11  max-h-11 flex items-center flex-1 flex-row justify-between w-full gap-4">
-                      <input
-                        type="number"
-                        className="w-full outline-none gap-2 flex-1"
-                        min={0}
-                        placeholder="e.g. 2"
-                        onChange={(e) => {
-                          updateRow(index, "amount", e.target.value);
-                        }}
-                        value={material.amount}
-                      />
+              <div key={index} className="new-border bg-white rounded-xl p-4">
+                <div className="flex flex-row items-center justify-between mb-3">
+                  <span className="text-sm font-medium text-gray-700">
+                    Material {index + 1}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => removeRow(index)}
+                    className="hover:cursor-pointer"
+                    disabled={materialRows.length === 1}
+                  >
+                    <XMarkIcon className="w-5 stroke-gray-400" />
+                  </button>
+                </div>
 
-                      <label className="text-sm">
-                        {selectedProgram?.isCashMode
-                          ? `₱/${selectedProgram?.programMaterial?.find((m) => m.id === material?.programMaterialId)?.material?.defaultUnit?.toLowerCase() ?? "unit"}`
-                          : `pts/${selectedProgram?.programMaterial?.find((m) => m.id === material?.programMaterialId)?.material?.defaultUnit?.toLowerCase() ?? "unit"}`}
-                      </label>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeRow(index)}
-                      className="hover:cursor-pointer"
-                      disabled={materialRows.length === 1}
-                    >
-                      <TrashIcon className="w-6 stroke-gray-400 " />
-                    </button>
+                <div className="w-full outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 mb-2 flex items-center">
+                  <select
+                    className="w-full outline-none"
+                    disabled={selectedProgramId === ""}
+                    onChange={(e) => {
+                      updateRow(index, "programMaterialId", e.target.value);
+                    }}
+                    value={material.programMaterialId}
+                  >
+                    <option value="" disabled hidden>
+                      {selectedProgramId === ""
+                        ? "Select program first"
+                        : "Select material"}
+                    </option>
+                    {selectedProgram?.programMaterial.map((m) => (
+                      <option value={m.id} key={m.id}>
+                        {m?.material?.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex flex-row gap-2">
+                  <div className="flex-1 outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 flex items-center gap-2">
+                    <input
+                      type="number"
+                      className="w-full outline-none flex-1"
+                      min={0}
+                      placeholder="e.g. 2"
+                      onChange={(e) => {
+                        updateRow(index, "amount", e.target.value);
+                      }}
+                      value={material.amount}
+                    />
+                    <label className="text-sm text-nowrap">
+                      {selectedProgram?.isCashMode
+                        ? `₱/${selectedProgram?.programMaterial?.find((m) => m.id === material?.programMaterialId)?.material?.defaultUnit?.toLowerCase() ?? "unit"}`
+                        : `pts/${selectedProgram?.programMaterial?.find((m) => m.id === material?.programMaterialId)?.material?.defaultUnit?.toLowerCase() ?? "unit"}`}
+                    </label>
                   </div>
                 </div>
               </div>
@@ -316,7 +323,11 @@ export const RecordTransactionModal = ({
               <label className="text-sm text-gray-700 flex">
                 Estimated total
               </label>
-              <p className="text-gray-700">{selectedProgram?.isCashMode ? `₱ ${totalValue}` : `${totalValue} pts`}</p>
+              <p className="text-gray-700">
+                {selectedProgram?.isCashMode
+                  ? `₱ ${totalValue}`
+                  : `${totalValue} pts`}
+              </p>
             </div>
             <button
               className="py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:cursor-pointer flex flex-row items-center justify-center gap-1 min-w-full"

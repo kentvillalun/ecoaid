@@ -12,6 +12,7 @@ import pickupRequestRoute from "./routes/pickup-request.route.js"
 import redemptionRoute from "./routes/redemption.route.js"
 import residentRoute from "./routes/resident.route.js"
 import materialRoute from "./routes/material.route.js"
+import manualIntakeRoute from "./routes/manual-intake.route.js"
 
 config();
 connectDB();
@@ -40,6 +41,7 @@ app.use("/pickup-requests", pickupRequestRoute)
 app.use("/redemption", redemptionRoute)
 app.use("/resident", residentRoute)
 app.use("/material", materialRoute)
+app.use("/manual-intake", manualIntakeRoute)
 
 
 
