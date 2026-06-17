@@ -53,7 +53,7 @@ export default function HomePage() {
   return (
     <Page className="bg-new-bg!">
       <header className="flex flex-row items-start justify-between min-w-full max-h-18.75 bg-new-bg fixed top-0 p-5 pl-0 z-50">
-        <div className="flex flex-row justify-between min-w-full items-center">
+        <div className="flex flex-row justify-between min-w-full items-center pl-5">
           <div className="max-w-35 relative w-full aspect-4/1">
             <Image
               src="/ecoaid-logo/logo-wordmark.svg"

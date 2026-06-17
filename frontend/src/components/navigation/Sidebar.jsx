@@ -58,7 +58,7 @@ export const Sidebar = () => {
     {
       icon: MaterialStockIcon,
       label: "Material Stock",
-      href: "",
+      href: "/material-stock",
     },
     {
       icon: RedemptionProgramIcon,
@@ -127,7 +127,7 @@ export const Sidebar = () => {
 
   return (
     <aside
-      className={`w-60 md:w-65 h-svh flex flex-col justify-between bg-new-primary fixed top-0 text-white left-0 z-50 md:shadow-xl ${inter.className} overflow-y-auto sidebar`}
+      className={`w-60 md:w-65 h-svh flex flex-col justify-between gradient-card fixed top-0 text-white left-0 z-50 md:shadow-xl ${inter.className} overflow-y-auto sidebar`}
     >
       <div className="p-4 flex flex-col gap-4 lg:gap-9">
         

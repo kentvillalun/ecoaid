@@ -1,4 +1,5 @@
 import { prisma } from "../config/db.js";
+import { convertToKg } from "../utils/covertToKg.js";
 
 const createProgram = async (req, res) => {
   try {
@@ -244,8 +245,8 @@ const createTransaction = async (req, res) => {
         source: "REDEMPTION",
         transactionType: "IN",
         materialId: materials[index].materialId,
-        unit: materials[index].material.defaultUnit, 
-        quantity: item.amount
+        unit: materials[index].material.defaultUnit === "PIECE" ? "PIECE" : "KG", 
+        quantity: convertToKg(item.amount, materials[index].material.defaultUnit)
       }))
     })
 
