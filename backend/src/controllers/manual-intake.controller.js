@@ -41,6 +41,19 @@ const recordIntake = async (req, res) => {
       },
     });
 
+    const transactionLog = await prisma.stockTransactionLog.createMany({
+      data: items.map((item) => ({
+        barangayId,
+        manualIntakeTransactionId: transaction.id,
+        source: "MANUAL_INTAKE",
+        transactionType: "IN",
+        materialId: item.materialId,
+        quantity: item.quantity,
+        unit: item.unit
+      })),
+      skipDuplicates: true,
+    })
+
     return res
       .status(201)
       .json({ message: "Manual intake transaction created" });

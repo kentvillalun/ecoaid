@@ -92,8 +92,8 @@ const listRequests = async (req, res) => {
 const updateStatus = async (req, res) => {
   try {
     const { id } = req.params;
-    const { status, rejectionReason, items } =
-      req.body ?? {};
+    const { status, rejectionReason, items } = req.body ?? {};
+    const { barangayId } = req.user;
 
     if (status === "APPROVED") {
       await prisma.pickupRequests.update({
@@ -134,6 +134,19 @@ const updateStatus = async (req, res) => {
           materialId: item.materialId,
           actualValue: item.actualValue,
           actualUnit: item.actualUnit,
+        })),
+        skipDuplicates: true,
+      });
+
+      await prisma.stockTransactionLog.createMany({
+        data: items.map((item) => ({
+          barangayId,
+          collectionRequestId: id,
+          source: "COLLECTION_REQUEST",
+          transactionType: "IN",
+          materialId: item.materialId,
+          quantity: item.actualValue,
+          unit: item.actualUnit,
         })),
         skipDuplicates: true,
       });
@@ -199,10 +212,10 @@ const getRequest = async (req, res) => {
             name: true,
             category: {
               select: {
-                name: true
-              }
-            }
-          }
+                name: true,
+              },
+            },
+          },
         },
         estimatedValue: true,
         estimatedUnit: true,
@@ -222,10 +235,10 @@ const getRequest = async (req, res) => {
                 category: {
                   select: {
                     name: true,
-                  }
+                  },
                 },
-                name: true
-              }
+                name: true,
+              },
             },
             actualValue: true,
             actualUnit: true,
@@ -267,9 +280,9 @@ const getMyRequest = async (req, res) => {
             category: {
               select: {
                 name: true,
-              }
-            }
-          }
+              },
+            },
+          },
         },
         status: true,
         createdAt: true,
@@ -306,9 +319,9 @@ const getMyRequestsById = async (req, res) => {
             category: {
               select: {
                 name: true,
-              }
-            }
-          }
+              },
+            },
+          },
         },
         status: true,
         notes: true,
@@ -327,10 +340,10 @@ const getMyRequestsById = async (req, res) => {
                 name: true,
                 category: {
                   select: {
-                    name: true
-                  }
-                }
-              }
+                    name: true,
+                  },
+                },
+              },
             },
             actualValue: true,
             actualUnit: true,

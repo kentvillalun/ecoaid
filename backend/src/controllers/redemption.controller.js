@@ -184,6 +184,8 @@ const createTransaction = async (req, res) => {
       educationalLevel,
     } = req.body ?? {};
 
+    const { barangayId } = req.user
+
     if (!programId || !items || !collectorName || !beneficiaryName) {
       return res.status(400).json({ error: "Missing required fields" });
     }
@@ -195,6 +197,12 @@ const createTransaction = async (req, res) => {
           select: {
             pointValue: true,
             cashValue: true,
+            materialId: true,
+            material: {
+              select: {
+                defaultUnit: true
+              }
+            },
             program: {
               select: {
                 isCashMode: true,
@@ -228,6 +236,18 @@ const createTransaction = async (req, res) => {
         },
       },
     });
+
+    const transactionLog = await prisma.stockTransactionLog.createMany({
+      data: items.map((item, index) => ({
+        barangayId,
+        redemptionTransactionId: transaction.id,
+        source: "REDEMPTION",
+        transactionType: "IN",
+        materialId: materials[index].materialId,
+        unit: materials[index].material.defaultUnit, 
+        quantity: item.amount
+      }))
+    })
 
     return res.status(201).json({
       message: "Transaction Created",

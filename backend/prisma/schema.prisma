@@ -68,6 +68,7 @@ model Barangay {
   material Material[]
   program Program[]
   manualIntakeTransaction ManualIntakeTransaction[]
+  stockTransactionLog StockTransactionLog[]
 }
 
 enum RedemptionMode {
@@ -165,6 +166,7 @@ model PickupRequests {
   isAssorted Boolean @default(false)
 
   collectionItems CollectionItem[]
+  stockTransactionLog StockTransactionLog[]
 }
 
 model Category {
@@ -193,6 +195,7 @@ model Material {
   collectionItem CollectionItem[]
   programMaterial ProgramMaterial[]
   manualIntakeItems ManualIntakeItems[]
+  stockTransactionLog StockTransactionLog[]
 
   @@unique([name, barangayId])
 }
@@ -274,6 +277,7 @@ model RedemptionTransaction {
   educationalLevel EducationalLevel?
 
   redemptionTransactionItem RedemptionTransactionItem[]
+  stockTransactionLog StockTransactionLog[]
 }
 
 model RedemptionTransactionItem {
@@ -314,6 +318,7 @@ model ManualIntakeTransaction {
   createdAt DateTime @default(now())
 
   manualIntakeItems ManualIntakeItems[]
+  stockTransactionLog StockTransactionLog[]
 }
 
 model ManualIntakeItems {
@@ -329,5 +334,45 @@ model ManualIntakeItems {
   unit Unit @default(KG)
 }
 
+enum TransactionType {
+  IN
+  OUT
+}
 
+enum Source {
+  MANUAL_INTAKE
+  COLLECTION_REQUEST
+  MANUAL_ADJUSTMENT
+  REDEMPTION
+  JUNKSHOP_SALES
+}
+
+model StockTransactionLog {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  barangayId String @db.Uuid()
+  barangay Barangay @relation(fields: [barangayId], references: [id])
+
+  materialId String @db.Uuid
+  material Material @relation(fields: [materialId], references: [id])
+
+  collectionRequestId String? @db.Uuid()
+  pickupRequest PickupRequests? @relation(fields: [collectionRequestId], references: [id])
+
+  manualIntakeTransactionId String? @db.Uuid()
+  manualIntakeTransaction ManualIntakeTransaction? @relation(fields: [manualIntakeTransactionId], references: [id])
+
+  redemptionTransactionId String? @db.Uuid()
+  redemptionTransaction RedemptionTransaction? @relation(fields: [redemptionTransactionId], references: [id])
+
+  junkshopSalesId String? @db.Uuid()
+
+  quantity Float
+  unit Unit @default(KG)
+  source Source @default(COLLECTION_REQUEST)
+
+  transactionType TransactionType @default(IN)
+
+  createdAt DateTime @default(now())
+}
 

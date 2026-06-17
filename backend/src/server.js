@@ -13,6 +13,7 @@ import redemptionRoute from "./routes/redemption.route.js"
 import residentRoute from "./routes/resident.route.js"
 import materialRoute from "./routes/material.route.js"
 import manualIntakeRoute from "./routes/manual-intake.route.js"
+import materialStockRoute from "./routes/material-stock.route.js"
 
 config();
 connectDB();
@@ -42,6 +43,7 @@ app.use("/redemption", redemptionRoute)
 app.use("/resident", residentRoute)
 app.use("/material", materialRoute)
 app.use("/manual-intake", manualIntakeRoute)
+app.use("/material-stock", materialStockRoute)
 
 
 
