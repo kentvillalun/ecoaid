@@ -24,9 +24,12 @@ The frontend is feature-complete for all currently implemented modules. Both res
 
 ### Barangay side
 
-- Dashboard (3 stat cards live, 3 hardcoded pending MRF/Program Funds modules)
+- Dashboard (3 stat cards live, 3 hardcoded pending Program Funds module + dashboard rewiring)
 - Collection Requests (full lifecycle: list, approve, decline, schedule, collect, detail)
+- Manual Intake (debounced resident search, household-name fallback, dynamic material/quantity/unit rows; writes to the stock ledger)
+- Material Stock (live per-material balance, transaction log, stock-out modal)
 - Redemption Management (programs list, program detail, transaction detail)
+- Junkshop Sales, Leaderboard, Reports — static UI scaffolds with hardcoded mock data; not linked in the sidebar, no backend yet
 
 ### Shared infrastructure
 

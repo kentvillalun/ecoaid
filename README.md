@@ -156,6 +156,25 @@ Protected by `authenticateBarangay + requireRoles(["CAPTAIN","SECRETARY","SK"])`
 | GET    | `/redemption/transactions`    | List all redemption transactions                       |
 | GET    | `/redemption/transactions/:id`| Get transaction detail with full line-item breakdown   |
 
+### Manual Intake (`/manual-intake`)
+
+Protected by `authenticateBarangay + requireRoles(["CAPTAIN","SECRETARY","SK","COLLECTOR"])`.
+
+| Method | Path             | Description                                                                 |
+|--------|------------------|------------------------------------------------------------------------------|
+| POST   | `/manual-intake/`| Record a manual intake transaction (resident or household name + material/quantity/unit rows); writes matching `IN` rows to the stock ledger |
+| GET    | `/manual-intake/`| List a barangay's intake transaction history                                |
+
+### Material Stock (`/material-stock`)
+
+Protected by `authenticateBarangay + requireRoles(["CAPTAIN","SK","COLLECTOR","SECRETARY"])`.
+
+| Method | Path                                  | Description                                                        |
+|--------|----------------------------------------|---------------------------------------------------------------------|
+| GET    | `/material-stock/`                     | Live per-material balance, netted from `StockTransactionLog`       |
+| GET    | `/material-stock/transaction-logs`     | Full stock transaction log history                                  |
+| POST   | `/material-stock/transaction-logs/out` | Record a manual stock-out adjustment (validated against current balance) |
+
 ### Dashboard (`/dashboard`)
 
 Protected by `authenticateBarangay + requireRoles(["CAPTAIN"])`.
@@ -183,6 +202,9 @@ Protected by `authenticateBarangay + requireRoles(["CAPTAIN"])`.
 - `ProgramMaterial` — Per-material reward value scoped to a program; both `pointValue` and `cashValue` to support dual reward modes; `materialId` FK to `Material`
 - `RedemptionTransaction` — Header record for a redemption event (beneficiary, collector, educational level, program)
 - `RedemptionTransactionItem` — Line-item detail per transaction; `programMaterialId` FK, `amount`, `currentValue` snapshot
+- `ManualIntakeTransaction` — Header record for a manual intake event; optional `userId` (resident, if matched) or `householdName` fallback, `collectorId`/`collectorName`, scoped per barangay
+- `ManualIntakeItems` — Per-material line item on a manual intake transaction; `materialId` FK, `quantity`, `unit`
+- `StockTransactionLog` — Append-only stock ledger; `materialId` FK, `quantity` (normalized to KG), `unit`, `transactionType` (`IN`/`OUT`), `source` (`Source` enum); optionally links back to the originating `PickupRequests`, `ManualIntakeTransaction`, or `RedemptionTransaction` row. Material Stock balances are computed by netting these rows per material — currently only `MANUAL_INTAKE` and `MANUAL_ADJUSTMENT` sources are written; `COLLECTION_REQUEST` and `REDEMPTION` are reserved enum values not yet wired up
 
 ---
 
@@ -193,7 +215,7 @@ Protected by `authenticateBarangay + requireRoles(["CAPTAIN"])`.
 | `(intro)`        | Onboarding flow                                                                             |
 | `(auth)`         | Login (with splash screen), signup, OTP verification, forgot password, reset password, barangay login |
 | `(resident)`     | Home (live data: profile + recent requests, cards navigate to detail), community (live barangay info), capture (DB-driven material selector, Cloudinary upload), requests list (Ongoing/History tabs, live data), request detail (photo, timeline, collection breakdown), profile (live name + barangay, logout), personal-information (edit mode, PATCH /resident/me, discard modal), notification settings (UI shell), settings (UI shell), help & support (FAQ accordion), announcements |
-| `(barangay)`     | Dashboard (partial live data), collection requests (list + detail), redemption programs list (`/redemption`), program detail (`/redemption/programs/[id]`), transaction detail (`/redemption/transactions/[id]`) |
+| `(barangay)`     | Dashboard (partial live data), collection requests (list + detail), manual intake (resident search + material rows), material stock (live balances, transaction log, stock-out modal), redemption programs list (`/redemption`), program detail (`/redemption/programs/[id]`), transaction detail (`/redemption/transactions/[id]`) |
 
 ---
 
@@ -207,9 +229,13 @@ The full pickup request lifecycle is wired end-to-end on the barangay side (REQU
 
 The Redemption Management module is fully wired and restructured. The route is now `/redemption` (was `/redemption-programs`). Programs support both points and cash reward modes via `isCashMode`. `RecordTransactionModal` handles multiple line items per transaction. The transaction detail page (`/redemption/transactions/[id]`) and program detail page (`/redemption/programs/[id]`) are built and wired. A `DesktopGuard` component blocks resident pages on non-mobile viewports.
 
-All resident data-driven pages are working (home, community, requests list, request detail, profile with edit mode). The barangay dashboard is partially wired — three stat cards (Total Recyclables Collected, Total Program Expenses, Current Fund Balance) remain hardcoded pending the MRF and Program Funds modules.
+All resident data-driven pages are working (home, community, requests list, request detail, profile with edit mode). The barangay dashboard is partially wired — three stat cards (Total Recyclables Collected, Total Program Expenses, Current Fund Balance) remain hardcoded pending the Program Funds module and dashboard rewiring.
 
-Next focus: Manual Collection Intake module (Sunday EcoAid manual entry with resident search).
+**Manual Collection Intake and Material Stock (MRF) are both built end-to-end.** Manual Intake (`/manual-intake`) lets barangay staff search for a resident (or fall back to a household name) and record material/quantity/unit rows; each submission writes `IN` rows to a new `StockTransactionLog` ledger. Material Stock (`/material-stock`) nets that ledger into a live per-material balance, shows the full transaction log, and supports manual stock-out adjustments. The ledger currently only receives entries from Manual Intake and manual adjustments — pickup-request collections and redemption transactions don't write to it yet.
+
+Junkshop Sales, Leaderboard, and Reports exist only as static UI scaffolds with hardcoded mock data — not linked in the barangay sidebar and not backed by any API.
+
+Next focus: Junkshop Sales module (per the latest commit history).
 
 See `docs/current-progress.md` for a detailed breakdown of what is done and what is next.
 

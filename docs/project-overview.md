@@ -30,11 +30,15 @@ The full collection request lifecycle is wired end-to-end: REQUESTED → APPROVE
 
 The Redemption Management module is complete end-to-end and restructured. The route moved from `/redemption-programs` to `/redemption`. Programs now support both points and cash reward modes (`isCashMode`). `ProgramMaterial` stores both `pointValue` and `cashValue`. `RedemptionTransaction` uses a `RedemptionTransactionItem` line-item model. The transaction detail page (`/redemption/transactions/[id]`) is built and wired. The program detail page is at `/redemption/programs/[id]`.
 
-All resident data-driven pages work end-to-end (home, community, requests list, request detail, profile with edit mode). The barangay dashboard is partially wired; three stat cards remain hardcoded until MRF and Program Funds modules are built.
+All resident data-driven pages work end-to-end (home, community, requests list, request detail, profile with edit mode). The barangay dashboard is partially wired; three stat cards remain hardcoded until the Program Funds module is built and the dashboard is rewired.
+
+**Manual Collection Intake is built end-to-end.** Barangay staff record Sunday EcoAid (or any direct) intake by searching for a resident or falling back to a household name, then adding material/quantity/unit rows. Each submission creates a `ManualIntakeTransaction` + `ManualIntakeItems` and writes `IN` rows to a new `StockTransactionLog` ledger.
+
+**Material Stock (MRF) is built end-to-end.** `/material-stock` nets `StockTransactionLog` rows per material into a live balance, lists the full transaction log, and supports manual stock-out adjustments via a modal. The ledger currently only receives entries from Manual Intake and manual adjustments — pickup-request collections and redemption transactions don't write to it yet, even though the `Source` enum already reserves values for both.
 
 The system is deployed. Backend runs on Railway. Frontend proxies via next.config.mjs rewrites.
 
-Active development focus: Manual Collection Intake module (Sunday EcoAid manual entry flow with resident search).
+Active development focus: Junkshop Sales module (price comparison across junkshops). It currently exists only as a static UI scaffold with hardcoded mock data, unlinked in the barangay sidebar.
 
 ---
 

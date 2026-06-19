@@ -195,7 +195,7 @@ function CategoryCard({ cat, displayUnit }) {
       >
         <div className="flex items-center gap-2">
           <span
-            className={`w-2 h-2 rounded-full flex-shrink-0 ${styles.dot}`}
+            className={`w-2 h-2 rounded-full shrink-0 ${styles.dot}`}
           />
           <h4 className={`font-semibold text-sm ${styles.text}`}>{cat.name}</h4>
           <span className="text-xs text-gray-400 font-normal">

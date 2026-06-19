@@ -143,22 +143,26 @@
 - **Onboarding screens 2.0** — onboarding page fully redesigned; new illustrations at `public/onboarding-2.0/onb{1,2,3}.png`; horizontal slide animation between steps; 4-segment progress bar indicator; animated headline/body/button per step with staggered delays; new copy for all 3 steps; haptic feedback on Next via `haptic.light()`; entry animation via `PageTransition`
 - **Auth pages visual redesign** — login, signup, OTP, forgot-password, and reset-password pages redesigned; login uses a bottom-sheet card layout with `motion/react` animations; splash screen updated to show white EcoAid wordmark on brand green background with fade-out; Android devices skip the splash screen; new logo SVG assets added (`logo-wordmark.svg`, `white-logo-wordmark.svg`)
 
+- **Manual Collection Intake module built end-to-end** — `ManualIntakeTransaction` and `ManualIntakeItems` Prisma models added; `recordIntake` controller creates a transaction with nested per-material items and writes matching `IN` rows to a new `StockTransactionLog` ledger (quantity normalized to KG via `convertToKg`); `getIntakeTransactions` lists intake history with resident/sitio and material/category detail; routes mounted at `/manual-intake`, protected by `authenticateBarangay + requireRoles(["CAPTAIN","SECRETARY","SK","COLLECTOR"])`. Frontend `/manual-intake` page: debounced resident search (`GET /api/resident/search?name=`), household-name input shown when no resident match is found, add/remove material rows, wired via `useFetch`/`useMutation`
+- **Material Stock (MRF) module built end-to-end** — `getStockSummary` nets `StockTransactionLog` `IN`/`OUT` rows per material into a running balance enriched with material name + category; `getTransactionLogs` lists the full ledger; `recordStockOut` validates the deduction against current balance before writing an `OUT` row (`source: MANUAL_ADJUSTMENT`); routes mounted at `/material-stock`. Frontend `/material-stock` page: live balance table, transaction log, and a stock-out modal wired via `useFetch`/`useMutation`
+- **Stock ledger schema** — `StockTransactionLog` model added with `TransactionType` (`IN`/`OUT`) and `Source` (`MANUAL_INTAKE`/`COLLECTION_REQUEST`/`MANUAL_ADJUSTMENT`/`REDEMPTION`/`JUNKSHOP_SALES`) enums; migrations `20260619032326_add_userid_fk` and `20260619032730_add_performed_by_field` applied. Only `MANUAL_INTAKE` and `MANUAL_ADJUSTMENT` sources are wired up so far — pickup-request collections and redemption transactions don't write to the ledger yet
+
 ---
 
 ## In Progress
 
-- Nothing actively in progress
+- Junkshop Sales module (backend + wiring) — page currently exists only as a static UI scaffold with hardcoded mock data, not linked in the barangay sidebar
 
 ---
 
 ## Next Steps (priority order)
 
-1. Build Manual Collection Intake module (Sunday EcoAid manual entry flow with resident search)
-2. Build Leaderboard (resident ranking by total contribution)
+1. Build Junkshop Sales module (price comparison across junkshops, backend + wiring; replace the existing mock scaffold)
+2. Wire pickup-request `COLLECTED` transitions and redemption transactions into `StockTransactionLog` so Material Stock reflects all intake/outflow sources, not just manual intake
 3. Build Reward Inventory module
 4. Build Program Funds module (expenses, junkshop income, profits)
-5. Build Material Stock read-only view
-6. Reports module
+5. Build Leaderboard (resident ranking by total contribution) — replace the existing mock scaffold
+6. Reports module — replace the existing mock scaffold
 
 ---
 
@@ -176,3 +180,4 @@
 - Batch collection moves approved requests into IN_PROGRESS
 - Redemption is separate from intake
 - Material Stock is read-only and derived from intake transactions
+- Material Stock currently nets only Manual Intake (`IN`) and manual stock-out adjustments (`OUT`); it does not yet include pickup-request collections or redemption transactions

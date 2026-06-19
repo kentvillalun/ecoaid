@@ -150,9 +150,14 @@
 - [x] **`haptics.js` utility** — `frontend/src/lib/haptics.js`; wraps the `bzzz` haptics library with named presets: `light` (selection — casual nav/Next/back), `medium` (snap — form submit/confirm), `success`, `error`, `warning` (toggle — destructive confirm); added `bzzz@^0.1.1` and `motion@^12.40.0` to `frontend/package.json`
 - [x] **Onboarding screens 2.0** — `/onboarding` page fully redesigned; new illustrations at `public/onboarding-2.0/onb{1,2,3}.png`; horizontal slide animation between steps via `motion/react`; 4-segment progress bar indicator; animated headline, body text, and button per step (opacity + y fade-in with staggered delay); new copy: step 1 "Recyclables Go to Waste Without a Clear System", step 2 "Your recyclables have value. Benefit from them", step 3 "How EcoAid Works"; haptic feedback on Next button via `haptic.light()`; uses `PageTransition` for entry animation
 - [x] **Auth pages visual redesign** — login, signup, OTP, forgot-password, and reset-password pages redesigned; login uses a bottom-sheet card layout (white form rises from green background); `motion/react` animations on form content; new splash screen shows a white EcoAid wordmark on the brand green background and fades out; Android devices skip the splash screen entirely (detected via `navigator.userAgent`); new SVG assets added: `public/ecoaid-logo/logo-wordmark.svg` and `white-logo-wordmark.svg`; `DesktopGuard` now uses `lg:hidden` CSS class approach in auth pages (no separate blocking overlay)
-- [ ] Manual Collection Intake module (Sunday EcoAid manual entry with resident search)
+- [x] **Manual Collection Intake module** — `backend/src/controllers/manual-intake.controller.js`: `recordIntake` creates a `ManualIntakeTransaction` with nested `ManualIntakeItems` (one per material/quantity/unit row), then writes one `StockTransactionLog` row per item (`source: MANUAL_INTAKE`, `transactionType: IN`, quantity normalized to KG via `convertToKg`); `getIntakeTransactions` lists a barangay's intake history with resident/sitio and material/category breakdown; `manual-intake.route.js` mounted at `/manual-intake`, protected by `authenticateBarangay + requireRoles(["CAPTAIN","SECRETARY","SK","COLLECTOR"])`. Frontend `/manual-intake` page wired with `useFetch`/`useMutation`: debounced resident search (`GET /api/resident/search?name=`), household-name input shown when no resident match exists, dynamic material/quantity/unit rows
+- [x] **Material Stock (MRF) module** — `backend/src/controllers/material-stock.controller.js`: `getStockSummary` groups `StockTransactionLog` by material/transactionType/unit and nets IN vs OUT into a running balance per material, enriched with material name + category; `getTransactionLogs` lists the full log history; `recordStockOut` validates the requested deduction against the current balance before writing an OUT log (`source: MANUAL_ADJUSTMENT`); `material-stock.route.js` mounted at `/material-stock`. Frontend `/material-stock` page wired with `useFetch` (summary + logs) and a stock-out modal wired via `useMutation`
+- [x] **Stock ledger schema** — `ManualIntakeTransaction`, `ManualIntakeItems`, and `StockTransactionLog` Prisma models added; `TransactionType` (`IN`/`OUT`) and `Source` (`MANUAL_INTAKE`/`COLLECTION_REQUEST`/`MANUAL_ADJUSTMENT`/`REDEMPTION`/`JUNKSHOP_SALES`) enums added; migrations `20260619032326_add_userid_fk` and `20260619032730_add_performed_by_field` applied
 - [ ] Collection schedule module
-- [ ] Dashboard remaining hardcoded stats (Total Recyclables Collected, Total Program Expenses, Current Fund Balance) — pending MRF and Program Funds modules
+- [ ] Dashboard remaining hardcoded stats (Total Recyclables Collected, Total Program Expenses, Current Fund Balance) — pending Program Funds module and dashboard wiring to `StockTransactionLog`
+- [ ] Wire pickup-request `COLLECTED` transitions and redemption transactions into `StockTransactionLog` — `Source` enum already reserves `COLLECTION_REQUEST` and `REDEMPTION` values for this, but neither controller writes to the stock ledger yet, so Material Stock balances currently reflect manual intake (+ manual stock-out) only
+- [ ] Junkshop Sales, Leaderboard, and Reports backend + wiring — pages exist as static UI scaffolds with hardcoded mock data, not linked in the barangay `Sidebar` (`href: ""`)
+- [ ] Reward Inventory, Program Funds, Residents, Announcements (barangay-side), and Settings modules — not yet built; `Sidebar` entries reserved but unlinked (`href: ""`)
 
 ## Current State
 App is deployed. Backend runs on Railway (`ecoprofit-production.up.railway.app`).
@@ -187,13 +192,27 @@ at `/redemption/transactions/[id]` is built and wired. The program detail page i
 The resident side has working data-driven pages: home, community, requests list, request
 detail, and profile pages all fetch real API data. The barangay dashboard is partially
 wired — three stat cards (Total Recyclables Collected, Total Program Expenses, Current Fund
-Balance) remain hardcoded pending the MRF and Program Funds modules.
+Balance) remain hardcoded pending the Program Funds module and dashboard rewiring.
 
 **Onboarding and auth pages are fully redesigned.** Onboarding uses new illustrations,
 horizontal slide animation with `motion/react`, and haptic feedback via `bzzz`. Auth pages
 use a bottom-sheet card layout with motion animations and a revised splash screen.
 
-Next focus: Manual Collection Intake module (Sunday EcoAid manual entry with resident search).
+**Manual Collection Intake module is done.** Barangay staff can record Sunday EcoAid intake
+(or any direct intake) by searching for a resident or falling back to a household name,
+adding one or more material/quantity/unit rows, and submitting. Each submission creates a
+`ManualIntakeTransaction` + `ManualIntakeItems` and writes matching `IN` rows to
+`StockTransactionLog`.
+
+**Material Stock (MRF) module is done.** `/material-stock` shows a live running balance per
+material (net of IN/OUT `StockTransactionLog` rows) plus a full transaction log, and supports
+manual stock-out adjustments through a modal. The stock ledger currently only receives `IN`
+entries from Manual Intake and `OUT` entries from manual adjustments — pickup-request
+collections and redemption transactions do not yet write to the ledger, even though the
+`Source` enum reserves `COLLECTION_REQUEST` and `REDEMPTION` values for that.
+
+Next focus: Junkshop Sales module (per the latest commit message), which currently exists
+only as an unwired UI scaffold with hardcoded mock data.
 
 ## Key Decisions Made
 - httpOnly cookies over localStorage → XSS protection
@@ -215,11 +234,16 @@ Next focus: Manual Collection Intake module (Sunday EcoAid manual entry with res
 - backend/src/controllers/pickup-request.controller.js — pickup request creation and all collection-request lifecycle transitions
 - backend/src/controllers/redemption.controller.js — createProgram, updateProgram, getPrograms, getProgram, createTransaction, getTransaction, getTransactions
 - backend/src/controllers/material.controller.js — getMaterials, getCategories
+- backend/src/controllers/manual-intake.controller.js — recordIntake, getIntakeTransactions; writes ManualIntakeTransaction/Items + StockTransactionLog IN rows
+- backend/src/controllers/material-stock.controller.js — getStockSummary, getTransactionLogs, recordStockOut; nets StockTransactionLog IN/OUT rows into per-material balances
+- backend/src/utils/covertToKg.js — converts quantity + Unit into a normalized KG value for the stock ledger
 - backend/src/middlewares/authMiddleware.js — authenticateResident, authenticateBarangay, requireRoles
 - backend/src/routes/auth.route.js
 - backend/src/routes/pickup-request.route.js — POST /pickup-requests; GET/PATCH/GET-by-id collection-requests routes; COLLECTED transition creates CollectionItem records
 - backend/src/routes/redemption.route.js — program and transaction endpoints; GET /transactions/:id added
 - backend/src/routes/material.route.js — GET /materials/, GET /materials/barangay, GET /materials/categories
+- backend/src/routes/manual-intake.route.js — POST /manual-intake/, GET /manual-intake/
+- backend/src/routes/material-stock.route.js — GET /material-stock/, GET /material-stock/transaction-logs, POST /material-stock/transaction-logs/out
 - backend/src/routes/dashboard.route.js
 - frontend/src/lib/roles.js — BARANGAY_ROLES array
 - backend/src/utils/generateToken.js
@@ -262,12 +286,16 @@ Next focus: Manual Collection Intake module (Sunday EcoAid manual entry with res
 - backend/src/routes/resident.route.js — GET /resident/me, PATCH /resident/me, GET /resident/barangay-info
 - frontend/src/app/(resident)/requests/page.jsx — resident requests list with Ongoing/History tabs, live data, error/empty/skeleton states
 - frontend/src/app/(resident)/requests/[id]/page.jsx — resident request detail with photo, timeline, and collection items breakdown
+- frontend/src/app/(barangay)/manual-intake/page.jsx — manual intake form with debounced resident search, household-name fallback, dynamic material rows
+- frontend/src/app/(barangay)/material-stock/page.jsx — live stock balance table, transaction log, and stock-out modal
 
 ## Known Issues / TODO
 - BlacklistedToken cleanup job needed (periodic deletion of expired tokens using the expiresAt field)
-- Dashboard partially wired — "Pending Collection Requests", "Total Intake Transactions", and "Unverified Residents" cards show real DB data; "Total Recyclables Collected", "Total Program Expenses", and "Current Fund Balance" are still hardcoded (pending MRF and Program Funds modules)
+- Dashboard partially wired — "Pending Collection Requests", "Total Intake Transactions", and "Unverified Residents" cards show real DB data; "Total Recyclables Collected", "Total Program Expenses", and "Current Fund Balance" are still hardcoded (pending Program Funds module and dashboard rewiring to the stock ledger)
 - Resident Layer 2 auth check (server component calling GET /auth/me) still pending
 - `InProgressActions` multi-row form: no client-side validation before submit — empty material/amount rows are silently sent to backend
+- `StockTransactionLog` is only written by Manual Intake (`IN`) and manual stock-out adjustments (`OUT`); pickup-request `COLLECTED` transitions and redemption transactions do not create ledger entries yet, so Material Stock balances undercount real intake/outflow until those are wired in
+- Junkshop Sales, Leaderboard, and Reports pages are static UI scaffolds with hardcoded mock data — no backend, and not linked in the barangay `Sidebar` (`href: ""`)
 
 ## Mentor Instructions
 Act as a senior dev mentor — guide me, don't just give me answers.
@@ -282,8 +310,8 @@ I'm building.
 > SplitPals = overflow/break only, no fixed schedule.
 > Teachable Machine = during sem (blocked on groupmates' dataset).
 
-- [ ] Week 1 (Jun 8–14)   — Manual Collection Intake (end-to-end)
-- [ ] Week 2 (Jun 15–21)  — Material Stock + Junkshop Sales
+- [x] Week 1 (Jun 8–14)   — Manual Collection Intake (end-to-end)
+- [~] Week 2 (Jun 15–21)  — Material Stock done; Junkshop Sales still a static UI scaffold, backend not started
 - [ ] Week 3 (Jun 22–28)  — Reward Inventory + Program Funds
 - [ ] Week 4 (Jun 29–Jul 5) — Leaderboard (admin + resident)
 - [ ] Week 5 (Jul 6–12)   — Announcements + Reports
