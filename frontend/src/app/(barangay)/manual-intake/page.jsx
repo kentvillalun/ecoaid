@@ -33,72 +33,7 @@ const inter = Inter({
   weight: ["400", "500", "600", "700"],
 });
 
-const MOCK_INTAKES = [
-  {
-    id: 1,
-    residentName: "Maria Santos",
-    isRegistered: true,
-    sitio: "Bulala",
-    materials: [
-      { name: "Plastic Bottles", type: "Plastics", quantity: 3, unit: "kg" },
-      { name: "Cardboard", type: "Papers", quantity: 5, unit: "kg" },
-      { name: "Aluminum Cans", type: "Metals", quantity: 1.5, unit: "kg" },
-    ],
-    intakeDate: "2026-06-08T09:30:00",
-  },
-  {
-    id: 2,
-    residentName: "Jose Reyes",
-    isRegistered: true,
-    sitio: "Centro",
-    materials: [
-      { name: "Glass Bottles", type: "Bottles", quantity: 2, unit: "kg" },
-      { name: "Metal Scraps", type: "Metals", quantity: 4, unit: "kg" },
-    ],
-    intakeDate: "2026-06-07T14:15:00",
-  },
-  {
-    id: 3,
-    residentName: "Dela Cruz Household",
-    isRegistered: false,
-    sitio: null,
-    materials: [
-      { name: "Newspaper", type: "Papers", quantity: 7, unit: "kg" },
-      { name: "Plastic Bags", type: "Plastics", quantity: 1, unit: "kg" },
-      { name: "Tin Cans", type: "Metals", quantity: 2, unit: "kg" },
-      { name: "Cardboard", type: "Papers", quantity: 3, unit: "kg" },
-    ],
-    intakeDate: "2026-06-07T10:00:00",
-  },
-  {
-    id: 4,
-    residentName: "Ana Villanueva",
-    isRegistered: true,
-    sitio: "Ilocos",
-    materials: [
-      { name: "PET Bottles", type: "Plastics", quantity: 2.5, unit: "kg" },
-      { name: "Mixed Paper", type: "Papers", quantity: 4, unit: "kg" },
-      { name: "Scrap Metal", type: "Metals", quantity: 1, unit: "kg" },
-    ],
-    intakeDate: "2026-06-06T08:45:00",
-  },
-  {
-    id: 5,
-    residentName: "Bautista Household",
-    isRegistered: false,
-    sitio: null,
-    materials: [
-      {
-        name: "Plastic Containers",
-        type: "Plastics",
-        quantity: 1.5,
-        unit: "kg",
-      },
-      { name: "White Paper", type: "Papers", quantity: 2, unit: "kg" },
-    ],
-    intakeDate: "2026-06-05T16:20:00",
-  },
-];
+
 
 const TABLE_HEADERS = ["Resident Name", "Sitio", "Materials", "Intake Date"];
 

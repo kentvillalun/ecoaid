@@ -134,6 +134,7 @@ model User {
   pickupRequest PickupRequests[]
   manualIntakeTransaction ManualIntakeTransaction[] @relation("ResidentIntakes")
   collectedIntakeTransaction ManualIntakeTransaction[] @relation("CollectorIntakes")
+  stockTransactionLog StockTransactionLog[]
 
   @@index([barangayId])
   @@index([sitioId])
@@ -353,6 +354,9 @@ model StockTransactionLog {
   barangayId String @db.Uuid()
   barangay Barangay @relation(fields: [barangayId], references: [id])
 
+  userId String? @db.Uuid()
+  user User? @relation(fields: [userId], references: [id])
+
   materialId String @db.Uuid
   material Material @relation(fields: [materialId], references: [id])
 
@@ -366,6 +370,7 @@ model StockTransactionLog {
   redemptionTransaction RedemptionTransaction? @relation(fields: [redemptionTransactionId], references: [id])
 
   junkshopSalesId String? @db.Uuid()
+  performedBy String? 
 
   quantity Float
   unit Unit @default(KG)

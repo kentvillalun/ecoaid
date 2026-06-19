@@ -44,3 +44,9 @@ body {
   font-weight: 500;
   color: #1a1a1a;
 }
+
+@layer components {
+  .input {
+    @apply w-full outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 mb-2
+  }
+}
