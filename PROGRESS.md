@@ -290,6 +290,11 @@ only as an unwired UI scaffold with hardcoded mock data.
 - frontend/src/app/(barangay)/material-stock/page.jsx — live stock balance table, transaction log, and stock-out modal
 
 ## Known Issues / TODO
+- `StockTransactionLog.performedBy` not set in Manual Intake, Redemption, or
+  Collection Request `COLLECTED` transitions — only Junkshop Sales
+  (`recordSale`) sets it correctly so far; each of the other three needs
+  its own check for whether the performing user's name is already in
+  scope before wiring it in (not a one-line fix per file, do as a batch)
 - BlacklistedToken cleanup job needed (periodic deletion of expired tokens using the expiresAt field)
 - Dashboard partially wired — "Pending Collection Requests", "Total Intake Transactions", and "Unverified Residents" cards show real DB data; "Total Recyclables Collected", "Total Program Expenses", and "Current Fund Balance" are still hardcoded (pending Program Funds module and dashboard rewiring to the stock ledger)
 - Resident Layer 2 auth check (server component calling GET /auth/me) still pending
@@ -305,17 +310,35 @@ BS IT student focused on becoming a full stack developer. My main
 concern is AI over-reliance — make sure I actually understand what 
 I'm building.
 
-## Vacation Roadmap (Jun 8 – Jul 19, 2025)
-> 3 hrs/day target. AI handles frontend UI scaffolding, Haru handles wiring + backend.
+## Vacation Roadmap — Block-Based (replaces fixed weekly dates as of Jun 29)
+> Switched from calendar weeks to focus blocks because actual pace is bursty
+> (2-3 hrs/day, only on days nothing else is pulling at time), not a uniform
+> 3hrs/day every day. A block = however many consecutive free days actually
+> show up. One unit of work per block. No block happening in a given week is
+> not a slip — it's just no block that week. Roadmap updates when a block
+> actually happens or doesn't, not on a fixed weekly cadence.
+> AI handles frontend UI scaffolding, Haru handles wiring + backend.
 > SplitPals = overflow/break only, no fixed schedule.
 > Teachable Machine = during sem (blocked on groupmates' dataset).
 
-- [x] Week 1 (Jun 8–14)   — Manual Collection Intake (end-to-end)
-- [~] Week 2 (Jun 15–21)  — Material Stock done; Junkshop Sales still a static UI scaffold, backend not started
-- [ ] Week 3 (Jun 22–28)  — Reward Inventory + Program Funds
-- [ ] Week 4 (Jun 29–Jul 5) — Leaderboard (admin + resident)
-- [ ] Week 5 (Jul 6–12)   — Announcements + Reports
-- [ ] Week 6 (Jul 13–19)  — Dashboard wiring + Settings fixes + tech debt
+- [x] Completed — Manual Collection Intake (end-to-end)
+- [x] Completed — Material Stock (end-to-end)
+- [x] Block A (completed Jun 29) — Junkshop Sales backend: `recordSale`
+      validation block finished, `StockTransactionLog` write path wired
+      (one OUT row per JunkshopSaleItem, source JUNKSHOP_SALES, via
+      `convertToKg`), `junkshopSalesId` upgraded to a proper FK relation,
+      both writes wrapped in `prisma.$transaction` for atomicity
+- [~] Block B (in progress, UI scaffold done Jun 30) — Junkshop Sales frontend:
+      page structure complete via Claude Code (comparison table with hover-
+      reveal price-cell affordance, summary cards, Record Sale modal with
+      dynamic item rows + kg/pcs unit select, Sales History table with
+      hover/tap breakdown table per sale). Remaining: wire cascading
+      junkshop→material select in modal, wire modal submission to
+      `recordSale`, build/wire `GET` endpoints for price comparison data
+      and sales history (including backend-computed `totalAmount` per sale)
+- [ ] Block C+ — remaining modules (Reward Inventory, Program Funds,
+      Leaderboard, Announcements, Reports, Settings) sized into blocks
+      as they come up — not pre-assigned dates this far out
 
 ## During Sem (Jul 20 onwards)
 - [ ] Teachable Machine (image recognition on pickup request)

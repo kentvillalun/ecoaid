@@ -69,6 +69,7 @@ model Barangay {
   program Program[]
   manualIntakeTransaction ManualIntakeTransaction[]
   stockTransactionLog StockTransactionLog[]
+  junkshop Junkshop[]
 }
 
 enum RedemptionMode {
@@ -135,6 +136,7 @@ model User {
   manualIntakeTransaction ManualIntakeTransaction[] @relation("ResidentIntakes")
   collectedIntakeTransaction ManualIntakeTransaction[] @relation("CollectorIntakes")
   stockTransactionLog StockTransactionLog[]
+  junkshopSales JunkshopSale[]
 
   @@index([barangayId])
   @@index([sitioId])
@@ -197,6 +199,8 @@ model Material {
   programMaterial ProgramMaterial[]
   manualIntakeItems ManualIntakeItems[]
   stockTransactionLog StockTransactionLog[]
+  junkshopPriceItems JunkshopPriceItem[]
+  junkshopSaleItems JunkshopSaleItem[]
 
   @@unique([name, barangayId])
 }
@@ -370,6 +374,7 @@ model StockTransactionLog {
   redemptionTransaction RedemptionTransaction? @relation(fields: [redemptionTransactionId], references: [id])
 
   junkshopSalesId String? @db.Uuid()
+  junkshopSale JunkshopSale? @relation(fields: [junkshopSalesId], references: [id])
   performedBy String? 
 
   quantity Float
@@ -381,3 +386,65 @@ model StockTransactionLog {
   createdAt DateTime @default(now())
 }
 
+model Junkshop {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
+
+  barangayId String @db.Uuid()
+  barangay Barangay @relation(fields: [barangayId], references: [id])
+
+  name String
+  description String?
+  location String?
+  isAvailable Boolean @default(true)
+  createdAt DateTime @default(now())
+
+  priceItems JunkshopPriceItem[]
+  sales JunkshopSale[]
+}
+
+model JunkshopPriceItem {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
+
+  junkshopId String @db.Uuid()
+  junkshop Junkshop @relation(fields: [junkshopId], references: [id])
+
+  materialId String @db.Uuid()
+  material Material @relation(fields: [materialId], references: [id])
+
+  price Float
+  unit Unit @default(KG)
+
+  @@unique([junkshopId, materialId])
+}
+
+model JunkshopSale {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
+
+  junkshopId String @db.Uuid()
+  junkshop Junkshop @relation(fields: [junkshopId], references: [id])
+
+  userId String? @db.Uuid()
+  user User? @relation(fields: [userId], references: [id])
+
+  performedBy String?
+  createdAt DateTime @default(now())
+
+  saleItems JunkshopSaleItem[]
+  stockTransactionLog StockTransactionLog[]
+}
+
+model JunkshopSaleItem {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
+
+  saleId String @db.Uuid()
+  junkshopSale JunkshopSale @relation(fields: [saleId], references: [id])
+
+  materialId String @db.Uuid()
+  material Material @relation(fields: [materialId], references: [id])
+
+  quantity Float
+  cost Float
+  unit Unit @default(KG)
+
+
+}

@@ -73,7 +73,7 @@ export const Sidebar = () => {
     {
       icon: JunkshopSalesIcon,
       label: "Junkshop Sales",
-      href: "",
+      href: "/junkshop-sales",
     },
     {
       icon: ProgramFundsIcon,

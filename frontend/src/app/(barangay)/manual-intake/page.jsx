@@ -13,7 +13,6 @@ import { formatDate } from "@/lib/formatDate";
 import {
   Bars3BottomLeftIcon,
   InboxArrowDownIcon,
-  PlusIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 
@@ -468,8 +467,7 @@ export default function ManualIntakePage() {
                     ]);
                   }}
                 >
-                  <PlusIcon className="text-gray-600 w-4" />
-                  <p className="text-gray-600">Add material</p>
+                  <p className="text-gray-700">Add material</p>
                 </button>
               </div>
             </Modal>,
