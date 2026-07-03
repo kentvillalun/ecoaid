@@ -302,6 +302,27 @@ only as an unwired UI scaffold with hardcoded mock data.
 - `StockTransactionLog` is only written by Manual Intake (`IN`) and manual stock-out adjustments (`OUT`); pickup-request `COLLECTED` transitions and redemption transactions do not create ledger entries yet, so Material Stock balances undercount real intake/outflow until those are wired in
 - Junkshop Sales, Leaderboard, and Reports pages are static UI scaffolds with hardcoded mock data — no backend, and not linked in the barangay `Sidebar` (`href: ""`)
 
+## Deferred Decisions
+- **Neon DB ownership/handover (not urgent — revisit before pilot testing / production handover)**
+  Currently on Kent's personal Neon account (same one used for freelance side
+  projects). Two branches depending on how the project lands post-graduation:
+  - If EcoAid stays generic/multi-barangay (per panel's original scoping) →
+    Kent retains DB ownership as neutral infra holder across multiple
+    barangay "clients"
+  - If one barangay becomes the sole/primary long-term owner → DB should be
+    handed off entirely, not left under personal account
+  If full handover is needed: do NOT use personal Neon/GitHub account for
+  client- or barangay-owned production DBs — create a dedicated account first.
+  Schema reapplies automatically via `prisma migrate deploy` against a new
+  DB (source of truth is `schema.prisma`, already in the codebase) — only
+  the actual data rows need manual export/import via `pg_dump` (use direct
+  connection string, not pooled/`-pooler`, since `pg_dump` needs
+  session-level SET statements) → restore via `psql` into the new project.
+  Ref: https://neon.com/faqs/export-database-sql-file
+  Same account-separation rule applies to any freelance client work
+  (e.g. balloon business site) — dedicated account before production, not
+  personal.
+
 ## Mentor Instructions
 Act as a senior dev mentor — guide me, don't just give me answers.
 Challenge me first, explain concepts before showing code, ask what 
@@ -336,12 +357,22 @@ I'm building.
          states via Claude Code
       ✅ Summary cards — Junkshops Tracked, Best Overall, Highest Rate
          all wired to real data
+      ✅ Junkshop detail modal — `JunkshopDetailModal` component at
+         `components/junkshop-sales/modals/JunkshopDetailModal.jsx`;
+         triggered by ArrowUpRightIcon button beside junkshop name
+         (desktop: column header, mobile: per-row with stopPropagation);
+         `selectedJunkshop` state in page passes junkshopId as prop;
+         `useFetch` inside modal fires on mount with
+         `/api/junkshop-sales/junkshop/:id`; read-only form layout;
+         `getJunkshopDetails` controller + route done and tested
       Remaining:
       - Wire price cell onClick → pre-fill modal with junkshopId
       - Wire cascading select in modal (junkshop → filters materials)
       - Wire modal submission → recordSale
       - Settings page: Add Junkshop modal (Claude Code scaffold + wiring)
-      - Junkshop detail modal
+      - Fix hooks violation in JunkshopDetailModal (useFetch must move
+        above the `if (!isOpen) return null` early return)
+      - Remove dead code: MOCK_JUNKSHOP constant and unused `shop` variable
 - [ ] Block C+ — remaining modules (Reward Inventory, Program Funds,
       Leaderboard, Announcements, Reports, Settings) sized into blocks
       as they come up — not pre-assigned dates this far out

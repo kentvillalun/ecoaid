@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { createPortal } from "react-dom";
 import { Inter } from "next/font/google";
 import { Page } from "@/components/layout/Page";
 import { PageContent } from "@/components/layout/PageContent";
@@ -11,14 +10,13 @@ import { Card } from "@/components/ui/Card";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { IconContainer } from "@/components/ui/IconContainer";
 import { MaterialTag } from "@/components/ui/MaterialTag";
-import { Modal } from "@/components/ui/Modal";
+import { RecordSaleModal } from "@/components/junkshop-sales/modals/RecordSaleModal";
 import {
   BuildingStorefrontIcon,
   ArrowUpRightIcon,
   TrophyIcon,
   StarIcon,
   ClipboardDocumentListIcon,
-  XMarkIcon,
   ShoppingBagIcon,
   QuestionMarkCircleIcon,
 } from "@heroicons/react/24/outline";
@@ -32,33 +30,12 @@ import "react-loading-skeleton/dist/skeleton.css";
 import { Error } from "@/components/ui/Error";
 import { Empty } from "@/components/ui/Empty";
 import { Spinner } from "@/components/ui/Spinner";
+import { JunkshopDetailModal } from "@/components/junkshop-sales/modals/JunkshopDetailModal";
 
 const inter = Inter({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
 });
-
-const JUNKSHOPS = [
-  { id: "js1", name: "Reyes Junkshop" },
-  { id: "js2", name: "Dela Cruz Trading" },
-  { id: "js3", name: "Vigan Recyclers" },
-];
-
-const PRICE_DATA = [
-  { material: "PET Bottles", category: "Plastics", prices: [12, 10, 14] },
-  { material: "Iron Scraps", category: "Metals", prices: [25, 28, 22] },
-  { material: "Newspaper", category: "Papers", prices: [6, 5, 7] },
-  { material: "Glass Bottles", category: "Bottles", prices: [8, 9, 8] },
-];
-
-const MOCK_MATERIALS = [
-  { id: "m1", name: "PET Bottles" },
-  { id: "m2", name: "Iron Scraps" },
-  { id: "m3", name: "Newspaper" },
-  { id: "m4", name: "Glass Bottles" },
-  { id: "m5", name: "Cardboard" },
-  { id: "m6", name: "Aluminum Cans" },
-];
 
 const getBestPriceIndex = (prices) => prices.indexOf(Math.max(...prices));
 
@@ -108,123 +85,6 @@ function BreakdownTable({ materials }) {
   );
 }
 
-function RecordSaleModal({
-  isOpen,
-  onClose,
-  preselectedJunkshopId = undefined,
-}) {
-  const [items, setItems] = useState([
-    { materialId: "", quantity: "", unit: "kg" },
-  ]);
-
-  const addItem = () =>
-    setItems((prev) => [...prev, { materialId: "", quantity: "", unit: "kg" }]);
-  const removeItem = (index) =>
-    setItems((prev) => prev.filter((_, i) => i !== index));
-
-  if (!isOpen) return null;
-
-  return createPortal(
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      icon={<ShoppingBagIcon className="w-6 stroke-new-primary" />}
-      title="Record Sale"
-      subtitle="Log a junkshop sale transaction"
-      confirmLabel="Record Sale"
-      confirmClassName="gradient-button"
-      onConfirm={() => {}}
-    >
-      <div className="p-6 flex flex-col gap-4">
-        {/* Junkshop select */}
-        <div className="flex flex-col gap-1">
-          <label className="label">Junkshop</label>
-          <div className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 flex items-center">
-            <select
-              className="w-full outline-none"
-              defaultValue={preselectedJunkshopId ?? ""}
-            >
-              <option value="" disabled hidden>
-                Select junkshop
-              </option>
-              {JUNKSHOPS.map((shop) => (
-                <option key={shop.id} value={shop.id}>
-                  {shop.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Dynamic item rows */}
-        <div className="flex flex-col gap-1">
-          <label className="label">Materials sold</label>
-          <div className="flex flex-col gap-3">
-            {items.map((_, index) => (
-              <div key={index} className="new-border bg-white rounded-xl p-4">
-                <div className="flex flex-row items-center justify-between mb-3">
-                  <span className="text-sm font-medium text-gray-700">
-                    Material {index + 1}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => removeItem(index)}
-                    disabled={items.length <= 1}
-                    className="hover:cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
-                  >
-                    <XMarkIcon className="w-5 stroke-gray-400" />
-                  </button>
-                </div>
-
-                {/* Material select */}
-                <div className="w-full outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 mb-2 flex items-center">
-                  <select className="w-full outline-none" defaultValue="">
-                    <option value="" disabled hidden>
-                      Select material
-                    </option>
-                    {MOCK_MATERIALS.map((m) => (
-                      <option key={m.id} value={m.id}>
-                        {m.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Quantity + Unit */}
-                <div className="flex flex-row gap-2">
-                  <div className="flex-1 outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 flex items-center">
-                    <input
-                      type="number"
-                      className="w-full outline-none flex-1"
-                      min={0}
-                      placeholder="e.g. 5"
-                    />
-                  </div>
-                  <div className="w-24 outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 flex items-center">
-                    <select className="w-full outline-none" defaultValue="kg">
-                      <option value="kg">kg</option>
-                      <option value="pcs">pcs</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <button
-            type="button"
-            onClick={addItem}
-            className="mt-1 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:cursor-pointer flex flex-row items-center justify-center gap-2 min-w-full"
-          >
-            <p className="text-gray-700">Add material</p>
-          </button>
-        </div>
-      </div>
-    </Modal>,
-    document.body,
-  );
-}
-
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 const HISTORY_HEADERS = [
@@ -237,6 +97,8 @@ const HISTORY_HEADERS = [
 
 export default function JunkshopSalesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isJunkshopModalOpen, setIsJunkshopModalOpen] = useState(false);
+  const [selectedJunkshop, setSelectedJunkshop] = useState("")
 
   const [salesRefetchCount, setSalesRefetchCount] = useState(0);
   const {
@@ -284,8 +146,8 @@ export default function JunkshopSalesPage() {
 
   const bestJunkshop = getBestOverallJunkshop();
 
-  const prices = allPriceItems?.map((item) => item.price)
-  const highestPrices = prices ? Math.max(...prices) : 0
+  const prices = allPriceItems?.map((item) => item.price);
+  const highestPrices = prices ? Math.max(...prices) : 0;
   return (
     <Page className="bg-new-bg! ">
       <BarangayTopBar title="Junkshop Sales" />
@@ -398,7 +260,20 @@ export default function JunkshopSalesPage() {
                         key={shop.id}
                         className="font-medium text-center p-4 text-nowrap"
                       >
-                        {shop.name}
+                        <button
+                          className="inline-flex items-center gap-1 hover:cursor-pointer"
+                          onClick={() => {
+                            setIsJunkshopModalOpen(true)
+                            setSelectedJunkshop(shop.id)
+                          }}
+                        >
+                          {shop.name}
+                          <IconContainer
+                            icon={<ArrowUpRightIcon className="w-2.5 stroke-[#6b7280]" />}
+                            className="rounded-full! p-1!"
+                            containerColor="#f3f4f640"
+                          />
+                        </button>
                       </th>
                     ))}
                     <th className="font-medium text-center p-4 text-nowrap text-cta-color">
@@ -563,7 +438,7 @@ export default function JunkshopSalesPage() {
                     unit: p?.unit,
                   };
                 });
-                
+
                 const bestIdx = getBestPriceIndex(prices.map((p) => p.price));
                 const bestPrice = Math.max(...prices.map((p) => p.price));
                 return (
@@ -587,11 +462,21 @@ export default function JunkshopSalesPage() {
                           className={`flex flex-row items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-150 hover:cursor-pointer w-full text-left
                           ${i === bestIdx ? "bg-green-50" : ""}`}
                         >
-                          <p
-                            className={`text-sm font-medium ${i === bestIdx ? "text-green-800" : "text-[#6b7280]"}`}
+                          <button
+                            className={`inline-flex items-center gap-1 text-sm font-medium ${i === bestIdx ? "text-green-800" : "text-[#6b7280]"}`}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setSelectedJunkshop(shop.id)
+                              setIsJunkshopModalOpen(true)
+                            }}
                           >
                             {shop.name}
-                          </p>
+                            <IconContainer
+                              icon={<ArrowUpRightIcon className="w-2.5 stroke-[#6b7280]" />}
+                              className="rounded-full! p-1!"
+                              containerColor="#f3f4f640"
+                            />
+                          </button>
                           <div className="flex items-center gap-2">
                             <span
                               className={`font-bold tabular-nums lowercase ${i === bestIdx ? "text-cta-color" : "text-text-primary"}`}
@@ -805,6 +690,11 @@ export default function JunkshopSalesPage() {
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
         />
+
+        <JunkshopDetailModal isOpen={isJunkshopModalOpen} onClose={() => {
+          setIsJunkshopModalOpen(false)
+          setSelectedJunkshop("")
+        }} junkshop={selectedJunkshop} />
       </PageContent>
     </Page>
   );

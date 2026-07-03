@@ -43,7 +43,7 @@ export const Modal = ({
                   </div>
                   <div className="flex flex-col gap-1">
                     <div className="flex flex-row gap-4 items-center">
-                      <h4 className="font-semibold text-[16px]">{title}</h4>
+                      <div className="font-semibold text-[16px]">{title}</div>
                       {isPill && <StatusBadge type={status} />}
                     </div>
                     <p className="text-gray-600 text-[14px]">{subtitle}</p>

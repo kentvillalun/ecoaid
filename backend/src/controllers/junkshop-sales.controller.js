@@ -218,4 +218,48 @@ const addJunkshop = async (req, res) => {
   }
 };
 
-export { recordSale, getJunkshopSales, getJunkshopWithPrices, addJunkshop };
+const getJunkshopDetails = async (req, res) => {
+  try {
+    const { junkshopId } = req.params
+    const { barangayId } = req.user
+
+    
+    const junkshop = await prisma.junkshop.findUnique({
+      where: { id: junkshopId, barangayId },
+      select: {
+        name: true,
+        description: true,
+        location: true,
+        isAvailable: true,
+        createdAt: true,
+        priceItems: {
+          select: {
+            id: true,
+            material: {
+              select: {
+                name: true,
+                category: {
+                  select: {
+                    name: true
+                  }
+                }
+              }
+            },
+            unit: true,
+            price: true
+          }
+        }
+      }
+    })
+
+    if (!junkshop) {
+      return res.status(404).json({ error: "Junkshop do not exist"})
+    }
+
+    return res.status(200).json({ message: "Fetching junkshop details successful", junkshop})
+  } catch (error) {
+    return res.status(500).json({ error: error.message })
+  }
+}
+
+export { recordSale, getJunkshopSales, getJunkshopWithPrices, addJunkshop, getJunkshopDetails };

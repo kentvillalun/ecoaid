@@ -1,6 +1,6 @@
 import express from "express"
 import { authenticateBarangay, requireRoles } from "../middlewares/authMiddleware.js"
-import { addJunkshop, getJunkshopSales, getJunkshopWithPrices, recordSale } from "../controllers/junkshop-sales.controller.js"
+import { addJunkshop, getJunkshopDetails, getJunkshopSales, getJunkshopWithPrices, recordSale } from "../controllers/junkshop-sales.controller.js"
 
 const router = express.Router()
 
@@ -8,5 +8,6 @@ router.post("/", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY", "SK
 router.get("/", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY", "SK", "TREASURER"]), getJunkshopSales)
 router.get("/prices", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY", "SK", "TREASURER"]), getJunkshopWithPrices)
 router.post("/junkshop", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY", "SK", "TREASURER"]), addJunkshop)
+router.get("/junkshop/:junkshopId", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY", "SK", "TREASURER"]), getJunkshopDetails)
 
 export default router
