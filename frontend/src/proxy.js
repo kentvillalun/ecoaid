@@ -6,7 +6,7 @@ export function proxy(request) {
   const residentToken = request.cookies.get("resident_token");
   const pathname = request.nextUrl.pathname;
 
-  const barangayRoutes = ["/dashboard", "/collection-requests", "/redemption"];
+  const barangayRoutes = ["/dashboard", "/collection-requests", "/redemption", "/manual-intake", "/material-stock", "/junkshop-sales"];
   const residentRoutes = [
     "/announcements",
     "/capture",
@@ -47,5 +47,8 @@ export const config = {
     "/home/:path*",
     "/profile/:path*",
     "/requests/:path*",
+    "/manual-intake/:path*",
+    "/material-stock/:path*",
+    "/junkshop-sales/:path*",
   ],
 };

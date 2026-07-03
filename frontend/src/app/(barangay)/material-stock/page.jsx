@@ -365,7 +365,7 @@ export default function MaterialStockPage() {
               confirmClassName={"gradient-button"}
               onConfirm={() => onSubmit()}
             >
-              <div className="p-6 flex flex-col gap-3">
+              <div className="p-6 flex flex-col gap-3 ">
                 <div className="flex flex-col gap-1">
                   <label htmlFor="materialId" className="label">
                     Material
@@ -536,7 +536,7 @@ export default function MaterialStockPage() {
           <Card
             className={`${inter.className} hidden md:flex md:flex-col px-8 overflow-x-auto md:gap-3 md:items-start shadow-none! new-border`}
           >
-            <table className="w-full text-sm border-collapse text-gray-600">
+            <table className="w-full text-sm border-collapse text-gray-600 overflow-x-auto">
               <thead className="border-b border-[#E6EFF5]">
                 <tr>
                   {TABLE_HEADERS.map((h) => (

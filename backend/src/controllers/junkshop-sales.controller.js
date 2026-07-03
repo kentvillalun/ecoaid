@@ -90,3 +90,132 @@ const recordSale = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
+const getJunkshopSales = async (req, res) => {
+  try {
+    const { barangayId } = req.user;
+
+    const sales = await prisma.junkshopSale.findMany({
+      where: {
+        junkshop: {
+          barangayId,
+        },
+      },
+      select: {
+        id: true,
+        junkshop: {
+          select: {
+            name: true,
+          },
+        },
+        performedBy: true,
+        createdAt: true,
+        saleItems: {
+          select: {
+            id: true,
+            material: {
+              select: {
+                name: true,
+                category: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
+            quantity: true,
+            cost: true,
+            unit: true,
+          },
+        },
+      },
+    });
+
+    const enrichedSales = sales.map((sale) => {
+      const totalAmount = sale.saleItems.reduce((accumulator, currentItem) => {
+        return accumulator + currentItem.cost * currentItem.quantity;
+      }, 0);
+
+      return { ...sale, totalAmount };
+    });
+
+    return res
+      .status(200)
+      .json({ message: "Fetching sale history successful", enrichedSales });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+const getJunkshopWithPrices = async (req, res) => {
+  try {
+    const { barangayId } = req.user;
+
+    const junkshops = await prisma.junkshop.findMany({
+      where: {
+        barangayId,
+      },
+      select: {
+        id: true,
+        name: true,
+        isAvailable: true,
+        priceItems: {
+          select: {
+            material: {
+              select: {
+                id: true,
+                name: true,
+                category: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
+            price: true,
+            unit: true,
+          },
+        },
+      },
+    });
+
+    return res
+      .status(200)
+      .json({ message: "Fetching junkshop with prices success", junkshops });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+const addJunkshop = async (req, res) => {
+  try {
+    const { barangayId } = req.user;
+    const { name, description, location, priceItems } = req.body ?? {};
+
+    await prisma.junkshop.create({
+      data: {
+        barangayId,
+        name,
+        description,
+        location,
+        priceItems: {
+          createMany: {
+            data: priceItems.map((item) => ({
+              materialId: item.materialId,
+              price: item.price,
+              unit: item.unit,
+            })),
+          },
+        },
+      },
+    });
+
+    return res
+      .status(201)
+      .json({ message: "Successfully created a junkshop record" });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+export { recordSale, getJunkshopSales, getJunkshopWithPrices, addJunkshop };

@@ -14,6 +14,7 @@ import residentRoute from "./routes/resident.route.js"
 import materialRoute from "./routes/material.route.js"
 import manualIntakeRoute from "./routes/manual-intake.route.js"
 import materialStockRoute from "./routes/material-stock.route.js"
+import junkshopSalesRoute from "./routes/junkshop-sales.route.js"
 
 config();
 connectDB();
@@ -44,6 +45,7 @@ app.use("/resident", residentRoute)
 app.use("/material", materialRoute)
 app.use("/manual-intake", manualIntakeRoute)
 app.use("/material-stock", materialStockRoute)
+app.use("/junkshop-sales", junkshopSalesRoute)
 
 
 

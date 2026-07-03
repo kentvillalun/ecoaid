@@ -26,71 +26,15 @@ import { Error } from "@/components/ui/Error";
 import { Empty } from "@/components/ui/Empty";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+import { HoverPortal } from "@/components/ui/HoverReveal";
 
 const inter = Inter({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
 });
 
-
-
 const TABLE_HEADERS = ["Resident Name", "Sitio", "Materials", "Intake Date"];
 
-function MaterialsCell({ materials }) {
-  const [show, setShow] = useState(false);
-  const [positionTop, setPositionTop] = useState(0);
-  const [positionLeft, setPositionLeft] = useState(0);
-
-  return (
-    <div
-      className="relative flex flex-wrap gap-1 min-h-full"
-      onMouseEnter={(e) => {
-        const rect = e.currentTarget.getBoundingClientRect();
-        setPositionTop(rect.top);
-        setPositionLeft(rect.left);
-        setShow(true);
-      }}
-      onMouseLeave={() => setShow(false)}
-    >
-      {materials?.map((m) => (
-        <MaterialTag
-          key={m.id}
-          type={m?.material?.category?.name}
-          materialName={m?.material?.name}
-        />
-      ))}
-      {show &&
-        createPortal(
-          <div
-            className="fixed left-0 z-50 bg-white rounded-xl  new-border p-3 min-w-56 "
-            style={{ top: positionTop, left: positionLeft }}
-          >
-            <p className="text-xs font-semibold text-gray-500 mb-2">
-              Materials & Quantity
-            </p>
-            <div className="flex flex-col gap-1">
-              {materials.map((m) => (
-                <div
-                  key={m?.id}
-                  className="flex items-center justify-between gap-6"
-                >
-                  <MaterialTag
-                    type={m?.material?.category?.name}
-                    materialName={m?.material?.name}
-                    textOnly
-                  />
-                  <span className="text-xs text-gray-500 text-nowrap lowercase">
-                    {m?.quantity} {m?.unit === "PIECE" ? "pcs" : m?.unit}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>,
-          document.body,
-        )}
-    </div>
-  );
-}
 
 function ResidentNameCell({ name, isRegistered = true }) {
   return (
@@ -552,7 +496,41 @@ export default function ManualIntakePage() {
                         {row?.user?.sitio?.name ?? "—"}
                       </td>
                       <td className="p-4">
-                        <MaterialsCell materials={row?.manualIntakeItems} />
+                        <HoverPortal
+                          content={
+                            <>
+                              <p className="text-xs font-semibold text-gray-500 mb-2">
+                                Materials & Quantity
+                              </p>
+                              <div className="flex flex-col gap-1">
+                                {row?.manualIntakeItems?.map((m) => (
+                                  <div
+                                    key={m?.id}
+                                    className="flex items-center justify-between gap-6"
+                                  >
+                                    <MaterialTag
+                                      type={m?.material?.category?.name}
+                                      materialName={m?.material?.name}
+                                      textOnly
+                                    />
+                                    <span className="text-xs text-gray-500 text-nowrap lowercase">
+                                      {m?.quantity}{" "}
+                                      {m?.unit === "PIECE" ? "pcs" : m?.unit}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </>
+                          }
+                        >
+                          {row?.manualIntakeItems?.map((m) => (
+                            <MaterialTag
+                              key={m.id}
+                              type={m?.material?.category?.name}
+                              materialName={m?.material?.name}
+                            />
+                          ))}
+                        </HoverPortal>
                       </td>
                       <td className="p-4 text-nowrap">
                         {formatDate(row.createdAt)}

@@ -328,14 +328,20 @@ I'm building.
       (one OUT row per JunkshopSaleItem, source JUNKSHOP_SALES, via
       `convertToKg`), `junkshopSalesId` upgraded to a proper FK relation,
       both writes wrapped in `prisma.$transaction` for atomicity
-- [~] Block B (in progress, UI scaffold done Jun 30) — Junkshop Sales frontend:
-      page structure complete via Claude Code (comparison table with hover-
-      reveal price-cell affordance, summary cards, Record Sale modal with
-      dynamic item rows + kg/pcs unit select, Sales History table with
-      hover/tap breakdown table per sale). Remaining: wire cascading
-      junkshop→material select in modal, wire modal submission to
-      `recordSale`, build/wire `GET` endpoints for price comparison data
-      and sales history (including backend-computed `totalAmount` per sale)
+- [~] Block B (in progress, UI scaffold done Jun 30, wiring started Jul 1) —
+      Junkshop Sales frontend wiring mostly complete:
+      ✅ Sales History table — real data, loading/error/empty states done
+      ✅ Price Comparison table — real data (uniqueMaterials via Map,
+         prices via flatMap+find), desktop + mobile, loading/error/empty
+         states via Claude Code
+      ✅ Summary cards — Junkshops Tracked, Best Overall, Highest Rate
+         all wired to real data
+      Remaining:
+      - Wire price cell onClick → pre-fill modal with junkshopId
+      - Wire cascading select in modal (junkshop → filters materials)
+      - Wire modal submission → recordSale
+      - Settings page: Add Junkshop modal (Claude Code scaffold + wiring)
+      - Junkshop detail modal
 - [ ] Block C+ — remaining modules (Reward Inventory, Program Funds,
       Leaderboard, Announcements, Reports, Settings) sized into blocks
       as they come up — not pre-assigned dates this far out
