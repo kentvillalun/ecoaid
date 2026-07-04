@@ -10,53 +10,23 @@ import { useFetch } from "@/hooks/useFetch";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 
-const MOCK_JUNKSHOP = {
-  name: "Reyes Junkshop",
-  description:
-    "Family-owned junkshop buying plastics, metals, and paper materials from residents and barangay collections.",
-  location: "Purok 3, Beddeng Laud, Vigan City",
-  isAvailable: true,
-  createdAt: "2025-11-14T09:30:00.000Z",
-  priceItems: [
-    {
-      id: "pi1",
-      material: { name: "PET Bottles", category: { name: "Plastics" } },
-      price: 12,
-      unit: "KG",
-    },
-    {
-      id: "pi2",
-      material: { name: "Iron Scraps", category: { name: "Metals" } },
-      price: 25,
-      unit: "KG",
-    },
-    {
-      id: "pi3",
-      material: { name: "Newspaper", category: { name: "Papers" } },
-      price: 6,
-      unit: "KG",
-    },
-    {
-      id: "pi4",
-      material: { name: "Glass Bottles", category: { name: "Bottles" } },
-      price: 8,
-      unit: "PIECE",
-    },
-  ],
-};
 
 const formatUnit = (unit) =>
   unit === "PIECE" ? "pcs" : (unit ?? "").toLowerCase();
 
-export function JunkshopDetailModal({ isOpen, onClose, junkshop = "" }) {
-  
+export function JunkshopDetailModal({
+  isOpen,
+  onClose,
+  junkshop = "",
+  setIsJunkshopModalOpen,
+  setIsModalOpen,
+  setPreselectedJunkshop,
+}) {
   const { data, isLoading } = useFetch({
     url: `/api/junkshop-sales/junkshop/${junkshop}`,
   });
-  if (!isOpen) return null;
 
-  
-  
+  if (!isOpen) return null;
 
   return createPortal(
     <Modal
@@ -67,8 +37,8 @@ export function JunkshopDetailModal({ isOpen, onClose, junkshop = "" }) {
         <div className="flex flex-row gap-1">
           {isLoading ? (
             <>
-              <Skeleton width={165}/>
-              <Skeleton width={95}/>
+              <Skeleton width={165} />
+              <Skeleton width={95} />
             </>
           ) : (
             <>
@@ -89,9 +59,13 @@ export function JunkshopDetailModal({ isOpen, onClose, junkshop = "" }) {
       }
       subtitle="Junkshop details"
       cancelLabel="Close"
-      confirmLabel="Done"
+      confirmLabel="Record Sale"
       confirmClassName="gradient-button"
-      onConfirm={onClose}
+      onConfirm={() => {
+        setIsJunkshopModalOpen(false);
+        setIsModalOpen(true);
+        setPreselectedJunkshop(junkshop);
+      }}
     >
       <div className="p-6 flex flex-col gap-4">
         {/* Status */}

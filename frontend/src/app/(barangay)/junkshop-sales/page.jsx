@@ -98,9 +98,10 @@ const HISTORY_HEADERS = [
 export default function JunkshopSalesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isJunkshopModalOpen, setIsJunkshopModalOpen] = useState(false);
-  const [selectedJunkshop, setSelectedJunkshop] = useState("")
+  const [selectedJunkshop, setSelectedJunkshop] = useState("");
 
   const [salesRefetchCount, setSalesRefetchCount] = useState(0);
+  const [preselectedJunkshop, setPreselectedJunkshop] = useState("");
   const {
     data: salesData,
     isLoading: isSalesLoading,
@@ -226,9 +227,9 @@ export default function JunkshopSalesPage() {
             <p className="md:text-2xl font-bold text-lg select-none">
               {formatCurrency(highestPrices)}
             </p>
-            <div className="flex flex-row items-center w-auto bg-gray-50 px-3 py-1 rounded-xl text-xs gap-1">
-              <QuestionMarkCircleIcon className="w-3 stroke-gray-400" />
-              <p className="text-gray-400 font-medium">Placeholder</p>
+            <div className="flex flex-row items-center w-auto bg-primary/10 px-3 py-1 rounded-xl text-xs gap-1">
+              <QuestionMarkCircleIcon className="w-3 stroke-cta-color" />
+              <p className="text-cta-color font-medium">Placeholder</p>
             </div>
           </Card>
         </section>
@@ -263,13 +264,15 @@ export default function JunkshopSalesPage() {
                         <button
                           className="inline-flex items-center gap-1 hover:cursor-pointer"
                           onClick={() => {
-                            setIsJunkshopModalOpen(true)
-                            setSelectedJunkshop(shop.id)
+                            setIsJunkshopModalOpen(true);
+                            setSelectedJunkshop(shop.id);
                           }}
                         >
                           {shop.name}
                           <IconContainer
-                            icon={<ArrowUpRightIcon className="w-2.5 stroke-[#6b7280]" />}
+                            icon={
+                              <ArrowUpRightIcon className="w-2.5 stroke-[#6b7280]" />
+                            }
                             className="rounded-full! p-1!"
                             containerColor="#f3f4f640"
                           />
@@ -324,8 +327,9 @@ export default function JunkshopSalesPage() {
                         );
                         return p?.price;
                       });
-                      const bestIdx = getBestPriceIndex(prices);
-                      const bestPrice = Math.max(...prices);
+                      const normalizedPrices = prices.map(p => p ?? 0)
+                      const bestIdx = getBestPriceIndex(normalizedPrices);
+                      const bestPrice = Math.max(...normalizedPrices);
                       return (
                         <tr
                           key={row.id}
@@ -348,9 +352,7 @@ export default function JunkshopSalesPage() {
                                 key={shop.id ?? i}
                                 className="p-2 text-center"
                               >
-                                <button
-                                  type="button"
-                                  onClick={() => {}}
+                                <div
                                   className={`inline-flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all duration-150 hover:cursor-pointer w-full
                                 ${i === bestIdx ? "hover:bg-green-100" : "hover:bg-gray-100"}`}
                                 >
@@ -359,7 +361,7 @@ export default function JunkshopSalesPage() {
                                   >
                                     {priceItem?.price
                                       ? `₱${priceItem.price}`
-                                      : "Not available"}
+                                      : "N/a"}
                                   </span>
                                   {i === bestIdx && (
                                     <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-green-100 text-green-700">
@@ -367,7 +369,7 @@ export default function JunkshopSalesPage() {
                                       Best price
                                     </span>
                                   )}
-                                </button>
+                                </div>
                               </td>
                             );
                           })}
@@ -439,8 +441,8 @@ export default function JunkshopSalesPage() {
                   };
                 });
 
-                const bestIdx = getBestPriceIndex(prices.map((p) => p.price));
-                const bestPrice = Math.max(...prices.map((p) => p.price));
+                const bestIdx = getBestPriceIndex(prices.map((p) => p.price ?? 0));
+
                 return (
                   <Card
                     key={row.id}
@@ -455,36 +457,37 @@ export default function JunkshopSalesPage() {
                     </div>
                     <div className="flex flex-col gap-2 w-full">
                       {pricesData?.junkshops?.map((shop, i) => (
-                        <button
+                        <div
                           key={shop.id}
                           type="button"
-                          onClick={() => {}}
                           className={`flex flex-row items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-150 hover:cursor-pointer w-full text-left
                           ${i === bestIdx ? "bg-green-50" : ""}`}
                         >
                           <button
                             className={`inline-flex items-center gap-1 text-sm font-medium ${i === bestIdx ? "text-green-800" : "text-[#6b7280]"}`}
                             onClick={(e) => {
-                              e.stopPropagation()
-                              setSelectedJunkshop(shop.id)
-                              setIsJunkshopModalOpen(true)
+                              e.stopPropagation();
+                              setSelectedJunkshop(shop.id);
+                              setIsJunkshopModalOpen(true);
                             }}
                           >
                             {shop.name}
                             <IconContainer
-                              icon={<ArrowUpRightIcon className="w-2.5 stroke-[#6b7280]" />}
+                              icon={
+                                <ArrowUpRightIcon className="w-2.5 stroke-[#6b7280]" />
+                              }
                               className="rounded-full! p-1!"
                               containerColor="#f3f4f640"
                             />
                           </button>
                           <div className="flex items-center gap-2">
                             <span
-                              className={`font-bold tabular-nums lowercase ${i === bestIdx ? "text-cta-color" : "text-text-primary"}`}
+                              className={`font-bold tabular-nums  ${i === bestIdx ? "text-cta-color" : "text-text-primary"}`}
                             >
                               {prices[i]?.price ? (
                                 <div>
                                   ₱{prices[i].price}
-                                  <span className="font-normal text-xs">
+                                  <span className="font-normal text-xs lowercase">
                                     /
                                     {prices[i].unit === "PIECE"
                                       ? "pcs"
@@ -492,8 +495,8 @@ export default function JunkshopSalesPage() {
                                   </span>
                                 </div>
                               ) : (
-                                <span className="text-xs text-gray-400">
-                                  Not available
+                                <span className="text-xs text-text-primary">
+                                  N/a
                                 </span>
                               )}
                             </span>
@@ -504,7 +507,7 @@ export default function JunkshopSalesPage() {
                               </span>
                             )}
                           </div>
-                        </button>
+                        </div>
                       ))}
                     </div>
                   </Card>
@@ -688,13 +691,24 @@ export default function JunkshopSalesPage() {
         {/* Modal */}
         <RecordSaleModal
           isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
+          setIsModalOpen={setIsModalOpen}
+          preselectedJunkshopId={preselectedJunkshop}
+          junkshops={pricesData?.junkshops}
+          setPreselectedJunkshop={setPreselectedJunkshop}
+          setSalesRefetchCount={setSalesRefetchCount}
         />
 
-        <JunkshopDetailModal isOpen={isJunkshopModalOpen} onClose={() => {
-          setIsJunkshopModalOpen(false)
-          setSelectedJunkshop("")
-        }} junkshop={selectedJunkshop} />
+        <JunkshopDetailModal
+          isOpen={isJunkshopModalOpen}
+          onClose={() => {
+            setIsJunkshopModalOpen(false);
+            setSelectedJunkshop("");
+          }}
+          junkshop={selectedJunkshop}
+          setIsJunkshopModalOpen={setIsJunkshopModalOpen}
+          setIsModalOpen={setIsModalOpen}
+          setPreselectedJunkshop={setPreselectedJunkshop}
+        />
       </PageContent>
     </Page>
   );

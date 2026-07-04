@@ -98,7 +98,7 @@ export const Sidebar = () => {
     {
       icon: SettingsIcon,
       label: "Settings",
-      href: "",
+      href: "/settings",
     },
   ];
 

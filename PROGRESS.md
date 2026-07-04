@@ -349,30 +349,19 @@ I'm building.
       (one OUT row per JunkshopSaleItem, source JUNKSHOP_SALES, via
       `convertToKg`), `junkshopSalesId` upgraded to a proper FK relation,
       both writes wrapped in `prisma.$transaction` for atomicity
-- [~] Block B (in progress, UI scaffold done Jun 30, wiring started Jul 1) —
-      Junkshop Sales frontend wiring mostly complete:
-      ✅ Sales History table — real data, loading/error/empty states done
-      ✅ Price Comparison table — real data (uniqueMaterials via Map,
-         prices via flatMap+find), desktop + mobile, loading/error/empty
-         states via Claude Code
-      ✅ Summary cards — Junkshops Tracked, Best Overall, Highest Rate
-         all wired to real data
-      ✅ Junkshop detail modal — `JunkshopDetailModal` component at
-         `components/junkshop-sales/modals/JunkshopDetailModal.jsx`;
-         triggered by ArrowUpRightIcon button beside junkshop name
-         (desktop: column header, mobile: per-row with stopPropagation);
-         `selectedJunkshop` state in page passes junkshopId as prop;
-         `useFetch` inside modal fires on mount with
-         `/api/junkshop-sales/junkshop/:id`; read-only form layout;
-         `getJunkshopDetails` controller + route done and tested
-      Remaining:
-      - Wire price cell onClick → pre-fill modal with junkshopId
-      - Wire cascading select in modal (junkshop → filters materials)
-      - Wire modal submission → recordSale
-      - Settings page: Add Junkshop modal (Claude Code scaffold + wiring)
-      - Fix hooks violation in JunkshopDetailModal (useFetch must move
-        above the `if (!isOpen) return null` early return)
-      - Remove dead code: MOCK_JUNKSHOP constant and unused `shop` variable
+- [x] Block B (completed Jul 5) — Junkshop Sales + Settings fully wired:
+      ✅ Sales History table — real data, loading/error/empty states
+      ✅ Price Comparison table — real data, desktop + mobile, NaN fix
+         via prices.map(p => p ?? 0) to preserve index alignment
+      ✅ Summary cards — all wired to real data
+      ✅ JunkshopDetailModal — wired to GET /junkshop-sales/junkshop/:id;
+         "Record Sale" button pre-fills RecordSaleModal
+      ✅ RecordSaleModal — cascading select, validation, useMutation wired
+         to POST /api/junkshop-sales, resets on close, refetches sales
+      ✅ Settings page — Junkshops section with real data from
+         GET /junkshop-sales/junkshops; AddJunkshopModal fully wired
+         with materials fetch, inline validation (nameError/priceItemsError),
+         useMutation to POST /junkshop-sales/junkshop
 - [ ] Block C+ — remaining modules (Reward Inventory, Program Funds,
       Leaderboard, Announcements, Reports, Settings) sized into blocks
       as they come up — not pre-assigned dates this far out

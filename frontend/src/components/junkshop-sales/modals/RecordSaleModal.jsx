@@ -4,48 +4,96 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import { Modal } from "@/components/ui/Modal";
 import { ShoppingBagIcon, XMarkIcon } from "@heroicons/react/24/outline";
-
-const JUNKSHOPS = [
-  { id: "js1", name: "Reyes Junkshop" },
-  { id: "js2", name: "Dela Cruz Trading" },
-  { id: "js3", name: "Vigan Recyclers" },
-];
-
-const MOCK_MATERIALS = [
-  { id: "m1", name: "PET Bottles" },
-  { id: "m2", name: "Iron Scraps" },
-  { id: "m3", name: "Newspaper" },
-  { id: "m4", name: "Glass Bottles" },
-  { id: "m5", name: "Cardboard" },
-  { id: "m6", name: "Aluminum Cans" },
-];
+import { toast } from "sonner";
+import { useMutation } from "@/hooks/useMutation";
 
 export function RecordSaleModal({
   isOpen,
-  onClose,
-  preselectedJunkshopId = undefined,
+  setIsModalOpen,
+  preselectedJunkshopId = "",
+  junkshops,
+  setPreselectedJunkshop,
+  setSalesRefetchCount,
 }) {
   const [items, setItems] = useState([
-    { materialId: "", quantity: "", unit: "kg" },
+    { materialId: "", quantity: "", unit: "KG" },
   ]);
+  const { makeRequest } = useMutation();
 
   const addItem = () =>
     setItems((prev) => [...prev, { materialId: "", quantity: "", unit: "kg" }]);
   const removeItem = (index) =>
     setItems((prev) => prev.filter((_, i) => i !== index));
 
+  const updateRow = (index, field, value) => {
+    const updated = [...items];
+    updated[index][field] = value;
+    setItems(updated);
+  };
+
   if (!isOpen) return null;
+
+  const resetModal = () => {
+    setPreselectedJunkshop("");
+    setItems([{ materialId: "", quantity: "", unit: "KG" }]);
+  };
+
+  const selectedJunkshop = junkshops?.find(
+    (shop) => shop.id === preselectedJunkshopId,
+  );
+
+  const handleSubmit = async () => {
+    if (!preselectedJunkshopId || preselectedJunkshopId === "") {
+      toast.error("Recording failed. Junkshop is required");
+      return
+    }
+
+    if (
+      items.length === 0 ||
+      items.some((row) => !row.materialId || !row.quantity || !row.unit)
+    ) {
+      toast.error("Recording failed. Please add at least one material item");
+      return
+    }
+
+    toast.loading("Recording sale");
+
+    const success = await makeRequest({
+      url: `/api/junkshop-sales`,
+      body: {
+        junkshopId: preselectedJunkshopId,
+        items: items.map((item) => ({
+          ...item,
+          quantity: parseFloat(item.quantity),
+        })),
+      },
+    });
+
+    if (success) {
+      toast.dismiss();
+      toast.success("Sale recorded");
+      setSalesRefetchCount((prev) => prev + 1);
+      resetModal();
+      setIsModalOpen(false)
+    } else {
+      toast.dismiss()
+      toast.error("Recording sale failed")
+    }
+  };
 
   return createPortal(
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={() => {
+        setIsModalOpen(false);
+        resetModal();
+      }}
       icon={<ShoppingBagIcon className="w-6 stroke-new-primary" />}
       title="Record Sale"
       subtitle="Log a junkshop sale transaction"
       confirmLabel="Record Sale"
       confirmClassName="gradient-button"
-      onConfirm={() => {}}
+      onConfirm={() => handleSubmit()}
     >
       <div className="p-6 flex flex-col gap-4">
         {/* Junkshop select */}
@@ -55,11 +103,12 @@ export function RecordSaleModal({
             <select
               className="w-full outline-none"
               defaultValue={preselectedJunkshopId ?? ""}
+              onChange={(e) => setPreselectedJunkshop(e.target.value)}
             >
               <option value="" disabled hidden>
                 Select junkshop
               </option>
-              {JUNKSHOPS.map((shop) => (
+              {junkshops.map((shop) => (
                 <option key={shop.id} value={shop.id}>
                   {shop.name}
                 </option>
@@ -90,13 +139,22 @@ export function RecordSaleModal({
 
                 {/* Material select */}
                 <div className="w-full outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 mb-2 flex items-center">
-                  <select className="w-full outline-none" defaultValue="">
+                  <select
+                    className="w-full outline-none"
+                    defaultValue=""
+                    onChange={(e) => {
+                      updateRow(index, "materialId", e.target.value);
+                    }}
+                    disabled={preselectedJunkshopId === ""}
+                  >
                     <option value="" disabled hidden>
-                      Select material
+                      {preselectedJunkshopId === ""
+                        ? "Please select a junkshop first"
+                        : "Select material"}
                     </option>
-                    {MOCK_MATERIALS.map((m) => (
-                      <option key={m.id} value={m.id}>
-                        {m.name}
+                    {selectedJunkshop?.priceItems?.map((item) => (
+                      <option value={item.material.id} key={item.material.id}>
+                        {item.material.name}
                       </option>
                     ))}
                   </select>
@@ -110,12 +168,21 @@ export function RecordSaleModal({
                       className="w-full outline-none flex-1"
                       min={0}
                       placeholder="e.g. 5"
+                      onChange={(e) => {
+                        updateRow(index, "quantity", e.target.value);
+                      }}
                     />
                   </div>
                   <div className="w-24 outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 flex items-center">
-                    <select className="w-full outline-none" defaultValue="kg">
-                      <option value="kg">kg</option>
-                      <option value="pcs">pcs</option>
+                    <select
+                      className="w-full outline-none"
+                      defaultValue="KG"
+                      onChange={(e) => {
+                        updateRow(index, "unit", e.target.value);
+                      }}
+                    >
+                      <option value="KG">kg</option>
+                      <option value="PIECE">pcs</option>
                     </select>
                   </div>
                 </div>

@@ -220,10 +220,9 @@ const addJunkshop = async (req, res) => {
 
 const getJunkshopDetails = async (req, res) => {
   try {
-    const { junkshopId } = req.params
-    const { barangayId } = req.user
+    const { junkshopId } = req.params;
+    const { barangayId } = req.user;
 
-    
     const junkshop = await prisma.junkshop.findUnique({
       where: { id: junkshopId, barangayId },
       select: {
@@ -240,26 +239,55 @@ const getJunkshopDetails = async (req, res) => {
                 name: true,
                 category: {
                   select: {
-                    name: true
-                  }
-                }
-              }
+                    name: true,
+                  },
+                },
+              },
             },
             unit: true,
-            price: true
-          }
-        }
-      }
-    })
+            price: true,
+          },
+        },
+      },
+    });
 
     if (!junkshop) {
-      return res.status(404).json({ error: "Junkshop do not exist"})
+      return res.status(404).json({ error: "Junkshop do not exist" });
     }
 
-    return res.status(200).json({ message: "Fetching junkshop details successful", junkshop})
+    return res
+      .status(200)
+      .json({ message: "Fetching junkshop details successful", junkshop });
   } catch (error) {
-    return res.status(500).json({ error: error.message })
+    return res.status(500).json({ error: error.message });
   }
-}
+};
 
-export { recordSale, getJunkshopSales, getJunkshopWithPrices, addJunkshop, getJunkshopDetails };
+const getJunkshops = async (req, res) => {
+  try {
+    const { barangayId } = req.user;
+
+    const junkshops = await prisma.junkshop.findMany({
+      where: { barangayId },
+      select: {
+        id: true,
+        name: true,
+        location: true,
+        isAvailable: true,
+      },
+    });
+
+    return res.status(200).json({ message: "Fetching junkshops successful", junkshops });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+export {
+  recordSale,
+  getJunkshopSales,
+  getJunkshopWithPrices,
+  addJunkshop,
+  getJunkshopDetails,
+  getJunkshops
+};
