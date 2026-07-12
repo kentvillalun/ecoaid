@@ -6,7 +6,7 @@ import { Empty } from "@/components/ui/Empty";
 
 
 
-export default function AnnouncementsPage() {
+export default function UpdatesPage() {
 
 
     return (

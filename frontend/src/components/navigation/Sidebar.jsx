@@ -83,7 +83,7 @@ export const Sidebar = () => {
     {
       icon: AnnoucementsIcon,
       label: "Announcements",
-      href: "",
+      href: "/announcements",
     },
     {
       icon: LeaderboardIcon,

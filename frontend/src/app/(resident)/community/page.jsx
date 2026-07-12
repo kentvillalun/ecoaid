@@ -95,7 +95,7 @@ export default function CommunityPage() {
               <p className="font-semibold">Annoucements</p>
               <Link
                 className="flex flex-row text-sm items-center"
-                href={"/announcements"}
+                href={"/updates"}
               >
                 <p className="font-medium text-cta-color">View more</p>{" "}
                 <ChevronRightIcon className="w-3" />{" "}

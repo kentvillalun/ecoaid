@@ -70,6 +70,7 @@ model Barangay {
   manualIntakeTransaction ManualIntakeTransaction[]
   stockTransactionLog StockTransactionLog[]
   junkshop Junkshop[]
+  announcement Announcement[]
 }
 
 enum RedemptionMode {
@@ -137,6 +138,7 @@ model User {
   collectedIntakeTransaction ManualIntakeTransaction[] @relation("CollectorIntakes")
   stockTransactionLog StockTransactionLog[]
   junkshopSales JunkshopSale[]
+  announcement Announcement[]
 
   @@index([barangayId])
   @@index([sitioId])
@@ -445,6 +447,33 @@ model JunkshopSaleItem {
   quantity Float
   cost Float
   unit Unit @default(KG)
-
-
 }
+
+enum AnnouncementCategory {
+  EVENT
+  REMINDER
+  GENERAL
+  NOTICE
+  ALERT
+}
+
+model Announcement {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
+
+  barangayId String @db.Uuid()
+  barangay Barangay @relation(fields: [barangayId], references: [id])
+
+  userId String? @db.Uuid()
+  user User? @relation(fields: [userId], references: [id])
+
+  title String
+  content String
+
+  category AnnouncementCategory @default(GENERAL)
+
+  performedBy String
+  performedByRole String
+
+  createdAt DateTime @default(now())
+}
+

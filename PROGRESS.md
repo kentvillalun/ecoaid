@@ -349,22 +349,37 @@ I'm building.
       (one OUT row per JunkshopSaleItem, source JUNKSHOP_SALES, via
       `convertToKg`), `junkshopSalesId` upgraded to a proper FK relation,
       both writes wrapped in `prisma.$transaction` for atomicity
-- [x] Block B (completed Jul 5) — Junkshop Sales + Settings fully wired:
-      ✅ Sales History table — real data, loading/error/empty states
-      ✅ Price Comparison table — real data, desktop + mobile, NaN fix
-         via prices.map(p => p ?? 0) to preserve index alignment
-      ✅ Summary cards — all wired to real data
-      ✅ JunkshopDetailModal — wired to GET /junkshop-sales/junkshop/:id;
-         "Record Sale" button pre-fills RecordSaleModal
-      ✅ RecordSaleModal — cascading select, validation, useMutation wired
-         to POST /api/junkshop-sales, resets on close, refetches sales
-      ✅ Settings page — Junkshops section with real data from
-         GET /junkshop-sales/junkshops; AddJunkshopModal fully wired
-         with materials fetch, inline validation (nameError/priceItemsError),
-         useMutation to POST /junkshop-sales/junkshop
-- [ ] Block C+ — remaining modules (Reward Inventory, Program Funds,
-      Leaderboard, Announcements, Reports, Settings) sized into blocks
-      as they come up — not pre-assigned dates this far out
+- [~] Block B (in progress, UI scaffold done Jun 30, wiring started Jul 1) —
+      Junkshop Sales frontend wiring mostly complete:
+      ✅ Sales History table — real data, loading/error/empty states done
+      ✅ Price Comparison table — real data (uniqueMaterials via Map,
+         prices via flatMap+find), desktop + mobile, loading/error/empty
+         states via Claude Code
+      ✅ Summary cards — Junkshops Tracked, Best Overall, Highest Rate
+         all wired to real data
+      Remaining:
+      - Wire price cell onClick → pre-fill modal with junkshopId
+      - Wire cascading select in modal (junkshop → filters materials)
+      - Wire modal submission → recordSale
+      - Settings page: Add Junkshop modal (Claude Code scaffold + wiring)
+      - Junkshop detail modal
+- [x] Block C — Announcements module (completed Jul 13):
+      Schema: Announcement model with AnnouncementCategory enum
+      (EVENT/REMINDER/GENERAL/NOTICE/ALERT), performedBy + performedByRole
+      snapshots, barangayId + userId FKs, orderBy createdAt desc
+      Backend: createAnnouncement (201), getAnnouncements, deleteAnnouncement
+      (findUnique → 404 check → delete), getResidentAnnouncements;
+      mounted at /announcements
+      Frontend: barangay announcements page with category filter tabs,
+      desktop table + mobile cards, CreateAnnouncementModal,
+      AnnouncementDetailModal with delete action; all wired end-to-end
+- [ ] Block D — Resident Announcements wiring:
+      - getLatestAnnouncements controller (top 2, for community page preview)
+      - Wire community page announcements section with real data
+      - Wire resident /announcements page with real data + localStorage write
+      - Resident header red dot indicator (read localStorage, compare dates)
+- [ ] Block E+ — remaining modules (Reward Inventory, Program Funds,
+      Leaderboard, Reports) sized into blocks as they come up
 
 ## During Sem (Jul 20 onwards)
 - [ ] Teachable Machine (image recognition on pickup request)

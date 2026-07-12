@@ -10,7 +10,7 @@ export default function ResidentLayout({ children }) {
 
   const paths = [
     "/capture",
-    "/announcements",
+    "/updates",
     "/profile/personal-information",
     "/profile/notifications",
     "/profile/settings",

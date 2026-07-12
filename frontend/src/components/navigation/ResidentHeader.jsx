@@ -2,7 +2,7 @@
 
 import { ArrowLeftIcon, BellIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
 import { Inter } from "next/font/google";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
 const inter = Inter({
@@ -20,16 +20,35 @@ export const ResidentHeader = ({
 }) => {
   
   const [actions, setActions] = useState(action);
-  
+  const [hasNewAnnouncements, setHasNewAnnouncements] = useState(false);
 
+  // Check localStorage on mount to see if there are unread announcements
+  useEffect(() => {
+    const lastViewed = localStorage.getItem("lastViewedAnnouncements");
+    const latestAnnouncementDate = localStorage.getItem("latestAnnouncementDate");
+
+    // First time visiting - never checked announcements before
+    if (!lastViewed) {
+      setHasNewAnnouncements(true);
+      return;
+    }
+
+    // A new announcement was posted after the last time the user viewed the page
+    if (latestAnnouncementDate && new Date(latestAnnouncementDate) > new Date(lastViewed)) {
+      setHasNewAnnouncements(true);
+    }
+  }, []);
 
   const actionItem = () => {
     switch (actions) {
       case "notification":
         return (
-         <Link href={"/announcements"} className="bg-white rounded-full p-2" style={{ border: "0.5px solid #e5e7eb"}}>
+         <Link href={"/updates"} className="relative bg-white rounded-full p-2" style={{ border: "0.5px solid #e5e7eb"}}>
             <BellIcon className="w-5 h-5" />
-          </Link> 
+            {hasNewAnnouncements && (
+              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border border-white" />
+            )}
+          </Link>
         );
       case 'edit':
         return <PencilSquareIcon className="w-5 h-5 text-[#727272]" onClick={() => setIsEditing((prev) => !prev)}/>
