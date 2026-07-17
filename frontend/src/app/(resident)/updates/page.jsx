@@ -52,17 +52,7 @@ export default function AnnouncementsPage() {
 
   const announcements = data?.announcements;
 
-  // Mark announcements as "viewed" once they've loaded successfully.
-  // This is what lets the red dot in ResidentHeader know there's nothing new.
-  useEffect(() => {
-    if (isLoading || isError || !announcements) return;
-
-    localStorage.setItem("lastViewedAnnouncements", new Date().toISOString());
-
-    if (announcements.length > 0) {
-      localStorage.setItem("latestAnnouncementDate", announcements[0].createdAt);
-    }
-  }, [isLoading, isError, announcements]);
+  
 
   return (
     <Page className="bg-new-bg!">

@@ -366,18 +366,16 @@ I'm building.
 - [x] Block C — Announcements module (completed Jul 13):
       Schema: Announcement model with AnnouncementCategory enum
       (EVENT/REMINDER/GENERAL/NOTICE/ALERT), performedBy + performedByRole
-      snapshots, barangayId + userId FKs, orderBy createdAt desc
-      Backend: createAnnouncement (201), getAnnouncements, deleteAnnouncement
-      (findUnique → 404 check → delete), getResidentAnnouncements;
-      mounted at /announcements
-      Frontend: barangay announcements page with category filter tabs,
-      desktop table + mobile cards, CreateAnnouncementModal,
-      AnnouncementDetailModal with delete action; all wired end-to-end
-- [ ] Block D — Resident Announcements wiring:
-      - getLatestAnnouncements controller (top 2, for community page preview)
-      - Wire community page announcements section with real data
-      - Wire resident /announcements page with real data + localStorage write
-      - Resident header red dot indicator (read localStorage, compare dates)
+      snapshots; controllers: createAnnouncement, getAnnouncements,
+      deleteAnnouncement, getResidentAnnouncements, getLatestAnnouncements;
+      barangay admin page with category filter tabs, CreateAnnouncementModal,
+      AnnouncementDetailModal with delete; all wired end-to-end
+- [x] Block D (completed Jul 13) — Resident Announcements wiring:
+      ✅ getLatestAnnouncements controller (top 2, community page preview)
+      ✅ Community page announcements section wired, read more/less toggle
+      ✅ Resident /updates page wired + localStorage write on load
+      ✅ Accepted Materials category legend using Set deduplication
+      ✅ Red dot indicator deferred — redundant given community page preview
 - [ ] Block E+ — remaining modules (Reward Inventory, Program Funds,
       Leaderboard, Reports) sized into blocks as they come up
 

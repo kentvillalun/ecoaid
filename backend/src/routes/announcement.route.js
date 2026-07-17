@@ -8,6 +8,7 @@ import {
   createAnnouncement,
   deleteAnnouncement,
   getAnnouncements,
+  getLatestAnnouncements,
   getResidentAnnouncements,
 } from "../controllers/announcement.controller.js";
 
@@ -32,5 +33,6 @@ router.delete(
   deleteAnnouncement,
 );
 router.get("/residents", authenticateResident, getResidentAnnouncements);
+router.get("/residents/latest", authenticateResident, getLatestAnnouncements)
 
 export default router;
