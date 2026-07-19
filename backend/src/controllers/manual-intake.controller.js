@@ -22,38 +22,51 @@ const recordIntake = async (req, res) => {
       return res.status(400).json({ error: "Required fields are missing." });
     }
 
-    const transaction = await prisma.manualIntakeTransaction.create({
-      data: {
-        userId,
-        householdName,
-        collectorId: id,
-        barangayId,
-        collectorName: `${collectorName.firstName} ${collectorName.lastName}`,
-        manualIntakeItems: {
-          createMany: {
-            data: items.map((item) => ({
-              materialId: item.materialId,
-              quantity: item.quantity,
-              unit: item.unit,
-            })),
-            skipDuplicates: true,
+    await prisma.$transaction(async (tx) => {
+      const transaction = await tx.manualIntakeTransaction.create({
+        data: {
+          userId,
+          householdName,
+          collectorId: id,
+          barangayId,
+          collectorName: `${collectorName.firstName} ${collectorName.lastName}`,
+          manualIntakeItems: {
+            createMany: {
+              data: items.map((item) => ({
+                materialId: item.materialId,
+                quantity: item.quantity,
+                unit: item.unit,
+              })),
+              skipDuplicates: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    const transactionLog = await prisma.stockTransactionLog.createMany({
-      data: items.map((item) => ({
-        barangayId,
-        manualIntakeTransactionId: transaction.id,
-        source: "MANUAL_INTAKE",
-        transactionType: "IN",
-        materialId: item.materialId,
-        quantity: convertToKg(item.quantity, item.unit),
-        unit: item.unit === "PIECE" ? "PIECE" : "KG"
-      })),
-      skipDuplicates: true,
-    })
+      if (userId) {
+        await tx.user.update({
+          where: {
+            id: userId
+          },
+          data: {
+            isVerified: true
+          }
+        })
+      }
+
+      const transactionLog = await tx.stockTransactionLog.createMany({
+        data: items.map((item) => ({
+          barangayId,
+          manualIntakeTransactionId: transaction.id,
+          source: "MANUAL_INTAKE",
+          transactionType: "IN",
+          materialId: item.materialId,
+          quantity: convertToKg(item.quantity, item.unit),
+          unit: item.unit === "PIECE" ? "PIECE" : "KG",
+        })),
+        skipDuplicates: true,
+      });
+    });
 
     return res
       .status(201)

@@ -376,7 +376,21 @@ I'm building.
       ✅ Resident /updates page wired + localStorage write on load
       ✅ Accepted Materials category legend using Set deduplication
       ✅ Red dot indicator deferred — redundant given community page preview
-- [ ] Block E+ — remaining modules (Reward Inventory, Program Funds,
+- [x] Block E (completed Jul 19) — Residents module + sidebar refactor:
+      ✅ getResidents controller — filtered by barangayId + role RESIDENT,
+         ordered by createdAt desc, select: id, firstName, lastName,
+         phoneNumber, address, purok, isVerified, createdAt
+      ✅ recordIntake upgraded — wrapped in prisma.$transaction, now sets
+         isVerified: true on resident when userId present (auto-verification
+         on first manual intake, matching COLLECTED pickup request behavior)
+      ✅ Residents page scaffolded + wired — summary cards (Total, Verified,
+         Unverified), search, desktop table + mobile cards, address+purok
+         combined as Location column
+      ✅ Sidebar refactored — collapsible Management and Communication
+         groups with chevron rotation animation, faint left border on
+         grouped items, logout pinned to bottom via mt-auto, both groups
+         default closed
+- [ ] Block F+ — remaining modules (Reward Inventory, Program Funds,
       Leaderboard, Reports) sized into blocks as they come up
 
 ## During Sem (Jul 20 onwards)

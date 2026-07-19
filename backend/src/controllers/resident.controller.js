@@ -110,36 +110,11 @@ const searchResident = async (req, res) => {
     const barangayId = req.user.barangayId;
     const { name } = req.query;
 
-    // const users = await prisma.user.findMany({
-    //   where: {
-    //     barangayId,
-    //     role: "RESIDENT",
-    //     OR: [
-    //       {
-    //         firstName: {
-    //           contains: name,
-    //           mode: "insensitive",
-    //         },
-    //       },
-    //       {
-    //         lastName: {
-    //           contains: name,
-    //           mode: "insensitive",
-    //         },
-    //       },
-    //     ],
-    //   },
-    //   select: {
-    //     id: true,
-    //     firstName: true,
-    //     lastName: true,
-    //   },
-    // });
     const users = await prisma.$queryRaw`
       SELECT id, "firstName", "lastName"
       FROM "User"
-      WHERE "barangayId" = ${barangayId} AND "role" = 'RESIDENT' AND CONCAT("firstName", ' ', "lastName") ILIKE ${'%' + name + '%'}
-    `
+      WHERE "barangayId" = ${barangayId} AND "role" = 'RESIDENT' AND CONCAT("firstName", ' ', "lastName") ILIKE ${"%" + name + "%"}
+    `;
 
     return res.status(200).json({
       message: "Fetch success",
@@ -150,4 +125,39 @@ const searchResident = async (req, res) => {
   }
 };
 
-export { getResidentProfile, getBarangayInfo, updateResidentProfile, searchResident };
+const getResidents = async (req, res) => {
+  try {
+    const { barangayId, role } = req.user;
+
+    const residents = await prisma.user.findMany({
+      where: { barangayId, role: "RESIDENT" },
+      orderBy: {
+        createdAt: "desc",
+      },
+      select: {
+        id: true,
+        phoneNumber: true,
+        firstName: true,
+        lastName: true,
+        address: true,
+        purok: true,
+        isVerified: true,
+        createdAt: true,
+      },
+    });
+
+    return res
+      .status(200)
+      .json({ message: "Fetching residents successful", residents });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+export {
+  getResidentProfile,
+  getBarangayInfo,
+  updateResidentProfile,
+  searchResident,
+  getResidents
+};
