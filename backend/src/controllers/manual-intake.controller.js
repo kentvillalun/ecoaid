@@ -57,6 +57,7 @@ const recordIntake = async (req, res) => {
       const transactionLog = await tx.stockTransactionLog.createMany({
         data: items.map((item) => ({
           barangayId,
+          userId,
           manualIntakeTransactionId: transaction.id,
           source: "MANUAL_INTAKE",
           transactionType: "IN",

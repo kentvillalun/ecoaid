@@ -16,6 +16,7 @@ import manualIntakeRoute from "./routes/manual-intake.route.js"
 import materialStockRoute from "./routes/material-stock.route.js"
 import junkshopSalesRoute from "./routes/junkshop-sales.route.js"
 import announcementRoute from "./routes/announcement.route.js"
+import leaderboardRoute from "./routes/leaderboard.route.js"
 
 config();
 connectDB();
@@ -48,6 +49,7 @@ app.use("/manual-intake", manualIntakeRoute)
 app.use("/material-stock", materialStockRoute)
 app.use("/junkshop-sales", junkshopSalesRoute)
 app.use("/announcements", announcementRoute)
+app.use("/leaderboard", leaderboardRoute)
 
 
 

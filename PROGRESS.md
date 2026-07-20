@@ -363,26 +363,15 @@ I'm building.
       - Wire modal submission → recordSale
       - Settings page: Add Junkshop modal (Claude Code scaffold + wiring)
       - Junkshop detail modal
-- [x] Block C — Announcements module (completed Jul 13):
-      Schema: Announcement model with AnnouncementCategory enum
-      (EVENT/REMINDER/GENERAL/NOTICE/ALERT), performedBy + performedByRole
-      snapshots; controllers: createAnnouncement, getAnnouncements,
-      deleteAnnouncement, getResidentAnnouncements, getLatestAnnouncements;
-      barangay admin page with category filter tabs, CreateAnnouncementModal,
-      AnnouncementDetailModal with delete; all wired end-to-end
-- [x] Block D (completed Jul 13) — Resident Announcements wiring:
-      ✅ getLatestAnnouncements controller (top 2, community page preview)
-      ✅ Community page announcements section wired, read more/less toggle
-      ✅ Resident /updates page wired + localStorage write on load
-      ✅ Accepted Materials category legend using Set deduplication
-      ✅ Red dot indicator deferred — redundant given community page preview
 - [x] Block E (completed Jul 19) — Residents module + sidebar refactor:
       ✅ getResidents controller — filtered by barangayId + role RESIDENT,
          ordered by createdAt desc, select: id, firstName, lastName,
          phoneNumber, address, purok, isVerified, createdAt
       ✅ recordIntake upgraded — wrapped in prisma.$transaction, now sets
-         isVerified: true on resident when userId present (auto-verification
-         on first manual intake, matching COLLECTED pickup request behavior)
+         isVerified: true on resident when userId present; userId now
+         written to StockTransactionLog rows
+      ✅ COLLECTED transition upgraded — wrapped in prisma.$transaction,
+         userId written to StockTransactionLog rows
       ✅ Residents page scaffolded + wired — summary cards (Total, Verified,
          Unverified), search, desktop table + mobile cards, address+purok
          combined as Location column
@@ -390,8 +379,16 @@ I'm building.
          groups with chevron rotation animation, faint left border on
          grouped items, logout pinned to bottom via mt-auto, both groups
          default closed
-- [ ] Block F+ — remaining modules (Reward Inventory, Program Funds,
-      Leaderboard, Reports) sized into blocks as they come up
+- [x] Block F (completed Jul 20) — Leaderboard module:
+      ✅ getRankedLeaderboard helper — groupBy StockTransactionLog by userId,
+         sum quantity, join with User for name/purok, returns ranked array
+      ✅ getLeaderboardStats controller — runs two parallel Promise.all
+         queries: weightLeaderboard (unit KG) + pieceLeaderboard (unit PIECE)
+      ✅ Leaderboard page — podium top 3, full rankings table, two filters:
+         By Kilogram/By Piece (type) + All Time/This Month/This Week (period);
+         loading/error/empty states; fully wired to real data
+- [ ] Block G+ — remaining modules (Program Funds, Reward Inventory, Reports)
+      sized into blocks as they come up
 
 ## During Sem (Jul 20 onwards)
 - [ ] Teachable Machine (image recognition on pickup request)

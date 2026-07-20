@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Page } from "@/components/layout/Page";
 import { PageContent } from "@/components/layout/PageContent";
 import { BarangayTopBar } from "@/components/navigation/BarangayTopBar";
@@ -8,27 +8,25 @@ import { BarangayHeaderCard } from "@/components/ui/BarangayHeaderCard";
 import { Card } from "@/components/ui/Card";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { IconContainer } from "@/components/ui/IconContainer";
+import { Spinner } from "@/components/ui/Spinner";
+import { Error } from "@/components/ui/Error";
+import { Empty } from "@/components/ui/Empty";
 import {
   TrophyIcon,
   UserGroupIcon,
   ScaleIcon,
   ArrowUpRightIcon,
-  StarIcon,
   CalendarDaysIcon,
+  ChevronDownIcon,
 } from "@heroicons/react/24/outline";
+import { useFetch } from "@/hooks/useFetch";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
-const ALL_RESIDENTS = [
-  { rank: 1, name: "Maria Santos", sitio: "Sitio 1", contribution: 45.5, points: 320 },
-  { rank: 2, name: "Juan Dela Cruz", sitio: "Sitio 2", contribution: 38, points: 275 },
-  { rank: 3, name: "Ana Reyes", sitio: "Sitio 1", contribution: 31.2, points: 220 },
-  { rank: 4, name: "Pedro Villanueva", sitio: "Sitio 3", contribution: 27.8, points: 198 },
-  { rank: 5, name: "Rosa Fernandez", sitio: "Sitio 2", contribution: 24.5, points: 175 },
-  { rank: 6, name: "Carlo Bautista", sitio: "Sitio 1", contribution: 21.0, points: 152 },
-  { rank: 7, name: "Liza Aquino", sitio: "Sitio 3", contribution: 18.3, points: 130 },
-  { rank: 8, name: "Nestor Castillo", sitio: "Sitio 2", contribution: 15.6, points: 112 },
-];
-
+const TYPES = ["By Kilogram", "By Piece"];
 const PERIODS = ["All Time", "This Month", "This Week"];
+
+const TABLE_HEADERS = ["Rank", "Resident", "Sitio", "Contribution"];
 
 const MEDAL_CONFIG = {
   1: {
@@ -61,12 +59,37 @@ const MEDAL_CONFIG = {
 };
 
 export default function LeaderboardPage() {
+  const [type, setType] = useState("By Kilogram");
   const [period, setPeriod] = useState("All Time");
+  const [showPeriodDropdown, setShowPeriodDropdown] = useState(false);
+  const periodDropdownRef = useRef(null);
 
-  const topThree = ALL_RESIDENTS.slice(0, 3);
-  const rest = ALL_RESIDENTS.slice(3);
+  const [refetchCount, setRefetchCount] = useState(0);
+  const { data, isLoading, isError } = useFetch({
+    url: "/api/leaderboard",
+    refetchCount,
+  });
 
-  const podiumOrder = [topThree[1], topThree[0], topThree[2]];
+  const handleRefetchCount = () => setRefetchCount((prev) => prev + 1);
+
+  const unitLabel = type === "By Kilogram" ? "kg" : "pcs";
+  const leaderboard =
+    type === "By Kilogram" ? data?.weightLeaderboard : data?.pieceLeaderboard;
+
+  const topThree = leaderboard?.slice(0, 3);
+  const rest = leaderboard?.slice(3);
+
+  const podiumOrder = topThree ? [topThree[1], topThree[0], topThree[2]] : [];
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (!periodDropdownRef?.current?.contains(e.target))
+        setShowPeriodDropdown(false);
+    };
+
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   return (
     <Page className="bg-new-bg!">
@@ -78,7 +101,7 @@ export default function LeaderboardPage() {
         />
 
         {/* Summary Cards */}
-        <section className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+        <section className="grid grid-cols-2 gap-3">
           <Card className="shadow-none! new-border flex flex-col items-start">
             <div className="flex flex-row items-start justify-between w-full">
               <p className="text-xs font-medium text-[#6b7280]">
@@ -90,9 +113,17 @@ export default function LeaderboardPage() {
                 containerColor="#f3f4f6"
               />
             </div>
-            <p className="md:text-2xl font-bold text-text-primary text-lg">
-              {ALL_RESIDENTS.length}
-            </p>
+            {isLoading ? (
+              <Skeleton width={40} />
+            ) : isError ? (
+              <p className="font-bold text-text-primary text-sm">
+                Data not available
+              </p>
+            ) : (
+              <p className="md:text-2xl font-bold text-text-primary text-lg">
+                {leaderboard?.length ?? 0}
+              </p>
+            )}
             <div className="flex flex-row items-center w-auto bg-primary/10 px-3 py-1 rounded-xl text-xs gap-1">
               <UserGroupIcon className="w-3 stroke-cta-color" />
               <p className="text-cta-color font-medium">Active residents</p>
@@ -110,34 +141,24 @@ export default function LeaderboardPage() {
                 containerColor="#f3f4f6"
               />
             </div>
-            <p className="md:text-2xl font-bold text-text-primary text-lg">
-              {topThree[0].contribution} kg
-            </p>
+            {isLoading ? (
+              <Skeleton width={40} />
+            ) : isError ? (
+              <p className="font-bold text-text-primary text-sm">
+                Data not available
+              </p>
+            ) : (
+              <p className="md:text-2xl font-bold text-text-primary text-lg">
+                {topThree?.[0] ? `${topThree[0].total} ${unitLabel}` : "—"}
+              </p>
+            )}
             <div className="flex flex-row items-center w-auto bg-primary/10 px-3 py-1 rounded-xl text-xs gap-1">
               <ScaleIcon className="w-3 stroke-cta-color" />
               <p className="text-cta-color font-medium">
-                {topThree[0].name.split(" ")[0]}
+                {isLoading || isError
+                  ? "—"
+                  : (topThree?.[0]?.name?.split(" ")[0] ?? "—")}
               </p>
-            </div>
-          </Card>
-
-          <Card className="shadow-none! new-border flex flex-col items-start col-span-2 lg:col-span-1">
-            <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-[#6b7280]">
-                Highest Points
-              </p>
-              <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-[#6b7280]" />}
-                className="rounded-full! p-2!"
-                containerColor="#f3f4f6"
-              />
-            </div>
-            <p className="md:text-2xl font-bold text-text-primary text-lg">
-              {topThree[0].points} pts
-            </p>
-            <div className="flex flex-row items-center w-auto bg-primary/10 px-3 py-1 rounded-xl text-xs gap-1">
-              <StarIcon className="w-3 stroke-cta-color" />
-              <p className="text-cta-color font-medium">Top scorer</p>
             </div>
           </Card>
         </section>
@@ -151,61 +172,147 @@ export default function LeaderboardPage() {
             noButton={true}
           />
 
-          {/* Period Filter */}
-          <div className="flex flex-row gap-2 items-center flex-wrap">
-            <div className="flex items-center gap-1.5 text-[#6b7280]">
-              <CalendarDaysIcon className="w-4" />
-              <span className="text-xs font-medium">Period:</span>
+          {/* Type + Period Filters */}
+          <div className="flex flex-row gap-2 items-center justify-between flex-wrap">
+            {/* Type Filter */}
+            <div className="flex flex-row gap-2 items-center flex-wrap">
+              {TYPES.map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setType(t)}
+                  className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all duration-150 border ${
+                    type === t
+                      ? "gradient-button text-white border-transparent"
+                      : "bg-white text-[#6b7280] border-[#e5e7eb] hover:border-[#d1d5db]"
+                  }`}
+                >
+                  {t}
+                </button>
+              ))}
             </div>
-            {PERIODS.map((p) => (
+
+            {/* Period Filter — desktop pills */}
+            <div className="hidden md:flex flex-row gap-2 items-center flex-wrap">
+              <div className="flex items-center gap-1.5 text-[#6b7280]">
+                <CalendarDaysIcon className="w-4" />
+              </div>
+              {PERIODS.map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setPeriod(p)}
+                  className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all duration-150 border ${
+                    period === p
+                      ? "gradient-button text-white border-transparent"
+                      : "bg-white text-[#6b7280] border-[#e5e7eb] hover:border-[#d1d5db]"
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+
+            {/* Period Filter — mobile dropdown */}
+            <div className="relative md:hidden" ref={periodDropdownRef}>
               <button
-                key={p}
-                onClick={() => setPeriod(p)}
-                className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all duration-150 border ${
-                  period === p
-                    ? "gradient-button text-white border-transparent"
-                    : "bg-white text-[#6b7280] border-[#e5e7eb] hover:border-[#d1d5db]"
-                }`}
+                onClick={() => setShowPeriodDropdown((v) => !v)}
+                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium border bg-white text-[#6b7280] border-[#e5e7eb]"
               >
-                {p}
+                <CalendarDaysIcon className="w-4" />
+                {period}
+                <ChevronDownIcon className="w-3.5" />
               </button>
-            ))}
+              {showPeriodDropdown && (
+                <div className="absolute right-0 top-9 z-40 flex flex-col items-start w-36 bg-white rounded-lg new-border text-xs py-2">
+                  {PERIODS.map((p) => (
+                    <div
+                      key={p}
+                      onClick={() => {
+                        setPeriod(p);
+                        setShowPeriodDropdown(false);
+                      }}
+                      className={`px-3.5 py-1.5 w-full hover:cursor-pointer hover:bg-gray-50 ${
+                        period === p
+                          ? "text-cta-color font-semibold"
+                          : "text-[#6b7280]"
+                      }`}
+                    >
+                      {p}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Top 3 Podium */}
-          <div className="grid grid-cols-3 gap-3 mt-1">
-            {podiumOrder.map((resident) => {
-              if (!resident) return null;
-              const config = MEDAL_CONFIG[resident.rank];
-              return (
+          {isLoading ? (
+            <div className="grid grid-cols-3 gap-4 md:gap-6 mt-1">
+              {Array.from({ length: 3 }).map((_, index) => (
                 <Card
-                  key={resident.rank}
-                  className={`shadow-none! border! ${config.border} ${config.bg} flex-col! items-center! gap-2 py-5! ${config.size} transition-transform`}
+                  key={index}
+                  className="shadow-none! new-border flex-col! items-center! gap-2 py-6! px-3!"
                 >
-                  <span className="text-2xl">{config.emoji}</span>
-                  <div className="flex flex-col items-center gap-0.5 text-center">
-                    <p className="font-bold text-text-primary text-sm leading-tight">
-                      {resident.name}
-                    </p>
-                    <p className="text-xs text-[#6b7280]">{resident.sitio}</p>
-                  </div>
-                  <div className="flex flex-col items-center gap-1">
-                    <span
-                      className={`text-xs font-bold px-3 py-1 rounded-full ${config.bg} ${config.text} border ${config.border}`}
-                    >
-                      {config.label} Place
-                    </span>
-                    <p className="text-xs text-[#6b7280] font-medium">
-                      {resident.contribution} kg
-                    </p>
-                    <p className={`text-xs font-semibold ${config.text}`}>
-                      {resident.points} pts
-                    </p>
-                  </div>
+                  <Skeleton circle width={28} height={28} />
+                  <Skeleton width={80} />
+                  <Skeleton width={50} />
+                  <Skeleton width={60} />
                 </Card>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          ) : isError ? (
+            <Card className="shadow-none! new-border">
+              <Error handleRefetchCount={handleRefetchCount} />
+            </Card>
+          ) : !topThree || topThree.length === 0 ? (
+            <Card className="shadow-none! new-border">
+              <Empty
+                text="No rankings yet"
+                subtext="No residents have logged contributions for this filter yet."
+              />
+            </Card>
+          ) : (
+            <div
+              className={`grid gap-4 md:gap-6 mt-1 ${
+                topThree.length === 1
+                  ? "grid-cols-1"
+                  : topThree.length === 2
+                    ? "grid-cols-2"
+                    : "grid-cols-3"
+              }`}
+            >
+              {podiumOrder.filter(Boolean).map((resident) => {
+                const config = MEDAL_CONFIG[resident.rank];
+                return (
+                  <Card
+                    key={resident.rank}
+                    className={`shadow-none! border! ${config.border} ${config.bg} flex-col! items-center! gap-2 py-6! px-3! ${
+                      topThree.length === 1 ? "" : config.size
+                    } transition-transform`}
+                  >
+                    <span className="text-2xl">{config.emoji}</span>
+                    <div className="flex flex-col items-center gap-0.5 text-center">
+                      <p className="font-bold text-text-primary text-sm leading-tight">
+                        {resident.name}
+                      </p>
+                      <p className="text-xs text-[#6b7280]">
+                        {resident.purok}
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-center gap-1">
+                      <span
+                        className={`text-xs font-bold px-3 py-1 rounded-full ${config.bg} ${config.text} border ${config.border}`}
+                      >
+                        {config.label} Place
+                      </span>
+                      <p className="text-xs text-[#6b7280] font-medium">
+                        {resident.total} {unitLabel}
+                      </p>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
         </section>
 
         {/* Ranks 4+ Table */}
@@ -222,7 +329,7 @@ export default function LeaderboardPage() {
             <table className="w-full text-sm border-collapse">
               <thead className="border-b border-[#E6EFF5]">
                 <tr>
-                  {["Rank", "Resident", "Sitio", "Contribution", "Points"].map((h) => (
+                  {TABLE_HEADERS.map((h) => (
                     <th
                       key={h}
                       className="font-medium text-sm text-[#6b7280] p-4 text-left"
@@ -233,63 +340,104 @@ export default function LeaderboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {rest.map((r) => (
-                  <tr
-                    key={r.rank}
-                    className="hover:bg-[#f8f8f8] transition-all border-b border-[#f3f4f6] last:border-0"
-                  >
-                    <td className="p-4">
-                      <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#f3f4f6] text-xs font-bold text-[#6b7280]">
-                        {r.rank}
-                      </span>
-                    </td>
-                    <td className="p-4">
-                      <p className="font-semibold text-text-primary">{r.name}</p>
-                    </td>
-                    <td className="p-4">
-                      <p className="text-[#6b7280] text-sm">{r.sitio}</p>
-                    </td>
-                    <td className="p-4">
-                      <p className="font-bold text-text-primary">
-                        {r.contribution} kg
-                      </p>
-                    </td>
-                    <td className="p-4">
-                      <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/10 text-cta-color">
-                        <StarIcon className="w-3 stroke-cta-color" />
-                        {r.points} pts
-                      </span>
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={TABLE_HEADERS.length}>
+                      <Spinner />
                     </td>
                   </tr>
-                ))}
+                ) : isError ? (
+                  <tr>
+                    <td colSpan={TABLE_HEADERS.length}>
+                      <Error handleRefetchCount={handleRefetchCount} />
+                    </td>
+                  </tr>
+                ) : !rest || rest.length === 0 ? (
+                  <tr>
+                    <td colSpan={TABLE_HEADERS.length}>
+                      <Empty
+                        text="No more rankings"
+                        subtext="There are no residents beyond the top 3 yet."
+                      />
+                    </td>
+                  </tr>
+                ) : (
+                  rest.map((r) => (
+                    <tr
+                      key={r.rank}
+                      className="hover:bg-[#f8f8f8] transition-all border-b border-[#f3f4f6] last:border-0"
+                    >
+                      <td className="p-4">
+                        <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#f3f4f6] text-xs font-bold text-[#6b7280]">
+                          {r.rank}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <p className="font-semibold text-text-primary">
+                          {r.name}
+                        </p>
+                      </td>
+                      <td className="p-4">
+                        <p className="text-[#6b7280] text-sm">{r.purok}</p>
+                      </td>
+                      <td className="p-4">
+                        <p className="font-bold text-text-primary">
+                          {r.total} {unitLabel}
+                        </p>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </Card>
 
           {/* Mobile Cards */}
           <div className="flex flex-col gap-2 md:hidden">
-            {rest.map((r) => (
-              <Card
-                key={r.rank}
-                className="shadow-none! new-border flex-row! items-center! gap-3"
-              >
-                <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#f3f4f6] text-sm font-bold text-[#6b7280] shrink-0">
-                  {r.rank}
-                </span>
-                <div className="flex flex-col flex-1 min-w-0">
-                  <p className="font-semibold text-text-primary truncate">{r.name}</p>
-                  <p className="text-xs text-[#6b7280]">{r.sitio}</p>
-                </div>
-                <div className="flex flex-col items-end shrink-0">
-                  <p className="font-bold text-text-primary text-sm">
-                    {r.contribution} kg
-                  </p>
-                  <span className="text-xs font-semibold text-cta-color">
-                    {r.points} pts
+            {isLoading ? (
+              Array.from({ length: 3 }).map((_, index) => (
+                <Card
+                  key={index}
+                  className="shadow-none! new-border flex-row! items-center! gap-3"
+                >
+                  <Skeleton circle width={32} height={32} />
+                  <div className="flex flex-col flex-1 gap-1">
+                    <Skeleton width={120} />
+                    <Skeleton width={80} />
+                  </div>
+                  <Skeleton width={50} />
+                </Card>
+              ))
+            ) : isError ? (
+              <Error handleRefetchCount={handleRefetchCount} />
+            ) : !rest || rest.length === 0 ? (
+              <Empty
+                text="No more rankings"
+                subtext="There are no residents beyond the top 3 yet."
+              />
+            ) : (
+              rest.map((r) => (
+                <Card
+                  key={r.rank}
+                  className="shadow-none! new-border flex-row! items-center! gap-3"
+                >
+                  <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#f3f4f6] text-sm font-bold text-[#6b7280] shrink-0">
+                    {r.rank}
                   </span>
-                </div>
-              </Card>
-            ))}
+                  <div className="flex flex-col flex-1 min-w-0">
+                    <p className="font-semibold text-text-primary truncate">
+                      {r.name}
+                    </p>
+                    <p className="text-xs text-[#6b7280]">{r.purok}</p>
+                  </div>
+                  <div className="flex flex-col items-end shrink-0">
+                    <p className="font-bold text-text-primary text-sm">
+                      {r.total} {unitLabel}
+                    </p>
+                  </div>
+                </Card>
+              ))
+            )}
           </div>
         </section>
       </PageContent>

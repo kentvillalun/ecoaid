@@ -122,42 +122,45 @@ const updateStatus = async (req, res) => {
         },
       });
 
-      await prisma.user.update({
-        where: { id: userId },
-        data: {
-          isVerified: true,
-        },
-      });
+      await prisma.$transaction(async (tx) => {
+        await tx.collectionItem.createMany({
+          data: items.map((item) => ({
+            requestId: id,
+            materialId: item.materialId,
+            actualValue: item.actualValue,
+            actualUnit: item.actualUnit,
+          })),
+          skipDuplicates: true,
+        });
 
-      await prisma.collectionItem.createMany({
-        data: items.map((item) => ({
-          requestId: id,
-          materialId: item.materialId,
-          actualValue: item.actualValue,
-          actualUnit: item.actualUnit,
-        })),
-        skipDuplicates: true,
-      });
+        await tx.stockTransactionLog.createMany({
+          data: items.map((item) => ({
+            barangayId,
+            userId,
+            collectionRequestId: id,
+            source: "COLLECTION_REQUEST",
+            transactionType: "IN",
+            materialId: item.materialId,
+            quantity: convertToKg(item.actualValue, item.actualUnit),
+            unit: item.actualUnit === "PIECE" ? "PIECE" : "KG",
+          })),
+          skipDuplicates: true,
+        });
 
-      await prisma.stockTransactionLog.createMany({
-        data: items.map((item) => ({
-          barangayId,
-          collectionRequestId: id,
-          source: "COLLECTION_REQUEST",
-          transactionType: "IN",
-          materialId: item.materialId,
-          quantity: convertToKg(item.actualValue, item.actualUnit),
-          unit: item.actualUnit === "PIECE" ? "PIECE" : "KG",
-        })),
-        skipDuplicates: true,
-      });
+        await tx.pickupRequests.update({
+          where: { id },
+          data: {
+            status: "COLLECTED",
+            collectedAt: new Date(),
+          },
+        });
 
-      await prisma.pickupRequests.update({
-        where: { id },
-        data: {
-          status: "COLLECTED",
-          collectedAt: new Date(),
-        },
+        await tx.user.update({
+          where: { id: userId },
+          data: {
+            isVerified: true,
+          },
+        });
       });
 
       return res.status(200).json({ message: "Request Collected " });
