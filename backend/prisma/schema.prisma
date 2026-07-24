@@ -71,6 +71,7 @@ model Barangay {
   stockTransactionLog StockTransactionLog[]
   junkshop Junkshop[]
   announcement Announcement[]
+  programExpense ProgramExpense[]
 }
 
 enum RedemptionMode {
@@ -139,7 +140,8 @@ model User {
   stockTransactionLog StockTransactionLog[]
   junkshopSales JunkshopSale[]
   announcement Announcement[]
-
+  programExpense ProgramExpense[]
+  
   @@index([barangayId])
   @@index([sitioId])
 }
@@ -252,6 +254,7 @@ model Program {
   
   programMaterial ProgramMaterial[]
   redemptionTransaction RedemptionTransaction[]
+  expenses ProgramExpense[]
 }
 
 model ProgramMaterial {
@@ -477,3 +480,23 @@ model Announcement {
   createdAt DateTime @default(now())
 }
 
+model ProgramExpense {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
+
+  userId String? @db.Uuid()
+  user User? @relation(fields: [userId], references: [id])
+  
+  programId String @db.Uuid()
+  program Program @relation(fields: [programId], references: [id])
+
+  barangayId String @db.Uuid()
+  barangay Barangay @relation(fields: [barangayId], references: [id])
+
+  name String
+  amount Float
+  description String
+  performedBy String
+  performedByRole String
+
+  createdAt DateTime @default(now())
+}

@@ -363,32 +363,20 @@ I'm building.
       - Wire modal submission → recordSale
       - Settings page: Add Junkshop modal (Claude Code scaffold + wiring)
       - Junkshop detail modal
-- [x] Block E (completed Jul 19) — Residents module + sidebar refactor:
-      ✅ getResidents controller — filtered by barangayId + role RESIDENT,
-         ordered by createdAt desc, select: id, firstName, lastName,
-         phoneNumber, address, purok, isVerified, createdAt
-      ✅ recordIntake upgraded — wrapped in prisma.$transaction, now sets
-         isVerified: true on resident when userId present; userId now
-         written to StockTransactionLog rows
-      ✅ COLLECTED transition upgraded — wrapped in prisma.$transaction,
-         userId written to StockTransactionLog rows
-      ✅ Residents page scaffolded + wired — summary cards (Total, Verified,
-         Unverified), search, desktop table + mobile cards, address+purok
-         combined as Location column
-      ✅ Sidebar refactored — collapsible Management and Communication
-         groups with chevron rotation animation, faint left border on
-         grouped items, logout pinned to bottom via mt-auto, both groups
-         default closed
-- [x] Block F (completed Jul 20) — Leaderboard module:
-      ✅ getRankedLeaderboard helper — groupBy StockTransactionLog by userId,
-         sum quantity, join with User for name/purok, returns ranked array
-      ✅ getLeaderboardStats controller — runs two parallel Promise.all
-         queries: weightLeaderboard (unit KG) + pieceLeaderboard (unit PIECE)
-      ✅ Leaderboard page — podium top 3, full rankings table, two filters:
-         By Kilogram/By Piece (type) + All Time/This Month/This Week (period);
-         loading/error/empty states; fully wired to real data
-- [ ] Block G+ — remaining modules (Program Funds, Reward Inventory, Reports)
-      sized into blocks as they come up
+- [x] Block C — Announcements module (completed Jul 13)
+- [x] Block D — Resident Announcements wiring (completed Jul 13)
+- [x] Block E — Residents module + sidebar refactor (completed Jul 19)
+- [x] Block F — Leaderboard module (completed Jul 20):
+      Two-leaderboard approach (By Kilogram + By Piece), getRankedLeaderboard
+      helper, Promise.all parallel queries, podium top 3 + full rankings table,
+      period filter (All Time/This Month/This Week), fully wired
+- [~] Block G (in progress) — Program Funds:
+      ✅ ProgramExpense schema — name, amount, description, performedBy,
+         performedByRole, userId/programId/barangayId FKs; migrated
+      ✅ addExpense controller + getExpenses controller done
+      Remaining: getProgramFundSummary, routes, Thunder Client testing,
+      Claude Code UI scaffold + wiring
+- [ ] Block H+ — Reward Inventory, Reports sized as they come up
 
 ## During Sem (Jul 20 onwards)
 - [ ] Teachable Machine (image recognition on pickup request)
