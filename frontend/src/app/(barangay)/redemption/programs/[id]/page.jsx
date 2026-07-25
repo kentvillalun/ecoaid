@@ -215,7 +215,7 @@ export default function ProgramDetails() {
                     value={data?.program?.isActive ? "Active" : "Inactive"}
                   />
                   <LabelValue
-                    name="Allotted Budget"
+                    name="Allocated Budget"
                     value={`₱ ${data?.program?.allotedBudget.toLocaleString()}`}
                   />
 

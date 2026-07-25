@@ -300,6 +300,10 @@ only as an unwired UI scaffold with hardcoded mock data.
 - Resident Layer 2 auth check (server component calling GET /auth/me) still pending
 - `InProgressActions` multi-row form: no client-side validation before submit — empty material/amount rows are silently sent to backend
 - `StockTransactionLog` is only written by Manual Intake (`IN`) and manual stock-out adjustments (`OUT`); pickup-request `COLLECTED` transitions and redemption transactions do not create ledger entries yet, so Material Stock balances undercount real intake/outflow until those are wired in
+- **Deletion → Archive pattern** — panel strictly forbids hard deletion; all delete operations across all modules should be replaced with soft delete/archive (isArchived field) before pilot testing. Affects: Announcements (deleteAnnouncement), and any future delete endpoints. Do as a batch after all modules are complete.
+- **Rate limiting** — no rate limiting on any endpoint currently; add before pilot testing
+- **Pagination / Load more** — decided to use reveal-more pattern instead of page-based pagination; implement on long lists (residents, transaction logs, sales history) before pilot testing
+- **Backend hardening** — input validation, consistent error message format, and request sanitization needed across controllers before pilot testing
 - Junkshop Sales, Leaderboard, and Reports pages are static UI scaffolds with hardcoded mock data — no backend, and not linked in the barangay `Sidebar` (`href: ""`)
 
 ## Deferred Decisions
@@ -344,38 +348,24 @@ I'm building.
 
 - [x] Completed — Manual Collection Intake (end-to-end)
 - [x] Completed — Material Stock (end-to-end)
-- [x] Block A (completed Jun 29) — Junkshop Sales backend: `recordSale`
-      validation block finished, `StockTransactionLog` write path wired
-      (one OUT row per JunkshopSaleItem, source JUNKSHOP_SALES, via
-      `convertToKg`), `junkshopSalesId` upgraded to a proper FK relation,
-      both writes wrapped in `prisma.$transaction` for atomicity
-- [~] Block B (in progress, UI scaffold done Jun 30, wiring started Jul 1) —
-      Junkshop Sales frontend wiring mostly complete:
-      ✅ Sales History table — real data, loading/error/empty states done
-      ✅ Price Comparison table — real data (uniqueMaterials via Map,
-         prices via flatMap+find), desktop + mobile, loading/error/empty
-         states via Claude Code
-      ✅ Summary cards — Junkshops Tracked, Best Overall, Highest Rate
-         all wired to real data
-      Remaining:
-      - Wire price cell onClick → pre-fill modal with junkshopId
-      - Wire cascading select in modal (junkshop → filters materials)
-      - Wire modal submission → recordSale
-      - Settings page: Add Junkshop modal (Claude Code scaffold + wiring)
-      - Junkshop detail modal
-- [x] Block C — Announcements module (completed Jul 13)
-- [x] Block D — Resident Announcements wiring (completed Jul 13)
-- [x] Block E — Residents module + sidebar refactor (completed Jul 19)
-- [x] Block F — Leaderboard module (completed Jul 20):
-      Two-leaderboard approach (By Kilogram + By Piece), getRankedLeaderboard
-      helper, Promise.all parallel queries, podium top 3 + full rankings table,
-      period filter (All Time/This Month/This Week), fully wired
-- [~] Block G (in progress) — Program Funds:
-      ✅ ProgramExpense schema — name, amount, description, performedBy,
-         performedByRole, userId/programId/barangayId FKs; migrated
-      ✅ addExpense controller + getExpenses controller done
-      Remaining: getProgramFundSummary, routes, Thunder Client testing,
-      Claude Code UI scaffold + wiring
+- [x] Block A (completed Jun 29) — Junkshop Sales backend
+- [x] Block B (completed Jul 5) — Junkshop Sales + Settings fully wired
+- [x] Block C (completed Jul 13) — Announcements module
+- [x] Block D (completed Jul 13) — Resident Announcements wiring
+- [x] Block E (completed Jul 19) — Residents module + sidebar refactor
+- [x] Block F (completed Jul 20) — Leaderboard module (two-leaderboard,
+      getRankedLeaderboard helper, Promise.all, podium + full rankings)
+- [x] Block G (completed Jul 25) — Program Funds module:
+      ✅ ProgramExpense schema (name, amount, description, performedBy,
+         performedByRole, userId/programId/barangayId FKs); migrated
+      ✅ addExpense, getExpenses, getProgramFundSummary, getTransactionLogs
+         controllers — summary computes totalIncome (reduce over JunkshopSaleItem),
+         totalExpenses (aggregate), programBreakdown (per-program budget tracking);
+         transaction log combines expenses + sales into unified sorted array
+      ✅ Program Funds page fully wired — summary cards (Income/Expenses/
+         Net Balance with contextual icons), Program Budgets table,
+         Transaction Log with All/Income/Expenses filter tabs,
+         AddExpenseModal wired via useMutation
 - [ ] Block H+ — Reward Inventory, Reports sized as they come up
 
 ## During Sem (Jul 20 onwards)

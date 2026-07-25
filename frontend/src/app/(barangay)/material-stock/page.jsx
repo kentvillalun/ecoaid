@@ -36,63 +36,6 @@ const inter = Inter({
   weight: ["400", "500", "600", "700"],
 });
 
-const TRANSACTION_LOG = [
-  {
-    id: 1,
-    material: "PET Bottles",
-    category: "Plastics",
-    quantity: 5.5,
-    unit: "kg",
-    source: "Manual Intake",
-    date: "Jun 15, 2026",
-  },
-  {
-    id: 2,
-    material: "Newspaper",
-    category: "Papers",
-    quantity: 8,
-    unit: "kg",
-    source: "Collection Request",
-    date: "Jun 14, 2026",
-  },
-  {
-    id: 3,
-    material: "Aluminum Cans",
-    category: "Metals",
-    quantity: 3,
-    unit: "kg",
-    source: "Redemption",
-    date: "Jun 13, 2026",
-  },
-  {
-    id: 4,
-    material: "Glass Bottles",
-    category: "Bottles",
-    quantity: 4,
-    unit: "kg",
-    source: "Manual Intake",
-    date: "Jun 12, 2026",
-  },
-  {
-    id: 5,
-    material: "Cardboard",
-    category: "Papers",
-    quantity: 10,
-    unit: "kg",
-    source: "Collection Request",
-    date: "Jun 11, 2026",
-  },
-  {
-    id: 6,
-    material: "Iron Scraps",
-    category: "Metals",
-    quantity: 2.5,
-    unit: "kg",
-    source: "Redemption",
-    date: "Jun 10, 2026",
-  },
-];
-
 // ─── Style Maps ───────────────────────────────────────────────────────────────
 
 const CATEGORY_STYLES = {

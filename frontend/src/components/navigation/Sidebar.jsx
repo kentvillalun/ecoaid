@@ -81,7 +81,7 @@ export const Sidebar = () => {
     {
       icon: ProgramFundsIcon,
       label: "Program Funds",
-      href: "",
+      href: "/program-funds",
     },
   ];
 

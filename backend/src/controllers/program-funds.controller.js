@@ -68,13 +68,6 @@ const getExpenses = async (req, res) => {
 
 const getProgramFundSummary = async (req, res) => {
   try {
-  } catch (error) {
-    return res.status(500).json({ error: error.message });
-  }
-};
-
-const getProgramFundSummary = async (req, res) => {
-  try {
     const { barangayId } = req.user;
 
     const totalExpenses = await prisma.programExpense.aggregate({
@@ -120,6 +113,7 @@ const getProgramFundSummary = async (req, res) => {
       }, 0);
 
       return {
+        id: p.id,
         name: p.name,
         allotedBudget: p.allotedBudget,
         totalSpent,
@@ -138,4 +132,73 @@ const getProgramFundSummary = async (req, res) => {
   }
 };
 
-export { addExpense, getExpenses, getProgramFundSummary };
+const getTransactionLogs = async (req, res) => {
+  try {
+    const { barangayId } = req.user;
+
+    const expenses = await prisma.programExpense.findMany({
+      where: { barangayId },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        program: {
+          select: {
+            name: true,
+          },
+        },
+        amount: true,
+        performedBy: true,
+        performedByRole: true,
+        createdAt: true,
+      },
+    });
+
+    const sales = await prisma.junkshopSale.findMany({
+      where: {
+        junkshop: {
+          barangayId,
+        },
+      },
+      select: {
+        id: true,
+        junkshop: {
+          select: {
+            name: true,
+          },
+        },
+        saleItems: {
+          select: {
+            quantity: true,
+            cost: true,
+          },
+        },
+        performedBy: true,
+        createdAt: true,
+      },
+    });
+
+    const transactions = [
+      ...expenses.map((e) => ({ ...e, type: "expense" })),
+      ...sales.map((s) => {
+        const { saleItems, ...rest } = s;
+        return {
+          ...rest,
+          type: "income",
+          name: "Junkshop Sale",
+          totalAmount: s.saleItems.reduce((total, current) => {
+            return total + current.cost * current.quantity;
+          }, 0),
+        };
+      }),
+    ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    return res
+      .status(200)
+      .json({ message: "Fetch transaction logs successful", transactions });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+export { addExpense, getExpenses, getProgramFundSummary, getTransactionLogs };
