@@ -72,6 +72,9 @@ model Barangay {
   junkshop Junkshop[]
   announcement Announcement[]
   programExpense ProgramExpense[]
+  rewardItems RewardItem[]
+  rewardReleases RewardRelease[]
+  beneficiaries Beneficiary[]
 }
 
 enum RedemptionMode {
@@ -141,6 +144,7 @@ model User {
   junkshopSales JunkshopSale[]
   announcement Announcement[]
   programExpense ProgramExpense[]
+  rewardReleases RewardRelease[]
   
   @@index([barangayId])
   @@index([sitioId])
@@ -255,6 +259,8 @@ model Program {
   programMaterial ProgramMaterial[]
   redemptionTransaction RedemptionTransaction[]
   expenses ProgramExpense[]
+  rewardItems RewardItem[]
+  rewardReleases RewardRelease[]
 }
 
 model ProgramMaterial {
@@ -279,6 +285,9 @@ model RedemptionTransaction {
 
   programId String @db.Uuid
   program Program @relation(fields: [programId], references: [id])
+
+  beneficiaryId String? @db.Uuid()
+  beneficiary Beneficiary? @relation(fields: [beneficiaryId], references: [id])
 
   collectorName String
   beneficiaryName String
@@ -499,4 +508,71 @@ model ProgramExpense {
   performedByRole String
 
   createdAt DateTime @default(now())
+}
+
+model RewardItem {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
+
+  programId String @db.Uuid()
+  program Program @relation(fields: [programId], references: [id])
+
+  barangayId String @db.Uuid()
+  barangay Barangay @relation(fields: [barangayId], references: [id])
+
+  category RewardCategory @default(GOODS)
+  pointCost Float
+  name String
+  quantity Float
+
+  createdAt DateTime @default(now())
+
+  rewardReleases RewardRelease[]
+}
+
+enum RewardCategory {
+  MEDICINE
+  GOODS
+  SCHOOL_SUPPLIES
+  SERVICES
+  OTHERS
+}
+
+model RewardRelease {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
+
+  rewardItemId String @db.Uuid()
+  rewardItem RewardItem @relation(fields: [rewardItemId], references: [id])
+
+  userId String? @db.Uuid()
+  user User? @relation(fields: [userId], references: [id])
+
+  beneficiaryId String? @db.Uuid()
+  beneficiary Beneficiary? @relation(fields: [beneficiaryId], references: [id])
+
+  programId String @db.Uuid()
+  program Program @relation(fields: [programId], references: [id])
+
+  barangayId String @db.Uuid()
+  barangay Barangay @relation(fields: [barangayId], references: [id])
+
+  quantity Float
+  beneficiaryName String
+  performedBy String
+  performedByRole String
+
+  createdAt DateTime @default(now())
+}
+
+model Beneficiary {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
+
+  barangayId String @db.Uuid()
+  barangay Barangay @relation(fields: [barangayId], references: [id])
+
+  name String
+  points Float 
+  createdAt DateTime @default(now())
+
+  redemptionTransaction RedemptionTransaction[]
+  rewardReleases RewardRelease[]
 }

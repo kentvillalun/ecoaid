@@ -181,15 +181,22 @@ const createTransaction = async (req, res) => {
       programId,
       items,
       collectorName,
-      beneficiaryName,
+      beneficiaryId,
       educationalLevel,
     } = req.body ?? {};
 
-    const { barangayId } = req.user
+    const { barangayId } = req.user;
 
-    if (!programId || !items || !collectorName || !beneficiaryName) {
+    if (!programId || !items || !collectorName) {
       return res.status(400).json({ error: "Missing required fields" });
     }
+
+    const beneficiary = await prisma.beneficiary.findUnique({
+      where: { beneficiaryId, barangayId },
+      select: {
+        name: true
+      }
+    })
 
     const materials = await Promise.all(
       items.map((i) =>
@@ -201,8 +208,8 @@ const createTransaction = async (req, res) => {
             materialId: true,
             material: {
               select: {
-                defaultUnit: true
-              }
+                defaultUnit: true,
+              },
             },
             program: {
               select: {
@@ -221,8 +228,9 @@ const createTransaction = async (req, res) => {
     const transaction = await prisma.redemptionTransaction.create({
       data: {
         programId,
+        beneficiaryId,
         collectorName,
-        beneficiaryName,
+        beneficiaryName: beneficiary.name,
         educationalLevel,
         redemptionTransactionItem: {
           createMany: {
@@ -245,10 +253,14 @@ const createTransaction = async (req, res) => {
         source: "REDEMPTION",
         transactionType: "IN",
         materialId: materials[index].materialId,
-        unit: materials[index].material.defaultUnit === "PIECE" ? "PIECE" : "KG", 
-        quantity: convertToKg(item.amount, materials[index].material.defaultUnit)
-      }))
-    })
+        unit:
+          materials[index].material.defaultUnit === "PIECE" ? "PIECE" : "KG",
+        quantity: convertToKg(
+          item.amount,
+          materials[index].material.defaultUnit,
+        ),
+      })),
+    });
 
     return res.status(201).json({
       message: "Transaction Created",
@@ -314,7 +326,7 @@ const getTransaction = async (req, res) => {
         },
       },
       include: {
-        program: true, 
+        program: true,
         redemptionTransactionItem: {
           include: {
             programMaterial: {
@@ -351,6 +363,53 @@ const getTransaction = async (req, res) => {
   }
 };
 
+const getBeneficiaries = async (req, res) => {
+  try {
+    const { barangayId } = req.user;
+
+    const beneficiaries = await prisma.beneficiary.findMany({
+      where: { barangayId },
+      select: {
+        id: true,
+        name: true,
+        points: true,
+        createdAt: true,
+      },
+    });
+
+    return res
+      .status(200)
+      .json({ message: "Fetch beneficiaries successful", beneficiaries });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+const searchBeneficiary = async (req, res) => {
+  try {
+    const { barangayId } = req.user;
+    const { name } = req.query;
+
+    const beneficiaries = await prisma.beneficiary.findMany({
+      where: {
+        barangayId,
+        name: { contains: name, mode: "insensitive" },
+      },
+      select: {
+        id: true,
+        name: true,
+        points: true,
+      },
+    });
+
+    return res
+      .status(200)
+      .json({ message: "Searching beneficiaries successful", beneficiaries });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 export {
   createProgram,
   getPrograms,
@@ -359,4 +418,6 @@ export {
   getTransactions,
   updateProgram,
   getTransaction,
+  getBeneficiaries,
+  searchBeneficiary
 };
