@@ -15,8 +15,6 @@ import { useEffect, useState } from "react";
 
 const schema = yup.object().shape({
   programId: yup.string().required("Program is required"),
-  beneficiaryName: yup.string().required("Beneficiary name is required"),
-  collectorName: yup.string().required("Collector name is required"),
   educationalLevel: yup.string().nullable().optional(),
 });
 
@@ -37,6 +35,12 @@ export const RecordTransactionModal = ({
     { programMaterialId: "", amount: "" },
   ]);
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [selectedBeneficiary, setSelectedBeneficiary] = useState(null);
+  const [isCreatingBeneficiary, setIsCreatingBeneficiary] = useState(false);
+  const [newBeneficiaryName, setNewBeneficiaryName] = useState("");
+
   const {
     register,
     formState: { errors },
@@ -47,8 +51,6 @@ export const RecordTransactionModal = ({
     resolver: yupResolver(schema),
     defaultValues: {
       programId: "",
-      beneficiaryName: "",
-      collectorName: "",
       educationalLevel: null,
     },
   });
@@ -73,14 +75,23 @@ export const RecordTransactionModal = ({
       );
     }
 
+    if (isCreatingBeneficiary) {
+      if (!newBeneficiaryName.trim()) {
+        return toast.error("Please input a beneficiary name");
+      }
+    } else if (!selectedBeneficiary) {
+      return toast.error("Please select or create a beneficiary");
+    }
+
     toast.loading("Creating transaction");
 
     const success = await makeRequest({
       url,
       body: {
         programId: formData.programId,
-        collectorName: formData.collectorName,
-        beneficiaryName: formData.beneficiaryName,
+        ...(isCreatingBeneficiary
+          ? { beneficiaryName: newBeneficiaryName }
+          : { beneficiaryId: selectedBeneficiary.id }),
         educationalLevel: formData.educationalLevel,
         items: materialRows.map((row) => ({
           ...row,
@@ -94,20 +105,16 @@ export const RecordTransactionModal = ({
       toast.success("Transaction created");
       setTransactionRefetchCount((prev) => prev + 1);
       setMaterialRows([{ programMaterialId: "", amount: "" }]);
+      setSelectedBeneficiary(null);
+      setSearchQuery("");
+      setIsCreatingBeneficiary(false);
+      setNewBeneficiaryName("");
       setIsTransactionModalOpen(false);
     } else {
       toast.dismiss();
       toast.error("Creating transaction failed");
     }
   };
-
-  useEffect(() => {
-    if (!currentBarangayData) return;
-    setValue(
-      "collectorName",
-      `${currentBarangayData.user.firstName} ${currentBarangayData.user.lastName}`,
-    );
-  }, [currentBarangayData]);
 
   const removeRow = (index) => {
     const removed = materialRows.filter((m, i) => i !== index);
@@ -135,6 +142,27 @@ export const RecordTransactionModal = ({
         row.amount
     );
   }, 0);
+
+  useEffect(() => {
+    if (!searchQuery) {
+      setSearchResults([]);
+      return;
+    }
+
+    const timeout = setTimeout(async () => {
+      const res = await fetch(
+        `/api/redemption/beneficiaries/search?name=${searchQuery}`,
+        {
+          credentials: "include",
+        },
+      );
+
+      const data = await res.json();
+      setSearchResults(data.beneficiaries);
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, [searchQuery]);
 
   return (
     <Modal
@@ -187,40 +215,116 @@ export const RecordTransactionModal = ({
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-text-primary font-medium">Collector</label>
-          <input
-            type="text"
-            className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg  transition-colors min-h-11 max-h-11 bg-gray-100 cursor-default"
-            placeholder="Input collectors' name here"
-            readOnly
-            value={
-              currentBarangayData
-                ? `${currentBarangayData.user.firstName} ${currentBarangayData.user.lastName}`
-                : "Loading..."
-            }
-            {...register("collectorName")}
-          />
-          {errors.collectorName && (
-            <p className="text-xs text-red-500 text-start">
-              {errors.collectorName?.message}
-            </p>
-          )}
-        </div>
+          {isCreatingBeneficiary ? (
+            <>
+              <div className="flex flex-row items-center justify-between">
+                <label className="text-text-primary font-medium">
+                  Beneficiary Name
+                </label>
+                <button
+                  type="button"
+                  className="text-xs text-cta-color hover:cursor-pointer"
+                  onClick={() => {
+                    setIsCreatingBeneficiary(false);
+                    setNewBeneficiaryName("");
+                  }}
+                >
+                  Back to search
+                </button>
+              </div>
+              <div className="flex flex-row items-center w-full outline-1 py-2.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11">
+                <input
+                  type="text"
+                  className="w-full outline-none px-3.5"
+                  placeholder="Input beneficiary name"
+                  value={newBeneficiaryName}
+                  onChange={(e) => setNewBeneficiaryName(e.target.value)}
+                />
+                <button
+                  className="pr-3.5 hover:cursor-pointer"
+                  type="button"
+                  onClick={() => {
+                    setIsCreatingBeneficiary(false);
+                    setNewBeneficiaryName("");
+                  }}
+                >
+                  <XMarkIcon className="w-5 stroke-gray-400" />
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <label className="text-text-primary font-medium">
+                Beneficiary
+              </label>
 
-        <div className="flex flex-col gap-1">
-          <label className="text-text-primary font-medium">
-            Beneficiary name
-          </label>
-          <input
-            type="text"
-            className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11  max-h-11"
-            placeholder="Input name here"
-            {...register("beneficiaryName")}
-          />
-          {errors.beneficiaryName && (
-            <p className="text-xs text-red-500 text-start">
-              {errors.beneficiaryName?.message}
-            </p>
+              <div className="flex flex-row items-center relative w-full outline-1 py-2.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11">
+                <input
+                  type="text"
+                  className="w-full outline-none px-3.5"
+                  placeholder="Search Beneficiary"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+
+                {selectedBeneficiary && (
+                  <span className="text-xs font-medium text-emerald-700 bg-emerald-50 rounded-3xl py-1 px-2 text-nowrap mr-2">
+                    {selectedBeneficiary.points} pts
+                  </span>
+                )}
+                {selectedBeneficiary && (
+                  <button
+                    className="pr-3.5 hover:cursor-pointer"
+                    type="button"
+                    onClick={() => {
+                      setSelectedBeneficiary(null);
+                      setSearchQuery("");
+                    }}
+                  >
+                    <XMarkIcon className="w-5 stroke-gray-400" />
+                  </button>
+                )}
+                {searchQuery && !selectedBeneficiary && (
+                  <div className="absolute bg-white flex flex-col w-full items-start z-40 rounded-lg new-border text-sm py-2.5 top-11.5">
+                    {searchResults.length > 0 ? (
+                      searchResults.map((r) => (
+                        <div
+                          key={r.id}
+                          className="px-3.5 hover:cursor-pointer hover:bg-gray-50 w-full py-1 flex flex-row items-center justify-between"
+                          onClick={() => {
+                            setSelectedBeneficiary(r);
+                            setSearchQuery(r.name);
+                          }}
+                        >
+                          <p className="text-text-primary">{r.name}</p>
+                          <p className="text-xs text-gray-500">
+                            {r.points} pts
+                          </p>
+                        </div>
+                      ))
+                    ) : (
+                      <>
+                        <p className="px-3.5 py-1 text-gray-500">
+                          No beneficiaries found
+                        </p>
+                        <button
+                          type="button"
+                          className="px-3.5 hover:cursor-pointer hover:bg-gray-50 w-full py-1.5 flex flex-row items-center gap-1.5 text-cta-color font-medium"
+                          onClick={() => {
+                            setIsCreatingBeneficiary(true);
+                            setSearchQuery("");
+                            setSearchResults([]);
+                          }}
+                        >
+                          <PlusIcon className="w-4" />
+                          Create new beneficiary
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            </>
           )}
         </div>
 

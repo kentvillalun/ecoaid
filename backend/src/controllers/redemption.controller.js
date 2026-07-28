@@ -177,24 +177,20 @@ const updateProgram = async (req, res) => {
 
 const createTransaction = async (req, res) => {
   try {
-    const {
-      programId,
-      items,
-      collectorName,
-      beneficiaryId,
-      educationalLevel,
-    } = req.body ?? {};
+    const { programId, items, beneficiaryId, beneficiaryName, educationalLevel } =
+      req.body ?? {};
 
-    const { barangayId } = req.user;
+    const { barangayId, id } = req.user;
 
-    if (!programId || !items || !collectorName) {
+    if (!programId || !items) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    const beneficiary = await prisma.beneficiary.findUnique({
-      where: { beneficiaryId, barangayId },
+    const user = await prisma.user.findUnique({
+      where: { barangayId, id },
       select: {
-        name: true
+        firstName: true,
+        lastName: true,
       }
     })
 
@@ -225,41 +221,91 @@ const createTransaction = async (req, res) => {
       return res.status(404).json({ error: "Program material not found" });
     }
 
-    const transaction = await prisma.redemptionTransaction.create({
-      data: {
-        programId,
-        beneficiaryId,
-        collectorName,
-        beneficiaryName: beneficiary.name,
-        educationalLevel,
-        redemptionTransactionItem: {
-          createMany: {
-            data: items.map((item, index) => ({
-              programMaterialId: item.programMaterialId,
-              amount: item.amount,
-              currentValue: materials[index].program.isCashMode
-                ? materials[index].cashValue
-                : materials[index].pointValue,
-            })),
+    const transaction = await prisma.$transaction(async (tx) => {
+      let beneficiarySnapshot = null;
+      let resolvedBeneficiaryId = beneficiaryId ?? null;
+
+      if (beneficiaryId) {
+        const beneficiary = await tx.beneficiary.findUnique({
+          where: { barangayId, id: beneficiaryId },
+          select: {
+            id: true,
+            name: true,
+            points: true,
+          },
+        });
+
+        if (!beneficiary) {
+          throw new Error("Beneficiary not found")
+        }
+
+        beneficiarySnapshot = beneficiary.name;
+      }
+
+      if (!beneficiaryId && beneficiaryName) {
+        const newBeneficiary = await tx.beneficiary.create({
+          data: { name: beneficiaryName, barangayId, points: 0 },
+        });
+        resolvedBeneficiaryId = newBeneficiary.id;
+        beneficiarySnapshot = beneficiaryName;
+      }
+
+      const transaction = await tx.redemptionTransaction.create({
+        data: {
+          programId,
+          beneficiaryId: resolvedBeneficiaryId,
+          collectorName: `${user.firstName} ${user.lastName}`,
+          beneficiaryName: beneficiarySnapshot,
+          educationalLevel,
+          redemptionTransactionItem: {
+            createMany: {
+              data: items.map((item, index) => ({
+                programMaterialId: item.programMaterialId,
+                amount: item.amount,
+                currentValue: materials[index].program.isCashMode
+                  ? materials[index].cashValue
+                  : materials[index].pointValue,
+              })),
+            },
           },
         },
-      },
-    });
+      });
 
-    const transactionLog = await prisma.stockTransactionLog.createMany({
-      data: items.map((item, index) => ({
-        barangayId,
-        redemptionTransactionId: transaction.id,
-        source: "REDEMPTION",
-        transactionType: "IN",
-        materialId: materials[index].materialId,
-        unit:
-          materials[index].material.defaultUnit === "PIECE" ? "PIECE" : "KG",
-        quantity: convertToKg(
-          item.amount,
-          materials[index].material.defaultUnit,
-        ),
-      })),
+      const isCashMode = materials[0]?.program?.isCashMode;
+      const totalPoints = items.reduce((total, item, index) => {
+        return total + materials[index].pointValue * item.amount;
+      }, 0);
+
+      if (resolvedBeneficiaryId && !isCashMode) {
+        await tx.beneficiary.update({
+          where: {
+            id: resolvedBeneficiaryId,
+          },
+          data: {
+            points: {
+              increment: totalPoints,
+            },
+          },
+        });
+      }
+
+      const transactionLog = await tx.stockTransactionLog.createMany({
+        data: items.map((item, index) => ({
+          barangayId,
+          redemptionTransactionId: transaction.id,
+          source: "REDEMPTION",
+          transactionType: "IN",
+          materialId: materials[index].materialId,
+          unit:
+            materials[index].material.defaultUnit === "PIECE" ? "PIECE" : "KG",
+          quantity: convertToKg(
+            item.amount,
+            materials[index].material.defaultUnit,
+          ),
+        })),
+      });
+
+      return transaction
     });
 
     return res.status(201).json({
@@ -419,5 +465,5 @@ export {
   updateProgram,
   getTransaction,
   getBeneficiaries,
-  searchBeneficiary
+  searchBeneficiary,
 };

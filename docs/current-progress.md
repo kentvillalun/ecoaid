@@ -157,7 +157,7 @@
 
 ## Next Steps (priority order)
 
-1. Build Junkshop Sales module (price comparison across junkshops, backend + wiring; replace the existing mock scaffold)
+1. Build Junkshop Sales module (price comparison across junkshops, backend + wiring; replace the existing mock scaffold) 
 2. Wire pickup-request `COLLECTED` transitions and redemption transactions into `StockTransactionLog` so Material Stock reflects all intake/outflow sources, not just manual intake
 3. Build Reward Inventory module
 4. Build Program Funds module (expenses, junkshop income, profits)

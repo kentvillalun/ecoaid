@@ -17,6 +17,7 @@ import junkshopSalesRoute from "./routes/junkshop-sales.route.js";
 import announcementRoute from "./routes/announcement.route.js";
 import leaderboardRoute from "./routes/leaderboard.route.js";
 import programFundsRoute from "./routes/program-funds.route.js";
+import rewardInventoryRoute from "./routes/reward-inventory.route.js"
 
 config();
 connectDB();
@@ -50,6 +51,7 @@ app.use("/junkshop-sales", junkshopSalesRoute);
 app.use("/announcements", announcementRoute);
 app.use("/leaderboard", leaderboardRoute);
 app.use("/program-funds", programFundsRoute);
+app.use("/rewards", rewardInventoryRoute);
 
 const PORT = process.env.PORT || 5001;
 const server = app.listen(PORT, () => {

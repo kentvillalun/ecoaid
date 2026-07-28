@@ -300,10 +300,6 @@ only as an unwired UI scaffold with hardcoded mock data.
 - Resident Layer 2 auth check (server component calling GET /auth/me) still pending
 - `InProgressActions` multi-row form: no client-side validation before submit — empty material/amount rows are silently sent to backend
 - `StockTransactionLog` is only written by Manual Intake (`IN`) and manual stock-out adjustments (`OUT`); pickup-request `COLLECTED` transitions and redemption transactions do not create ledger entries yet, so Material Stock balances undercount real intake/outflow until those are wired in
-- **Deletion → Archive pattern** — panel strictly forbids hard deletion; all delete operations across all modules should be replaced with soft delete/archive (isArchived field) before pilot testing. Affects: Announcements (deleteAnnouncement), and any future delete endpoints. Do as a batch after all modules are complete.
-- **Rate limiting** — no rate limiting on any endpoint currently; add before pilot testing
-- **Pagination / Load more** — decided to use reveal-more pattern instead of page-based pagination; implement on long lists (residents, transaction logs, sales history) before pilot testing
-- **Backend hardening** — input validation, consistent error message format, and request sanitization needed across controllers before pilot testing
 - Junkshop Sales, Leaderboard, and Reports pages are static UI scaffolds with hardcoded mock data — no backend, and not linked in the barangay `Sidebar` (`href: ""`)
 
 ## Deferred Decisions
@@ -353,20 +349,30 @@ I'm building.
 - [x] Block C (completed Jul 13) — Announcements module
 - [x] Block D (completed Jul 13) — Resident Announcements wiring
 - [x] Block E (completed Jul 19) — Residents module + sidebar refactor
-- [x] Block F (completed Jul 20) — Leaderboard module (two-leaderboard,
-      getRankedLeaderboard helper, Promise.all, podium + full rankings)
-- [x] Block G (completed Jul 25) — Program Funds module:
-      ✅ ProgramExpense schema (name, amount, description, performedBy,
-         performedByRole, userId/programId/barangayId FKs); migrated
-      ✅ addExpense, getExpenses, getProgramFundSummary, getTransactionLogs
-         controllers — summary computes totalIncome (reduce over JunkshopSaleItem),
-         totalExpenses (aggregate), programBreakdown (per-program budget tracking);
-         transaction log combines expenses + sales into unified sorted array
-      ✅ Program Funds page fully wired — summary cards (Income/Expenses/
-         Net Balance with contextual icons), Program Budgets table,
-         Transaction Log with All/Income/Expenses filter tabs,
-         AddExpenseModal wired via useMutation
-- [ ] Block H+ — Reward Inventory, Reports sized as they come up
+- [x] Block F (completed Jul 20) — Leaderboard module
+- [x] Block G (completed Jul 25) — Program Funds module fully wired
+- [~] Block H (in progress) — Reward Inventory + Redemption fixes:
+      ✅ Beneficiary model — name, points, barangayId; back-relations to
+         RedemptionTransaction, RewardRelease; migrated
+      ✅ RewardItem model — name, category (RewardCategory enum), quantity,
+         pointCost, programId, barangayId; migrated
+      ✅ RewardRelease model — rewardItemId, beneficiaryId, userId, programId,
+         barangayId, quantity, beneficiaryName, performedBy, performedByRole
+      ✅ addRewardItem, getRewardItems (with available stock computed via reduce),
+         releaseReward (validates stock + points, $transaction), getRewardReleases,
+         getRewardSummary (Promise.all parallel queries) — all done and tested
+      ✅ getBeneficiaries, searchBeneficiary controllers + routes
+      ✅ createTransaction updated — accepts beneficiaryId (existing) OR
+         beneficiaryName (new, creates beneficiary inline in $transaction);
+         collectorName removed, derived from req.user; points added to
+         beneficiary balance (points mode only)
+      ✅ RecordTransactionModal updated — debounced beneficiary search,
+         two modes (existing vs new), beneficiaryId/beneficiaryName sent correctly
+      Remaining:
+      - Reward Inventory page UI scaffold + wiring
+      - Reports module
+- [ ] Block I+ — Reports, technical debt batch (archive pattern, rate limiting,
+      pagination, backend hardening)
 
 ## During Sem (Jul 20 onwards)
 - [ ] Teachable Machine (image recognition on pickup request)

@@ -203,6 +203,8 @@ export default function ManualIntakePage() {
     };
   }, []);
 
+
+
   return (
     <Page className="bg-new-bg!">
       <BarangayTopBar title="Manual Collection Intake" />
