@@ -38,6 +38,7 @@ const getRewardItems = async (req, res) => {
       },
       select: {
         id: true,
+        programId: true,
         program: {
           select: {
             name: true,
@@ -46,6 +47,7 @@ const getRewardItems = async (req, res) => {
         category: true,
         name: true,
         quantity: true,
+        pointCost: true,
         createdAt: true,
         rewardReleases: {
           select: {
@@ -62,9 +64,11 @@ const getRewardItems = async (req, res) => {
 
       return {
         id: r.id,
+        programId: r.programId,
         programName: r.program.name,
         category: r.category,
         name: r.name,
+        pointCost: r.pointCost,
         available: r.quantity - totalReleases,
         createdAt: r.createdAt,
       };

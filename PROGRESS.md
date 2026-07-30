@@ -351,28 +351,21 @@ I'm building.
 - [x] Block E (completed Jul 19) — Residents module + sidebar refactor
 - [x] Block F (completed Jul 20) — Leaderboard module
 - [x] Block G (completed Jul 25) — Program Funds module fully wired
-- [~] Block H (in progress) — Reward Inventory + Redemption fixes:
-      ✅ Beneficiary model — name, points, barangayId; back-relations to
-         RedemptionTransaction, RewardRelease; migrated
-      ✅ RewardItem model — name, category (RewardCategory enum), quantity,
-         pointCost, programId, barangayId; migrated
-      ✅ RewardRelease model — rewardItemId, beneficiaryId, userId, programId,
-         barangayId, quantity, beneficiaryName, performedBy, performedByRole
-      ✅ addRewardItem, getRewardItems (with available stock computed via reduce),
-         releaseReward (validates stock + points, $transaction), getRewardReleases,
-         getRewardSummary (Promise.all parallel queries) — all done and tested
+- [x] Block H (completed Jul 30) — Reward Inventory + Redemption fixes:
+      ✅ Beneficiary model + RewardItem + RewardRelease schema + migrations
+      ✅ addRewardItem, getRewardItems, releaseReward, getRewardReleases,
+         getRewardSummary controllers — all done and tested
       ✅ getBeneficiaries, searchBeneficiary controllers + routes
-      ✅ createTransaction updated — accepts beneficiaryId (existing) OR
-         beneficiaryName (new, creates beneficiary inline in $transaction);
-         collectorName removed, derived from req.user; points added to
-         beneficiary balance (points mode only)
-      ✅ RecordTransactionModal updated — debounced beneficiary search,
-         two modes (existing vs new), beneficiaryId/beneficiaryName sent correctly
-      Remaining:
-      - Reward Inventory page UI scaffold + wiring
-      - Reports module
-- [ ] Block I+ — Reports, technical debt batch (archive pattern, rate limiting,
-      pagination, backend hardening)
+      ✅ createTransaction updated — beneficiary create-or-find inline,
+         collectorName derived from req.user, points added to beneficiary
+      ✅ RecordTransactionModal — debounced beneficiary search, two modes
+         (existing vs new beneficiary), correct submission body
+      ✅ Reward Inventory page fully wired — summary cards, reward items
+         table + mobile cards, release history table + mobile cards,
+         AddRewardItemModal + ReleaseRewardModal both wired
+- [ ] Block I — Reports module
+- [ ] Block J — Technical debt batch (archive pattern, rate limiting,
+      pagination/load more, backend hardening)
 
 ## During Sem (Jul 20 onwards)
 - [ ] Teachable Machine (image recognition on pickup request)

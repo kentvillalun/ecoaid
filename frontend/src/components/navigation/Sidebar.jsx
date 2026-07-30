@@ -71,7 +71,7 @@ export const Sidebar = () => {
     {
       icon: RewardsIcon,
       label: "Reward ",
-      href: "",
+      href: "/reward-inventory",
     },
     {
       icon: JunkshopSalesIcon,
