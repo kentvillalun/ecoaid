@@ -150,7 +150,7 @@ export default function JunkshopSalesPage() {
   const prices = allPriceItems?.map((item) => item.price);
   const highestPrices = prices ? Math.max(...prices) : 0;
   return (
-    <Page className="bg-new-bg! ">
+    <Page className="bg-bg! ">
       <BarangayTopBar title="Junkshop Sales" />
       <PageContent className="md:pl-70! md:p-6 md:gap-7">
         {/* Header */}
@@ -163,13 +163,13 @@ export default function JunkshopSalesPage() {
         <section className="grid grid-cols-2 lg:grid-cols-3 gap-3">
           <Card className="shadow-none! new-border flex flex-col items-start">
             <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-[#6b7280]">
+              <p className="text-xs font-medium text-text-secondary">
                 Junkshops Tracked
               </p>
               <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-[#6b7280]" />}
+                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
                 className="rounded-full! p-2!"
-                containerColor="#f3f4f6"
+                containerColor="var(--color-icon-bg)"
               />
             </div>
             {isPricesLoading ? (
@@ -183,19 +183,19 @@ export default function JunkshopSalesPage() {
                 {pricesData?.junkshops?.length}
               </p>
             )}
-            <div className="flex flex-row items-center w-auto bg-primary/10 px-3 py-1 rounded-xl text-xs gap-1">
-              <BuildingStorefrontIcon className="w-3 stroke-cta-color" />
-              <p className="text-cta-color font-medium">Active partners</p>
+            <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+              <BuildingStorefrontIcon className="w-3 stroke-accent" />
+              <p className="text-accent font-medium">Active partners</p>
             </div>
           </Card>
 
           <Card className="shadow-none! new-border flex flex-col items-start">
             <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-[#6b7280]">Best Overall</p>
+              <p className="text-xs font-medium text-text-secondary">Best Overall</p>
               <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-[#6b7280]" />}
+                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
                 className="rounded-full! p-2!"
-                containerColor="#f3f4f6"
+                containerColor="var(--color-icon-bg)"
               />
             </div>
             <p className="md:text-xl font-bold text-text-primary text-base leading-tight mt-1 mb-1">
@@ -209,27 +209,27 @@ export default function JunkshopSalesPage() {
                 bestJunkshop
               )}
             </p>
-            <div className="flex flex-row items-center w-auto bg-primary/10 px-3 py-1 rounded-xl text-xs gap-1">
-              <TrophyIcon className="w-3 stroke-cta-color" />
-              <p className="text-cta-color font-medium">Top performer</p>
+            <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+              <TrophyIcon className="w-3 stroke-accent" />
+              <p className="text-accent font-medium">Top performer</p>
             </div>
           </Card>
 
           <Card className="shadow-none! new-border flex flex-col items-start col-span-2 lg:col-span-1">
             <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-[#6b7280]">Stat TBD</p>
+              <p className="text-xs font-medium text-text-secondary">Stat TBD</p>
               <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-[#6b7280]" />}
+                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
                 className="rounded-full! p-2!"
-                containerColor="#f3f4f6"
+                containerColor="var(--color-icon-bg)"
               />
             </div>
             <p className="md:text-2xl font-bold text-lg select-none">
               {formatCurrency(highestPrices)}
             </p>
-            <div className="flex flex-row items-center w-auto bg-primary/10 px-3 py-1 rounded-xl text-xs gap-1">
-              <QuestionMarkCircleIcon className="w-3 stroke-cta-color" />
-              <p className="text-cta-color font-medium">Placeholder</p>
+            <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+              <QuestionMarkCircleIcon className="w-3 stroke-accent" />
+              <p className="text-accent font-medium">Placeholder</p>
             </div>
           </Card>
         </section>
@@ -239,7 +239,7 @@ export default function JunkshopSalesPage() {
           <SectionHeader
             title="Price Comparison"
             subtitle="Price per kg by junkshop and material type"
-            icon={<StarIcon className="w-6 stroke-cta-color" />}
+            icon={<StarIcon className="w-6 stroke-accent" />}
             buttonLabel="Record Sale"
             buttonIcon={<ShoppingBagIcon className="w-5 hidden md:flex" />}
             onAction={() => setIsModalOpen(true)}
@@ -251,7 +251,7 @@ export default function JunkshopSalesPage() {
           >
             <div className="w-full overflow-x-auto">
               <table className="w-full text-sm border-collapse text-gray-600">
-                <thead className="border-b border-[#E6EFF5]">
+                <thead className="border-b border-border">
                   <tr>
                     <th className="font-medium text-start p-4 text-nowrap">
                       Material
@@ -271,15 +271,15 @@ export default function JunkshopSalesPage() {
                           {shop.name}
                           <IconContainer
                             icon={
-                              <ArrowUpRightIcon className="w-2.5 stroke-[#6b7280]" />
+                              <ArrowUpRightIcon className="w-2.5 stroke-text-secondary" />
                             }
                             className="rounded-full! p-1!"
-                            containerColor="#f3f4f640"
+                            containerColor="var(--color-icon-bg)"
                           />
                         </button>
                       </th>
                     ))}
-                    <th className="font-medium text-center p-4 text-nowrap text-cta-color">
+                    <th className="font-medium text-center p-4 text-nowrap text-accent">
                       Best Price
                     </th>
                   </tr>
@@ -333,7 +333,7 @@ export default function JunkshopSalesPage() {
                       return (
                         <tr
                           key={row.id}
-                          className="hover:bg-[#f8f8f8] transition-all duration-150"
+                          className="hover:bg-bg transition-all duration-150"
                         >
                           <td className="p-4">
                             <MaterialTag
@@ -357,7 +357,7 @@ export default function JunkshopSalesPage() {
                                 ${i === bestIdx ? "hover:bg-green-100" : "hover:bg-gray-100"}`}
                                 >
                                   <span
-                                    className={`font-semibold tabular-nums ${i === bestIdx ? "text-cta-color text-base" : "text-text-primary"}`}
+                                    className={`font-semibold tabular-nums ${i === bestIdx ? "text-accent text-base" : "text-text-primary"}`}
                                   >
                                     {priceItem?.price
                                       ? `₱${priceItem.price}`
@@ -375,10 +375,10 @@ export default function JunkshopSalesPage() {
                           })}
                           <td className="p-4 text-center bg-green-50/40">
                             <div className="flex flex-col items-center gap-0.5">
-                              <span className="font-bold text-cta-color text-base tabular-nums">
+                              <span className="font-bold text-accent text-base tabular-nums">
                                 ₱{bestPrice}
                               </span>
-                              <span className="text-xs text-[#6b7280]">
+                              <span className="text-xs text-text-secondary">
                                 {
                                   pricesData?.junkshops?.[bestIdx]?.name.split(
                                     " ",
@@ -464,7 +464,7 @@ export default function JunkshopSalesPage() {
                           ${i === bestIdx ? "bg-green-50" : ""}`}
                         >
                           <button
-                            className={`inline-flex items-center gap-1 text-sm font-medium ${i === bestIdx ? "text-green-800" : "text-[#6b7280]"}`}
+                            className={`inline-flex items-center gap-1 text-sm font-medium ${i === bestIdx ? "text-green-800" : "text-text-secondary"}`}
                             onClick={(e) => {
                               e.stopPropagation();
                               setSelectedJunkshop(shop.id);
@@ -474,15 +474,15 @@ export default function JunkshopSalesPage() {
                             {shop.name}
                             <IconContainer
                               icon={
-                                <ArrowUpRightIcon className="w-2.5 stroke-[#6b7280]" />
+                                <ArrowUpRightIcon className="w-2.5 stroke-text-secondary" />
                               }
                               className="rounded-full! p-1!"
-                              containerColor="#f3f4f640"
+                              containerColor="var(--color-icon-bg)"
                             />
                           </button>
                           <div className="flex items-center gap-2">
                             <span
-                              className={`font-bold tabular-nums  ${i === bestIdx ? "text-cta-color" : "text-text-primary"}`}
+                              className={`font-bold tabular-nums  ${i === bestIdx ? "text-accent" : "text-text-primary"}`}
                             >
                               {prices[i]?.price ? (
                                 <div>
@@ -523,7 +523,7 @@ export default function JunkshopSalesPage() {
             title="Sales History"
             subtitle="Recent transactions across junkshops"
             icon={
-              <ClipboardDocumentListIcon className="w-6 stroke-cta-color" />
+              <ClipboardDocumentListIcon className="w-6 stroke-accent" />
             }
             noButton
           />
@@ -534,7 +534,7 @@ export default function JunkshopSalesPage() {
           >
             <div className="w-full overflow-x-auto overflow-y-hidden">
               <table className="w-full text-sm border-collapse text-gray-600">
-                <thead className="border-b border-[#E6EFF5]">
+                <thead className="border-b border-border">
                   <tr>
                     {HISTORY_HEADERS.map((h) => (
                       <th
@@ -582,7 +582,7 @@ export default function JunkshopSalesPage() {
                       return (
                         <tr
                           key={row.id}
-                          className="text-start hover:bg-[#f8f8f8] transition-all duration-150"
+                          className="text-start hover:bg-bg transition-all duration-150"
                         >
                           <td className="p-4 font-medium text-text-primary text-nowrap">
                             {row?.junkshop?.name}
@@ -669,7 +669,7 @@ export default function JunkshopSalesPage() {
                     <p className="text-sm font-semibold text-text-primary">
                       {row.junkshop.name}
                     </p>
-                    <p className="text-sm font-bold text-cta-color tabular-nums">
+                    <p className="text-sm font-bold text-accent tabular-nums">
                       {formatCurrency(row.totalAmount)}
                     </p>
                   </div>

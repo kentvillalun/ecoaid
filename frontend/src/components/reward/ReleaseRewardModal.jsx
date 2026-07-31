@@ -141,7 +141,7 @@ export const ReleaseRewardModal = ({
         resetModal();
         onClose();
       }}
-      icon={<TruckIcon className="w-6 stroke-cta-color" />}
+      icon={<TruckIcon className="w-6 stroke-accent" />}
       title="Release Reward"
       subtitle="Search for a beneficiary and release reward items"
       confirmLabel="Release Reward"
@@ -151,7 +151,7 @@ export const ReleaseRewardModal = ({
       <div className="p-6 flex flex-col gap-3">
         <div className="flex flex-col gap-1">
           <label className="label">Beneficiary</label>
-          <div className="flex flex-row items-center relative w-full outline-1 py-2.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11">
+          <div className="input flex flex-row items-center relative mb-0">
             <input
               type="text"
               className="w-full outline-none px-3.5"
@@ -178,7 +178,7 @@ export const ReleaseRewardModal = ({
               </button>
             )}
             {searchQuery && !selectedBeneficiary && (
-              <div className="absolute bg-white flex flex-col w-full items-start z-40 rounded-lg new-border text-sm py-2.5 top-11.5">
+              <div className="absolute bg-surface flex flex-col w-full items-start z-40 rounded-lg new-border text-sm py-2.5 top-11.5">
                 {searchResults.length > 0 ? (
                   searchResults.map((r) => (
                     <div
@@ -220,7 +220,7 @@ export const ReleaseRewardModal = ({
               return (
                 <div
                   key={index}
-                  className="new-border bg-white rounded-xl p-4"
+                  className="new-border bg-surface rounded-xl p-4"
                 >
                   <div className="flex flex-row items-center justify-between mb-3">
                     <span className="text-sm font-medium text-gray-700">

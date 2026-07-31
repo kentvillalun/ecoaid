@@ -50,10 +50,10 @@ export default function RequestDetailPage() {
   const handleRefetchCount = () => setRefetchCount((prev) => prev + 1);
 
   return (
-    <Page className="bg-new-bg! overflow-hidden">
+    <Page className="bg-bg! overflow-hidden">
       <ResidentHeader
         title={"Request Details"}
-        className="bg-new-bg! shadow-none"
+        className="bg-bg! shadow-none"
       />
       <PageContent
         withBottomNav={false}
@@ -219,7 +219,7 @@ export default function RequestDetailPage() {
                 </div>
                 <div className="flex flex-col items-start justify-between gap-2 pb-2">
                   <p className="text-text-primary text-sm font-medium">Notes</p>
-                  <p className="bg-new-bg text-sm p-2 new-border w-full rounded-lg min-h-25 text-text-primary">
+                  <p className="bg-bg text-sm p-2 new-border w-full rounded-lg min-h-25 text-text-primary">
                     {data?.request?.notes
                       ? data?.request?.notes
                       : "There is no notes available for this request"}
@@ -249,7 +249,7 @@ export default function RequestDetailPage() {
                         className={`w-2 h-2 rounded-full mt-1.5 ${
                           i === timelineEvents.length - 1
                             ? statusStyles[data?.request?.status]
-                            : "bg-cta-color"
+                            : "bg-accent"
                         }`}
                       />
 

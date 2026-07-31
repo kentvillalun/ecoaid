@@ -98,7 +98,7 @@ export const AddExpenseModal = ({ isModalOpen, setIsModalOpen, handleSummaryRefe
         setIsModalOpen(false)
         resetModal()
       }}
-      icon={<BanknotesIcon className="w-6 stroke-cta-color" />}
+      icon={<BanknotesIcon className="w-6 stroke-accent" />}
       title="Add Expense"
       subtitle="Please input details for the program expense"
       confirmLabel="Add Expense"

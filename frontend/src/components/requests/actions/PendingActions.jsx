@@ -23,9 +23,9 @@ export const PendingActions = ({ id, onSuccess, variant }) => {
             isOpen={isOpen}
             subtitle={"Please state the rejection reason"}
             status={"REQUESTED"}
-            icon={<ExclamationTriangleIcon className="w-6 stroke-black" />}
+            icon={<ExclamationTriangleIcon className="w-6 stroke-accent" />}
             confirmLabel={"Decline"}
-            confirmClassName={"bg-red-500 hover:bg-red-600 duration-300 ease-in-out transition-all"}
+            confirmClassName={"gradient-button-red duration-300 ease-in-out transition-all"}
             onClose={() => setIsOpen(false)}
             onConfirm={async () => {
               toast.loading("Declining request...")
@@ -49,7 +49,7 @@ export const PendingActions = ({ id, onSuccess, variant }) => {
               </label>
               <textarea
                 type="text"
-                className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-[#74C857] transition-colors"
+                className="input mb-0 max-h-none"
                 rows={4}
                 placeholder="Input the reason here"
                 onChange={(event) => setRejectionReason(event.target.value)}

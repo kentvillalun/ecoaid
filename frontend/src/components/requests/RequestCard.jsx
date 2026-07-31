@@ -81,7 +81,7 @@ export const RequestCard = ({
               {status === "APPROVED" ? (
                 <Card
                   className={`flex flex-col shadow-none! new-border items-start gap-3 transition-all hover:cursor-pointer hover:-translate-y-0.5 duration-200 ease-in-out ${
-                    isSelected ? "bg-[#F0FAF0] ring-1 ring-cta-color" : ""
+                    isSelected ? "bg-[#F0FAF0] ring-1 ring-accent" : ""
                   }`}
                 >
                   {/* Top row */}
@@ -136,7 +136,7 @@ export const RequestCard = ({
               ) : (
                 <Card
                   className={`flex flex-col items-start gap-3 shadow-none! new-border transition-all hover:cursor-pointer hover:-translate-y-0.5 duration-200 ease-in-out ${
-                    isSelected ? "bg-[#F0FAF0] ring-2 ring-[#74C857]" : ""
+                    isSelected ? "bg-[#F0FAF0] ring-1 ring-accent" : ""
                   }`}
                   handleClick={() =>
                     router.push(`/collection-requests/${d.id}`)

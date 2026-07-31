@@ -84,7 +84,7 @@ function UnitToggle({ value, onChange }) {
       <span className="text-xs font-medium text-gray-400 tracking-wide uppercase">
         Unit
       </span>
-      <div className="flex flex-row bg-white new-border rounded-xl p-0.5 gap-0.5">
+      <div className="flex flex-row bg-surface new-border rounded-xl p-0.5 gap-0.5">
         {["kg", "lbs"].map((u) => (
           <button
             key={u}
@@ -287,7 +287,7 @@ export default function MaterialStockPage() {
   };
 
   return (
-    <Page className="bg-new-bg!">
+    <Page className="bg-bg!">
       <BarangayTopBar title="Material Stock" />
       <PageContent className="md:pl-70! md:p-6 md:gap-7">
         {/* Header */}
@@ -301,7 +301,7 @@ export default function MaterialStockPage() {
             <Modal
               isOpen={isModalOpen}
               onClose={() => setIsModalOpen(false)}
-              icon={<ArrowUpTrayIcon className="w-6 stroke-new-primary" />}
+              icon={<ArrowUpTrayIcon className="w-6 stroke-accent" />}
               title={"Record stock out"}
               subtitle={"Please input details for your stock out transaction"}
               confirmLabel={"Record stock out"}
@@ -384,11 +384,11 @@ export default function MaterialStockPage() {
         <section className="grid grid-cols-2 gap-3">
           <Card className="shadow-none! new-border flex flex-col items-start">
             <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-[#6b7280]">Total Weight</p>
+              <p className="text-xs font-medium text-text-secondary">Total Weight</p>
               <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-[#6b7280]" />}
+                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
                 className="rounded-full! p-2!"
-                containerColor="#f3f4f6"
+                containerColor="var(--color-icon-bg)"
               />
             </div>
             <p className="md:text-2xl font-bold text-text-primary text-lg">
@@ -400,19 +400,19 @@ export default function MaterialStockPage() {
                 <span className="">{totalWeightDisplay}</span>
               )}
             </p>
-            <div className="flex flex-row items-center w-auto bg-primary/10 px-3 py-1 rounded-xl text-xs gap-2">
-              <ScaleIcon className="w-3 stroke-cta-color" />
-              <p className="text-cta-color font-medium">All categories</p>
+            <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-2">
+              <ScaleIcon className="w-3 stroke-accent" />
+              <p className="text-accent font-medium">All categories</p>
             </div>
           </Card>
 
           <Card className="shadow-none! new-border flex flex-col items-start">
             <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-[#6b7280]">Total Pieces</p>
+              <p className="text-xs font-medium text-text-secondary">Total Pieces</p>
               <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-[#6b7280]" />}
+                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
                 className="rounded-full! p-2!"
-                containerColor="#f3f4f6"
+                containerColor="var(--color-icon-bg)"
               />
             </div>
             <p className="md:text-2xl font-bold text-text-primary text-lg">
@@ -424,9 +424,9 @@ export default function MaterialStockPage() {
                 <span className="">{TOTAL_PCS} pcs</span>
               )}
             </p>
-            <div className="flex flex-row items-center w-auto bg-primary/10 px-3 py-1 rounded-xl text-xs gap-2">
-              <CubeIcon className="w-3 stroke-cta-color" />
-              <p className="text-cta-color font-medium">
+            <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-2">
+              <CubeIcon className="w-3 stroke-accent" />
+              <p className="text-accent font-medium">
                 Piece-based materials
               </p>
             </div>
@@ -437,7 +437,7 @@ export default function MaterialStockPage() {
           <SectionHeader
             title="Category Overview"
             subtitle="Recyclable materials grouped by category"
-            icon={<ArchiveBoxIcon className="w-6 stroke-cta-color" />}
+            icon={<ArchiveBoxIcon className="w-6 stroke-accent" />}
             noButton
           />
 
@@ -469,7 +469,7 @@ export default function MaterialStockPage() {
           <SectionHeader
             title="Transaction Log"
             subtitle="History of all stock movements"
-            icon={<Bars3BottomLeftIcon className="w-6 stroke-cta-color" />}
+            icon={<Bars3BottomLeftIcon className="w-6 stroke-accent" />}
             buttonLabel="Stock Out"
             buttonIcon={<ArrowUpTrayIcon className="w-5 hidden md:flex" />}
             onAction={() => setIsModalOpen((prev) => !prev)}
@@ -480,7 +480,7 @@ export default function MaterialStockPage() {
             className={`${inter.className} hidden md:flex md:flex-col px-8 overflow-x-auto md:gap-3 md:items-start shadow-none! new-border`}
           >
             <table className="w-full text-sm border-collapse text-gray-600 overflow-x-auto">
-              <thead className="border-b border-[#E6EFF5]">
+              <thead className="border-b border-border">
                 <tr>
                   {TABLE_HEADERS.map((h) => (
                     <th
@@ -532,7 +532,7 @@ export default function MaterialStockPage() {
                     return (
                       <tr
                         key={row.id}
-                        className="text-start hover:bg-[#f8f8f8] transition-all duration-150"
+                        className="text-start hover:bg-bg transition-all duration-150"
                       >
                         <td className="p-4">
                           <MaterialTag

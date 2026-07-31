@@ -99,7 +99,7 @@ export default function RewardInventoryPage() {
   const handleReleaseRefetchCount = () =>
     setReleaseRefetchCount((prev) => prev + 1);
   return (
-    <Page className="bg-new-bg!">
+    <Page className="bg-bg!">
       <BarangayTopBar title="Reward Inventory" />
       <PageContent className="md:pl-70! md:p-6 md:gap-7">
         {/* Header */}
@@ -112,11 +112,11 @@ export default function RewardInventoryPage() {
         <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <Card className="shadow-none! new-border flex flex-col items-start">
             <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-[#6b7280]">Total Items</p>
+              <p className="text-xs font-medium text-text-secondary">Total Items</p>
               <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-[#6b7280]" />}
+                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
                 className="rounded-full! p-2!"
-                containerColor="#f3f4f6"
+                containerColor="var(--color-icon-bg)"
               />
             </div>
             <p className="md:text-2xl font-bold text-text-primary text-base">
@@ -126,21 +126,21 @@ export default function RewardInventoryPage() {
                 (summaryData?.totalItems ?? 0)
               )}
             </p>
-            <div className="flex flex-row items-center w-auto bg-primary/10 px-3 py-1 rounded-xl text-xs gap-1">
-              <ArchiveBoxIcon className="w-3 stroke-cta-color" />
-              <p className="text-cta-color font-medium">Reward items tracked</p>
+            <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+              <ArchiveBoxIcon className="w-3 stroke-accent" />
+              <p className="text-accent font-medium">Reward items tracked</p>
             </div>
           </Card>
 
           <Card className="shadow-none! new-border flex flex-col items-start">
             <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-[#6b7280]">
+              <p className="text-xs font-medium text-text-secondary">
                 Total Available
               </p>
               <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-[#6b7280]" />}
+                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
                 className="rounded-full! p-2!"
-                containerColor="#f3f4f6"
+                containerColor="var(--color-icon-bg)"
               />
             </div>
             <p className="md:text-2xl font-bold text-text-primary text-base">
@@ -150,21 +150,21 @@ export default function RewardInventoryPage() {
                 (summaryData?.totalAvailable ?? 0)
               )}
             </p>
-            <div className="flex flex-row items-center w-auto bg-primary/10 px-3 py-1 rounded-xl text-xs gap-1">
-              <CheckCircleIcon className="w-3 stroke-cta-color" />
-              <p className="text-cta-color font-medium">Ready to distribute</p>
+            <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+              <CheckCircleIcon className="w-3 stroke-accent" />
+              <p className="text-accent font-medium">Ready to distribute</p>
             </div>
           </Card>
 
           <Card className="shadow-none! new-border flex flex-col items-start">
             <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-[#6b7280]">
+              <p className="text-xs font-medium text-text-secondary">
                 Total Released
               </p>
               <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-[#6b7280]" />}
+                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
                 className="rounded-full! p-2!"
-                containerColor="#f3f4f6"
+                containerColor="var(--color-icon-bg)"
               />
             </div>
             <p className="md:text-2xl font-bold text-text-primary text-base">
@@ -174,21 +174,21 @@ export default function RewardInventoryPage() {
                 (summaryData?.totalReleased ?? 0)
               )}
             </p>
-            <div className="flex flex-row items-center w-auto bg-primary/10 px-3 py-1 rounded-xl text-xs gap-1">
-              <TruckIcon className="w-3 stroke-cta-color" />
-              <p className="text-cta-color font-medium">Distributed items</p>
+            <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+              <TruckIcon className="w-3 stroke-accent" />
+              <p className="text-accent font-medium">Distributed items</p>
             </div>
           </Card>
 
           <Card className="shadow-none! new-border flex flex-col items-start">
             <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-[#6b7280]">
+              <p className="text-xs font-medium text-text-secondary">
                 Total Beneficiaries
               </p>
               <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-[#6b7280]" />}
+                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
                 className="rounded-full! p-2!"
-                containerColor="#f3f4f6"
+                containerColor="var(--color-icon-bg)"
               />
             </div>
             <p className="md:text-2xl font-bold text-text-primary text-base">
@@ -198,16 +198,16 @@ export default function RewardInventoryPage() {
                 (summaryData?.distinctBeneficiaries ?? 0)
               )}
             </p>
-            <div className="flex flex-row items-center w-auto bg-primary/10 px-3 py-1 rounded-xl text-xs gap-1">
-              <UserGroupIcon className="w-3 stroke-cta-color" />
-              <p className="text-cta-color font-medium">Unique recipients</p>
+            <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+              <UserGroupIcon className="w-3 stroke-accent" />
+              <p className="text-accent font-medium">Unique recipients</p>
             </div>
           </Card>
           {isSummaryError && (
-            <div className="col-span-2 md:cols-span-4 w-full text-xs md:text-sm text-[#6b7280]">
+            <div className="col-span-2 md:cols-span-4 w-full text-xs md:text-sm text-text-secondary">
               Unable to load reward summary.{" "}
               <button
-                className="text-cta-color font-medium"
+                className="text-accent font-medium"
                 onClick={() => handleSummaryRefetchCount()}
               >
                 Please try again
@@ -221,7 +221,7 @@ export default function RewardInventoryPage() {
           <SectionHeader
             title="Reward Items"
             subtitle="Current stock available for distribution"
-            icon={<GiftIcon className="w-6 stroke-cta-color" />}
+            icon={<GiftIcon className="w-6 stroke-accent" />}
             buttonLabel="Add Item"
             onAction={() => setIsAddModalOpen(true)}
           />
@@ -232,7 +232,7 @@ export default function RewardInventoryPage() {
           >
             <div className="w-full overflow-x-auto">
               <table className="w-full text-sm border-collapse text-gray-600">
-                <thead className="border-b border-[#E6EFF5]">
+                <thead className="border-b border-border">
                   <tr>
                     {REWARD_HEADERS.map((h) => (
                       <th
@@ -278,7 +278,7 @@ export default function RewardInventoryPage() {
                     rewardItemsData?.rewardItems?.map((item) => (
                       <tr
                         key={item.id}
-                        className="hover:bg-[#f8f8f8] transition-all duration-150"
+                        className="hover:bg-bg transition-all duration-150"
                       >
                         <td className="p-4 font-medium text-text-primary text-nowrap">
                           {item.programName}
@@ -387,7 +387,7 @@ export default function RewardInventoryPage() {
             title="Release History"
             subtitle="Record of all reward distributions"
             icon={
-              <ClipboardDocumentListIcon className="w-6 stroke-cta-color" />
+              <ClipboardDocumentListIcon className="w-6 stroke-accent" />
             }
             buttonLabel="Release Reward"
             onAction={() => setIsReleaseModalOpen(true)}
@@ -399,7 +399,7 @@ export default function RewardInventoryPage() {
           >
             <div className="w-full overflow-x-auto">
               <table className="w-full text-sm border-collapse text-gray-600">
-                <thead className="border-b border-[#E6EFF5]">
+                <thead className="border-b border-border">
                   <tr>
                     {HISTORY_HEADERS.map((h) => (
                       <th
@@ -443,7 +443,7 @@ export default function RewardInventoryPage() {
                     releaseData?.rewardReleases?.map((entry) => (
                       <tr
                         key={entry?.id}
-                        className="hover:bg-[#f8f8f8] transition-all duration-150"
+                        className="hover:bg-bg transition-all duration-150"
                       >
                         <td className="p-4 font-medium text-text-primary text-nowrap">
                           {entry?.rewardItem?.name}
@@ -521,7 +521,7 @@ export default function RewardInventoryPage() {
                     <p className="text-sm font-bold text-text-primary">
                       {entry.rewardItem?.name}
                     </p>
-                    <p className="text-sm font-bold text-cta-color tabular-nums">
+                    <p className="text-sm font-bold text-accent tabular-nums">
                       x{entry.quantity}
                     </p>
                   </div>

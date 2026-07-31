@@ -100,7 +100,7 @@ export default function ProgramDetails() {
   });
   const router = useRouter();
   return (
-    <Page className="bg-new-bg!">
+    <Page className="bg-bg!">
       <BarangayTopBar title={"Program Details"} />
       <PageContent className="md:pl-70! md:p-6 gap-3">
         {isTransactionModalOpen &&
@@ -136,11 +136,11 @@ export default function ProgramDetails() {
               ? "bg-green-100 text-green-700"
               : "bg-red-100 text-red-700"
           }
-          icon={<DocumentIcon className="w-6 stroke-black" />}
+          icon={<DocumentIcon className="w-6 stroke-accent" />}
         />
 
         <SectionHeader
-          icon={<GiftIcon className="w-6 stroke-cta-color" />}
+          icon={<GiftIcon className="w-6 stroke-accent" />}
           title={"Program Details"}
           subtitle={"Review program details and material points"}
           buttonLabel={"Edit Program"}
@@ -274,7 +274,7 @@ export default function ProgramDetails() {
             <SectionHeader
               title={"Transaction History"}
               subtitle={"Redemption transactions under this program"}
-              icon={<Bars3BottomLeftIcon className="w-6 stroke-cta-color" />}
+              icon={<Bars3BottomLeftIcon className="w-6 stroke-accent" />}
               buttonLabel={"Record Transaction"}
               onAction={() => setIsTransactionModalOpen(true)}
               buttonClassName={data?.program?.isActive ? "flex!" : "hidden!"}
@@ -285,7 +285,7 @@ export default function ProgramDetails() {
               className={` hidden md:flex md:flex-col px-8 overflow-x-auto md:gap-3 md:items-start shadow-none! new-border`}
             >
               <table className="w-full text-sm border-collapse text-nowrap">
-                <thead className="border-b border-[#E6EFF5]">
+                <thead className="border-b border-border">
                   <tr>
                     {TABLE_COLUMNS.map((col) => (
                       <th
@@ -327,7 +327,7 @@ export default function ProgramDetails() {
                     transactions?.map((t) => (
                       <tr
                         key={t?.id}
-                        className="text-center hover:bg-[#f8f8f8] transition-all"
+                        className="text-center hover:bg-bg transition-all"
                       >
                         {TABLE_COLUMNS.map((col) => (
                           <td key={col.header} className="p-3">

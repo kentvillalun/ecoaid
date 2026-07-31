@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export const DesktopGuard = () => {
   return (
-    <main className="hidden lg:flex h-svh w-full items-center justify-center bg-new-primary">
+    <main className="hidden lg:flex h-svh w-full items-center justify-center bg-dark">
       <div className="text-center flex flex-col items-center gap-4">
         <div className="max-w-40 relative w-full aspect-3/1">
           <Image

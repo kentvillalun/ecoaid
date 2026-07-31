@@ -81,7 +81,7 @@ export default function AnnouncementsPage() {
 
 
   return (
-    <Page className="bg-new-bg!">
+    <Page className="bg-bg!">
       <BarangayTopBar title="Announcements" />
       <PageContent className="md:pl-70! md:p-6 md:gap-7">
         {/* Header */}
@@ -94,13 +94,13 @@ export default function AnnouncementsPage() {
           <SectionHeader
             title="Announcements"
             subtitle="All published announcements"
-            icon={<MegaphoneIcon className="w-6 stroke-cta-color" />}
+            icon={<MegaphoneIcon className="w-6 stroke-accent" />}
             buttonLabel="Create Announcement"
             onAction={() => setIsCreateModalOpen(true)}
           />
 
           {/* Category filter tabs */}
-          <div className="sticky top-0 z-10 bg-new-bg pt-1">
+          <div className="sticky top-0 z-10 bg-bg pt-1">
             <StatusChip
               STATUS_TABS={CATEGORY_TABS}
               currentTab={currentTab}
@@ -114,7 +114,7 @@ export default function AnnouncementsPage() {
           >
             <div className="w-full overflow-x-auto">
               <table className="w-full text-sm border-collapse text-gray-600">
-                <thead className="border-b border-[#E6EFF5]">
+                <thead className="border-b border-border">
                   <tr>
                     {TABLE_HEADERS.map((h) => (
                       <th
@@ -149,7 +149,7 @@ export default function AnnouncementsPage() {
                     filteredAnnouncements?.map((item) => (
                       <tr
                         key={item.id}
-                        className="hover:bg-[#f8f8f8] transition-all duration-150"
+                        className="hover:bg-bg transition-all duration-150"
                       >
                         <td className="p-4 text-nowrap">
                           <div className="flex flex-row items-center gap-2">
@@ -163,15 +163,12 @@ export default function AnnouncementsPage() {
                           </div>
                         </td>
                         <td className="p-4 text-nowrap">
-                          <div className="flex flex-row items-center gap-2">
-                            <p className="font-semibold text-text-primary">
-                              {item.performedBy}
-                            </p>
-                            <Badge
-                              label={item.performedByRole}
-                              color="bg-gray-100 text-gray-600"
-                            />
-                          </div>
+                          <p className="font-semibold text-text-primary">
+                            {item.performedBy}
+                          </p>
+                          <p className="text-xs text-gray-400 capitalize">
+                            {item.performedByRole.toLowerCase()}
+                          </p>
                         </td>
                         <td className="p-4 text-nowrap text-gray-400 text-xs">
                           {formatDate(item.createdAt)}
@@ -179,7 +176,7 @@ export default function AnnouncementsPage() {
                         <td className="p-4">
                           <button
                             type="button"
-                            className="text-cta-color font-medium hover:cursor-pointer text-nowrap"
+                            className="text-accent font-medium hover:cursor-pointer text-nowrap"
                             onClick={() => handleViewDetails(item)}
                           >
                             View Details
@@ -229,14 +226,13 @@ export default function AnnouncementsPage() {
                       color={CATEGORY_COLORS[item.category]}
                     />
                   </div>
-                  <div className="flex flex-row items-center gap-2">
+                  <div>
                     <p className="text-xs font-semibold text-text-primary">
                       {item.performedBy}
                     </p>
-                    <Badge
-                      label={item.performedByRole}
-                      color="bg-gray-100 text-gray-600"
-                    />
+                    <p className="text-xs text-gray-400 capitalize">
+                      {item.performedByRole.toLowerCase()}
+                    </p>
                   </div>
                   <p className="text-xs text-gray-400">
                     {formatDate(item.createdAt)}

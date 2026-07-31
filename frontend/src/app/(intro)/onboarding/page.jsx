@@ -27,7 +27,7 @@ export default function OnboardingPage() {
     <>
       <DesktopGuard />
 
-      <Page className="bg-new-bg! lg:hidden!">
+      <Page className="bg-bg! lg:hidden!">
         <PageTransition
           key={"page"}
           className="flex flex-col items-center justify-between min-w-full pt-6 "
@@ -46,7 +46,7 @@ export default function OnboardingPage() {
               className={`${step === 3 ? "hidden" : "flex"} items-center justify-end w-full pr-4 md:px-15`}
             >
               <Link
-                className="text-new-primary"
+                className="text-dark"
                 href={"/login"}
                 onClick={() => {
                   localStorage.setItem("hasSeenOnboarding", "true");
@@ -81,7 +81,7 @@ export default function OnboardingPage() {
                     />
 
                     <div
-                      className="xs:w-45 xs:h-45 mobile:w-55 mobile:h-55 md:w-70 md:h-70 bg-[#74C85740] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                      className="xs:w-45 xs:h-45 mobile:w-55 mobile:h-55 md:w-70 md:h-70 bg-success/25 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
                       style={{
                         borderRadius: "60% 40% 55% 45% / 50% 60% 40% 50%",
                       }}
@@ -90,7 +90,7 @@ export default function OnboardingPage() {
                 </div>
                 <div className="flex flex-col items-center justify-between gap-3.5 w-full">
                   <div className="grid grid-cols-4 mx-auto items-center justify-center gap-1 w-full max-w-30">
-                    <div className="col-span-2 h-1.25 bg-cta-color rounded-xl"></div>
+                    <div className="col-span-2 h-1.25 bg-accent rounded-xl"></div>
                     <div className="h-1.25 bg-[#D1D5DB] col-span-1 rounded-xl"></div>
                     <div className="h-1.25 bg-[#D1D5DB] col-span-1 rounded-xl"></div>
                   </div>
@@ -131,7 +131,7 @@ export default function OnboardingPage() {
                         transition={{ duration: 0.5, delay: 0.55 }}
                       >
                         <button
-                          className="bg-cta-color w-full text-white font-medium mobile:py-5 xs:py-3.5 rounded-[14px] text-sm gradient-button"
+                          className="bg-accent w-full text-white font-medium mobile:py-5 xs:py-3.5 rounded-[14px] text-sm gradient-button"
                           onClick={() => {
                             setStep(step + 1);
                             haptic.light();
@@ -160,7 +160,7 @@ export default function OnboardingPage() {
                     />
 
                     <div
-                      className="xs:w-64 xs:h-45 mobile:w-90 mobile:h-55 md:w-110 md:h-70 bg-[#74C85740] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                      className="xs:w-64 xs:h-45 mobile:w-90 mobile:h-55 md:w-110 md:h-70 bg-success/25 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
                       style={{
                         borderRadius: "52% 48% 58% 42% / 38% 42% 52% 48%",
                       }}
@@ -170,7 +170,7 @@ export default function OnboardingPage() {
                 <div className="flex flex-col items-center justify-between gap-3.5 w-full">
                   <div className="grid grid-cols-4 mx-auto items-center justify-center gap-1 w-full max-w-30">
                     <div className="h-1.25 bg-[#D1D5DB] col-span-1 rounded-xl"></div>
-                    <div className="col-span-2 h-1.25 bg-cta-color rounded-xl"></div>
+                    <div className="col-span-2 h-1.25 bg-accent rounded-xl"></div>
                     <div className="h-1.25 bg-[#D1D5DB] col-span-1 rounded-xl"></div>
                   </div>
 
@@ -210,7 +210,7 @@ export default function OnboardingPage() {
                           transition={{ duration: 0.5, delay: 0.55 }}
                         >
                           <button
-                            className="bg-cta-color w-full text-white font-medium xs:py-3.5 mobile:py-5 rounded-[14px] text-sm gradient-button"
+                            className="bg-accent w-full text-white font-medium xs:py-3.5 mobile:py-5 rounded-[14px] text-sm gradient-button"
                             onClick={() => {
                               setStep(step + 1);
                               haptic.light();
@@ -240,7 +240,7 @@ export default function OnboardingPage() {
                     />
 
                     <div
-                      className="xs:w-48 xs:h-52 mobile:w-65 mobile:h-72 md:w-80 md:h-90 bg-[#74C85740] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                      className="xs:w-48 xs:h-52 mobile:w-65 mobile:h-72 md:w-80 md:h-90 bg-success/25 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
                       style={{
                         borderRadius: "45% 55% 50% 50% / 55% 45% 60% 40%",
                       }}
@@ -251,7 +251,7 @@ export default function OnboardingPage() {
                   <div className="grid grid-cols-4 mx-auto items-center justify-center gap-1 w-full max-w-30">
                     <div className="h-1.25 bg-[#D1D5DB] col-span-1 rounded-xl"></div>
                     <div className="h-1.25 bg-[#D1D5DB] col-span-1 rounded-xl"></div>
-                    <div className="col-span-2 h-1.25 bg-cta-color rounded-xl"></div>
+                    <div className="col-span-2 h-1.25 bg-accent rounded-xl"></div>
                   </div>
                   <div className="bg-white mobile:min-h-69 w-full rounded-t-4xl mobile:p-8.25 xs:p-6">
                     {step === 3 && (
@@ -290,7 +290,7 @@ export default function OnboardingPage() {
                           transition={{ duration: 0.5, delay: 0.55 }}
                         >
                           <Link
-                            className="bg-cta-color w-full text-white font-medium mobile:py-5 xs:py-3.5 rounded-[14px] block text-center text-sm gradient-button"
+                            className="bg-accent w-full text-white font-medium mobile:py-5 xs:py-3.5 rounded-[14px] block text-center text-sm gradient-button"
                             onClick={() => {
                               localStorage.setItem("hasSeenOnboarding", "true");
                               sessionStorage.setItem("skipSplash", "true");

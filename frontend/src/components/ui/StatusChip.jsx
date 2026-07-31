@@ -17,7 +17,7 @@ export const StatusChip = ({ STATUS_TABS, currentTab, setCurrentTab }) => {
         const isActive = currentTab === tab.key;
         return (
           <button
-            className={`${inter.className}  py-1.5 px-3 text-sm rounded-xl ${isActive ? "gradient-button text-white" : "text-gray-600 bg-white"} transition-all ease-in-out hover:cursor-pointer duration-300 text-nowrap new-border` }
+            className={`${inter.className}  py-1.5 px-3 text-sm rounded-xl ${isActive ? "gradient-button text-white" : "text-gray-600 bg-surface"} transition-all ease-in-out hover:cursor-pointer duration-300 text-nowrap new-border` }
             key={tab.key}
             onClick={() => setCurrentTab(tab.key)}
           >

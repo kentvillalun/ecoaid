@@ -43,7 +43,7 @@ export const ResidentHeader = ({
     switch (actions) {
       case "notification":
         return (
-         <Link href={"/updates"} className="relative bg-white rounded-full p-2" style={{ border: "0.5px solid #e5e7eb"}}>
+         <Link href={"/updates"} className="relative bg-surface rounded-full p-2" style={{ border: "0.5px solid var(--color-border)"}}>
             <BellIcon className="w-5 h-5" />
             {hasNewAnnouncements && (
               <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border border-white" />
@@ -60,7 +60,7 @@ export const ResidentHeader = ({
 
   return (
     <header
-      className={`flex flex-row items-start justify-between min-w-full bg-new-bg fixed top-0 py-6 px-8 ${inter.className} z-50 min-h-18 ${className}`} style={{ borderBottom: "0.5px solid #e5e7eb" }}
+      className={`flex flex-row items-start justify-between min-w-full bg-bg fixed top-0 py-6 px-8 ${inter.className} z-50 min-h-18 ${className}`} style={{ borderBottom: "0.5px solid var(--color-border)" }}
     >
       <div className="flex flex-row items-center justify-between min-w-full">
         <ArrowLeftIcon

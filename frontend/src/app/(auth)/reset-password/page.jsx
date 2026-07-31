@@ -98,13 +98,13 @@ export default function ResetPasswordPage() {
   return (
     <>
       <DesktopGuard />
-      <Page className="lg:hidden bg-new-bg!">
+      <Page className="lg:hidden bg-bg!">
         <div className={`min-w-full flex flex-col justify-end`}>
           <form
-            className="min-h-auto bg-white p-8 rounded-t-4xl flex flex-col relative justify-center max-w-full"
+            className="min-h-auto bg-surface p-8 rounded-t-4xl flex flex-col relative justify-center max-w-full"
             onSubmit={handleSubmit(onSubmit)}
           >
-            <div className="-top-6 left-6 absolute rounded-full bg-new-primary w-16 h-16 flex items-center justify-center">
+            <div className="-top-6 left-6 absolute rounded-full bg-dark w-16 h-16 flex items-center justify-center">
               <div className="w-8 relative aspect-square ">
                 <Image
                   src="/ecoaid-logo/ecoaid-green-logo.png"
@@ -124,7 +124,7 @@ export default function ResetPasswordPage() {
             >
               <h3 className="font-semibold text-2xl mt-10">Reset Password</h3>
 
-              <div className="flex flex-col gap-6 text-[#717680] my-10">
+              <div className="flex flex-col gap-6 text-text-secondary my-10">
                 <div className="flex flex-col gap-2">
                   <label
                     htmlFor="newPassword"
@@ -132,7 +132,7 @@ export default function ResetPasswordPage() {
                   >
                     New Password
                   </label>
-                  <div className="flex flex-row justify-between outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors text-base">
+                  <div className="input flex flex-row justify-between text-base mb-0">
                     <input
                       type={showPassword ? "text" : "password"}
                       placeholder="Input your new password"
@@ -163,7 +163,7 @@ export default function ResetPasswordPage() {
                   >
                     Confirm new password
                   </label>
-                  <div className="flex flex-row justify-between outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors text-base">
+                  <div className="input flex flex-row justify-between text-base mb-0">
                     <input
                       type={showConfirmPassword ? "text" : "password"}
                       placeholder="Confirm new password"
@@ -193,7 +193,7 @@ export default function ResetPasswordPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting || !resetToken}
-                  className="bg-cta-color text-white font-medium py-3.75 px-24 rounded-[14px] disabled:opacity-70 text-sm gradient-button"
+                  className="bg-accent text-white font-medium py-3.75 px-24 rounded-[14px] disabled:opacity-70 text-sm gradient-button"
                 >
                   {isSubmitting ? "Resetting..." : "Reset Password"}
                 </button>
@@ -206,7 +206,7 @@ export default function ResetPasswordPage() {
                   }}
                 >
                   Back to{" "}
-                  <span className="font-medium text-cta-color text-sm">
+                  <span className="font-medium text-accent text-sm">
                     Log In
                   </span>
                 </Link>

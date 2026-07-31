@@ -69,7 +69,7 @@ export function CreateAnnouncementModal({ isOpen, setIsCreateModalOpen, handleRe
     <Modal
       isOpen={isOpen}
       onClose={() => setIsCreateModalOpen(false)}
-      icon={<MegaphoneIcon className="w-6 stroke-new-primary" />}
+      icon={<MegaphoneIcon className="w-6 stroke-accent" />}
       title="Create Announcement"
       subtitle="Publish a new announcement to residents"
       confirmLabel="Publish"
@@ -80,7 +80,7 @@ export function CreateAnnouncementModal({ isOpen, setIsCreateModalOpen, handleRe
         {/* Title */}
         <div className="flex flex-col gap-1">
           <label className="label">Title</label>
-          <div className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 flex items-center">
+          <div className="input flex items-center mb-0">
             <input
               type="text"
               className="w-full outline-none"
@@ -95,7 +95,7 @@ export function CreateAnnouncementModal({ isOpen, setIsCreateModalOpen, handleRe
         {/* Category */}
         <div className="flex flex-col gap-1">
           <label className="label">Category</label>
-          <div className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 flex items-center">
+          <div className="input flex items-center mb-0">
             <select
               className="w-full outline-none"
               defaultValue=""
@@ -119,7 +119,7 @@ export function CreateAnnouncementModal({ isOpen, setIsCreateModalOpen, handleRe
         {/* Content */}
         <div className="flex flex-col gap-1">
           <label className="label">Content</label>
-          <div className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors flex items-start">
+          <div className="input flex items-start mb-0 max-h-none">
             <textarea
               className="w-full outline-none"
               rows={4}

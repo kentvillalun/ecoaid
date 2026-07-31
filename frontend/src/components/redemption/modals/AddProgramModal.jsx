@@ -186,7 +186,7 @@ export const AddProgramModal = ({
     <Modal
       isOpen={isProgramModalOpen}
       onClose={() => setIsProgramModalOpen(false)}
-      icon={<GiftIcon className="w-6 stroke-black" />}
+      icon={<GiftIcon className="w-6 stroke-accent" />}
       title={program ? "Edit Program" : "Create Program"}
       subtitle={
         program
@@ -204,7 +204,7 @@ export const AddProgramModal = ({
           <label className="text-text-primary font-medium">Program name</label>
           <input
             type="text"
-            className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11  max-h-11"
+            className="input mb-0"
             placeholder="Input the program name here"
             {...register("name")}
           />
@@ -221,7 +221,7 @@ export const AddProgramModal = ({
           </label>
           <textarea
             type="text"
-            className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors"
+            className="input mb-0 max-h-none"
             placeholder="Input a short description about the program"
             {...register("description")}
             rows={4}
@@ -258,7 +258,7 @@ export const AddProgramModal = ({
               value={true}
             />
             <label
-              className={`flex flex-col gap-1 outline-1 py-2.5 px-3.5 text-gray-400 outline-gray-300 rounded-lg focus-within:outline-[#74C857] transition-colors min-h-11 ${isCashMode === "true" || isCashMode === true ? "bg-gray-100 " : ""}`}
+              className={`flex flex-col gap-1 outline-1 py-2.5 px-3.5 text-gray-400 outline-gray-300 rounded-lg focus-within:outline-accent transition-colors min-h-11 ${isCashMode === "true" || isCashMode === true ? "bg-gray-100 " : ""}`}
               htmlFor="cash"
             >
               <p className=" text-sm font-medium">Cash</p>
@@ -274,7 +274,7 @@ export const AddProgramModal = ({
             <label className="text-text-primary font-medium">Allotted budget</label>
             <input
               type="number"
-              className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11  max-h-11"
+              className="input mb-0"
               placeholder="Input budget here"
               {...register("allotedBudget")}
             />
@@ -333,7 +333,7 @@ export const AddProgramModal = ({
                     />
 
                     <div
-                      className="flex flex-row items-center justify-between flex-1 outline-1 py-2.5 px-3.5 rounded-lg text-[#717680] outline-gray-300 focus-within:outline-cta-color"
+                      className="input flex flex-row items-center justify-between flex-1 mb-0"
                       onClick={(e) =>
                         e.currentTarget.querySelector("input")?.focus()
                       }
@@ -403,7 +403,7 @@ export const AddProgramModal = ({
                     />
 
                     <div
-                      className="flex flex-row items-center justify-between flex-1 outline-1 py-2.5 px-3.5 rounded-lg text-[#717680] outline-gray-300 focus-within:outline-cta-color"
+                      className="input flex flex-row items-center justify-between flex-1 mb-0"
                       onClick={(e) =>
                         e.currentTarget.querySelector("input")?.focus()
                       }
@@ -473,7 +473,7 @@ export const AddProgramModal = ({
                     />
 
                     <div
-                      className="flex flex-row items-center justify-between flex-1 outline-1 py-2.5 px-3.5 rounded-lg text-[#717680] outline-gray-300 focus-within:outline-cta-color"
+                      className="input flex flex-row items-center justify-between flex-1 mb-0"
                       onClick={(e) =>
                         e.currentTarget.querySelector("input")?.focus()
                       }
@@ -543,7 +543,7 @@ export const AddProgramModal = ({
                     />
 
                     <div
-                      className="flex flex-row items-center justify-between flex-1 outline-1 py-2.5 px-3.5 rounded-lg text-[#717680] outline-gray-300 focus-within:outline-cta-color"
+                      className="input flex flex-row items-center justify-between flex-1 mb-0"
                       onClick={(e) =>
                         e.currentTarget.querySelector("input")?.focus()
                       }

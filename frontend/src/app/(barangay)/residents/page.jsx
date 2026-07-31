@@ -59,7 +59,7 @@ export default function ResidentsPage() {
     (r) => r.isVerified === false,
   ).length;
   return (
-    <Page className="bg-new-bg!">
+    <Page className="bg-bg!">
       <BarangayTopBar title="Residents" />
       <PageContent className="md:pl-70! md:p-6 md:gap-7">
         {/* Header */}
@@ -72,13 +72,13 @@ export default function ResidentsPage() {
         <section className="grid grid-cols-2 lg:grid-cols-3 gap-3">
           <Card className="shadow-none! new-border flex flex-col items-start">
             <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-[#6b7280]">
+              <p className="text-xs font-medium text-text-secondary">
                 Total Residents
               </p>
               <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-[#6b7280]" />}
+                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
                 className="rounded-full! p-2!"
-                containerColor="#f3f4f6"
+                containerColor="var(--color-icon-bg)"
               />
             </div>
             {isLoading ? (
@@ -92,19 +92,19 @@ export default function ResidentsPage() {
                 {totalCount}
               </p>
             )}
-            <div className="flex flex-row items-center w-auto bg-primary/10 px-3 py-1 rounded-xl text-xs gap-1">
-              <UsersIcon className="w-3 stroke-cta-color" />
-              <p className="text-cta-color font-medium">Registered accounts</p>
+            <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+              <UsersIcon className="w-3 stroke-accent" />
+              <p className="text-accent font-medium">Registered accounts</p>
             </div>
           </Card>
 
           <Card className="shadow-none! new-border flex flex-col items-start">
             <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-[#6b7280]">Verified</p>
+              <p className="text-xs font-medium text-text-secondary">Verified</p>
               <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-[#6b7280]" />}
+                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
                 className="rounded-full! p-2!"
-                containerColor="#f3f4f6"
+                containerColor="var(--color-icon-bg)"
               />
             </div>
             {isLoading ? (
@@ -118,21 +118,19 @@ export default function ResidentsPage() {
                 {verifiedCount}
               </p>
             )}
-            <div className="flex flex-row items-center w-auto bg-green-50 px-3 py-1 rounded-xl text-xs gap-1">
-              <CheckBadgeIcon className="w-3 stroke-green-700" />
-              <p className="text-green-700 font-medium">
-                With completed transactions
-              </p>
+            <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+              <CheckBadgeIcon className="w-3 stroke-accent" />
+              <p className="text-accent font-medium">Verified accounts</p>
             </div>
           </Card>
 
           <Card className="shadow-none! new-border flex flex-col items-start col-span-2 lg:col-span-1">
             <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-[#6b7280]">Unverified</p>
+              <p className="text-xs font-medium text-text-secondary">Unverified</p>
               <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-[#6b7280]" />}
+                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
                 className="rounded-full! p-2!"
-                containerColor="#f3f4f6"
+                containerColor="var(--color-icon-bg)"
               />
             </div>
             {isLoading ? (
@@ -146,9 +144,9 @@ export default function ResidentsPage() {
                 {unverifiedCount}
               </p>
             )}
-            <div className="flex flex-row items-center w-auto bg-yellow-50 px-3 py-1 rounded-xl text-xs gap-1">
-              <ExclamationCircleIcon className="w-3 stroke-yellow-700" />
-              <p className="text-yellow-700 font-medium">
+            <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+              <ExclamationCircleIcon className="w-3 stroke-accent" />
+              <p className="text-accent font-medium">
                 No completed transactions yet
               </p>
             </div>
@@ -161,7 +159,7 @@ export default function ResidentsPage() {
           <SectionHeader
             title="Residents"
             subtitle="All registered residents in your barangay"
-            icon={<UsersIcon className="w-6 stroke-cta-color" />}
+            icon={<UsersIcon className="w-6 stroke-accent" />}
             noButton
           />
 
@@ -171,7 +169,7 @@ export default function ResidentsPage() {
           >
             <div className="w-full overflow-x-auto">
               <table className="w-full text-sm border-collapse text-gray-600">
-                <thead className="border-b border-[#E6EFF5]">
+                <thead className="border-b border-border">
                   <tr>
                     {TABLE_HEADERS.map((h) => (
                       <th
@@ -209,7 +207,7 @@ export default function ResidentsPage() {
                     data?.residents?.map((resident) => (
                       <tr
                         key={resident.id}
-                        className="hover:bg-[#f8f8f8] transition-all duration-150"
+                        className="hover:bg-bg transition-all duration-150"
                       >
                         <td className="p-4 font-bold text-text-primary text-nowrap">
                           {resident.firstName} {resident.lastName}

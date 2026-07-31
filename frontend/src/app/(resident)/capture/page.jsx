@@ -196,7 +196,7 @@ export default function CapturePage() {
   }, []);
 
   return (
-    <Page className="bg-new-bg!">
+    <Page className="bg-bg!">
       <Toaster position="top-center" />
       <ResidentHeader title={"Capture Recyclables"} />
 
@@ -210,7 +210,7 @@ export default function CapturePage() {
         >
           <div className="bg-white shadow-lg p-4 rounded-lg flex flex-col gap-4 items-center justify-center">
             <div className="flex flex-col items-center justify-center py-4">
-              <CheckCircleIcon className="fill-cta-color h-10 w-10" />
+              <CheckCircleIcon className="fill-accent h-10 w-10" />
               <p className="text-md font-medium">Request Sent!</p>
               <p className="text-sm text-[#727272] max-w-55 text-center">
                 Your barangay will review your collection soon.
@@ -309,7 +309,7 @@ export default function CapturePage() {
           >
             <div className="flex flex-col gap-3">
               <div className="flex flex-col gap-1">
-                <div className="flex flex-row items-center gap-1 outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11">
+                <div className="input flex flex-row items-center gap-1 mb-0">
                   <input
                     type="checkbox"
                     onChange={(e) => {
@@ -342,7 +342,7 @@ export default function CapturePage() {
                     <label className="font-medium text-sm text-[#727272] ">
                       Material category
                     </label>
-                    <div className="outline-1 py-2.5 px-3.5 text-[#717680] text-base outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors">
+                    <div className="input text-base mb-0">
                       <select
                         className="w-full outline-none"
                         onChange={(e) => setCategory(e.target.value)}
@@ -364,7 +364,7 @@ export default function CapturePage() {
                     <label className="font-medium text-sm text-[#727272]">
                       Material
                     </label>
-                    <div className="outline-1 py-2.5 px-3.5 text-[#717680] text-base outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors">
+                    <div className="input text-base mb-0">
                       <select
                         className="w-full outline-none"
                         {...register("materialId")}
@@ -392,7 +392,7 @@ export default function CapturePage() {
                 <label className="font-medium text-sm text-[#727272] ">
                   Estimated value
                 </label>
-                <div className="outline-1 py-2.5 pl-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors flex items-center justify-between">
+                <div className="outline-1 py-2.5 pl-3.5 text-text-secondary outline-border rounded-lg focus-within:outline-accent transition-colors flex items-center justify-between">
                   <div className="flex flex-row justify-center items-center w-full pr-4">
                     <input
                       type="number"
@@ -438,7 +438,7 @@ export default function CapturePage() {
                   value={sitio ?? "Loading..."}
                   disabled
                   type="text"
-                  className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-[#74C857] transition-colors disabled:bg-gray-100"
+                  className="input mb-0 disabled:bg-gray-100"
                   placeholder="e.g. Sitio 1"
                 />
               </div>
@@ -449,7 +449,7 @@ export default function CapturePage() {
                 </label>
                 <input
                   type="text"
-                  className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors"
+                  className="input mb-0 max-h-none"
                   placeholder="Enter your notes here"
                   {...register("notes")}
                 />

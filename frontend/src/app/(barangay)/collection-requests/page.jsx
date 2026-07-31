@@ -89,7 +89,7 @@ export default function CollectionRequests() {
   };
 
   return (
-    <Page className="bg-new-bg!">
+    <Page className="bg-bg!">
       <BarangayTopBar title="Collection Requests" />
       <PageContent className=" md:pl-70! md:p-6 md:gap-7">
         <BarangayHeaderCard
@@ -100,7 +100,7 @@ export default function CollectionRequests() {
         />
         <SearchInput />
         <div className="flex flex-col gap-3 relative">
-          <div className="sticky -top-5 z-30 bg-new-bg pt-4">
+          <div className="sticky -top-5 z-30 bg-bg pt-4">
             <StatusChip
               STATUS_TABS={STATUS_TABS}
               currentTab={currentTab}

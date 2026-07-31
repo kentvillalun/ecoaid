@@ -142,7 +142,7 @@ export default function LoginPage() {
       <>
         <DesktopGuard />
         <main
-          className={`min-h-svh overflow-x-hidden flex items-center justify-center bg-new-primary ${inter.className} ${isFading ? "opacity-0" : "opacity-100"} transition-opacity duration-500 lg:hidden`}
+          className={`min-h-svh overflow-x-hidden flex items-center justify-center bg-dark ${inter.className} ${isFading ? "opacity-0" : "opacity-100"} transition-opacity duration-500 lg:hidden`}
         >
           <div
             className={`flex flex-col items-center w-full max-w-md gap-25 p-2 justify-center`}
@@ -165,13 +165,13 @@ export default function LoginPage() {
     <>
       <DesktopGuard />
       {!isChecking && (
-        <Page className="lg:hidden bg-new-bg!">
+        <Page className="lg:hidden bg-bg!">
           <div className={`min-w-full flex flex-col justify-end`}>
             <form
-              className="min-h-auto bg-white p-8 rounded-t-4xl flex flex-col relative justify-center max-w-full"
+              className="min-h-auto bg-surface p-8 rounded-t-4xl flex flex-col relative justify-center max-w-full"
               onSubmit={handleSubmit(onSubmit)}
             >
-              <div className="-top-6 left-6 absolute rounded-full bg-new-primary w-16 h-16 flex items-center justify-center">
+              <div className="-top-6 left-6 absolute rounded-full bg-dark w-16 h-16 flex items-center justify-center">
                 <div className="w-8 relative aspect-square ">
                   <Image
                     src="/ecoaid-logo/ecoaid-green-logo.png"
@@ -190,7 +190,7 @@ export default function LoginPage() {
               >
                 <h3 className="font-semibold text-2xl mt-10">Sign In</h3>
 
-                <div className="flex flex-col gap-6 text-[#717680] my-10">
+                <div className="flex flex-col gap-6 text-text-secondary my-10">
                   <div className="flex flex-col gap-2">
                     <label
                       htmlFor=""
@@ -202,7 +202,7 @@ export default function LoginPage() {
                       <input
                         type="text"
                         placeholder="Input username"
-                        className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors text-base"
+                        className="input text-base mb-0"
                         {...register("username")}
                       />
 
@@ -221,7 +221,7 @@ export default function LoginPage() {
                     >
                       Password
                     </label>
-                    <div className="flex flex-row gap-3.25 justify-between outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors text-base">
+                    <div className="input flex flex-row gap-3.25 justify-between text-base mb-0">
                       <input
                         type={showPassword ? "text" : "password"}
                         placeholder="Input password"
@@ -257,7 +257,7 @@ export default function LoginPage() {
                   )}
 
                   <button
-                    className="bg-cta-color text-white font-medium py-3.75 px-24 rounded-[14px] disabled:opacity-70 text-sm gradient-button"
+                    className="bg-accent text-white font-medium py-3.75 px-24 rounded-[14px] disabled:opacity-70 text-sm gradient-button"
                     type="submit"
                     disabled={isSubmitting}
                   >
@@ -265,7 +265,7 @@ export default function LoginPage() {
                   </button>
 
                   <Link
-                    className="text-center text-cta-color font-medium text-sm"
+                    className="text-center text-accent font-medium text-sm"
                     href="/forgot-password"
                   >
                     Forgot Password?
@@ -276,7 +276,7 @@ export default function LoginPage() {
                     href="/signup"
                   >
                     Don't have an account?{" "}
-                    <span className="font-medium text-cta-color">Sign Up</span>
+                    <span className="font-medium text-accent">Sign Up</span>
                   </Link>
                 </div>
               </motion.div>

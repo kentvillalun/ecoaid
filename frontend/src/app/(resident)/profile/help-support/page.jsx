@@ -59,10 +59,10 @@ export default function HelpAndSupportPage() {
   };
 
   return (
-    <Page className="bg-new-bg!">
+    <Page className="bg-bg!">
       <ResidentHeader
         title={"Help & Support"}
-        className="bg-new-bg! shadow-none!"
+        className="bg-bg! shadow-none!"
       />
 
       <PageContent>
@@ -88,7 +88,7 @@ export default function HelpAndSupportPage() {
                       <div
                         className={`transform transition-transform duration-400 ease-in-out ${isOpen ? "" : "rotate-180"}`}
                       >
-                        <ChevronUpIcon className="h-6 w-6 stroke-cta-color" />
+                        <ChevronUpIcon className="h-6 w-6 stroke-accent" />
                       </div>
                     </button>
                     <AnimatePresence>

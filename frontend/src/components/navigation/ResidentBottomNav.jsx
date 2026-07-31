@@ -31,9 +31,9 @@ export const ResidentBottomNav = ({classname = ""}) => {
 
   return (
     <section
-      className={`min-h-18.75 bottom-0 bg-white min-w-screen pb-2.25 flex flex-row items-center justify-center px-3 z-1000 fixed ${inter.className} ${classname} new-border`}
+      className={`min-h-18.75 bottom-0 bg-surface min-w-screen pb-2.25 flex flex-row items-center justify-center px-3 z-1000 fixed ${inter.className} ${classname} new-border`}
     >
-      <div className="grid grid-cols-3 gap-1 text-[#9DB2CE]">
+      <div className="grid grid-cols-3 gap-1 text-muted-accent">
         <div className="grid grid-cols-2 gap-3">
           <Link
             className="flex flex-col items-center justify-center"
@@ -41,8 +41,8 @@ export const ResidentBottomNav = ({classname = ""}) => {
           >
             {isHome ? (
               <>
-                <HomeIconSolid className="h-6.25 w-6.25 fill-cta-color" />
-                <p className="text-[12px] text-cta-color">Home</p>
+                <HomeIconSolid className="h-6.25 w-6.25 fill-accent" />
+                <p className="text-[12px] text-accent">Home</p>
               </>
             ) : (
               <>
@@ -57,8 +57,8 @@ export const ResidentBottomNav = ({classname = ""}) => {
           >
             {isCommunity ? (
               <>
-                <MapPinIconSolid className="h-6.25 w-6.25 fill-cta-color" />
-                <p className="text-[12px] text-cta-color">Barangay</p>
+                <MapPinIconSolid className="h-6.25 w-6.25 fill-accent" />
+                <p className="text-[12px] text-accent">Barangay</p>
               </>
             ) : (
               <>
@@ -85,8 +85,8 @@ export const ResidentBottomNav = ({classname = ""}) => {
           >
             {isRequests ? (
               <>
-                <ClipboardIconSolid className="h-6.25 w-6.25 fill-cta-color" />
-                <p className="text-[12px] text-cta-color">Requests</p>
+                <ClipboardIconSolid className="h-6.25 w-6.25 fill-accent" />
+                <p className="text-[12px] text-accent">Requests</p>
               </>
             ) : (
               <>
@@ -101,8 +101,8 @@ export const ResidentBottomNav = ({classname = ""}) => {
           >
             {isProfile ? (
               <>
-                <UserIconSolid className="h-6.25 w-6.25 fill-cta-color" />
-                <p className="text-[12px] text-cta-color">Profile</p>
+                <UserIconSolid className="h-6.25 w-6.25 fill-accent" />
+                <p className="text-[12px] text-accent">Profile</p>
               </>
             ) : (
               <>

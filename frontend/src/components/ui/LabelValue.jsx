@@ -13,7 +13,7 @@ export const LabelValue = ({
 }) => {
   return (
     <div className={`${inter.className} flex flex-col w-full  ${className}`}>
-      <p className="text-[#6b7280] text-xs">{name}</p>
+      <p className="text-text-secondary text-xs">{name}</p>
       <div
         className={`text-sm ${(name === "Notes" || name === "Description") && "italic text-text-primary "} ${valueClassName}`}
       >

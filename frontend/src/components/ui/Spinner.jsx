@@ -6,13 +6,13 @@ export const Spinner = ({ className = "" }) => {
       className={`flex flex-col items-center justify-center min-h-full p-20 text-center ${className}`}
     >
       <div className="animate-spin">
-        <ArrowPathIcon className="w-9 stroke-cta-color" />
+        <ArrowPathIcon className="w-9 stroke-accent" />
       </div>
       <div className="">
-        <p className="text-xl font-semibold text-[#1F2937]">
+        <p className="text-xl font-semibold text-text-primary">
           Loading. Please wait
         </p>
-        <p className="text-sm text-[#6B7280]">Items are currently loading</p>
+        <p className="text-sm text-text-secondary">Items are currently loading</p>
       </div>
     </div>
   );

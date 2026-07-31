@@ -57,13 +57,13 @@ export default function ForgotPasswordPage() {
     <>
       <DesktopGuard />
 
-      <Page className="lg:hidden bg-new-bg">
+      <Page className="lg:hidden bg-bg">
         <div className={`min-w-full flex flex-col justify-end`}>
           <form
-            className="min-h-auto bg-white p-8 rounded-t-4xl flex flex-col relative justify-center max-w-full"
+            className="min-h-auto bg-surface p-8 rounded-t-4xl flex flex-col relative justify-center max-w-full"
             onSubmit={handleSubmit(onSubmit)}
           >
-            <div className="-top-6 left-6 absolute rounded-full bg-new-primary w-16 h-16 flex items-center justify-center">
+            <div className="-top-6 left-6 absolute rounded-full bg-dark w-16 h-16 flex items-center justify-center">
               <div className="w-8 relative aspect-square ">
                 <Image
                   src="/ecoaid-logo/ecoaid-green-logo.png"
@@ -90,12 +90,12 @@ export default function ForgotPasswordPage() {
                   }}
                   type="button"
                 >
-                  <ArrowLeftIcon className="w-7 stroke-cta-color" />
+                  <ArrowLeftIcon className="w-7 stroke-accent" />
                 </button>
                 <h3 className="font-semibold text-2xl">Forgot Password</h3>
               </div>
 
-              <div className="flex flex-col gap-4 text-[#717680] my-10">
+              <div className="flex flex-col gap-4 text-text-secondary my-10">
                 <div className="flex flex-col gap-2">
                   <label
                     htmlFor="contact"
@@ -107,7 +107,7 @@ export default function ForgotPasswordPage() {
                     id="contact"
                     type="text"
                     placeholder="09xxxxxxxxx"
-                    className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors text-base"
+                    className="input text-base mb-0"
                     {...register("phoneNumber")}
                   />
                   {errors.phoneNumber?.message && (
@@ -125,7 +125,7 @@ export default function ForgotPasswordPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="bg-cta-color text-white font-medium py-3.75 px-24 rounded-[14px] disabled:opacity-70 text-sm gradient-button"
+                  className="bg-accent text-white font-medium py-3.75 px-24 rounded-[14px] disabled:opacity-70 text-sm gradient-button"
                 >
                   {isSubmitting ? "Sending..." : "Submit"}
                 </button>

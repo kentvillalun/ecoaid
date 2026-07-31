@@ -55,8 +55,8 @@ export default function AnnouncementsPage() {
   
 
   return (
-    <Page className="bg-new-bg!">
-      <ResidentHeader title={"Announcements"} className="shadow-none! bg-new-bg!" />
+    <Page className="bg-bg!">
+      <ResidentHeader title={"Announcements"} className="shadow-none! bg-bg!" />
       <PageContent className="md:pl-3! gap-3!">
         {isLoading ? (
           <div className="flex flex-col gap-3">
@@ -120,7 +120,7 @@ export default function AnnouncementsPage() {
                   {isLong && (
                     <button
                       type="button"
-                      className="text-sm font-medium text-cta-color hover:cursor-pointer"
+                      className="text-sm font-medium text-accent hover:cursor-pointer"
                       onClick={() => toggleExpand(item.id)}
                     >
                       {isExpanded ? "Read less" : "Read more"}

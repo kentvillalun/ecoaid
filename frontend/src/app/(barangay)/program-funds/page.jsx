@@ -104,7 +104,7 @@ export default function ProgramFundsPage() {
         : "No expense records yet.";
 
   return (
-    <Page className="bg-new-bg!">
+    <Page className="bg-bg!">
       <BarangayTopBar title="Program Funds" />
       <PageContent className="md:pl-70! md:p-6 md:gap-7">
         {/* Header */}
@@ -117,11 +117,11 @@ export default function ProgramFundsPage() {
         <section className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <Card className="shadow-none! new-border flex flex-col items-start">
             <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-[#6b7280]">Total Income</p>
+              <p className="text-xs font-medium text-text-secondary">Total Income</p>
               <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-[#6b7280]" />}
+                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
                 className="rounded-full! p-2!"
-                containerColor="#f3f4f6"
+                containerColor="var(--color-icon-bg)"
               />
             </div>
             <p className="md:text-2xl font-bold text-green-600 text-lg flex flex-row items-center gap-1.5">
@@ -141,13 +141,13 @@ export default function ProgramFundsPage() {
 
           <Card className="shadow-none! new-border flex flex-col items-start">
             <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-[#6b7280]">
+              <p className="text-xs font-medium text-text-secondary">
                 Total Expenses
               </p>
               <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-[#6b7280]" />}
+                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
                 className="rounded-full! p-2!"
-                containerColor="#f3f4f6"
+                containerColor="var(--color-icon-bg)"
               />
             </div>
             <p className="md:text-2xl font-bold text-red-600 text-lg flex flex-row items-center gap-1.5">
@@ -166,11 +166,11 @@ export default function ProgramFundsPage() {
 
           <Card className="shadow-none! new-border flex flex-col items-start">
             <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-[#6b7280]">Net Balance</p>
+              <p className="text-xs font-medium text-text-secondary">Net Balance</p>
               <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-[#6b7280]" />}
+                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
                 className="rounded-full! p-2!"
-                containerColor="#f3f4f6"
+                containerColor="var(--color-icon-bg)"
               />
             </div>
             <p
@@ -205,7 +205,7 @@ export default function ProgramFundsPage() {
           <SectionHeader
             title="Program Budgets"
             subtitle="Allocated budget vs actual spending per program"
-            icon={<ChartPieIcon className="w-6 stroke-cta-color" />}
+            icon={<ChartPieIcon className="w-6 stroke-accent" />}
             noButton
           />
 
@@ -215,7 +215,7 @@ export default function ProgramFundsPage() {
           >
             <div className="w-full overflow-x-auto">
               <table className="w-full text-sm border-collapse text-gray-600">
-                <thead className="border-b border-[#E6EFF5]">
+                <thead className="border-b border-border">
                   <tr>
                     {PROGRAM_TABLE_HEADERS.map((h) => (
                       <th
@@ -272,7 +272,7 @@ export default function ProgramFundsPage() {
                       return (
                         <tr
                           key={p.id}
-                          className="hover:bg-[#f8f8f8] transition-all duration-150"
+                          className="hover:bg-bg transition-all duration-150"
                         >
                           <td className="p-4 font-semibold text-text-primary text-nowrap">
                             {p.name}
@@ -405,13 +405,13 @@ export default function ProgramFundsPage() {
           <SectionHeader
             title="Transaction Log"
             subtitle="All income and expense records"
-            icon={<Bars3BottomLeftIcon className="w-6 stroke-cta-color" />}
+            icon={<Bars3BottomLeftIcon className="w-6 stroke-accent" />}
             buttonLabel="Add Expense"
             onAction={() => setIsModalOpen(true)}
           />
 
           {/* Filter tabs */}
-          <div className="sticky -top-5 md:-top-6 z-10 bg-new-bg pt-2">
+          <div className="sticky -top-5 md:-top-6 z-10 bg-bg pt-2">
             <StatusChip
               STATUS_TABS={FILTER_TABS}
               currentTab={currentTab}
@@ -425,7 +425,7 @@ export default function ProgramFundsPage() {
           >
             <div className="w-full overflow-x-auto">
               <table className="w-full text-sm border-collapse text-gray-600">
-                <thead className="border-b border-[#E6EFF5]">
+                <thead className="border-b border-border">
                   <tr>
                     {TRANSACTION_TABLE_HEADERS.map((h) => (
                       <th
@@ -478,7 +478,7 @@ export default function ProgramFundsPage() {
                     filteredTransactions?.map((t) => (
                       <tr
                         key={t?.id}
-                        className="hover:bg-[#f8f8f8] transition-all duration-150"
+                        className="hover:bg-bg transition-all duration-150"
                       >
                         <td className="p-4">
                           <Badge

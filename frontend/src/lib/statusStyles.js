@@ -1,9 +1,9 @@
 export const statusStyles = {
-    REQUESTED: "bg-[#FCD50A25] text-[#EEB90E]",
-    APPROVED: "bg-[#1D9BF017] text-[#1D9BF0]",
-    IN_PROGRESS: "bg-[#FFF4D6] text-[#C88A00]",
-    REJECTED: "bg-[#FFE4E4] text-[#E54848]",
-    COLLECTED: "bg-[#89D95720] text-[#74C857]",
+    REQUESTED: "bg-warning/10 text-warning",
+    APPROVED: "bg-info/10 text-info",
+    IN_PROGRESS: "bg-in-progress/10 text-in-progress",
+    REJECTED: "bg-error/10 text-error",
+    COLLECTED: "bg-success/10 text-success",
     NOT_SCHEDULED: "bg-gray-200 text-gray-700",
     SCHEDULED: "bg-blue-100 text-blue-700",
   };

@@ -27,13 +27,13 @@ export default function TransactionDetailPage() {
   const handleRefetchCount = () => setRefetchCount((prev) => prev + 1);
 
   return (
-    <Page className="bg-new-bg!">
+    <Page className="bg-bg!">
       <BarangayTopBar title={"Transaction Details"} />
       <PageContent className="md:pl-70! md:p-6 gap-3">
         <DetailHeader
           title={"Transaction Details"}
           subtitle={"Review full details of this redemption transaction"}
-          icon={<DocumentIcon className="w-6 stroke-black" />}
+          icon={<DocumentIcon className="w-6 stroke-accent" />}
           badgeLabel={
             data?.transaction?.program?.isActive ? "Active" : "Inactive"
           }
@@ -45,7 +45,7 @@ export default function TransactionDetailPage() {
         />
 
         <SectionHeader
-          icon={<GiftIcon className="w-6 stroke-cta-color" />}
+          icon={<GiftIcon className="w-6 stroke-accent" />}
           title={"Transaction Details"}
           subtitle={"Review transaction information and redemption items"}
           noButton={true}
@@ -93,7 +93,7 @@ export default function TransactionDetailPage() {
                     <p className="">Amount & value</p>
                   </div>
 
-                  <div className="text-sm text-gray-600 flex flex-row items-center justify-between hover:bg-[#f8f8f8] transition-all p-3 rounded border-b border-gray-100">
+                  <div className="text-sm text-gray-600 flex flex-row items-center justify-between hover:bg-bg transition-all p-3 rounded border-b border-gray-100">
                     <div className="flex flex-col md:flex-row gap-1 items-start">
                       <Skeleton width={100} />
                       <Skeleton width={90} />
@@ -161,7 +161,7 @@ export default function TransactionDetailPage() {
 
                   {data?.transaction?.redemptionTransactionItem?.map((t) => (
                     <div
-                      className="text-sm text-gray-600 flex flex-row items-center justify-between hover:bg-[#f8f8f8] transition-all p-3 rounded border-b border-gray-100"
+                      className="text-sm text-gray-600 flex flex-row items-center justify-between hover:bg-bg transition-all p-3 rounded border-b border-gray-100"
                       key={t.id}
                     >
                       <div className="flex flex-col md:flex-row gap-1 items-start">

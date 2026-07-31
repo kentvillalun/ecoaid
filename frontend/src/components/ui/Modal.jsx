@@ -32,7 +32,7 @@ export const Modal = ({
       {isOpen && (
         <section className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm ">
           <div
-            className={`fixed flex flex-col justify-center z-100 bg-white  rounded-2xl m-4 min-w-[90%] md:min-w-[45%] ${inter.className} max-h-[90%] max-w-[60%]`}
+            className={`fixed flex flex-col justify-center z-100 bg-surface  rounded-2xl m-4 min-w-[90%] md:min-w-[45%] ${inter.className} max-h-[90%] max-w-[60%]`}
           >
             <div className="p-6 border-b border-gray-200 w-full">
               <div className="sticky flex flex-row items-center justify-between ">

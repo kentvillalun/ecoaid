@@ -286,10 +286,10 @@ export default function OtpPage() {
     <>
       <DesktopGuard />
 
-      <Page className="lg:hidden bg-new-bg!">
+      <Page className="lg:hidden bg-bg!">
         <div className={`min-w-full flex flex-col justify-end`}>
-          <div className="min-h-auto bg-white p-8 rounded-t-4xl flex flex-col relative justify-center max-w-full">
-            <div className="-top-6 left-6 absolute rounded-full bg-new-primary w-16 h-16 flex items-center justify-center">
+          <div className="min-h-auto bg-surface p-8 rounded-t-4xl flex flex-col relative justify-center max-w-full">
+            <div className="-top-6 left-6 absolute rounded-full bg-dark w-16 h-16 flex items-center justify-center">
               <div className="w-8 relative aspect-square ">
                 <Image
                   src="/ecoaid-logo/ecoaid-green-logo.png"
@@ -331,7 +331,7 @@ export default function OtpPage() {
                     // without using type="number" which has unwanted behavior
                     maxLength={1}
                     value={digit}
-                    className="outline h-10 w-10 outline-[#E7E3E0] focus:outline-cta-color transition-colors duration-150 ease-in-out rounded-[5px] p-3 text-center"
+                    className="outline h-10 w-10 outline-border focus:outline-accent transition-colors duration-150 ease-in-out rounded-[5px] p-3 text-center"
                     // ref callback: stores each input element in the array
                     // so we can call .focus() on them programmatically
                     ref={(el) => (inputRefs.current[index] = el)}
@@ -357,7 +357,7 @@ export default function OtpPage() {
               )}
               <div className="flex flex-col gap-6">
                 <button
-                  className="bg-cta-color text-white font-medium py-3.75 px-24 rounded-[14px] disabled:opacity-70 text-sm gradient-button"
+                  className="bg-accent text-white font-medium py-3.75 px-24 rounded-[14px] disabled:opacity-70 text-sm gradient-button"
                   onClick={handleSubmit}
                   disabled={isSubmitting}
                   type="button"

@@ -112,7 +112,7 @@ export const InProgressActions = ({
             isOpen={isOpen}
             title={"Finalize Record"}
             subtitle={"Please input the actual weight of the recyclable"}
-            icon={<ScaleIcon className="w-6 stroke-black" />}
+            icon={<ScaleIcon className="w-6 stroke-accent" />}
             status={"IN_PROGRESS"}
             confirmLabel={"Confirm"}
             confirmClassName={
@@ -158,7 +158,7 @@ export const InProgressActions = ({
                       </button>
                     </div>
 
-                    <div className="w-full outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 mb-2">
+                    <div className="input">
                       <select
                         className="w-full outline-none"
                         onChange={(e) =>
@@ -177,7 +177,7 @@ export const InProgressActions = ({
                       </select>
                     </div>
 
-                    <div className="w-full outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 mb-2">
+                    <div className="input">
                       <select
                         className="w-full outline-none"
                         onChange={(e) =>
@@ -198,7 +198,7 @@ export const InProgressActions = ({
                     </div>
 
                     <div className="flex flex-row gap-2">
-                      <div className="flex-1 outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11">
+                      <div className="input flex-1 mb-0">
                         <input
                           type="number"
                           className="outline-none w-full"
@@ -213,7 +213,7 @@ export const InProgressActions = ({
                           }
                         />
                       </div>
-                      <div className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 min-w-28">
+                      <div className="input min-w-28 mb-0">
                         <select
                           className="w-full outline-none"
                           onChange={(e) =>
@@ -247,7 +247,7 @@ export const InProgressActions = ({
                 <label className="font-medium text-base text-text-primary px-2">
                   Actual Value
                 </label>
-                <div className="outline-1 py-2.5 pl-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors flex items-center justify-between">
+                <div className="outline-1 py-2.5 pl-3.5 text-text-secondary outline-border rounded-lg focus-within:outline-accent transition-colors flex items-center justify-between">
                   <div className="flex flex-row justify-center items-center w-full pr-4">
                     <input
                       type="number"

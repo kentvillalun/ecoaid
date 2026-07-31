@@ -94,7 +94,7 @@ export const Sidebar = () => {
     {
       icon: LeaderboardIcon,
       label: "Leaderboard",
-      href: "",
+      href: "/leaderboard",
     },
     {
       icon: ReportsIcon,
@@ -113,7 +113,7 @@ export const Sidebar = () => {
 
   const renderNavItem = (item) => (
     <Link
-      className="flex flex-row gap-3 hover:cursor-pointer p-2 rounded-lg hover:bg-cta-color/10  transition-all ease-in-out items-center"
+      className="flex flex-row gap-3 hover:cursor-pointer p-2 rounded-lg hover:bg-accent/10  transition-all ease-in-out items-center"
       key={item.label}
       href={item.href}
     >
@@ -219,7 +219,7 @@ export const Sidebar = () => {
       </div>
       <div className="mt-auto">
         <button className="pl-6 p-4 mb-15 w-full" onClick={handleLogout}>
-          <div className="flex flex-row gap-3 hover:cursor-pointer p-2 rounded-lg hover:bg-cta-color/10 transition-all ease-in-out">
+          <div className="flex flex-row gap-3 hover:cursor-pointer p-2 rounded-lg hover:bg-accent/10 transition-all ease-in-out">
             <LogoutIcon className="h-6 w-6 md:block hidden hover:cursor-pointer" />
             <label className="font-medium text-md hover:cursor-pointer">
               Logout

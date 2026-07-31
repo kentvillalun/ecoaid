@@ -86,7 +86,7 @@ const maxCollections = Math.max(...MONTHLY_DATA.map((d) => d.collections));
 
 export default function ReportsPage() {
   return (
-    <Page className="bg-new-bg!">
+    <Page className="bg-bg!">
       <BarangayTopBar title="Reports" />
       <PageContent className="md:pl-70! md:p-6 md:gap-7">
         <BarangayHeaderCard
@@ -98,77 +98,77 @@ export default function ReportsPage() {
         <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <Card className="shadow-none! new-border flex flex-col items-start">
             <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-[#6b7280]">
+              <p className="text-xs font-medium text-text-secondary">
                 Total Collections
               </p>
               <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-[#6b7280]" />}
+                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
                 className="rounded-full! p-2!"
-                containerColor="#f3f4f6"
+                containerColor="var(--color-icon-bg)"
               />
             </div>
             <p className="md:text-2xl font-bold text-text-primary text-lg">
               180
             </p>
-            <div className="flex flex-row items-center w-auto bg-primary/10 px-3 py-1 rounded-xl text-xs gap-1">
-              <ClipboardDocumentListIcon className="w-3 stroke-cta-color" />
-              <p className="text-cta-color font-medium">All time</p>
+            <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+              <ClipboardDocumentListIcon className="w-3 stroke-accent" />
+              <p className="text-accent font-medium">All time</p>
             </div>
           </Card>
 
           <Card className="shadow-none! new-border flex flex-col items-start">
             <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-[#6b7280]">Weight Collected</p>
+              <p className="text-xs font-medium text-text-secondary">Weight Collected</p>
               <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-[#6b7280]" />}
+                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
                 className="rounded-full! p-2!"
-                containerColor="#f3f4f6"
+                containerColor="var(--color-icon-bg)"
               />
             </div>
             <p className="md:text-2xl font-bold text-text-primary text-lg">
               1,250 kg
             </p>
-            <div className="flex flex-row items-center w-auto bg-primary/10 px-3 py-1 rounded-xl text-xs gap-1">
-              <ScaleIcon className="w-3 stroke-cta-color" />
-              <p className="text-cta-color font-medium">Total diverted</p>
+            <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+              <ScaleIcon className="w-3 stroke-accent" />
+              <p className="text-accent font-medium">Total diverted</p>
             </div>
           </Card>
 
           <Card className="shadow-none! new-border flex flex-col items-start">
             <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-[#6b7280]">
+              <p className="text-xs font-medium text-text-secondary">
                 Active Residents
               </p>
               <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-[#6b7280]" />}
+                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
                 className="rounded-full! p-2!"
-                containerColor="#f3f4f6"
+                containerColor="var(--color-icon-bg)"
               />
             </div>
             <p className="md:text-2xl font-bold text-text-primary text-lg">
               64
             </p>
-            <div className="flex flex-row items-center w-auto bg-primary/10 px-3 py-1 rounded-xl text-xs gap-1">
-              <UserGroupIcon className="w-3 stroke-cta-color" />
-              <p className="text-cta-color font-medium">Participating</p>
+            <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+              <UserGroupIcon className="w-3 stroke-accent" />
+              <p className="text-accent font-medium">Participating</p>
             </div>
           </Card>
 
           <Card className="shadow-none! new-border flex flex-col items-start">
             <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-[#6b7280]">Points Awarded</p>
+              <p className="text-xs font-medium text-text-secondary">Points Awarded</p>
               <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-[#6b7280]" />}
+                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
                 className="rounded-full! p-2!"
-                containerColor="#f3f4f6"
+                containerColor="var(--color-icon-bg)"
               />
             </div>
             <p className="md:text-2xl font-bold text-text-primary text-lg">
               8,450
             </p>
-            <div className="flex flex-row items-center w-auto bg-primary/10 px-3 py-1 rounded-xl text-xs gap-1">
-              <StarIcon className="w-3 stroke-cta-color" />
-              <p className="text-cta-color font-medium">Total issued</p>
+            <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+              <StarIcon className="w-3 stroke-accent" />
+              <p className="text-accent font-medium">Total issued</p>
             </div>
           </Card>
         </section>
@@ -178,7 +178,7 @@ export default function ReportsPage() {
           <SectionHeader
             title="Collections per Month"
             subtitle="Last 6 months of intake activity"
-            icon={<ChartBarIcon className="w-6 stroke-cta-color" />}
+            icon={<ChartBarIcon className="w-6 stroke-accent" />}
             noButton={true}
           />
 
@@ -194,12 +194,12 @@ export default function ReportsPage() {
                       className="flex flex-col items-center gap-1 flex-1"
                     >
                       <span
-                        className={`text-[10px] font-semibold ${iMax ? "text-cta-color" : "text-[#6b7280]"}`}
+                        className={`text-[10px] font-semibold ${iMax ? "text-accent" : "text-text-secondary"}`}
                       >
                         {d.collections}
                       </span>
                       <div
-                        className={`w-full rounded-t-md transition-all ${iMax ? "gradient-button" : "bg-[#e5e7eb]"}`}
+                        className={`w-full rounded-t-md transition-all ${iMax ? "gradient-button" : "bg-border"}`}
                         style={{ height: `${heightPct}%`, minHeight: "8px" }}
                       />
                     </div>
@@ -210,7 +210,7 @@ export default function ReportsPage() {
                 {MONTHLY_DATA.map((d) => (
                   <span
                     key={d.month}
-                    className="text-[11px] font-medium text-[#6b7280] text-center flex-1"
+                    className="text-[11px] font-medium text-text-secondary text-center flex-1"
                   >
                     {d.month}
                   </span>
@@ -220,11 +220,11 @@ export default function ReportsPage() {
             <div className="flex flex-row items-center gap-4 pt-2 border-t border-[#f3f4f6] w-full">
               <div className="flex items-center gap-1.5">
                 <span className="w-3 h-3 rounded-sm gradient-button inline-block" />
-                <span className="text-xs text-[#6b7280]">Peak month</span>
+                <span className="text-xs text-text-secondary">Peak month</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-sm bg-[#e5e7eb] inline-block" />
-                <span className="text-xs text-[#6b7280]">Regular month</span>
+                <span className="w-3 h-3 rounded-sm bg-border inline-block" />
+                <span className="text-xs text-text-secondary">Regular month</span>
               </div>
             </div>
           </Card>
@@ -235,19 +235,19 @@ export default function ReportsPage() {
           <SectionHeader
             title="Recent Activity"
             subtitle="Latest recorded intake transactions"
-            icon={<Bars3BottomLeftIcon className="w-6 stroke-cta-color" />}
+            icon={<Bars3BottomLeftIcon className="w-6 stroke-accent" />}
             noButton={true}
           />
 
           {/* Desktop Table */}
           <Card className="hidden md:flex md:flex-col px-6 overflow-x-auto md:gap-3 md:items-start shadow-none! new-border">
             <table className="w-full text-sm border-collapse">
-              <thead className="border-b border-[#E6EFF5]">
+              <thead className="border-b border-border">
                 <tr>
                   {["Date", "Resident", "Material", "Weight", "Source"].map((h) => (
                     <th
                       key={h}
-                      className="font-medium text-sm text-[#6b7280] p-4 text-left"
+                      className="font-medium text-sm text-text-secondary p-4 text-left"
                     >
                       {h}
                     </th>
@@ -260,10 +260,10 @@ export default function ReportsPage() {
                   return (
                     <tr
                       key={item.id}
-                      className="hover:bg-[#f8f8f8] transition-all border-b border-[#f3f4f6] last:border-0"
+                      className="hover:bg-bg transition-all border-b border-[#f3f4f6] last:border-0"
                     >
                       <td className="p-4">
-                        <p className="text-[#6b7280] text-xs">{item.date}</p>
+                        <p className="text-text-secondary text-xs">{item.date}</p>
                       </td>
                       <td className="p-4">
                         <p className="font-semibold text-text-primary">
@@ -311,20 +311,20 @@ export default function ReportsPage() {
                   </div>
                   <div className="flex flex-row gap-6">
                     <div className="flex flex-col">
-                      <p className="text-xs text-[#6b7280]">Material</p>
+                      <p className="text-xs text-text-secondary">Material</p>
                       <p className="text-sm font-medium text-text-primary">
                         {item.material}
                       </p>
                     </div>
                     <div className="flex flex-col">
-                      <p className="text-xs text-[#6b7280]">Weight</p>
+                      <p className="text-xs text-text-secondary">Weight</p>
                       <p className="text-sm font-bold text-text-primary">
                         {item.weight}
                       </p>
                     </div>
                     <div className="flex flex-col">
-                      <p className="text-xs text-[#6b7280]">Date</p>
-                      <p className="text-xs text-[#6b7280]">{item.date}</p>
+                      <p className="text-xs text-text-secondary">Date</p>
+                      <p className="text-xs text-text-secondary">{item.date}</p>
                     </div>
                   </div>
                 </Card>

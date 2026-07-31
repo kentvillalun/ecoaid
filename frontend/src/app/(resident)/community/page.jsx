@@ -84,7 +84,7 @@ export default function CommunityPage() {
   ];
 
   return (
-    <Page className="bg-new-bg">
+    <Page className="bg-bg">
       <ResidentHeader
         title={
           isLoading ? (
@@ -95,7 +95,7 @@ export default function CommunityPage() {
         }
         subtitle={"EcoAid Program"}
         action={"notification"}
-        className="shadow-none! bg-new-bg!"
+        className="shadow-none! bg-bg!"
       />
 
       <PageContent className="md:pl-3! top-18!">
@@ -104,12 +104,12 @@ export default function CommunityPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <Card className="flex gap-2 flex-col w-full items-start new-border shadow-none!">
               <div className="flex flex-row gap-3 items-center ">
-                <div className="border p-3 border-none rounded-xl items-center bg-[#EAF7E3]">
-                  <CalendarDaysIcon className="w-6 stroke-cta-color" />
+                <div className="border p-3 border-none rounded-xl items-center bg-accent-light">
+                  <CalendarDaysIcon className="w-6 stroke-accent" />
                 </div>
                 <div className="text-text-primary">
                   <p className="font-medium text-sm">Collection Schedule</p>
-                  <p className="text-xs text-gray-600">
+                  <p className="text-xs text-text-secondary">
                     Regular Pickup Schedule
                   </p>
                 </div>
@@ -118,19 +118,19 @@ export default function CommunityPage() {
                 <div className="text-text-primary font-medium text-sm">
                   Every Sunday
                 </div>
-                <div className="text-gray-600 text-xs">9:00 AM - 12:00 PM</div>
+                <div className="text-text-secondary text-xs">9:00 AM - 12:00 PM</div>
               </div>
             </Card>
 
             {/* Accepted Materials */}
             <Card className="flex gap-2 flex-col items-start new-border shadow-none!">
               <div className="flex flex-row gap-3 items-center ">
-                <div className="border p-3 border-none rounded-xl items-center bg-[#EAF7E3]">
-                  <ArrowPathIcon className="w-6 stroke-cta-color" />
+                <div className="border p-3 border-none rounded-xl items-center bg-accent-light">
+                  <ArrowPathIcon className="w-6 stroke-accent" />
                 </div>
                 <div className="text-text-primary">
                   <p className="font-medium text-sm">Accepted Materials</p>
-                  <p className="text-xs text-gray-600">
+                  <p className="text-xs text-text-secondary">
                     What you can contribute
                   </p>
                 </div>
@@ -147,7 +147,7 @@ export default function CommunityPage() {
                   ) : (
                     !isMaterialsError && (
                       <>
-                        <p className="text-xs font-semibold text-cta-color">
+                        <p className="text-xs font-semibold text-accent">
                           Legend:
                         </p>
                         <div className="flex gap-1.5 flex-wrap">
@@ -171,7 +171,7 @@ export default function CommunityPage() {
                     <div className="text-xs text-gray-400">
                       Unable to get barangay accepted materials.{" "}
                       <button
-                        className="text-cta-color"
+                        className="text-accent"
                         onClick={() => handleMaterialsRefetchCount()}
                       >
                         Please try again
@@ -202,7 +202,7 @@ export default function CommunityPage() {
                 className="flex flex-row text-sm items-center"
                 href={"/updates"}
               >
-                <p className="font-medium text-cta-color">View more</p>{" "}
+                <p className="font-medium text-accent">View more</p>{" "}
                 <ChevronRightIcon className="w-3" />{" "}
               </Link>
             </div>
@@ -271,7 +271,7 @@ export default function CommunityPage() {
                       {isLong && (
                         <button
                           type="button"
-                          className="text-sm font-medium text-cta-color hover:cursor-pointer"
+                          className="text-sm font-medium text-accent hover:cursor-pointer"
                           onClick={() => toggleExpand(item.id)}
                         >
                           {isExpanded ? "Read less" : "Read more"}
@@ -316,8 +316,8 @@ export default function CommunityPage() {
                         }
                         color={
                           data?.barangay?.isRegistered
-                            ? "bg-[#dcfce7] text-[#15803d]"
-                            : "bg-[#fee2e2] text-[#b91c1c]"
+                            ? "bg-success/10 text-success"
+                            : "bg-error/10 text-error"
                         }
                         className="px-2!"
                       />

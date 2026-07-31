@@ -88,7 +88,7 @@ export function RecordSaleModal({
         setIsModalOpen(false);
         resetModal();
       }}
-      icon={<ShoppingBagIcon className="w-6 stroke-new-primary" />}
+      icon={<ShoppingBagIcon className="w-6 stroke-accent" />}
       title="Record Sale"
       subtitle="Log a junkshop sale transaction"
       confirmLabel="Record Sale"
@@ -99,7 +99,7 @@ export function RecordSaleModal({
         {/* Junkshop select */}
         <div className="flex flex-col gap-1">
           <label className="label">Junkshop</label>
-          <div className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 flex items-center">
+          <div className="input flex items-center mb-0">
             <select
               className="w-full outline-none"
               defaultValue={preselectedJunkshopId ?? ""}
@@ -122,7 +122,7 @@ export function RecordSaleModal({
           <label className="label">Materials sold</label>
           <div className="flex flex-col gap-3">
             {items.map((_, index) => (
-              <div key={index} className="new-border bg-white rounded-xl p-4">
+              <div key={index} className="new-border bg-surface rounded-xl p-4">
                 <div className="flex flex-row items-center justify-between mb-3">
                   <span className="text-sm font-medium text-gray-700">
                     Material {index + 1}
@@ -138,7 +138,7 @@ export function RecordSaleModal({
                 </div>
 
                 {/* Material select */}
-                <div className="w-full outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 mb-2 flex items-center">
+                <div className="input flex items-center">
                   <select
                     className="w-full outline-none"
                     defaultValue=""
@@ -162,7 +162,7 @@ export function RecordSaleModal({
 
                 {/* Quantity + Unit */}
                 <div className="flex flex-row gap-2">
-                  <div className="flex-1 outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 flex items-center">
+                  <div className="input flex-1 flex items-center mb-0">
                     <input
                       type="number"
                       className="w-full outline-none flex-1"
@@ -173,7 +173,7 @@ export function RecordSaleModal({
                       }}
                     />
                   </div>
-                  <div className="w-24 outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 flex items-center">
+                  <div className="input w-24 flex items-center mb-0">
                     <select
                       className="w-full outline-none"
                       defaultValue="KG"

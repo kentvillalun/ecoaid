@@ -49,7 +49,7 @@ export default function RedemptionProgramPage() {
   const handleProgramRefetch = () => setRefetchCount((prev) => prev + 1);
 
   return (
-    <Page className="bg-new-bg!">
+    <Page className="bg-bg!">
       <BarangayTopBar title={"Redemption Management"} />
       <PageContent className=" md:pl-70! md:p-6 md:gap-7">
         <BarangayHeaderCard
@@ -85,7 +85,7 @@ export default function RedemptionProgramPage() {
           <SectionHeader
             title={"Programs"}
             subtitle={"Active redemption programs"}
-            icon={<GiftIcon className="w-6 stroke-cta-color" />}
+            icon={<GiftIcon className="w-6 stroke-accent" />}
             buttonLabel={"Add Program"}
             onAction={() => setIsProgramModalOpen(true)}
           />
@@ -160,7 +160,7 @@ export default function RedemptionProgramPage() {
           <SectionHeader
             title={"Transaction history"}
             subtitle={"All recorded redemptions"}
-            icon={<Bars3BottomLeftIcon className="w-6 stroke-cta-color" />}
+            icon={<Bars3BottomLeftIcon className="w-6 stroke-accent" />}
             buttonLabel={"Record transaction"}
             onAction={() => setIsTransactionModalOpen(true)}
           />

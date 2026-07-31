@@ -16,10 +16,10 @@ export const Empty = ({ text, subtext, className = "" }) => {
           priority
         />
       </div> */}
-      <h1 className="text-3xl font-semibold text-[#1F2937] text-center">
+      <h1 className="text-3xl font-semibold text-text-primary text-center">
         {text}
       </h1>
-      <p className="text-sm text-[#6B7280] text-center">{subtext}</p>
+      <p className="text-sm text-text-secondary text-center">{subtext}</p>
     </div>
   );
 };

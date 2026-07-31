@@ -35,16 +35,16 @@ export default function NotificationSettingPage() {
 
 
   return (
-    <Page className="bg-new-bg!">
-      <ResidentHeader title={"Notification Settings"} className="shadow-none! bg-new-bg!"/>
+    <Page className="bg-bg!">
+      <ResidentHeader title={"Notification Settings"} className="shadow-none! bg-bg!"/>
 
       <PageContent>
         <div className="">
-          <div className="font-medium py-3 border-b border-[#E7E3E0] text-sm">
+          <div className="font-medium py-3 border-b border-border text-sm">
             <h2 className="">Transaction Updates</h2>
           </div>
           {NOTIF_OPT.map((opt) => (
-            <div className="py-3 border-b border-[#E7E3E0] flex flex-row gap-2 items-center justify-between" key={opt.key}>
+            <div className="py-3 border-b border-border flex flex-row gap-2 items-center justify-between" key={opt.key}>
               <div className="flex flex-col gap-1">
                 <h2 className="font-medium text-sm">{opt.title}</h2>
                 <p className="text-xs">{opt.description}</p>

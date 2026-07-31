@@ -206,7 +206,7 @@ export default function ManualIntakePage() {
 
 
   return (
-    <Page className="bg-new-bg!">
+    <Page className="bg-bg!">
       <BarangayTopBar title="Manual Collection Intake" />
       <PageContent className="md:pl-70! md:p-6 md:gap-7">
         <BarangayHeaderCard
@@ -222,7 +222,7 @@ export default function ManualIntakePage() {
                 resetModal();
                 setIsModalOpen(false);
               }}
-              icon={<InboxArrowDownIcon className="w-6 stroke-new-primary" />}
+              icon={<InboxArrowDownIcon className="w-6 stroke-accent" />}
               title={"Record Intake"}
               subtitle={
                 "Record collected materials for a resident or household."
@@ -236,7 +236,7 @@ export default function ManualIntakePage() {
                   <label htmlFor="searchResident" className="label">
                     Resident
                   </label>
-                  <div className="flex flex-row relative w-full outline-1 py-2.5  text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11">
+                  <div className="input flex flex-row relative mb-0">
                     <input
                       type="text"
                       className="w-full outline-none px-3.5"
@@ -278,7 +278,7 @@ export default function ManualIntakePage() {
                     )}
                     {showDropdown && (
                       <div
-                        className="absolute bg-white flex flex-col w-full items-start z-40 rounded-lg new-border text-sm py-2.5 top-11.5"
+                        className="absolute bg-surface flex flex-col w-full items-start z-40 rounded-lg new-border text-sm py-2.5 top-11.5"
                         ref={dropdownRef}
                       >
                         {residentsList.length === 0 ? (
@@ -318,7 +318,7 @@ export default function ManualIntakePage() {
                     </label>
                     <input
                       type="text"
-                      className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11  max-h-11"
+                      className="input mb-0"
                       id="household"
                       placeholder="Input resident name"
                       onChange={(e) => setHouseholdName(e.target.value)}
@@ -335,7 +335,7 @@ export default function ManualIntakePage() {
                     {materialRows.map((material, index) => (
                       <div
                         key={index}
-                        className="new-border bg-white rounded-xl p-4"
+                        className="new-border bg-surface rounded-xl p-4"
                       >
                         <div className="flex flex-row items-center justify-between mb-3">
                           <span className="text-sm font-medium text-gray-700">
@@ -352,7 +352,7 @@ export default function ManualIntakePage() {
                           </button>
                         </div>
 
-                        <div className="w-full outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 mb-2">
+                        <div className="input">
                           <select
                             className="w-full outline-none"
                             onChange={(e) =>
@@ -372,7 +372,7 @@ export default function ManualIntakePage() {
                         </div>
 
                         <div className="flex flex-row gap-2">
-                          <div className="flex-1 outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11">
+                          <div className="input flex-1 mb-0">
                             <input
                               type="number"
                               className="outline-none w-full"
@@ -382,7 +382,7 @@ export default function ManualIntakePage() {
                               }}
                             />
                           </div>
-                          <div className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 min-w-28">
+                          <div className="input min-w-28 mb-0">
                             <select
                               className="w-full outline-none"
                               onChange={(e) => {
@@ -424,7 +424,7 @@ export default function ManualIntakePage() {
           <SectionHeader
             title="Intake History"
             subtitle="All recorded manual intake entries"
-            icon={<Bars3BottomLeftIcon className="w-6 stroke-cta-color" />}
+            icon={<Bars3BottomLeftIcon className="w-6 stroke-accent" />}
             buttonLabel="Record Intake"
             onAction={() => {
               setIsModalOpen(true);
@@ -437,7 +437,7 @@ export default function ManualIntakePage() {
             className={`${inter.className} hidden md:flex md:flex-col px-8 overflow-x-auto md:gap-3 md:items-start shadow-none! new-border`}
           >
             <table className="w-full text-sm border-collapse text-gray-600 overflow-x-auto">
-              <thead className="border-b border-[#E6EFF5]">
+              <thead className="border-b border-border">
                 <tr>
                   {TABLE_HEADERS.map((h) => (
                     <th
@@ -480,7 +480,7 @@ export default function ManualIntakePage() {
                   transactionsData?.transactions?.map((row) => (
                     <tr
                       key={row.id}
-                      className="text-start hover:bg-[#f8f8f8] transition-all transform"
+                      className="text-start hover:bg-bg transition-all transform"
                     >
                       <td className="p-4">
                         {row.user ? (

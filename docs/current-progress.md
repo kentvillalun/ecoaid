@@ -149,20 +149,36 @@
 
 ---
 
+## Completed (continued — modules built after the last full update above)
+
+- **Junkshop Sales module built end-to-end** — `recordSale`, `getJunkshopSales`, `getJunkshopsWithPrices`, `getJunkshopDetails`, `addJunkshop`, `getJunkshops` controllers; frontend page fully wired with price comparison table, `HoverPortal`, `RecordSaleModal`
+- **Announcements module built end-to-end** — `AnnouncementCategory` enum; all four controllers; admin page with category filter tabs; resident page with read-more and `localStorage` read-tracking
+- **Leaderboard module built end-to-end** — two-leaderboard approach (by Kilogram, by Piece); `getRankedLeaderboard` helper using `Promise.all`
+- **Program Funds module built end-to-end** — `addExpense`, `getExpenses`, `getProgramFundSummary` controllers and frontend wiring complete
+- **Reward Inventory module built end-to-end** — `Beneficiary`, `RewardItem`, `RewardRelease` schema + migrations; `addRewardItem`, `getRewardItems`, `releaseReward`, `getRewardReleases`, `getRewardSummary`, `getBeneficiaries`, `searchBeneficiary` controllers; `RecordTransactionModal` (debounced beneficiary search, existing/new beneficiary modes); Reward Inventory page fully wired (summary cards, tables, mobile cards, `AddRewardItemModal`, `ReleaseRewardModal`)
+- **Settings — Add Junkshop modal** complete
+
+---
+
 ## In Progress
 
-- Junkshop Sales module (backend + wiring) — page currently exists only as a static UI scaffold with hardcoded mock data, not linked in the barangay sidebar
+- **Reports module** — still a static UI scaffold with hardcoded mock data, not linked in the barangay sidebar. Needs discovery with actual barangay staff (Secretary/Treasurer) on exact fields/breakdowns before backend design, since the real workflow today is manual Excel compilation from multiple sources.
+- **Settings page** — Add Junkshop modal done; next up is a curated theme-picker feature (preset palette options, not full user color control) to preserve brand identity while giving barangays some customization.
 
 ---
 
 ## Next Steps (priority order)
 
-1. Build Junkshop Sales module (price comparison across junkshops, backend + wiring; replace the existing mock scaffold) 
-2. Wire pickup-request `COLLECTED` transitions and redemption transactions into `StockTransactionLog` so Material Stock reflects all intake/outflow sources, not just manual intake
-3. Build Reward Inventory module
-4. Build Program Funds module (expenses, junkshop income, profits)
-5. Build Leaderboard (resident ranking by total contribution) — replace the existing mock scaffold
-6. Reports module — replace the existing mock scaffold
+1. Settings — theme picker (curated palette presets)
+2. Reports module — gather real requirements from barangay staff first, then design aggregation approach (Material Stock, Junkshop Sales, Redemption, Program Funds) and likely Excel export
+3. Technical debt batch:
+   - Archive pattern (soft delete) — panel forbids hard deletion
+   - Rate limiting
+   - Pagination / load more pattern
+   - Backend hardening (input validation, consistent error format)
+   - Dashboard rewiring (3 hardcoded stat cards — should now be unblocked since Program Funds is done)
+   - `StockTransactionLog` not written by pickup-request `COLLECTED` transitions or redemption transactions
+   - `performedBy` not set in Manual Intake, Redemption, or Collection Request
 
 ---
 

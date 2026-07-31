@@ -312,7 +312,7 @@ export default function SignupPage() {
   return (
     <>
       <DesktopGuard />
-      <Page className="bg-new-bg! lg:hidden">
+      <Page className="bg-bg! lg:hidden">
         {isTermsOpen && (
           <section className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
             <TermsModal
@@ -324,10 +324,10 @@ export default function SignupPage() {
 
         <div className="min-w-full flex flex-col justify-end mt-10">
           <form
-            className="min-h-auto bg-white p-8 rounded-t-4xl flex flex-col relative justify-center max-w-full"
+            className="min-h-auto bg-surface p-8 rounded-t-4xl flex flex-col relative justify-center max-w-full"
             onSubmit={handleSubmit(onSubmit)}
           >
-            <div className="-top-6 left-6 absolute rounded-full bg-new-primary w-16 h-16 flex items-center justify-center">
+            <div className="-top-6 left-6 absolute rounded-full bg-dark w-16 h-16 flex items-center justify-center">
               <div className="w-8 relative aspect-square ">
                 <Image
                   src="/ecoaid-logo/ecoaid-green-logo.png"
@@ -354,12 +354,12 @@ export default function SignupPage() {
                   }}
                   type="button"
                 >
-                  <ArrowLeftIcon className="w-7 stroke-cta-color" />
+                  <ArrowLeftIcon className="w-7 stroke-accent" />
                 </button>
                 <h3 className="font-semibold text-2xl">Create Account</h3>
               </div>
 
-              <div className="flex flex-col gap-4 text-[#717680] my-10">
+              <div className="flex flex-col gap-4 text-text-secondary my-10">
                 {/* First name */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-2">
@@ -373,7 +373,7 @@ export default function SignupPage() {
                       id="fname"
                       type="text"
                       placeholder="Juan"
-                      className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors text-base"
+                      className="input text-base mb-0"
                       {...register("firstName")}
                     />
                     {errors.firstName?.message && (
@@ -395,7 +395,7 @@ export default function SignupPage() {
                       id="lname"
                       type="text"
                       placeholder="Dela Cruz"
-                      className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors text-base"
+                      className="input text-base mb-0"
                       {...register("lastName")}
                     />
                     {errors.lastName?.message && (
@@ -418,7 +418,7 @@ export default function SignupPage() {
                     id="username"
                     type="text"
                     placeholder="juandelacruz123"
-                    className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors text-base"
+                    className="input text-base mb-0"
                     {...register("username")}
                   />
                   {errors.username?.message && (
@@ -441,7 +441,7 @@ export default function SignupPage() {
                     id="contact"
                     type="text"
                     placeholder="09xxxxxxxxx"
-                    className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors text-base"
+                    className="input text-base mb-0"
                     {...register("phoneNumber")}
                   />
                   {errors.phoneNumber?.message && (
@@ -465,7 +465,7 @@ export default function SignupPage() {
                       type="text"
                       id="barangay"
                       placeholder="Input your barangay name"
-                      className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors text-base"
+                      className="input text-base mb-0"
                       autoComplete="off"
                       value={barangayQuery}
                       {...register("barangayName")}
@@ -490,7 +490,7 @@ export default function SignupPage() {
 
                   {/* Dropdown will go here */}
                   {showSuggestions && barangayQuery.trim() && (
-                    <div className="absolute left-0 right-0 top-full z-20 rounded-xl border border-[#E7E3E0] bg-white py-2 shadow-lg">
+                    <div className="absolute left-0 right-0 top-full z-20 rounded-xl border border-border bg-surface py-2 shadow-lg">
                       {isBarangayLoading && (
                         <p className="px-4 py-2 text-xs text-text-primary">
                           Loading barangays...
@@ -540,7 +540,7 @@ export default function SignupPage() {
                   >
                     Sitio
                   </label>
-                  <div className="px-2 w-full outline-1 py-2.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors text-base disabled:bg-gray-100">
+                  <div className="input px-2 text-base disabled:bg-gray-100 mb-0">
                     <select
                       id="sitio"
                       className=" w-full outline-none"
@@ -582,7 +582,7 @@ export default function SignupPage() {
                   >
                     Password
                   </label>
-                  <div className="flex flex-row items-center justify-between outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors text-base">
+                  <div className="input flex flex-row items-center justify-between text-base mb-0">
                     <input
                       type={showPassword ? "text" : "password"}
                       placeholder="Input your password"
@@ -613,7 +613,7 @@ export default function SignupPage() {
                   >
                     Confirm password
                   </label>
-                  <div className="flex flex-row items-center justify-between outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors text-base">
+                  <div className="input flex flex-row items-center justify-between text-base mb-0">
                     <input
                       type={showConfirmPassword ? "text" : "password"}
                       placeholder="Input your password"
@@ -648,11 +648,11 @@ export default function SignupPage() {
                     onClick={() => setIsTermsOpen(true)}
                   >
                     I accept{" "}
-                    <span className="font-medium text-cta-color">
+                    <span className="font-medium text-accent">
                       Terms & conditions
                     </span>{" "}
                     and{" "}
-                    <span className="font-medium text-cta-color">
+                    <span className="font-medium text-accent">
                       Privacy policy.
                     </span>
                   </p>
@@ -668,7 +668,7 @@ export default function SignupPage() {
               </div>
               <div className="flex flex-col gap-6 justify-center w-full md:max-w-xl mx-auto mb-15">
                 <button
-                  className="bg-cta-color text-white font-medium py-3.75 px-24 rounded-[14px] disabled:opacity-70 text-sm gradient-button"
+                  className="bg-accent text-white font-medium py-3.75 px-24 rounded-[14px] disabled:opacity-70 text-sm gradient-button"
                   type="submit"
                 >
                   Create Account
@@ -682,7 +682,7 @@ export default function SignupPage() {
                   }}
                 >
                   Already have an account?{" "}
-                  <span className="font-medium text-cta-color">Sign In</span>
+                  <span className="font-medium text-accent">Sign In</span>
                 </Link>
               </div>
             </motion.div>

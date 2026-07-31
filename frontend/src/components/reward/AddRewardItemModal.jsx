@@ -136,7 +136,7 @@ export const AddRewardItemModal = ({
         setIsModalOpen(false);
         resetModal();
       }}
-      icon={<GiftIcon className="w-6 stroke-cta-color" />}
+      icon={<GiftIcon className="w-6 stroke-accent" />}
       title="Add Reward Item"
       subtitle="Add a new reward item to stock"
       confirmLabel="Add Item"

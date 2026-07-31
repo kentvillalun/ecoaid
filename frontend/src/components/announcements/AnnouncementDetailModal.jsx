@@ -57,7 +57,7 @@ export function AnnouncementDetailModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      icon={<MegaphoneIcon className="w-6 stroke-new-primary" />}
+      icon={<MegaphoneIcon className="w-6 stroke-accent" />}
       title="Announcement Details"
       subtitle="View announcement information"
       cancelLabel="Close"
@@ -84,7 +84,7 @@ export function AnnouncementDetailModal({
         <div className="flex flex-col gap-1">
           <label className="label">Content</label>
           <textarea
-            className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg transition-colors bg-gray-50 cursor-default resize-none"
+            className="input mb-0 max-h-none bg-gray-50 cursor-default resize-none"
             rows={5}
             readOnly
             value={announcement?.content || ""}
@@ -97,7 +97,7 @@ export function AnnouncementDetailModal({
             <label className="label">Posted By</label>
             <input
               type="text"
-              className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg transition-colors min-h-11 max-h-11 bg-gray-50 cursor-default"
+              className="input mb-0 bg-gray-50 cursor-default"
               readOnly
               value={announcement?.performedBy || ""}
             />
@@ -106,7 +106,7 @@ export function AnnouncementDetailModal({
             <label className="label">Role</label>
             <input
               type="text"
-              className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg transition-colors min-h-11 max-h-11 bg-gray-50 cursor-default "
+              className="input mb-0 bg-gray-50 cursor-default"
               readOnly
               value={announcement?.performedByRole.toLowerCase() || ""}
             />
@@ -115,7 +115,7 @@ export function AnnouncementDetailModal({
             <label className="label">Date Created</label>
             <input
               type="text"
-              className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg transition-colors min-h-11 max-h-11 bg-gray-50 cursor-default"
+              className="input mb-0 bg-gray-50 cursor-default"
               readOnly
               value={formatDate(announcement?.createdAt)}
             />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Inter } from "next/font/google";
 import { Page } from "@/components/layout/Page";
 import { PageContent } from "@/components/layout/PageContent";
 import { BarangayTopBar } from "@/components/navigation/BarangayTopBar";
@@ -22,6 +23,11 @@ import {
 import { useFetch } from "@/hooks/useFetch";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
 
 const TYPES = ["By Kilogram", "By Piece"];
 const PERIODS = ["All Time", "This Month", "This Week"];
@@ -92,7 +98,7 @@ export default function LeaderboardPage() {
   }, []);
 
   return (
-    <Page className="bg-new-bg!">
+    <Page className="bg-bg!">
       <BarangayTopBar title="Leaderboard" />
       <PageContent className="md:pl-70! md:p-6 md:gap-7">
         <BarangayHeaderCard
@@ -101,16 +107,16 @@ export default function LeaderboardPage() {
         />
 
         {/* Summary Cards */}
-        <section className="grid grid-cols-2 gap-3">
+        <section className="grid grid-rows-2 gap-3">
           <Card className="shadow-none! new-border flex flex-col items-start">
             <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-[#6b7280]">
+              <p className="text-xs font-medium text-text-secondary">
                 Total Participants
               </p>
               <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-[#6b7280]" />}
+                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
                 className="rounded-full! p-2!"
-                containerColor="#f3f4f6"
+                containerColor="var(--color-icon-bg)"
               />
             </div>
             {isLoading ? (
@@ -124,21 +130,21 @@ export default function LeaderboardPage() {
                 {leaderboard?.length ?? 0}
               </p>
             )}
-            <div className="flex flex-row items-center w-auto bg-primary/10 px-3 py-1 rounded-xl text-xs gap-1">
-              <UserGroupIcon className="w-3 stroke-cta-color" />
-              <p className="text-cta-color font-medium">Active residents</p>
+            <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+              <UserGroupIcon className="w-3 stroke-accent" />
+              <p className="text-accent font-medium">Active residents</p>
             </div>
           </Card>
 
           <Card className="shadow-none! new-border flex flex-col items-start">
             <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-[#6b7280]">
+              <p className="text-xs font-medium text-text-secondary">
                 Top Contribution
               </p>
               <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-[#6b7280]" />}
+                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
                 className="rounded-full! p-2!"
-                containerColor="#f3f4f6"
+                containerColor="var(--color-icon-bg)"
               />
             </div>
             {isLoading ? (
@@ -152,9 +158,9 @@ export default function LeaderboardPage() {
                 {topThree?.[0] ? `${topThree[0].total} ${unitLabel}` : "—"}
               </p>
             )}
-            <div className="flex flex-row items-center w-auto bg-primary/10 px-3 py-1 rounded-xl text-xs gap-1">
-              <ScaleIcon className="w-3 stroke-cta-color" />
-              <p className="text-cta-color font-medium">
+            <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+              <ScaleIcon className="w-3 stroke-accent" />
+              <p className="text-accent font-medium">
                 {isLoading || isError
                   ? "—"
                   : (topThree?.[0]?.name?.split(" ")[0] ?? "—")}
@@ -168,7 +174,7 @@ export default function LeaderboardPage() {
           <SectionHeader
             title="Rankings"
             subtitle="Residents ranked by total recyclable contribution"
-            icon={<TrophyIcon className="w-6 stroke-cta-color" />}
+            icon={<TrophyIcon className="w-6 stroke-accent" />}
             noButton={true}
           />
 
@@ -183,7 +189,7 @@ export default function LeaderboardPage() {
                   className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all duration-150 border ${
                     type === t
                       ? "gradient-button text-white border-transparent"
-                      : "bg-white text-[#6b7280] border-[#e5e7eb] hover:border-[#d1d5db]"
+                      : "bg-surface text-text-secondary border-border hover:border-[#d1d5db]"
                   }`}
                 >
                   {t}
@@ -193,7 +199,7 @@ export default function LeaderboardPage() {
 
             {/* Period Filter — desktop pills */}
             <div className="hidden md:flex flex-row gap-2 items-center flex-wrap">
-              <div className="flex items-center gap-1.5 text-[#6b7280]">
+              <div className="flex items-center gap-1.5 text-text-secondary">
                 <CalendarDaysIcon className="w-4" />
               </div>
               {PERIODS.map((p) => (
@@ -203,7 +209,7 @@ export default function LeaderboardPage() {
                   className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all duration-150 border ${
                     period === p
                       ? "gradient-button text-white border-transparent"
-                      : "bg-white text-[#6b7280] border-[#e5e7eb] hover:border-[#d1d5db]"
+                      : "bg-surface text-text-secondary border-border hover:border-[#d1d5db]"
                   }`}
                 >
                   {p}
@@ -215,14 +221,14 @@ export default function LeaderboardPage() {
             <div className="relative md:hidden" ref={periodDropdownRef}>
               <button
                 onClick={() => setShowPeriodDropdown((v) => !v)}
-                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium border bg-white text-[#6b7280] border-[#e5e7eb]"
+                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium border bg-surface text-text-secondary border-border"
               >
                 <CalendarDaysIcon className="w-4" />
                 {period}
                 <ChevronDownIcon className="w-3.5" />
               </button>
               {showPeriodDropdown && (
-                <div className="absolute right-0 top-9 z-40 flex flex-col items-start w-36 bg-white rounded-lg new-border text-xs py-2">
+                <div className="absolute right-0 top-9 z-40 flex flex-col items-start w-36 bg-surface rounded-lg new-border text-xs py-2">
                   {PERIODS.map((p) => (
                     <div
                       key={p}
@@ -232,8 +238,8 @@ export default function LeaderboardPage() {
                       }}
                       className={`px-3.5 py-1.5 w-full hover:cursor-pointer hover:bg-gray-50 ${
                         period === p
-                          ? "text-cta-color font-semibold"
-                          : "text-[#6b7280]"
+                          ? "text-accent font-semibold"
+                          : "text-text-secondary"
                       }`}
                     >
                       {p}
@@ -294,7 +300,7 @@ export default function LeaderboardPage() {
                       <p className="font-bold text-text-primary text-sm leading-tight">
                         {resident.name}
                       </p>
-                      <p className="text-xs text-[#6b7280]">
+                      <p className="text-xs text-text-secondary">
                         {resident.purok}
                       </p>
                     </div>
@@ -304,7 +310,7 @@ export default function LeaderboardPage() {
                       >
                         {config.label} Place
                       </span>
-                      <p className="text-xs text-[#6b7280] font-medium">
+                      <p className="text-xs text-text-secondary font-medium">
                         {resident.total} {unitLabel}
                       </p>
                     </div>
@@ -320,19 +326,19 @@ export default function LeaderboardPage() {
           <SectionHeader
             title="Full Rankings"
             subtitle="Rank 4 and beyond"
-            icon={<UserGroupIcon className="w-6 stroke-cta-color" />}
+            icon={<UserGroupIcon className="w-6 stroke-accent" />}
             noButton={true}
           />
 
           {/* Desktop Table */}
-          <Card className="hidden md:flex md:flex-col px-6 overflow-x-auto md:gap-3 md:items-start shadow-none! new-border">
+          <Card className={`${inter.className} hidden md:flex md:flex-col px-6 overflow-x-auto md:gap-3 md:items-start shadow-none! new-border`}>
             <table className="w-full text-sm border-collapse">
-              <thead className="border-b border-[#E6EFF5]">
+              <thead className="border-b border-border">
                 <tr>
                   {TABLE_HEADERS.map((h) => (
                     <th
                       key={h}
-                      className="font-medium text-sm text-[#6b7280] p-4 text-left"
+                      className="font-medium text-sm text-text-secondary p-4 text-left"
                     >
                       {h}
                     </th>
@@ -365,10 +371,10 @@ export default function LeaderboardPage() {
                   rest.map((r) => (
                     <tr
                       key={r.rank}
-                      className="hover:bg-[#f8f8f8] transition-all border-b border-[#f3f4f6] last:border-0"
+                      className="hover:bg-bg transition-all border-b border-icon-bg last:border-0"
                     >
                       <td className="p-4">
-                        <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#f3f4f6] text-xs font-bold text-[#6b7280]">
+                        <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-icon-bg text-xs font-bold text-text-secondary">
                           {r.rank}
                         </span>
                       </td>
@@ -378,7 +384,7 @@ export default function LeaderboardPage() {
                         </p>
                       </td>
                       <td className="p-4">
-                        <p className="text-[#6b7280] text-sm">{r.purok}</p>
+                        <p className="text-text-secondary text-sm">{r.purok}</p>
                       </td>
                       <td className="p-4">
                         <p className="font-bold text-text-primary">
@@ -421,14 +427,14 @@ export default function LeaderboardPage() {
                   key={r.rank}
                   className="shadow-none! new-border flex-row! items-center! gap-3"
                 >
-                  <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#f3f4f6] text-sm font-bold text-[#6b7280] shrink-0">
+                  <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-icon-bg text-sm font-bold text-text-secondary shrink-0">
                     {r.rank}
                   </span>
                   <div className="flex flex-col flex-1 min-w-0">
                     <p className="font-semibold text-text-primary truncate">
                       {r.name}
                     </p>
-                    <p className="text-xs text-[#6b7280]">{r.purok}</p>
+                    <p className="text-xs text-text-secondary">{r.purok}</p>
                   </div>
                   <div className="flex flex-col items-end shrink-0">
                     <p className="font-bold text-text-primary text-sm">

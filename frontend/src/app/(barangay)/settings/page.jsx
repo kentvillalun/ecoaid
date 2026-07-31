@@ -34,7 +34,7 @@ export default function SettingsPage() {
   const handleRefetchCount = () => setRefetchCount(prev => prev + 1)
 
   return (
-    <Page className="bg-new-bg!">
+    <Page className="bg-bg!">
       <BarangayTopBar title="Settings" />
       <PageContent className="md:pl-70! md:p-6 md:gap-7">
         <BarangayHeaderCard
@@ -48,7 +48,7 @@ export default function SettingsPage() {
             <SectionHeader
               title="Junkshops"
               subtitle="Manage junkshop partners and their price listings"
-              icon={<BuildingStorefrontIcon className="w-6 stroke-cta-color" />}
+              icon={<BuildingStorefrontIcon className="w-6 stroke-accent" />}
               buttonLabel="Add Junkshop"
               onAction={() => setIsAddJunkshopModalOpen(true)}
             />
@@ -56,7 +56,7 @@ export default function SettingsPage() {
               To view junkshop details, go to the{" "}
               <Link
                 href={"/junkshop-sales"}
-                className="text-cta-color font-semibold"
+                className="text-accent font-semibold"
               >
                 Junkshop Sales
               </Link>{" "}
@@ -70,7 +70,7 @@ export default function SettingsPage() {
           >
             <div className="w-full overflow-x-auto">
               <table className="w-full text-sm border-collapse text-gray-600">
-                <thead className="border-b border-[#E6EFF5]">
+                <thead className="border-b border-border">
                   <tr>
                     {TABLE_HEADERS.map((h) => (
                       <th
@@ -115,7 +115,7 @@ export default function SettingsPage() {
                     data?.junkshops?.map((shop) => (
                       <tr
                         key={shop.id}
-                        className="hover:bg-[#f8f8f8] transition-all duration-150"
+                        className="hover:bg-bg transition-all duration-150"
                       >
                         <td className="p-4 font-medium text-text-primary text-nowrap">
                           {shop.name}

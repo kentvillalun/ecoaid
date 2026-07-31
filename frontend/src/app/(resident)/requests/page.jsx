@@ -35,11 +35,11 @@ export default function RequestsPage() {
   const handleRefetchCount = () => setRefetchCount((prev) => prev + 1);
 
   return (
-    <Page className="overflow-hidden bg-new-bg">
+    <Page className="overflow-hidden bg-bg">
       <ResidentHeader
         title={"Requests & History"}
         action={"notification"}
-        className="shadow-none bg-new-bg!"
+        className="shadow-none bg-bg!"
       />
 
       <PageContent
@@ -130,7 +130,7 @@ export default function RequestsPage() {
                     <div className="flex flex-col flex-1">
                       <div className="flex flex-row justify-between">
                         <div className="flex flex-col  items-start justify-between">
-                          <h3 className="font-semibold text-[#1F2937] capitalize">
+                          <h3 className="font-semibold text-text-primary capitalize">
                             {r.isAssorted === true
                               ? "Assorted Request"
                               : r.material?.name}

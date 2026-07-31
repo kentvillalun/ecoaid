@@ -169,7 +169,7 @@ export const RecordTransactionModal = ({
       title={"Record Transaction"}
       isOpen={isTransactionModalOpen}
       onClose={() => setIsTransactionModalOpen(false)}
-      icon={<Bars3BottomLeftIcon className="stroke-black w-6" />}
+      icon={<Bars3BottomLeftIcon className="stroke-accent w-6" />}
       subtitle={"Choose program and record transaction"}
       confirmLabel={"Record Transaction"}
       confirmClassName={
@@ -183,13 +183,13 @@ export const RecordTransactionModal = ({
           <label className="text-text-primary font-medium">Program</label>
           {preselectedProgram ? (
             <input
-              className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11"
+              className="input mb-0"
               value={preselectedProgram.name}
               disabled
               {...register("programId")}
             />
           ) : (
-            <div className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 flex items-center">
+            <div className="input flex items-center mb-0">
               <select
                 className="w-full outline-none"
                 defaultValue=""
@@ -223,7 +223,7 @@ export const RecordTransactionModal = ({
                 </label>
                 <button
                   type="button"
-                  className="text-xs text-cta-color hover:cursor-pointer"
+                  className="text-xs text-accent hover:cursor-pointer"
                   onClick={() => {
                     setIsCreatingBeneficiary(false);
                     setNewBeneficiaryName("");
@@ -232,7 +232,7 @@ export const RecordTransactionModal = ({
                   Back to search
                 </button>
               </div>
-              <div className="flex flex-row items-center w-full outline-1 py-2.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11">
+              <div className="input flex flex-row items-center mb-0">
                 <input
                   type="text"
                   className="w-full outline-none px-3.5"
@@ -258,7 +258,7 @@ export const RecordTransactionModal = ({
                 Beneficiary
               </label>
 
-              <div className="flex flex-row items-center relative w-full outline-1 py-2.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11">
+              <div className="input flex flex-row items-center relative mb-0">
                 <input
                   type="text"
                   className="w-full outline-none px-3.5"
@@ -285,7 +285,7 @@ export const RecordTransactionModal = ({
                   </button>
                 )}
                 {searchQuery && !selectedBeneficiary && (
-                  <div className="absolute bg-white flex flex-col w-full items-start z-40 rounded-lg new-border text-sm py-2.5 top-11.5">
+                  <div className="absolute bg-surface flex flex-col w-full items-start z-40 rounded-lg new-border text-sm py-2.5 top-11.5">
                     {searchResults.length > 0 ? (
                       searchResults.map((r) => (
                         <div
@@ -309,7 +309,7 @@ export const RecordTransactionModal = ({
                         </p>
                         <button
                           type="button"
-                          className="px-3.5 hover:cursor-pointer hover:bg-gray-50 w-full py-1.5 flex flex-row items-center gap-1.5 text-cta-color font-medium"
+                          className="px-3.5 hover:cursor-pointer hover:bg-gray-50 w-full py-1.5 flex flex-row items-center gap-1.5 text-accent font-medium"
                           onClick={() => {
                             setIsCreatingBeneficiary(true);
                             setSearchQuery("");
@@ -332,7 +332,7 @@ export const RecordTransactionModal = ({
           <label className="text-text-primary font-medium">
             Educational level
           </label>
-          <div className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11  max-h-11 flex items-center">
+          <div className="input flex items-center mb-0">
             <select
               className="w-full outline-none"
               defaultValue=""
@@ -362,7 +362,7 @@ export const RecordTransactionModal = ({
 
           <div className="flex flex-col gap-3">
             {materialRows.map((material, index) => (
-              <div key={index} className="new-border bg-white rounded-xl p-4">
+              <div key={index} className="new-border bg-surface rounded-xl p-4">
                 <div className="flex flex-row items-center justify-between mb-3">
                   <span className="text-sm font-medium text-gray-700">
                     Material {index + 1}
@@ -377,7 +377,7 @@ export const RecordTransactionModal = ({
                   </button>
                 </div>
 
-                <div className="w-full outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 mb-2 flex items-center">
+                <div className="input flex items-center">
                   <select
                     className="w-full outline-none"
                     disabled={selectedProgramId === ""}
@@ -400,7 +400,7 @@ export const RecordTransactionModal = ({
                 </div>
 
                 <div className="flex flex-row gap-2">
-                  <div className="flex-1 outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 flex items-center gap-2">
+                  <div className="input flex-1 flex items-center gap-2 mb-0">
                     <input
                       type="number"
                       className="w-full outline-none flex-1"

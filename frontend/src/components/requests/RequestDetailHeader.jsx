@@ -16,7 +16,7 @@ export const RequestDetailHeader = ({ type }) => {
 
       <div className="flex flex-row gap-4 items-center flex-1">
         <div className="border p-3 border-gray-200 rounded-lg md:flex items-center hidden bg-white">
-          <ClipboardDocumentListIcon className="w-6 stroke-black" />
+          <ClipboardDocumentListIcon className="w-6 stroke-accent" />
         </div>
         <div className="flex flex-col flex-1">
           <div className="flex flex-row items-center gap-3">

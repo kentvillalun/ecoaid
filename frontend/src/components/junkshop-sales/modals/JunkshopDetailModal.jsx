@@ -32,7 +32,7 @@ export function JunkshopDetailModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      icon={<BuildingStorefrontIcon className="w-6 stroke-new-primary" />}
+      icon={<BuildingStorefrontIcon className="w-6 stroke-accent" />}
       title={
         <div className="flex flex-row gap-1">
           {isLoading ? (
@@ -80,7 +80,7 @@ export function JunkshopDetailModal({
         <div className="flex flex-col gap-1">
           <label className="label">Description</label>
           <textarea
-            className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg transition-colors bg-gray-50 cursor-default resize-none"
+            className="input mb-0 max-h-none bg-gray-50 cursor-default resize-none"
             rows={3}
             readOnly
             value={data?.junkshop?.description || "No description provided."}
@@ -93,7 +93,7 @@ export function JunkshopDetailModal({
             <label className="label">Location</label>
             <input
               type="text"
-              className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg transition-colors min-h-11 max-h-11 bg-gray-50 cursor-default"
+              className="input mb-0 bg-gray-50 cursor-default"
               readOnly
               value={data?.junkshop?.location || "Not specified"}
             />
@@ -102,7 +102,7 @@ export function JunkshopDetailModal({
             <label className="label">Junkshop Added</label>
             <input
               type="text"
-              className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg transition-colors min-h-11 max-h-11 bg-gray-50 cursor-default"
+              className="input mb-0 bg-gray-50 cursor-default"
               readOnly
               value={formatDate(data?.junkshop?.createdAt)}
             />
@@ -112,7 +112,7 @@ export function JunkshopDetailModal({
         {/* Price Items */}
         <div className="flex flex-col gap-1">
           <label className="label">Price Items</label>
-          <div className="new-border bg-white rounded-xl overflow-hidden">
+          <div className="new-border bg-surface rounded-xl overflow-hidden">
             <table className="w-full text-xs border-collapse">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50">

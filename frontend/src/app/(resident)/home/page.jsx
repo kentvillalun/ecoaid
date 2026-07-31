@@ -51,8 +51,8 @@ export default function HomePage() {
   };
 
   return (
-    <Page className="bg-new-bg!">
-      <header className="flex flex-row items-start justify-between min-w-full max-h-18.75 bg-new-bg fixed top-0 p-5 pl-0 z-50">
+    <Page className="bg-bg!">
+      <header className="flex flex-row items-start justify-between min-w-full max-h-18.75 bg-bg fixed top-0 p-5 pl-0 z-50">
         <div className="flex flex-row justify-between min-w-full items-center pl-5">
           <div className="max-w-35 relative w-full aspect-4/1">
             <Image
@@ -105,7 +105,7 @@ export default function HomePage() {
               transition={{ duration: 0.3 }}
             >
               <Card
-                customBorder="0.5px solid #e5e7eb"
+                customBorder="0.5px solid var(--color-border)"
                 className="shadow-none! flex flex-row items-center justify-between"
                 handleClick={() => {
                   router.push("/profile/help-support");
@@ -113,7 +113,7 @@ export default function HomePage() {
               >
                 <div className="">
                   {/* <p className="text-sm text-new-primary font-medium">First time? Watch the tutorial</p> */}
-                  <p className="text-sm text-new-primary font-medium">
+                  <p className="text-sm text-dark font-medium">
                     New to EcoAid? Visit our FAQ
                   </p>
                   <p className="text-xs text-text-primary">
@@ -135,11 +135,11 @@ export default function HomePage() {
         </AnimatePresence>
 
         <Card
-          customBorder="0.5px solid #e5e7eb"
+          customBorder="0.5px solid var(--color-border)"
           className="shadow-none! gradient-card relative flex flex-col gap-2 items-start p-4! overflow-clip min-h-37"
         >
-          <div className="absolute w-30 md:w-35 md:h-35 bg-cta-color/60 rounded-full h-30 -right-8 -top-8 md:-top-10 md:-right-10"></div>
-          <div className="absolute w-25 md:w-35 md:h-35 bg-cta-color/50 rounded-full h-25 right-18 -bottom-12 md:right-45 md:-bottom-16"></div>
+          <div className="absolute w-30 md:w-35 md:h-35 bg-accent/60 rounded-full h-30 -right-8 -top-8 md:-top-10 md:-right-10"></div>
+          <div className="absolute w-25 md:w-35 md:h-35 bg-accent/50 rounded-full h-25 right-18 -bottom-12 md:right-45 md:-bottom-16"></div>
           <div className="flex flex-col gap-1 items-start justify-start w-full">
             <p className="text-xs text-[rgba(255,255,255,0.6)] font-medium uppercase">
               Your Points
@@ -150,11 +150,11 @@ export default function HomePage() {
             </p>
           </div>
           <div
-            className="text-xs flex flex-row gap-1 items-center justify-start bg-primary/20 px-3 py-1 rounded-xl"
-            style={{ border: "0.5px solid #49b02d" }}
+            className="text-xs flex flex-row gap-1 items-center justify-start bg-accent/20 px-3 py-1 rounded-xl"
+            style={{ border: "0.5px solid var(--color-accent)" }}
           >
-            <TrophyIcon className="w-3.5 stroke-primary" />
-            <p className="text-primary font-semibold ">
+            <TrophyIcon className="w-3.5 stroke-accent" />
+            <p className="text-accent font-semibold ">
               Rank #3 in your barangay
             </p>
           </div>
@@ -163,11 +163,11 @@ export default function HomePage() {
         <div className="grid grid-cols-2 gap-3">
           <Link href={"/community"} className="contents">
             <Card className="flex-col items-start gap-2 new-border shadow-none md:flex-row md:items-center md:gap-3">
-              <div className="border p-3 border-none rounded-xl items-center bg-[#EAF7E3]">
-                <CalendarDaysIcon className="w-6 stroke-cta-color" />
+              <div className="border p-3 border-none rounded-xl items-center bg-accent-light">
+                <CalendarDaysIcon className="w-6 stroke-accent" />
               </div>
               <div className="text-xs flex flex-col gap-1">
-                <p className="uppercase  text-gray-400 font-medium">
+                <p className="uppercase  text-text-secondary font-medium">
                   EcoAid Collection
                 </p>
                 <div className="text-text-primary font-medium text-sm">
@@ -179,11 +179,11 @@ export default function HomePage() {
           </Link>
           <Link href={"/community"} className="contents">
             <Card className="flex-col items-start gap-2 new-border shadow-none! md:flex-row md:items-center md:gap-3">
-              <div className="border p-3 border-none rounded-xl items-center bg-[#EAF7E3]">
-                <ArrowPathIcon className="w-6 stroke-cta-color" />
+              <div className="border p-3 border-none rounded-xl items-center bg-accent-light">
+                <ArrowPathIcon className="w-6 stroke-accent" />
               </div>
               <div className="text-xs flex flex-col gap-1">
-                <p className="uppercase  text-gray-400 font-medium">
+                <p className="uppercase  text-text-secondary font-medium">
                   accepted materials
                 </p>
                 <div className="flex flex-wrap gap-1">
@@ -204,7 +204,7 @@ export default function HomePage() {
               className="flex flex-row text-sm items-center"
               href={"/requests"}
             >
-              <p className="font-medium text-cta-color">View all</p>{" "}
+              <p className="font-medium text-accent">View all</p>{" "}
               <ChevronRightIcon className="w-3" />{" "}
             </Link>
           </div>
@@ -256,7 +256,7 @@ export default function HomePage() {
                   {/* Top row */}
                   <div className="flex flex-row justify-between w-full">
                     <div className="flex flex-col gap-0.5">
-                      <h3 className="font-semibold text-[#1F2937]">
+                      <h3 className="font-semibold text-text-primary">
                         {r?.isAssorted ? "Assorted Request" : r?.material?.name}
                       </h3>
                       <p className="text-sm text-gray-500">

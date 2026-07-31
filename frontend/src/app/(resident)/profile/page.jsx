@@ -54,17 +54,17 @@ export default function ProfilePage() {
   const handleRefetchCount = () => setRefetchCount((prev) => prev + 1);
 
   return (
-    <Page className="bg-new-bg!">
+    <Page className="bg-bg!">
       <Toaster position="top-center" />
       <ResidentHeader
         title={"Profile"}
-        className="py-6 shadow-none bg-new-bg!"
+        className="py-6 shadow-none bg-bg!"
       />
 
       <PageContent className="pt-10 md:pl-3! md:top-18! ">
         <section className="flex flex-col gap-5">
           <div className="flex flex-col items-center gap-4">
-            <div className="border-5 rounded-full max-h-40 max-w-40 border-cta-color shadow-xl overflow-hidden flex items-center justify-center">
+            <div className="border-5 rounded-full max-h-40 max-w-40 border-accent shadow-xl overflow-hidden flex items-center justify-center">
               <Image
                 src={"/picture.jpg"}
                 width={143}
@@ -82,7 +82,7 @@ export default function ProfilePage() {
                 <div className="text-sm text-[#727272]">
                   Something went wrong.{" "}
                   <button
-                    className="text-[#74C857] hover:underline"
+                    className="text-success hover:underline"
                     onClick={handleRefetchCount}
                   >
                     Please try again
@@ -106,7 +106,7 @@ export default function ProfilePage() {
             <div className="flex flex-col gap-2">
               <Link href={"/profile/personal-information"}>
                 <Card className="flex-row gap-5 shadow-none new-border">
-                  <div className="min-w-10 min-h-10 rounded-full bg-[#9DB2CE26] flex items-center justify-center">
+                  <div className="min-w-10 min-h-10 rounded-full bg-muted-accent/15 flex items-center justify-center">
                     <ListBulletIcon className="w-6 h-6" />
                   </div>
                   <p className="font-medium">Personal Information</p>
@@ -115,7 +115,7 @@ export default function ProfilePage() {
 
               <Link href={"/profile/notifications"}>
                 <Card className="flex-row gap-5 shadow-none new-border">
-                  <div className="min-w-10 min-h-10 rounded-full bg-[#9DB2CE26] flex items-center justify-center">
+                  <div className="min-w-10 min-h-10 rounded-full bg-muted-accent/15 flex items-center justify-center">
                     <BellIcon className="w-6 h-6" />
                   </div>
                   <p className="font-medium">Notification Settings</p>
@@ -124,7 +124,7 @@ export default function ProfilePage() {
 
               <Link href={"/profile/settings"}>
                 <Card className="flex-row gap-5 shadow-none new-border">
-                  <div className="min-w-10 min-h-10 rounded-full bg-[#9DB2CE26] flex items-center justify-center">
+                  <div className="min-w-10 min-h-10 rounded-full bg-muted-accent/15 flex items-center justify-center">
                     <Cog8ToothIcon className="w-6 h-6" />
                   </div>
                   <p className="font-medium">Settings</p>
@@ -133,7 +133,7 @@ export default function ProfilePage() {
 
               <Link href={"/profile/help-support"}>
                 <Card className="flex-row gap-5 shadow-none new-border">
-                  <div className="min-w-10 min-h-10 rounded-full bg-[#9DB2CE26] flex items-center justify-center">
+                  <div className="min-w-10 min-h-10 rounded-full bg-muted-accent/15 flex items-center justify-center">
                     <QuestionMarkCircleIcon className="w-6 h-6" />
                   </div>
                   <p className="font-medium">Help & Support</p>
@@ -145,7 +145,7 @@ export default function ProfilePage() {
               className="flex-row gap-5 shadow-none new-border mb-20"
               handleClick={handleLogout}
             >
-              <div className="min-w-10 min-h-10 rounded-full bg-[#9DB2CE26] flex items-center justify-center">
+              <div className="min-w-10 min-h-10 rounded-full bg-muted-accent/15 flex items-center justify-center">
                 <ArrowLeftStartOnRectangleIcon className="w-6 h-6" />
               </div>
               <p className="font-medium ">Log out</p>

@@ -103,7 +103,7 @@ export function AddJunkshopModal({ isOpen, onClose, setIsModalOpen }) {
       onClose={() => {
         resetModal()
       }}
-      icon={<BuildingStorefrontIcon className="w-6 stroke-new-primary" />}
+      icon={<BuildingStorefrontIcon className="w-6 stroke-accent" />}
       title="Add Junkshop"
       subtitle="Register a new junkshop partner and its price listing"
       confirmLabel="Add Junkshop"
@@ -116,7 +116,7 @@ export function AddJunkshopModal({ isOpen, onClose, setIsModalOpen }) {
           <label htmlFor="junkshopName" className="label">
             Name
           </label>
-          <div className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 flex items-center">
+          <div className="input flex items-center mb-0">
             <input
               type="text"
               id="junkshopName"
@@ -135,7 +135,7 @@ export function AddJunkshopModal({ isOpen, onClose, setIsModalOpen }) {
           </label>
           <textarea
             id="junkshopDescription"
-            className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors resize-none"
+            className="input mb-0 max-h-none resize-none"
             rows={3}
             placeholder="Optional notes about this junkshop"
             onChange={(e) => setDescription(e.target.value)}
@@ -147,7 +147,7 @@ export function AddJunkshopModal({ isOpen, onClose, setIsModalOpen }) {
           <label htmlFor="junkshopLocation" className="label">
             Location
           </label>
-          <div className="outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 flex items-center">
+          <div className="input flex items-center mb-0">
             <input
               type="text"
               id="junkshopLocation"
@@ -163,7 +163,7 @@ export function AddJunkshopModal({ isOpen, onClose, setIsModalOpen }) {
           <label className="label">Price Items</label>
           <div className="flex flex-col gap-3">
             {priceItems.map((_, index) => (
-              <div key={index} className="new-border bg-white rounded-xl p-4">
+              <div key={index} className="new-border bg-surface rounded-xl p-4">
                 <div className="flex flex-row items-center justify-between mb-3">
                   <span className="text-sm font-medium text-gray-700">
                     Material {index + 1}
@@ -179,7 +179,7 @@ export function AddJunkshopModal({ isOpen, onClose, setIsModalOpen }) {
                 </div>
 
                 {/* Material select */}
-                <div className="w-full outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 mb-2 flex items-center">
+                <div className="input flex items-center">
                   <select
                     className="w-full outline-none"
                     defaultValue=""
@@ -200,7 +200,7 @@ export function AddJunkshopModal({ isOpen, onClose, setIsModalOpen }) {
 
                 {/* Price + Unit */}
                 <div className="flex flex-row gap-2">
-                  <div className="flex-1 outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 flex items-center">
+                  <div className="input flex-1 flex items-center mb-0">
                     <input
                       type="number"
                       className="w-full outline-none flex-1"
@@ -211,7 +211,7 @@ export function AddJunkshopModal({ isOpen, onClose, setIsModalOpen }) {
                       }
                     />
                   </div>
-                  <div className="w-24 outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 flex items-center">
+                  <div className="input w-24 flex items-center mb-0">
                     <select
                       className="w-full outline-none"
                       defaultValue="KG"

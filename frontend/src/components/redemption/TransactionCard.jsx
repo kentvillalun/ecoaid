@@ -49,10 +49,10 @@ export const TransactionCard = ({
         </div>
       ) : data?.transactions?.length === 0 ? (
         <div className="flex flex-col items-center justify-center min-h-full p-10 gap-1 md:hidden">
-          <h1 className="text-3xl font-semibold text-[#1F2937] text-center">
+          <h1 className="text-3xl font-semibold text-text-primary text-center">
             No transactions yet
           </h1>
-          <p className="text-sm text-[#6B7280] text-center">
+          <p className="text-sm text-text-secondary text-center">
             There are no redemption trasaction yet.
           </p>
         </div>

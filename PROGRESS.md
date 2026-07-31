@@ -289,6 +289,48 @@ only as an unwired UI scaffold with hardcoded mock data.
 - frontend/src/app/(barangay)/manual-intake/page.jsx — manual intake form with debounced resident search, household-name fallback, dynamic material rows
 - frontend/src/app/(barangay)/material-stock/page.jsx — live stock balance table, transaction log, and stock-out modal
 
+## Design Token System (finalized Aug 1, 2026)
+Built ahead of the Settings theme-picker feature. A full color audit via
+Claude Code found the frontend had 4 rival "green" systems, 5 different
+border-grays, and 8 independent status-color maps (all fixed by consolidating
+into one token set) — see `Known Issues / TODO` batch-migration note below.
+
+16 CSS custom properties now live in `frontend/src/app/globals.css`'s
+`@theme` block:
+- `--color-bg` (#f8f8f8), `--color-surface` (#FFFFFF)
+- `--color-text-primary` (#1a1a1a), `--color-text-secondary` (#6B7280)
+- `--color-border` (#e5e7eb), `--color-dark` (#092517)
+- `--color-accent` (#14532D), `--color-accent-hover` (#1f7a42), `--color-accent-light` (#EAF7E3)
+- `--color-success` (#74C857), `--color-error` (#E54848), `--color-warning` (#EEB90E)
+- `--color-in-progress` (#C88A00), `--color-info` (#1D9BF0)
+- `--color-muted-accent` (#9DB2CE), `--color-icon-bg` (#f3f4f6)
+
+Old tokens (`--color-primary`, `--color-cta-color`, `--color-new-primary`,
+`--color-new-bg`) are **deleted**. Any code still referencing them
+(`bg-primary`, `outline-cta-color`, etc.) is a leftover bug, not intentional.
+
+Design rule: status colors (success/error/warning/in-progress/info) are
+intentionally separate from `--color-accent` — status meaning must stay
+consistent no matter what accent color a barangay picks for their theme.
+`--color-accent` is the only token planned to be swappable per barangay
+theme preset (dark mode explicitly deferred, not v1 scope).
+
+`.input`, `.gradient-button`, `.gradient-card`, `.new-border`, `.label`
+utility classes in `globals.css` already updated to reference the new
+tokens via `var(--color-...)`.
+
+**Migration status:** Batch 1 (shared `ui/` components + form inputs) done.
+Found + partially fixed a regression: dashboard stat card icons/pills lost
+color from referencing the deleted `--color-primary`. Batches 2-7 (nav/layout,
+auth, resident pages, all barangay modules, stragglers incl. `not-found.jsx`
+and manifest fix) combined into one Claude Code run due to usage-limit
+proximity — includes a `MIGRATION_LOG.md` requirement and an explicit
+scope-creep guard (Claude Code proactively "fixed" an out-of-scope file
+once during Batch 1; prompt now requires it to flag instead of act).
+**Next session starting point:** review `MIGRATION_LOG.md`, run
+`git diff --stat` for full blast radius, spot-check ~5-6 representative
+pages across module groups, close out any remaining unmapped colors.
+
 ## Known Issues / TODO
 - `StockTransactionLog.performedBy` not set in Manual Intake, Redemption, or
   Collection Request `COLLECTED` transitions — only Junkshop Sales
@@ -364,6 +406,43 @@ I'm building.
          table + mobile cards, release history table + mobile cards,
          AddRewardItemModal + ReleaseRewardModal both wired
 - [ ] Block I — Reports module
+      NOTE (Aug 1): before backend design, need to sit down with actual
+      barangay staff (Secretary/Treasurer) — they currently compile reports
+      manually in Excel from multiple sources. Need their real column/field
+      requirements before designing aggregation + export. Not yet started.
+- [x/~] Block I.5 (inserted, Aug 1) — Settings: Theme Picker + Design System Consolidation
+      Scope locked: barangay-level (not per-user) accent color theme,
+      curated presets only (not full color picker), applies to both
+      resident and barangay staff UI. Dark mode explicitly deferred —
+      not needed for v1.
+      Discovered mid-design: color usage across frontend/src was NOT
+      unified (4 rival "green" systems, 5 border-grays, 8 independent
+      status-color maps, Card.jsx defaulting to shadow/rounded-3xl
+      against the locked no-shadow/12px spec). Full color audit run via
+      Claude Code before touching the theme feature — see
+      COLOR_AUDIT.md-equivalent findings, 22 inconsistencies catalogued
+      and prioritized (High/Medium/Low).
+      Decided: fix all 22 findings now (not deferred to Block J) since
+      the theme picker can't work correctly on top of untokenized colors.
+      New design token system finalized — 16 CSS custom properties in
+      globals.css @theme block (see below), replacing the old 4 tokens
+      (--color-primary, --color-cta-color, --color-new-primary,
+      --color-new-bg, all deleted).
+      Token migration in progress via Claude Code, batched by
+      module to keep diffs reviewable:
+        Batch 1 (ui/ shared components + form inputs) — DONE.
+          Regression found: dashboard stat card icons/pills lost color
+          (referenced deleted --color-primary via bg-primary/text-primary/
+          border-primary/ring-primary) — fix folded into next batch run.
+        Batches 2-7 (nav/layout, auth, resident pages, barangay modules,
+          stragglers + not-found.jsx + manifest fix) — combined into one
+          prompt run due to Claude Code usage limit proximity; includes
+          MIGRATION_LOG.md requirement and a scope-creep guard (Claude
+          Code is not to proactively "fix" out-of-scope files without
+          flagging first — this happened once during Batch 1).
+      Next session: pull MIGRATION_LOG.md, run git diff --stat for full
+      blast radius, spot-check ~5-6 representative pages across module
+      groups, then close out any remaining unmapped colors manually.
 - [ ] Block J — Technical debt batch (archive pattern, rate limiting,
       pagination/load more, backend hardening)
 

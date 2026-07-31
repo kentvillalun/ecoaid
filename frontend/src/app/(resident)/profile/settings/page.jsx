@@ -13,28 +13,28 @@ export default function SettingsPage() {
     {
       key: "language",
       title: "Laguage",
-      icon: <LanguageIcon className="h-6 w-6 stroke-cta-color" />,
+      icon: <LanguageIcon className="h-6 w-6 stroke-accent" />,
       isToggled: false,
     },
     {
       key: "dark-mode",
       title: "Dark Mode",
-      icon: <MoonIcon className="h-6 w-6 stroke-cta-color" />,
+      icon: <MoonIcon className="h-6 w-6 stroke-accent" />,
       isToggled: false,
     },
   ];
   return (
-    <Page className="bg-new-bg!">
-      <ResidentHeader title={"Settings"} className="shadow-none bg-new-bg!" />
+    <Page className="bg-bg!">
+      <ResidentHeader title={"Settings"} className="shadow-none bg-bg!" />
 
       <PageContent>
         <div className="">
-          <div className="font-medium py-3 border-b border-[#E7E3E0] text-sm">
+          <div className="font-medium py-3 border-b border-border text-sm">
             <h2 className="">General</h2>
           </div>
           {SETTINGS_CONFIG.map((set) => (
             <div
-              className="py-3 border-b border-[#E7E3E0] flex flex-row gap-2 items-center justify-between"
+              className="py-3 border-b border-border flex flex-row gap-2 items-center justify-between"
               key={set.key}
             >
               <div className="flex flex-row gap-3 items-center justify-center ">

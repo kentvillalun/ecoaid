@@ -55,7 +55,7 @@ export default function RequestDetails() {
   ].filter((e) => e.show);
 
   return (
-    <Page className="bg-new-bg!">
+    <Page className="bg-bg!">
       <BarangayTopBar title={"Collection Request"} />
       <PageContent className="md:pl-70! md:p-6 md:gap-7">
         <RequestDetailHeader type={status} />
@@ -174,7 +174,7 @@ export default function RequestDetails() {
                         <p className="text-sm text-test-primary">
                           {item.actualUnit === "PIECE"
                             ? "pcs"
-                            : item.actualUnit}
+                            : (item.actualUnit).toLowerCase()}
                         </p>
                       </div>
                     ))}
@@ -216,7 +216,7 @@ export default function RequestDetails() {
                     className={`flex flex-row gap-3 ${i < timelineEvents.length - 1 ? "pb-4" : ""}`}
                   >
                     <div className="flex flex-col items-center">
-                      <div className="w-2 h-2 rounded-full bg-primary mt-1.5" />
+                      <div className="w-2 h-2 rounded-full bg-accent mt-1.5" />
                       {i < timelineEvents.length - 1 && (
                         <div className="w-px flex-1 bg-gray-200 mt-1" />
                       )}

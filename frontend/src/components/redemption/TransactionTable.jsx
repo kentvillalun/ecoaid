@@ -97,7 +97,7 @@ export const TransactionTable = ({
       className={`${inter.className} hidden md:flex md:flex-col px-8  overflow-x-auto md:gap-3 md:items-start shadow-none! new-border`}
     >
       <table className="w-full text-sm border-collapse text-nowrap text-gray-600">
-        <thead className="border-b border-[#E6EFF5]">
+        <thead className="border-b border-border">
           <tr className="">
             {tableConfig.map((col) => (
               <th className="font-medium text-start p-4" key={col.header}>
@@ -134,7 +134,7 @@ export const TransactionTable = ({
           ) : (
             data?.transactions?.map((t) => (
               <tr
-                className="text-start hover:bg-[#f8f8f8] transition-all transform"
+                className="text-start hover:bg-bg transition-all transform"
                 key={t.id}
               >
                 {tableConfig.map((col) => (

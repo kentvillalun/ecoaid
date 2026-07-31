@@ -1,13 +1,22 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #49b02d;
-  --color-new-primary: #092517;
+  --color-bg: #f8f8f8;
+  --color-surface: #FFFFFF;
   --color-text-primary: #1a1a1a;
-  --color-cta-color: #14532D;
-  --breakpoint-xs: 360px;
-  --breakpoint-mobile: 390px;
-  --color-new-bg: #F8F8F8;
+  --color-text-secondary: #6B7280;
+  --color-border: #e5e7eb;
+  --color-dark: #092517;
+  --color-accent: #14532D;
+  --color-success: #74C857;
+  --color-error: #E54848;
+  --color-warning: #EEB90E;
+  --color-in-progress: #C88A00;
+  --color-info: #1D9BF0;
+  --color-muted-accent: #9DB2CE;
+  --color-icon-bg: #f3f4f6;
+  --color-accent-hover: #1f7a42;
+  --color-accent-light: #EAF7E3;
 }
 
 .sidebar {
@@ -21,7 +30,7 @@ body {
 }
 
 .gradient-button {
-  background-image: linear-gradient(to bottom, #1f7a42, #14532D);
+  background-image: linear-gradient(to bottom, var(--color-accent-hover), var(--color-accent));
 }
 
 .gradient-button-red {
@@ -33,20 +42,20 @@ body {
 }
 
 .gradient-card {
-  background-image: linear-gradient(to bottom, #0d3320, #092517);
+  background-image: linear-gradient(to bottom, #0d3320, var(--color-dark));
 }
 
 .new-border {
-  border: 0.5px solid #e5e7eb;
+  border: 0.5px solid var(--color-border);
 }
 
 .label {
   font-weight: 500;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
 }
 
 @layer components {
   .input {
-    @apply w-full outline-1 py-2.5 px-3.5 text-[#717680] outline-gray-300 rounded-lg focus-within:outline-cta-color transition-colors min-h-11 max-h-11 mb-2
+    @apply w-full outline-1 py-2.5 px-3.5 text-text-secondary outline-border rounded-lg focus-within:outline-accent transition-colors min-h-11 max-h-11 mb-2
   }
 }
