@@ -319,17 +319,61 @@ theme preset (dark mode explicitly deferred, not v1 scope).
 utility classes in `globals.css` already updated to reference the new
 tokens via `var(--color-...)`.
 
-**Migration status:** Batch 1 (shared `ui/` components + form inputs) done.
-Found + partially fixed a regression: dashboard stat card icons/pills lost
-color from referencing the deleted `--color-primary`. Batches 2-7 (nav/layout,
-auth, resident pages, all barangay modules, stragglers incl. `not-found.jsx`
-and manifest fix) combined into one Claude Code run due to usage-limit
-proximity — includes a `MIGRATION_LOG.md` requirement and an explicit
-scope-creep guard (Claude Code proactively "fixed" an out-of-scope file
-once during Batch 1; prompt now requires it to flag instead of act).
-**Next session starting point:** review `MIGRATION_LOG.md`, run
-`git diff --stat` for full blast radius, spot-check ~5-6 representative
-pages across module groups, close out any remaining unmapped colors.
+**Migration status: COMPLETE.** All 7 batches + cleanup pass finished and
+verified — zero remaining `cta-color`/`new-primary`/`new-bg` references
+outside 2 dead/commented lines, ESLint clean. `MIGRATION_LOG.md` reviewed.
+3 open decisions from the log resolved:
+1. Discard-confirm modal icon (`personal-information.jsx`) → changed from
+   `stroke-accent` to `stroke-error` (destructive-action warning icon
+   shouldn't be brand green) — pending Haru applying the 1-line fix
+2. Program Funds income/expense colors (`text-green-600`/`text-red-600`
+   etc.) → **kept as-is, intentional.** Decided these deep/saturated
+   Tailwind-named colors serve prominent financial figures better than
+   the softer `--color-success`/`--color-error` tokens; not a bug
+3. Minor unmapped hex (signup dropdown grays, reports chart border,
+   leaderboard `hover:border-[#d1d5db]`) → leaderboard one fixed
+   (→ `hover:border-border`); the rest parked in Block J debt
+
+**Theme picker UI direction validated (Aug 2)** via inline mockup —
+grid of preset preview cards (mini sidebar-bar + gradient sample button
+per card), matches the "curated presets, not a color picker" UX pattern
+(Bentodoro-style reference). 5 presets designed, each defining just the
+3 themeable tokens (`--color-accent`, `--color-accent-hover`,
+`--color-accent-light`) — bg/surface/border/text tokens stay fixed
+across all themes since only light mode is in scope:
+
+| Preset | accent | accent-hover | accent-light |
+|---|---|---|---|
+| Forest Green (default) | #14532D | #1f7a42 | #EAF7E3 |
+| Ocean Teal | #115E59 | #0D9488 | #CCFBF1 |
+| Sunrise Orange | #9A3412 | #EA580C | #FFEDD5 |
+| Royal Purple | #6B21A8 | #9333EA | #F3E8FF |
+| Deep Maroon | #7F1D1D | #B91C1C | #FEE2E2 |
+
+UX decisions locked:
+- Section header ("Appearance") — consistent with every other Settings
+  section, same `SectionHeader` component pattern as rest of app
+- Click a preset card = **local preview only** (instant CSS variable
+  update via JS, e.g. `document.documentElement.style.setProperty()`),
+  zero backend calls per click — avoids wasted requests while browsing
+- "Save changes" button sits below the preset grid, only meaningfully
+  active when previewed selection differs from the actually-saved theme
+- One API call only on Save — commits to DB + updates localStorage
+- No confirmation modal — low-stakes, reversible, cosmetic setting
+- If user navigates away without saving, **silently revert** to actual
+  saved theme — no "unsaved changes" warning needed
+- Theme is barangay-level (not per-user), fetched once on login/app
+  load, cached to localStorage, applies to both resident and barangay
+  staff interfaces
+- Dark mode explicitly out of scope for v1
+
+**Next session plan (per Haru — Aug 3, vacant day):** implement in the
+usual order — schema first (add theme field to `Barangay` model — still
+need to decide: store a theme key/slug like `"forest-green"` and keep
+hex values in frontend code, vs. store the 3 hex values directly in DB),
+then controller (GET/PATCH theme endpoint), then frontend (Settings UI
+wiring, localStorage caching, live CSS variable application on
+login/app load).
 
 ## Known Issues / TODO
 - `StockTransactionLog.performedBy` not set in Manual Intake, Redemption, or

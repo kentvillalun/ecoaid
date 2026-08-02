@@ -186,10 +186,10 @@ export default function LeaderboardPage() {
                 <button
                   key={t}
                   onClick={() => setType(t)}
-                  className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all duration-150 border ${
+                  className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all duration-150 border hover:cursor-pointer ${
                     type === t
                       ? "gradient-button text-white border-transparent"
-                      : "bg-surface text-text-secondary border-border hover:border-[#d1d5db]"
+                      : "bg-surface text-text-secondary border-border hover:border-border"
                   }`}
                 >
                   {t}
@@ -206,10 +206,10 @@ export default function LeaderboardPage() {
                 <button
                   key={p}
                   onClick={() => setPeriod(p)}
-                  className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all duration-150 border ${
+                  className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all duration-150 hover:cursor-pointer border ${
                     period === p
                       ? "gradient-button text-white border-transparent"
-                      : "bg-surface text-text-secondary border-border hover:border-[#d1d5db]"
+                      : "bg-surface text-text-secondary border-border hover:border-border "
                   }`}
                 >
                   {p}

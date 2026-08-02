@@ -62,7 +62,7 @@ export default function PersonalInformationPage() {
         createPortal(
           <Modal
             isOpen={isModalOpen}
-            icon={<ExclamationTriangleIcon className="w-6 stroke-accent" />}
+            icon={<ExclamationTriangleIcon className="w-6 stroke-error" />}
             title={"Discard Changes?"}
             subtitle={"You have unsaved changes that will be lost."}
             onClose={() => setIsModalOpen(false)}

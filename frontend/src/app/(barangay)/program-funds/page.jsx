@@ -508,8 +508,8 @@ export default function ProgramFundsPage() {
                               {t?.performedBy}
                             </p>
                             {t?.performedByRole && (
-                              <p className="text-xs text-gray-400">
-                                {t?.performedByRole}
+                              <p className="text-xs text-gray-400 capitalize">
+                                {(t?.performedByRole).toLowerCase()}
                               </p>
                             )}
                           </div>
@@ -590,8 +590,8 @@ export default function ProgramFundsPage() {
                         {t.performedBy}
                       </p>
                       {t?.performedByRole && (
-                        <p className="text-xs text-gray-400">
-                          {t?.performedByRole}
+                        <p className="text-xs text-gray-400 capitalize">
+                          {(t?.performedByRole).toLowerCase()}
                         </p>
                       )}
                     </div>
