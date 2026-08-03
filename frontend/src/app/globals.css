@@ -17,6 +17,8 @@
   --color-icon-bg: #f3f4f6;
   --color-accent-hover: #1f7a42;
   --color-accent-light: #EAF7E3;
+  --breakpoint-xs: 300px;
+  --breakpoint-mobile: 400px;
 }
 
 .sidebar {
