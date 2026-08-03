@@ -188,12 +188,12 @@ export default function BarangayDashboardPage() {
             >
               <div className="absolute w-30 md:w-35 md:h-35 bg-accent/60 rounded-full h-30 -right-8 -top-8 md:-top-10 md:-right-10"></div>
               <div className="absolute w-25 md:w-35 md:h-35 bg-accent/50 rounded-full h-25 right-18 -bottom-12 md:right-45 md:-bottom-16"></div>
-              <div className="flex flex-col items-start justify-between gap-2  z-40">
+              <div className="flex flex-col items-start justify-between gap-2 z-40 h-full">
                 <div className="flex flex-col gap-1 items-start justify-start w-full">
                   <p className="text-xs text-[rgba(255,255,255,0.6)] font-medium uppercase">
                     Total Recyclables Collected
                   </p>
-                  <p className="text-white font-bold text-4xl md:text-5xl">
+                  <p className="text-white font-bold text-3xl md:text-5xl">
                     1,250 kg
                   </p>
                   <p className="text-xs text-[rgba(255,255,255,0.6)]">
@@ -210,13 +210,13 @@ export default function BarangayDashboardPage() {
               </div>
               <div className="flex flex-col gap-2 items-end lg:items-start justify-start h-full z-40 lg:border-l lg:border-white/10 lg:pl-3">
                 <div className="flex flex-col gap-1 items-end lg:items-start justify-start w-full">
-                  <p className="text-xs text-[rgba(255,255,255,0.6)] font-medium uppercase">
+                  <p className="text-xs text-[rgba(255,255,255,0.6)] font-medium uppercase text-end">
                     Current Fund Balance
                   </p>
-                  <p className="text-white font-bold text-4xl md:text-5xl">
+                  <p className="text-white font-bold text-3xl md:text-5xl">
                     ₱ 17,500
                   </p>
-                  <p className="text-xs text-[rgba(255,255,255,0.6)]">
+                  <p className="text-xs text-[rgba(255,255,255,0.6)] text-end text-nowrap">
                     Available program funds
                   </p>
                 </div>
@@ -272,7 +272,7 @@ export default function BarangayDashboardPage() {
 
             <Card className="shadow-none! new-border flex flex-col items-start">
               <div className="flex flex-row items-start justify-between w-full">
-                <p className="text-xs font-medium text-[#6b7280]">
+                <p className="text-xs font-medium text-[#6b7280] ">
                   Unverified residents
                 </p>
                 <IconContainer
@@ -287,7 +287,7 @@ export default function BarangayDashboardPage() {
               <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
                 <ExclamationCircleIcon className="w-3 stroke-accent" />
                 <p className="text-accent font-medium">
-                  Pending verification
+                  For verification
                 </p>
               </div>
             </Card>

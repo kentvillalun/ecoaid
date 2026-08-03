@@ -1,0 +1,5 @@
+-- CreateEnum
+CREATE TYPE "Theme" AS ENUM ('FOREST_GREEN', 'OCEAN_TEAL', 'SUNRISE_ORANGE', 'ROYAL_PURPLE', 'DEEP_MAROON');
+
+-- AlterTable
+ALTER TABLE "Barangay" ADD COLUMN     "themeAccent" "Theme" NOT NULL DEFAULT 'FOREST_GREEN';

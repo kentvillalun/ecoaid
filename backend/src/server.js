@@ -18,6 +18,7 @@ import announcementRoute from "./routes/announcement.route.js";
 import leaderboardRoute from "./routes/leaderboard.route.js";
 import programFundsRoute from "./routes/program-funds.route.js";
 import rewardInventoryRoute from "./routes/reward-inventory.route.js"
+import settingsRoute from "./routes/settings.route.js"
 
 config();
 connectDB();
@@ -52,6 +53,7 @@ app.use("/announcements", announcementRoute);
 app.use("/leaderboard", leaderboardRoute);
 app.use("/program-funds", programFundsRoute);
 app.use("/rewards", rewardInventoryRoute);
+app.use("/settings", settingsRoute);
 
 const PORT = process.env.PORT || 5001;
 const server = app.listen(PORT, () => {

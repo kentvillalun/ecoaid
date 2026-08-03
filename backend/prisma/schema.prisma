@@ -42,6 +42,14 @@ model OtpVerification {
   @@index([phoneNumber])
 }
 
+enum Theme {
+  FOREST_GREEN
+  OCEAN_TEAL
+  SUNRISE_ORANGE
+  ROYAL_PURPLE
+  DEEP_MAROON
+}
+
 
 model Barangay {
   id           String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -64,6 +72,8 @@ model Barangay {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  themeAccent Theme @default(FOREST_GREEN)
 
   material Material[]
   program Program[]

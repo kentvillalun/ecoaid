@@ -367,13 +367,66 @@ UX decisions locked:
   staff interfaces
 - Dark mode explicitly out of scope for v1
 
-**Next session plan (per Haru — Aug 3, vacant day):** implement in the
-usual order — schema first (add theme field to `Barangay` model — still
-need to decide: store a theme key/slug like `"forest-green"` and keep
-hex values in frontend code, vs. store the 3 hex values directly in DB),
-then controller (GET/PATCH theme endpoint), then frontend (Settings UI
-wiring, localStorage caching, live CSS variable application on
-login/app load).
+**Schema — DONE (Aug 3).** Decided: store a theme **slug via Prisma enum**
+(not raw hex values in DB) — reasoning: hex values live in a frontend
+constant, so the last-saved theme can render instantly from localStorage
+cache on load, without waiting on a network request. Also decided: no
+separate table needed (single value, one per barangay, no history to
+track) — just a column on `Barangay`, same pattern as `redemptionMode`.
+
+```prisma
+enum Theme {
+  FOREST_GREEN
+  OCEAN_TEAL
+  SUNRISE_ORANGE
+  ROYAL_PURPLE
+  DEEP_MAROON
+}
+```
+`Barangay.themeAccent Theme @default(FOREST_GREEN)` — migration run and
+verified (existing barangay record defaulted correctly).
+
+**Controller/routes — DONE (Aug 3),** new `settings.controller.js` +
+`settings.routes.js` (first real Settings-domain file — Junkshop's "Add
+Junkshop" still lives in the junkshop-sales controller since it's
+junkshop-domain data despite living in Settings UI; theme has no natural
+domain home, so it's the first thing to justify a dedicated Settings
+controller).
+- `GET /settings/theme/resident` (authenticateResident, role RESIDENT)
+- `GET /settings/theme/staff` (authenticateBarangay, roles CAPTAIN/SK/
+  SECRETARY/TREASURER/COLLECTOR) — both routes call the same `getTheme`,
+  kept as two routes since the auth middleware isn't designed to accept
+  either token type interchangeably (JWT payload carries `barangayId`
+  regardless of role either way, so the query itself is identical)
+- `PATCH /settings/theme` (authenticateBarangay, roles CAPTAIN + SECRETARY
+  only — theme change requires top admin privilege, Secretary included
+  since they handle day-to-day settings/admin work in practice)
+- Validation: incoming `themeAccent` checked against the 5 valid enum
+  values via `.includes()`, `400` on invalid, `500` on Prisma/server error
+- Manually tested via Thunder Client — both GET routes, PATCH with valid
+  role (succeeds) and invalid role e.g. SK/COLLECTOR (correctly rejected)
+
+**Next session (frontend):** two pieces, in this order —
+1. **App-wide fetch/cache/apply logic** — where the theme gets fetched
+   once on login (both resident and barangay redirect flows), cached to
+   localStorage, and CSS variables applied on load. This needs to exist
+   before Settings page work, since Settings reads from the same context.
+2. **Settings page UI** — preset grid (design already validated via
+   mockup), local-only preview on click (`document.documentElement.
+   style.setProperty()`, no backend call), Save button below the grid
+   using `useMutation` to hit `PATCH /settings/theme`, only meaningfully
+   active when previewed selection differs from saved theme.
+
+**Unrelated bug noticed mid-session, not yet fixed:** two custom Tailwind
+breakpoints (`xs`, `mobile`) used throughout `onboarding/page.jsx` (and
+likely other mobile-specific files) were accidentally deleted from the
+`@theme` block during the token migration cleanup — original pixel
+values unknown/unrecoverable. Suggested placeholder values discussed but
+not yet applied: `--breakpoint-xs: 400px`, `--breakpoint-mobile: 500px`
+(inferred from usage pattern — `xs` = smallest phones, `mobile` = larger
+phones, both below `md`'s 768px). Needs visual verification on a real
+device or devtools before locking in, and a grep across the codebase for
+other files using `xs:`/`mobile:` that may also be affected.
 
 ## Known Issues / TODO
 - `StockTransactionLog.performedBy` not set in Manual Intake, Redemption, or
