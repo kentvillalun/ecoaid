@@ -92,9 +92,9 @@ export default function ResidentsPage() {
                 {totalCount}
               </p>
             )}
-            <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+            <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1 ">
               <UsersIcon className="w-3 stroke-accent" />
-              <p className="text-accent font-medium">Registered accounts</p>
+              <p className="text-accent font-medium ">Registered accounts</p>
             </div>
           </Card>
 

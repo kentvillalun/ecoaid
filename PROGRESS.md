@@ -406,16 +406,155 @@ controller).
 - Manually tested via Thunder Client — both GET routes, PATCH with valid
   role (succeeds) and invalid role e.g. SK/COLLECTOR (correctly rejected)
 
-**Next session (frontend):** two pieces, in this order —
-1. **App-wide fetch/cache/apply logic** — where the theme gets fetched
-   once on login (both resident and barangay redirect flows), cached to
-   localStorage, and CSS variables applied on load. This needs to exist
-   before Settings page work, since Settings reads from the same context.
-2. **Settings page UI** — preset grid (design already validated via
-   mockup), local-only preview on click (`document.documentElement.
-   style.setProperty()`, no backend call), Save button below the grid
-   using `useMutation` to hit `PATCH /settings/theme`, only meaningfully
-   active when previewed selection differs from saved theme.
+**Frontend — IN PROGRESS (Aug 4).** Haru building solo (deemed straightforward
+enough), mentor guiding via Q&A rather than writing code directly.
+
+`lib/themes.js` — DONE. Exports:
+- `THEMES` object keyed by enum slug, each with `name`, `accent`,
+  `accentHover`, `accentLight`, and a new `accentDark` field (added
+  mid-session — see gradient-card note below)
+- `applyTheme(themeKey)` helper — looks up the theme, guards against
+  invalid/unknown keys, calls `document.documentElement.style.
+  setProperty()` for each of the 3(-4) CSS variables. This is the
+  mechanism that makes instant, no-reload theme switching possible:
+  since all Tailwind utility classes (`bg-accent`, `text-accent` etc.)
+  resolve to `var(--color-accent)`, overriding the variable on
+  `document.documentElement` (the `<html>` root, chosen specifically so
+  the override cascades to every element on the page) repaints
+  everything using that class, instantly, no component re-render needed
+
+`(barangay)/layout.jsx` — theme-apply logic DONE and debugged. Real
+learning moment this session: first attempt nested `useFetch` inside a
+`useEffect` callback → "Invalid hook call" error, since hooks can only
+be called at a component's top level, never inside another hook's
+callback. Fixed by pulling `useFetch` out to the component body directly,
+with a second `useEffect` watching `[theme]` (extracted from the fetch
+result) to apply + cache the fresh value once it arrives. That second
+effect needs a guard clause (`if (!theme) return`) — without it, the
+effect fires on initial render before the fetch resolves and would
+silently write the string `"undefined"` into localStorage. Final pattern,
+reusable for the resident layout:
+```js
+// cache-first instant apply, runs once on mount
+useEffect(() => {
+  const cachedTheme = localStorage.getItem("barangayTheme");
+  if (cachedTheme) applyTheme(cachedTheme);
+}, []);
+
+// useFetch called directly in component body — not nested
+const { data: barangayThemeData } = useFetch({ url: "/api/settings/theme/staff" });
+const theme = barangayThemeData?.theme?.themeAccent;
+
+// re-apply + cache once fresh data arrives, self-corrects if cache was stale
+useEffect(() => {
+  if (!theme) return;
+  applyTheme(theme);
+  localStorage.setItem("barangayTheme", theme);
+}, [theme]);
+```
+
+**Visual styling decisions made this session** (via live testing against
+the dashboard, Forest Green default):
+- `.sidebar` scrollbar-color: reverted to `var(--color-dark)`, NOT
+  themeable — sidebar background itself stays fixed brand identity
+  (`--color-dark`), so a themed scrollbar color would clash rather than
+  match its own container
+- `.gradient-card` (resident/barangay hero card, e.g. dashboard's
+  "Total Recyclables Collected" card): went through several iterations —
+  gradient using `--color-dark` was rejected (brand-identity color
+  shouldn't mix into a themeable element, since it's meant to stay
+  constant across all barangays regardless of their chosen accent).
+  Considered `accent → accent-hover` gradient and a new `accentDark`
+  token (added to `THEMES`, one theme darker than `accent`, distinct
+  from the fixed `--color-dark`) for a two-tone gradient, but Haru's
+  final call after visual testing: **flat `var(--color-accent)` fill,
+  no gradient** — simplest, reads cleanest, "not too dark, not too
+  light." `accentDark` values were computed and added to `themes.js`
+  regardless (harmless if unused for now, available if a two-tone
+  treatment is wanted later): Forest #092517, Ocean Teal #0A3D3A,
+  Sunrise Orange #6B240C, Royal Purple #4A1573, Deep Maroon #5C1414
+- Found + flagged, NOT yet fixed: the "All time total" / "Available
+  funds" pills sitting inside the now-accent-colored gradient card are
+  low-contrast (accent text/border on an accent-colored card background
+  — same readability problem regardless of which theme is active, since
+  it's an accent-on-accent contrast issue, not a Forest-Green-specific
+  one). White/frosted-glass alternatives were proposed and demoed but
+  Haru decided to keep them accent-colored for now — open item, revisit
+  if it reads poorly once tested against non-green themes
+
+**Theme picker feature — FUNCTIONALLY COMPLETE (Aug 5).** Both layouts
+(`(barangay)/layout.jsx`, `(resident)/layout.jsx`) apply cached theme
+instantly on mount and self-correct once the fetch resolves. Settings
+page UI built solo by Haru (mentor guided via Q&A, did not write the
+code directly) — preset grid, scope-warning banner, Save/Cancel, full
+save flow tested working end-to-end.
+
+**Real bugs hit and fixed this session** (good learning reference for
+similar patterns later):
+1. **Stale state read after `setState`** — clicking a preset card called
+   `setPreviewTheme(key)` then immediately `applyTheme(previewTheme)` on
+   the next line; since React batches state updates for the next render,
+   `previewTheme` still held the *previous* click's value, causing a
+   visible "one click behind" lag that looked like a performance problem
+   but was actually a data-staleness problem. Fixed by using `key`
+   directly (the plain variable from the `.map()` destructure) instead
+   of reading back from state.
+2. **`useMutation` defaults to POST** — `makeRequest` silently sent POST
+   to a PATCH-only route, request failed with no obvious error. Needed
+   explicit `method: "PATCH"` in the call. Worth remembering as a general
+   checklist item for any future `useMutation` call against a
+   PATCH/PUT/DELETE route.
+3. **Stale closure in unmount-cleanup effect** — the "revert to saved
+   theme on navigate-away" cleanup (`useEffect(() => { return () =>
+   applyTheme(savedTheme) }, [savedTheme])`) was firing its cleanup on
+   *every* `savedTheme` change, not just true unmount, and doing so with
+   a stale captured value — causing a visible flash back to the old
+   theme immediately after a successful save (the post-save refetch
+   updates `savedTheme`, which retriggers this effect's cleanup with the
+   *previous* value before the effect re-registers). Fixed using
+   `useRef` to track the latest `savedTheme` without it being a
+   dependency: a ref updates without retriggering effects/re-renders,
+   so `useEffect(() => { return () => applyTheme(savedThemeRef.current)
+   }, [])` only fires on true unmount and always reads the current
+   value. New concept for Haru this session — state vs. ref distinction
+   (state triggers re-renders and can go stale in closures; a ref
+   doesn't trigger re-renders but always reflects the current value).
+   NOTE: initial fix attempt left the OLD buggy effect in the file
+   alongside the new ref-based one — both were running simultaneously,
+   which meant the bug persisted until the old block was deleted
+   entirely. Worth double-checking file state after applying a fix,
+   not just adding the new code.
+
+**Design decisions finalized this session:**
+- `.gradient-card` final state: flat `var(--color-accent)` fill, no
+  gradient (earlier gradient/accentDark exploration abandoned after
+  visual testing — see prior session notes, `accentDark` values remain
+  in `themes.js` unused, harmless)
+- `.sidebar` scrollbar-color: confirmed fixed to `var(--color-dark)`,
+  not themeable (tested visually against the "should the whole sidebar
+  follow theme" question — accent-colored sidebar blended badly into
+  the accent-colored hero card in Forest Green, confirmed the fixed
+  approach was correct)
+- Junkshop Sales "Best price" highlight (green row) — decided to KEEP
+  tied to `--color-success`, not `--color-accent`. Same reasoning as
+  the earlier Program Funds decision: this is a semantic status
+  indicator ("this is the best option"), not a branding element — green
+  carries a near-universal "good/winning" association that wouldn't
+  transfer if it followed an arbitrary theme color like orange or
+  purple. Should already reference `--color-success` if not already
+  (worth a quick check, not yet verified)
+- Pill contrast issue (accent-on-accent inside gradient-card) from last
+  session — Haru's final call: leave as accent-colored, not revisited
+  further this session
+
+**Remaining before this feature is fully closed out:**
+1. Full cross-theme visual pass — test all 5 presets (not just Forest
+   Green default), especially the gradient-card + pill contrast combo
+   against Ocean Teal/Sunrise Orange/Royal Purple/Deep Maroon
+2. Verify Junkshop Sales "Best" badge actually uses `--color-success`
+   token, not a raw Tailwind green class
+3. Confirm resident-side Settings/theme display (if residents have any
+   theme-related UI, vs. just passively receiving the applied theme)
 
 **Unrelated bug noticed mid-session, not yet fixed:** two custom Tailwind
 breakpoints (`xs`, `mobile`) used throughout `onboarding/page.jsx` (and
@@ -427,6 +566,76 @@ not yet applied: `--breakpoint-xs: 400px`, `--breakpoint-mobile: 500px`
 phones, both below `md`'s 768px). Needs visual verification on a real
 device or devtools before locking in, and a grep across the codebase for
 other files using `xs:`/`mobile:` that may also be affected.
+
+## Scope Planning — Defense Timeline (discussed Aug 4, 2026)
+Defense: last week of September 2026. Pilot testing must be complete
+*before* defense, not overlapping it — so pilot testing is calendar time,
+not dev time, and its start date (not the defense date) should be what
+drives sprint planning from here.
+
+**Confirmed compliance-matrix requirements** (cannot be deferred to
+post-defense):
+- Image recognition (Teachable Machine — still needs dataset capture
+  from groupmates, previously deferred to "during-semester," now
+  time-boxed by the defense date)
+- System should be generic/adaptable to any barangay, not hardcoded to
+  the pilot barangay — module availability must be configurable per
+  barangay (this requirement was initially mistaken for a "nice to have"
+  during this discussion, then corrected — it IS in the compliance matrix)
+
+**Architectural decision — module configuration belongs at Super Admin
+level, not barangay-level Settings.** Reasoning, worked out in
+conversation:
+1. Per the SaaS model (barangays register through the dev team/Super
+   Admin, not self-service), the entity deciding "which modules does
+   this barangay get" is the Super Admin, not the barangay itself
+2. Barangay staff don't know the system architecture — some modules
+   have cross-dependencies, so giving barangay staff a toggle to
+   disable/enable modules risks them breaking things they don't
+   understand
+3. Mental model going forward: barangay-level Settings = things the
+   barangay controls about their own experience (e.g. the theme
+   picker — cosmetic, low-risk, appropriately self-service). Super
+   Admin config = things that determine what a barangay has access to
+   in the first place (module flags) — a different authority level
+   entirely, even though both get colloquially called "settings"
+
+**Existing foundation already in place:** `Barangay` model already has
+feature flags (`hasCollectionRequests`, `hasRedemptionManagement`,
+`hasRewardInventory`, `hasLeaderboard`) per `project-overview.md` — the
+schema-level flexibility already exists. The actual gap is (a) a Super
+Admin interface to manage these, and (b) applying the flags to
+conditionally render barangay UI (e.g. hide Leaderboard from sidebar if
+`hasLeaderboard: false`). Not started — full flag coverage across all
+modules not yet verified (may be missing flags for Program Funds,
+Junkshop Sales, etc.).
+
+**Open question, going to adviser:** full Super Admin interface (real
+UI for onboarding barangays + toggling modules) vs. seed file approach
+(demonstrate the architecture's multi-barangay adaptability via 2-3
+seeded barangay records with different flag combinations, defend the
+schema-level compliance without building the full admin UI before
+defense). Haru's plan: communicate the scope-creep risk directly to
+adviser, propose the seed-file approach as the defensible middle ground,
+build the full interface as post-defense work if adviser insists.
+
+**Not compliance-required, safe to defer to post-defense** (per this
+discussion): audit logs (suggested by instructors but not in the
+compliance matrix — if pursued, scope to high-risk actions only, e.g.
+fund/redemption/verification changes, not literally every controller),
+rate limiting, pagination, remaining minor technical debt.
+
+**Working "required before defense" list, current understanding:**
+1. Theme picker (in progress)
+2. Reports module (blocked on stakeholder conversation)
+3. Image recognition (compliance-required)
+4. Super Admin module configuration — scope pending adviser input
+   (seed file vs. full interface)
+5. Archive pattern (panel requirement)
+6. Basic backend hardening
+7. Pilot testing (calendar-driven — needs its own start-date target,
+   not yet set)
+8. Defense prep
 
 ## Known Issues / TODO
 - `StockTransactionLog.performedBy` not set in Manual Intake, Redemption, or

@@ -50,6 +50,8 @@ export default function HomePage() {
     setShowBanner(false);
   };
 
+ 
+
   return (
     <Page className="bg-bg!">
       <header className="flex flex-row items-start justify-between min-w-full max-h-18.75 bg-bg fixed top-0 p-5 pl-0 z-50">

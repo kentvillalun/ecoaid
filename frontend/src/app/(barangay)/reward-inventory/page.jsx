@@ -351,11 +351,11 @@ export default function RewardInventoryPage() {
                   key={item.id}
                   className="flex flex-col items-start gap-2 shadow-none! new-border"
                 >
-                  <div className="flex flex-row items-center justify-between w-full gap-2">
+                  <div className="flex flex-row items-start justify-between w-full gap-2">
                     <p className="text-sm font-medium text-text-primary">
                       {item.programName}
                     </p>
-                    <Badge
+                    <Badge 
                       label={CATEGORY_LABELS[item.category]}
                       color={CATEGORY_COLORS[item.category]}
                     />

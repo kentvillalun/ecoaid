@@ -232,16 +232,16 @@ export const RecordTransactionModal = ({
                   Back to search
                 </button>
               </div>
-              <div className="input flex flex-row items-center mb-0">
+              <div className="input flex flex-row items-center mb-0 justify-between">
                 <input
                   type="text"
-                  className="w-full outline-none px-3.5"
+                  className="w-full outline-none"
                   placeholder="Input beneficiary name"
                   value={newBeneficiaryName}
                   onChange={(e) => setNewBeneficiaryName(e.target.value)}
                 />
                 <button
-                  className="pr-3.5 hover:cursor-pointer"
+                  className="hover:cursor-pointer"
                   type="button"
                   onClick={() => {
                     setIsCreatingBeneficiary(false);
@@ -258,23 +258,23 @@ export const RecordTransactionModal = ({
                 Beneficiary
               </label>
 
-              <div className="input flex flex-row items-center relative mb-0">
+              <div className="input flex flex-row items-center relative mb-0 gap-2">
                 <input
                   type="text"
-                  className="w-full outline-none px-3.5"
+                  className="w-full outline-none"
                   placeholder="Search Beneficiary"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
 
                 {selectedBeneficiary && (
-                  <span className="text-xs font-medium text-emerald-700 bg-emerald-50 rounded-3xl py-1 px-2 text-nowrap mr-2">
+                  <span className="text-xs font-medium text-accent bg-accent-light rounded-3xl py-1 px-2 text-nowrap">
                     {selectedBeneficiary.points} pts
                   </span>
                 )}
                 {selectedBeneficiary && (
                   <button
-                    className="pr-3.5 hover:cursor-pointer"
+                    className=" hover:cursor-pointer"
                     type="button"
                     onClick={() => {
                       setSelectedBeneficiary(null);
@@ -285,7 +285,7 @@ export const RecordTransactionModal = ({
                   </button>
                 )}
                 {searchQuery && !selectedBeneficiary && (
-                  <div className="absolute bg-surface flex flex-col w-full items-start z-40 rounded-lg new-border text-sm py-2.5 top-11.5">
+                  <div className="absolute bg-surface flex flex-col w-full items-start z-40 rounded-lg new-border text-sm py-2.5 top-11.5 left-0">
                     {searchResults.length > 0 ? (
                       searchResults.map((r) => (
                         <div

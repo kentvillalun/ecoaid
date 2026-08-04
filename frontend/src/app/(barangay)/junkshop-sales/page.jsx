@@ -357,7 +357,7 @@ export default function JunkshopSalesPage() {
                                 ${i === bestIdx ? "hover:bg-green-100" : "hover:bg-gray-100"}`}
                                 >
                                   <span
-                                    className={`font-semibold tabular-nums ${i === bestIdx ? "text-accent text-base" : "text-text-primary"}`}
+                                    className={`font-semibold tabular-nums ${i === bestIdx ? "text-green-800 text-base" : "text-text-primary"}`}
                                   >
                                     {priceItem?.price
                                       ? `₱${priceItem.price}`
@@ -464,7 +464,7 @@ export default function JunkshopSalesPage() {
                           ${i === bestIdx ? "bg-green-50" : ""}`}
                         >
                           <button
-                            className={`inline-flex items-center gap-1 text-sm font-medium ${i === bestIdx ? "text-green-800" : "text-text-secondary"}`}
+                            className={`inline-flex items-center gap-1 text-sm font-medium text-start ${i === bestIdx ? "text-green-800" : "text-text-secondary"}`}
                             onClick={(e) => {
                               e.stopPropagation();
                               setSelectedJunkshop(shop.id);
@@ -472,17 +472,17 @@ export default function JunkshopSalesPage() {
                             }}
                           >
                             {shop.name}
-                            <IconContainer
+                            {/* <IconContainer
                               icon={
                                 <ArrowUpRightIcon className="w-2.5 stroke-text-secondary" />
                               }
                               className="rounded-full! p-1!"
                               containerColor="var(--color-icon-bg)"
-                            />
+                            /> */}
                           </button>
                           <div className="flex items-center gap-2">
                             <span
-                              className={`font-bold tabular-nums  ${i === bestIdx ? "text-accent" : "text-text-primary"}`}
+                              className={`font-bold tabular-nums  ${i === bestIdx ? "text-green-800" : "text-text-primary"}`}
                             >
                               {prices[i]?.price ? (
                                 <div>

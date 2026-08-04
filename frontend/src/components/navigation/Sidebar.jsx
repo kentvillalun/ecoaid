@@ -178,7 +178,7 @@ export const Sidebar = () => {
 
   return (
     <aside
-      className={`w-60 md:w-65 h-svh flex flex-col gradient-card fixed top-0 text-white left-0 z-50 md:shadow-xl ${inter.className} overflow-y-auto sidebar`}
+      className={`w-60 md:w-65 h-svh flex flex-col bg-accent-dark fixed top-0 text-white left-0 z-50 md:shadow-xl ${inter.className} overflow-y-auto sidebar`}
     >
       <div className="p-4 flex flex-col gap-4 lg:gap-9">
         
@@ -191,7 +191,7 @@ export const Sidebar = () => {
               priority
             />
           </div>
-          <div className="md:hidden">
+          <div className="md:hidden"> 
             <XMarkIcon
               className="w-6 h-6  hover:cursor-pointer"
               onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -212,9 +212,11 @@ export const Sidebar = () => {
           {renderGroup(
             "Communication",
             communicationItems,
-            isCommunicationOpen,
+            isCommunicationOpen, 
             setIsCommunicationOpen,
           )}
+
+          
         </div>
       </div>
       <div className="mt-auto">

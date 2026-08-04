@@ -2,27 +2,28 @@
 
 @theme {
   --color-bg: #f8f8f8;
-  --color-surface: #FFFFFF;
+  --color-surface: #ffffff;
   --color-text-primary: #1a1a1a;
-  --color-text-secondary: #6B7280;
+  --color-text-secondary: #6b7280;
   --color-border: #e5e7eb;
   --color-dark: #092517;
-  --color-accent: #14532D;
-  --color-success: #74C857;
-  --color-error: #E54848;
-  --color-warning: #EEB90E;
-  --color-in-progress: #C88A00;
-  --color-info: #1D9BF0;
-  --color-muted-accent: #9DB2CE;
+  --color-accent: #14532d;
+  --color-success: #74c857;
+  --color-error: #e54848;
+  --color-warning: #eeb90e;
+  --color-in-progress: #c88a00;
+  --color-info: #1d9bf0;
+  --color-muted-accent: #9db2ce;
   --color-icon-bg: #f3f4f6;
   --color-accent-hover: #1f7a42;
-  --color-accent-light: #EAF7E3;
+  --color-accent-light: #eaf7e3;
   --breakpoint-xs: 300px;
   --breakpoint-mobile: 400px;
+  --color-accent-dark: #092517;
 }
 
 .sidebar {
-  scrollbar-color: #104028 transparent;
+  scrollbar-color: var(--color-accent) transparent;
   scrollbar-width: thin;
 }
 
@@ -32,7 +33,11 @@ body {
 }
 
 .gradient-button {
-  background-image: linear-gradient(to bottom, var(--color-accent-hover), var(--color-accent));
+  background-image: linear-gradient(
+    to bottom,
+    var(--color-accent-hover),
+    var(--color-accent)
+  );
 }
 
 .gradient-button-red {
@@ -44,7 +49,11 @@ body {
 }
 
 .gradient-card {
-  background-image: linear-gradient(to bottom, #0d3320, var(--color-dark));
+  background-image: linear-gradient(
+    to bottom,
+    var(--color-accent),
+    var(--color-accent-dark)
+  );
 }
 
 .new-border {
@@ -58,6 +67,6 @@ body {
 
 @layer components {
   .input {
-    @apply w-full outline-1 py-2.5 px-3.5 text-text-secondary outline-border rounded-lg focus-within:outline-accent transition-colors min-h-11 max-h-11 mb-2
+    @apply w-full outline-1 py-2.5 px-3.5 text-text-secondary outline-border rounded-lg focus-within:outline-accent transition-colors min-h-11 max-h-11 mb-2;
   }
 }

@@ -1,14 +1,35 @@
 "use client";
 
 import { Sidebar } from "@/components/navigation/Sidebar";
-import { useState, createContext } from "react";
+import { useState, createContext, useEffect } from "react";
 import { Toaster } from "sonner";
 import { motion, AnimatePresence } from "motion/react";
+import { applyTheme } from "@/lib/themes";
+import { useFetch } from "@/hooks/useFetch";
 
 export const DrawerContext = createContext();
 
 export default function BarangayLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { data: barangayThemeData } = useFetch({
+    url: "/api/settings/theme/staff",
+  });
+
+  useEffect(() => {
+    const cachedTheme = localStorage.getItem("barangayTheme");
+    if (cachedTheme) {
+      applyTheme(cachedTheme);
+    }
+  }, []);
+
+  
+  const theme = barangayThemeData?.theme?.themeAccent;
+  useEffect(() => {
+    if (!theme) return;
+
+    applyTheme(theme);
+    localStorage.setItem("barangayTheme", theme);
+  }, [theme]);
 
   return (
     <>

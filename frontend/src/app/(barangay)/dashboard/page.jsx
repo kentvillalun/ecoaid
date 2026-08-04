@@ -104,7 +104,7 @@ export default function BarangayDashboardPage() {
 
             <Card className="shadow-none! new-border flex flex-col items-start">
               <div className="flex flex-row items-start justify-between w-full">
-                <p className="text-xs font-medium text-[#6b7280] flex-1">
+                <p className="text-xs font-medium text-text-secondary flex-1">
                   Pending requests
                 </p>
                 <IconContainer
@@ -122,7 +122,7 @@ export default function BarangayDashboardPage() {
 
             <Card className="shadow-none! new-border flex flex-col items-start">
               <div className="flex flex-row items-start justify-between w-full">
-                <p className="text-xs font-medium text-[#6b7280]">
+                <p className="text-xs font-medium text-text-secondary">
                   Intake transactions
                 </p>
                 <IconContainer
@@ -140,7 +140,7 @@ export default function BarangayDashboardPage() {
 
             <Card className="shadow-none! new-border flex flex-col items-start">
               <div className="flex flex-row items-start justify-between w-full">
-                <p className="text-xs font-medium text-[#6b7280]">
+                <p className="text-xs font-medium text-text-secondary">
                   Unverified residents
                 </p>
                 <IconContainer
@@ -159,7 +159,7 @@ export default function BarangayDashboardPage() {
             </Card>
             <Card className="shadow-none! new-border flex flex-col items-start">
               <div className="flex flex-row items-start justify-between w-full">
-                <p className="text-xs font-medium text-[#6b7280]">
+                <p className="text-xs font-medium text-text-secondary">
                   Program expenses
                 </p>
                 <IconContainer
@@ -232,7 +232,7 @@ export default function BarangayDashboardPage() {
 
             <Card className="shadow-none! new-border flex flex-col items-start">
               <div className="flex flex-row items-start justify-between w-full">
-                <p className="text-xs font-medium text-[#6b7280] flex-1">
+                <p className="text-xs font-medium text-text-secondary flex-1">
                   Pending requests
                 </p>
                 <IconContainer
@@ -246,13 +246,13 @@ export default function BarangayDashboardPage() {
               </p>
               <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
                 <ClockIcon className="w-3 stroke-accent" />
-                <p className="text-accent font-medium">Awaiting approval</p>
+                <p className="text-accent font-medium">To approve</p>
               </div>
             </Card>
 
             <Card className="shadow-none! new-border flex flex-col items-start">
               <div className="flex flex-row items-start justify-between w-full">
-                <p className="text-xs font-medium text-[#6b7280]">
+                <p className="text-xs font-medium text-text-secondary">
                   Intake transactions
                 </p>
                 <IconContainer
@@ -272,7 +272,7 @@ export default function BarangayDashboardPage() {
 
             <Card className="shadow-none! new-border flex flex-col items-start">
               <div className="flex flex-row items-start justify-between w-full">
-                <p className="text-xs font-medium text-[#6b7280] ">
+                <p className="text-xs font-medium text-text-secondary ">
                   Unverified residents
                 </p>
                 <IconContainer
@@ -293,7 +293,7 @@ export default function BarangayDashboardPage() {
             </Card>
             <Card className="shadow-none! new-border flex flex-col items-start">
               <div className="flex flex-row items-start justify-between w-full">
-                <p className="text-xs font-medium text-[#6b7280]">
+                <p className="text-xs font-medium text-text-secondary">
                   Program expenses
                 </p>
                 <IconContainer

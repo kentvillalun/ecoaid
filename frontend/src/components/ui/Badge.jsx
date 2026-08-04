@@ -10,7 +10,7 @@ export const Badge = ({label, color, className = ""}) => {
 
     return (
         <div
-      className={`py-1 px-2 inline-block text-xs rounded-3xl font-medium capitalize text-center  ${inter.className} ${color} ${className}`}
+      className={`py-1 px-2 inline-block text-xs rounded-3xl font-medium capitalize text-center text-nowrap  ${inter.className} ${color} ${className}`}
     >
       {label.toLowerCase()}
     </div>

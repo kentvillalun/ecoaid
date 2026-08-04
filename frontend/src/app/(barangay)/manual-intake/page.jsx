@@ -372,7 +372,7 @@ export default function ManualIntakePage() {
                         </div>
 
                         <div className="flex flex-row gap-2">
-                          <div className="input flex-1 mb-0">
+                          <div className="input flex-2 mb-0">
                             <input
                               type="number"
                               className="outline-none w-full"
@@ -382,7 +382,7 @@ export default function ManualIntakePage() {
                               }}
                             />
                           </div>
-                          <div className="input min-w-28 mb-0">
+                          <div className="input min-w-28 mb-0 flex-1">
                             <select
                               className="w-full outline-none"
                               onChange={(e) => {
