@@ -1,4 +1,18 @@
-import { XMarkIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
+import {
+  HomeIcon,
+  InboxStackIcon,
+  UserIcon,
+  MegaphoneIcon,
+  CubeIcon,
+  BanknotesIcon,
+  ChartBarIcon,
+  Cog6ToothIcon,
+  ArrowsRightLeftIcon,
+  GiftIcon,
+  ClipboardDocumentCheckIcon,
+  WalletIcon,
+  TrophyIcon,
+} from "@heroicons/react/24/solid";
 import {
   HomeIcon as DashboardIcon,
   InboxStackIcon as RequestIcon,
@@ -14,7 +28,9 @@ import {
   ClipboardDocumentCheckIcon as RewardsIcon,
   WalletIcon as ProgramFundsIcon,
   TrophyIcon as LeaderboardIcon,
-} from "@heroicons/react/24/solid";
+  XMarkIcon,
+  ChevronDownIcon,
+} from "@heroicons/react/24/outline";
 import { useContext, useState } from "react";
 import { DrawerContext } from "@/app/(barangay)/layout.jsx";
 import Link from "next/link";
@@ -23,7 +39,7 @@ import { API_BASE_URL } from "@/lib/config";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { useFetch } from "@/hooks/useFetch";
+import { usePathname } from "next/navigation";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -32,28 +48,34 @@ const inter = Inter({
 export const Sidebar = () => {
   const { sidebarOpen, setSidebarOpen } = useContext(DrawerContext);
   const router = useRouter();
+  const pathName = usePathname();
   // const {isLoading, data} = useFetch({ url: "/api/auth/barangay/me"})
+
 
   const topLevelItems = [
     {
       icon: DashboardIcon,
       label: "Dashboard",
       href: "/dashboard",
+      solidIcon: HomeIcon,
     },
     {
       icon: RequestIcon,
       label: "Collection Requests",
       href: "/collection-requests",
+      solidIcon: InboxStackIcon,
     },
     {
       icon: CollectionSortingIcon,
       label: "Manual Intake",
       href: "/manual-intake",
+      solidIcon: ArrowsRightLeftIcon,
     },
     {
       icon: ResidentsIcon,
       label: "Residents",
       href: "/residents",
+      solidIcon: UserIcon,
     },
   ];
 
@@ -62,26 +84,31 @@ export const Sidebar = () => {
       icon: MaterialStockIcon,
       label: "Material Stock",
       href: "/material-stock",
+      solidIcon: CubeIcon,
     },
     {
       icon: RedemptionProgramIcon,
       label: "Redemption",
       href: "/redemption",
+      solidIcon: GiftIcon,
     },
     {
       icon: RewardsIcon,
       label: "Reward ",
       href: "/reward-inventory",
+      solidIcon: ClipboardDocumentCheckIcon,
     },
     {
       icon: JunkshopSalesIcon,
       label: "Junkshop Sales",
       href: "/junkshop-sales",
+      solidIcon: BanknotesIcon,
     },
     {
       icon: ProgramFundsIcon,
       label: "Program Funds",
       href: "/program-funds",
+      solidIcon: WalletIcon,
     },
   ];
 
@@ -90,21 +117,25 @@ export const Sidebar = () => {
       icon: AnnoucementsIcon,
       label: "Announcements",
       href: "/announcements",
+      solidIcon: MegaphoneIcon,
     },
     {
       icon: LeaderboardIcon,
       label: "Leaderboard",
       href: "/leaderboard",
+      solidIcon: TrophyIcon,
     },
     {
       icon: ReportsIcon,
       label: "Reports",
-      href: "",
+      href: "/reports",
+      solidIcon: ChartBarIcon,
     },
     {
       icon: SettingsIcon,
       label: "Settings",
       href: "/settings",
+      solidIcon: Cog6ToothIcon,
     },
   ];
 
@@ -113,12 +144,19 @@ export const Sidebar = () => {
 
   const renderNavItem = (item) => (
     <Link
-      className="flex flex-row gap-3 hover:cursor-pointer p-2 rounded-lg hover:bg-accent/10  transition-all ease-in-out items-center"
+      className={`flex flex-row gap-3.5 hover:cursor-pointer p-2 px-3 rounded-xl hover:bg-accent/10 transition-all ease-in-out items-center group ${pathName === item.href ? "gradient-button" : ""}`}
       key={item.label}
       href={item.href}
     >
-      <item.icon className="h-6 w-6 md:block hidden hover:cursor-pointer" />
-      <label className="font-medium text-md hover:cursor-pointer">
+      {pathName === item.href ? (
+        <item.solidIcon className="h-4 w-4 md:block hidden" />
+      ) : (
+        <item.icon className="h-4 w-4 md:block hidden hover:cursor-pointer stroke-text-secondary group-hover:stroke-accent " />
+      )}
+
+      <label
+        className={`text-base hover:cursor-pointer  ${pathName === item.href ? "text-surface" : "text-text-secondary group-hover:text-accent"}`}
+      >
         {item.label}
       </label>
     </Link>
@@ -132,9 +170,9 @@ export const Sidebar = () => {
           e.stopPropagation();
           setIsOpen((prev) => !prev);
         }}
-        className="flex flex-row items-center justify-between w-full p-2 hover:cursor-pointer"
+        className="flex flex-row items-center justify-between w-full p-2 hover:cursor-pointer text-text-secondary"
       >
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-white/50">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-text-secondary">
           {label}
         </span>
         <ChevronDownIcon
@@ -145,7 +183,7 @@ export const Sidebar = () => {
         className={`grid transition-all duration-300 ease-in-out ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}
       >
         <div className="overflow-hidden">
-          <div className="flex flex-col gap-2 lg:gap-3 border-l-2 border-white/10 ml-3 pl-2">
+          <div className="flex flex-col gap-2 lg:gap-3 border-l-2 border-white/10 pl-2">
             {items.map(renderNavItem)}
           </div>
         </div>
@@ -174,32 +212,35 @@ export const Sidebar = () => {
     }
   };
 
-  
-
   return (
     <aside
-      className={`w-60 md:w-65 h-svh flex flex-col bg-accent-dark fixed top-0 text-white left-0 z-50 md:shadow-xl ${inter.className} overflow-y-auto sidebar`}
+      className={`w-60 md:w-65 h-svh flex flex-col bg-surface fixed top-0 text-white left-0 z-50 ${inter.className} overflow-y-auto sidebar new-border`}
     >
+      <div className="md:hidden flex pt-4 pr-4 items-end w-full justify-end">
+        <XMarkIcon
+          className="w-6 h-6  hover:cursor-pointer stroke-text-primary"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+        />
+      </div>
       <div className="p-4 flex flex-col gap-4 lg:gap-9">
-        
-        <div className="flex flex-row justify-between items-center">
-          <div className="max-w-40 relative w-full aspect-3/1">
+        <div className="flex flex-row justify-start gap-2 border-b-border border pb-4">
+          <div className="max-w-10 relative w-full aspect-square">
             <Image
-              src="/ecoaid-logo/white-logo-wordmark.svg"
+              src="/ecoaid-logo/logo-w-container.svg"
               alt="EcoAid logo"
               fill
               priority
             />
           </div>
-          <div className="md:hidden"> 
-            <XMarkIcon
-              className="w-6 h-6  hover:cursor-pointer"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-            />
+          <div className="flex flex-col gap-0">
+            <p className="font-baloo text-xl text-dark font-medium leading-none">
+              ecoaid
+            </p>
+            <p className="text-text-secondary text-xs">Recycling Management</p>
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 pl-2 lg:gap-3">
+        <div className="flex flex-col gap-2 lg:gap-3">
           {topLevelItems.map(renderNavItem)}
 
           {renderGroup(
@@ -212,18 +253,16 @@ export const Sidebar = () => {
           {renderGroup(
             "Communication",
             communicationItems,
-            isCommunicationOpen, 
+            isCommunicationOpen,
             setIsCommunicationOpen,
           )}
-
-          
         </div>
       </div>
       <div className="mt-auto">
         <button className="pl-6 p-4 mb-15 w-full" onClick={handleLogout}>
-          <div className="flex flex-row gap-3 hover:cursor-pointer p-2 rounded-lg hover:bg-accent/10 transition-all ease-in-out">
-            <LogoutIcon className="h-6 w-6 md:block hidden hover:cursor-pointer" />
-            <label className="font-medium text-md hover:cursor-pointer">
+          <div className="flex flex-row gap-3 hover:cursor-pointer p-2 px-3 rounded-xl hover:bg-accent/10 transition-all ease-in-out items-center group">
+            <LogoutIcon className="h-4 w-4 md:block hidden hover:cursor-pointer group-hover:stroke-accent stroke-text-secondary" />
+            <label className="text-base text-text-secondary hover:cursor-pointer group-hover:text-accent">
               Logout
             </label>
           </div>

@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Baloo_2 } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -10,6 +10,13 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
+const baloo = Baloo_2({
+  subsets: ['latin'],
+  weight: ['600', '700', '800'],
+  variable: '--font-baloo',
+});
+
 
 export const metadata = {
   title: "EcoAid",
@@ -29,7 +36,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-auto`}
+        className={`${geistSans.variable} ${geistMono.variable} ${baloo.variable} antialiased overflow-auto`}
       >
         {children}
       </body>

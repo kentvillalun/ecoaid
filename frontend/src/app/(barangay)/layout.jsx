@@ -22,7 +22,6 @@ export default function BarangayLayout({ children }) {
     }
   }, []);
 
-  
   const theme = barangayThemeData?.theme?.themeAccent;
   useEffect(() => {
     if (!theme) return;
@@ -34,7 +33,12 @@ export default function BarangayLayout({ children }) {
   return (
     <>
       <DrawerContext.Provider value={{ sidebarOpen, setSidebarOpen }}>
-        <Toaster position="top-center" />
+        <div className="md:hidden">
+          <Toaster position="top-center" />
+        </div>
+        <div className="hidden md:flex">
+          <Toaster position="bottom-right" />
+        </div>
         <main className="">{children}</main>
         {sidebarOpen && (
           <AnimatePresence mode="wait">

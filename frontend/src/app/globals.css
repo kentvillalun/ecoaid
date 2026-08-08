@@ -20,10 +20,11 @@
   --breakpoint-xs: 300px;
   --breakpoint-mobile: 400px;
   --color-accent-dark: #092517;
+  
+  --font-baloo: var(--font-baloo)
 }
 
 .sidebar {
-  scrollbar-color: var(--color-accent) transparent;
   scrollbar-width: thin;
 }
 
