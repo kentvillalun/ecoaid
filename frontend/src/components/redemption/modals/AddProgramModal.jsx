@@ -1,7 +1,7 @@
 "use client";
 
 import { Modal } from "@/components/ui/Modal";
-import { GiftIcon } from "@heroicons/react/24/outline";
+import { GiftIcon, PlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -41,7 +41,7 @@ export const AddProgramModal = ({
   program,
   id,
 }) => {
-  const { makeRequest, isLoading, data, error, isError } = useMutation();
+  const { makeRequest } = useMutation();
   const url = program
     ? `/api/redemption/programs/${id}`
     : "/api/redemption/programs";
@@ -56,17 +56,17 @@ export const AddProgramModal = ({
 
   const [materialState, setMaterialState] = useState({});
 
-  const papers = materialsData?.materials?.filter(
-    (m) => m.category.name === "Papers",
-  );
-  const metals = materialsData?.materials?.filter(
-    (m) => m.category.name === "Metals",
-  );
-  const plastics = materialsData?.materials?.filter(
-    (m) => m?.category?.name === "Plastics",
-  );
-  const bottles = materialsData?.materials?.filter(
-    (m) => m.category.name === "Bottles",
+  // Group materials by whatever category names actually exist in the DB.
+  // No hardcoded category list here — add/rename/remove a category in the
+  // backend and this picks it up automatically, no code change needed.
+  const materialsByCategory = (materialsData?.materials ?? []).reduce(
+    (acc, material) => {
+      const categoryName = material?.category?.name ?? "Uncategorized";
+      if (!acc[categoryName]) acc[categoryName] = [];
+      acc[categoryName].push(material);
+      return acc;
+    },
+    {},
   );
 
   const {
@@ -182,6 +182,95 @@ export const AddProgramModal = ({
     setValue("materials", materialState);
   }, [materialState]);
 
+  // A material is toggled by clicking anywhere on its card. The input
+  // itself stops the click from bubbling up (otherwise clicking into the
+  // number field would immediately re-toggle the card off).
+  const toggleMaterial = (materialId) => {
+    const isCurrentlyChecked = materialState[materialId]?.isChecked ?? false;
+    setMaterialState({
+      ...materialState,
+      [materialId]: {
+        ...materialState[materialId],
+        isChecked: !isCurrentlyChecked,
+        value: isCurrentlyChecked ? "" : materialState[materialId]?.value,
+      },
+    });
+  };
+
+  // One reusable card — used to be a checkbox+row copy-pasted 4x (once
+  // per hardcoded category). Same underlying state shape as before
+  // (isChecked/value keyed by materialId), just a different UI on top:
+  // unselected = plain outline card, selected = accent-filled card with
+  // the value input revealed inline instead of shown-but-disabled.
+  const renderMaterialCard = (material) => {
+    const isChecked = materialState[material.id]?.isChecked ?? false;
+
+    return (
+      <div
+        key={material.id}
+        onClick={() => toggleMaterial(material.id)}
+        className={`flex flex-col gap-2 rounded-lg border p-3 cursor-pointer transition-colors ${
+          isChecked
+            ? "bg-white border-accent"
+            : "bg-white border-border hover:border-accent/40"
+        }`}
+      >
+        <div className="flex flex-row items-center justify-between gap-2">
+          <span
+            className={`text-sm ${isChecked ? "text-accent font-medium" : "text-text-primary"}`}
+          >
+            {material.name}
+          </span>
+          {isChecked ? (
+            <XMarkIcon className="w-4 h-4 stroke-accent shrink-0" />
+          ) : (
+            <PlusIcon className="w-4 h-4 stroke-text-secondary shrink-0" />
+          )}
+        </div>
+
+        {isChecked && (
+          <div
+            className="flex flex-row items-center gap-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <input
+              type="number"
+              min={0}
+              className="input mb-0 w-full"
+              placeholder="0"
+              value={materialState[material.id]?.value ?? ""}
+              onChange={(e) => {
+                setMaterialState({
+                  ...materialState,
+                  [material.id]: {
+                    ...materialState[material.id],
+                    value: e.target.value,
+                  },
+                });
+              }}
+            />
+            <span className="text-xs text-accent">
+              {isCashMode === "true" || isCashMode === true
+                ? `₱/${material.defaultUnit.toLowerCase()}`
+                : `pts/${material.defaultUnit.toLowerCase()}`}
+            </span>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderCategoryColumn = (categoryName, materials) => (
+    <div className="flex flex-col gap-2" key={categoryName}>
+      <label className="pr-6 text-text-primary capitalized">
+        {categoryName}
+      </label>
+      <div className="flex flex-col gap-2">
+        {materials.map(renderMaterialCard)}
+      </div>
+    </div>
+  );
+
   return (
     <Modal
       isOpen={isProgramModalOpen}
@@ -244,7 +333,7 @@ export const AddProgramModal = ({
               value={false}
             />
             <label
-              className={`flex flex-col gap-1 outline-1 py-2.5 px-3.5  text-gray-400 rounded-lg outline-gray-300 transition-colors min-h-11 ${isCashMode === "false" || isCashMode === false ? "bg-gray-100 " : ""}`}
+              className={`flex flex-col gap-1 py-2.5 px-3.5 text-gray-400 rounded-lg border transition-colors min-h-11 bg-white ${isCashMode === "false" || isCashMode === false ? "border-accent" : "border-border"}`}
               htmlFor="reward"
             >
               <p className=" text-sm font-medium">Points</p>
@@ -258,7 +347,7 @@ export const AddProgramModal = ({
               value={true}
             />
             <label
-              className={`flex flex-col gap-1 outline-1 py-2.5 px-3.5 text-gray-400 outline-gray-300 rounded-lg focus-within:outline-accent transition-colors min-h-11 ${isCashMode === "true" || isCashMode === true ? "bg-gray-100 " : ""}`}
+              className={`flex flex-col gap-1 py-2.5 px-3.5 text-gray-400 rounded-lg border focus-within:outline-accent transition-colors min-h-11 bg-white ${isCashMode === "true" || isCashMode === true ? "border-accent" : "border-border"}`}
               htmlFor="cash"
             >
               <p className=" text-sm font-medium">Cash</p>
@@ -267,9 +356,7 @@ export const AddProgramModal = ({
           </div>
         </div>
 
-        <div
-          className={`grid gap-3 grid-cols-1`}
-        >
+        <div className={`grid gap-3 grid-cols-1`}>
           <div className="flex flex-col gap-1 ">
             <label className="text-text-primary font-medium">Allotted budget</label>
             <input
@@ -284,7 +371,6 @@ export const AddProgramModal = ({
               </p>
             )}
           </div>
-          
         </div>
 
         <div className="flex flex-col gap-1">
@@ -296,291 +382,22 @@ export const AddProgramModal = ({
             </label>
             <p className="text-text-primary text-sm">
               {isCashMode === true || isCashMode === "true"
-                ? "Check materials to include and assign cash values. "
-                : "Check materials to include and assign point values. "}
+                ? "Select materials to include and assign cash values. "
+                : "Select materials to include and assign point values. "}
             </p>
           </div>
 
+          {/* Was 4 copy-pasted checkbox-row blocks (Plastics/Metals/Papers/
+              Bottles). Now renders one column per category that actually
+              exists in materialsData, with clickable cards instead of
+              checkbox rows — the input only appears once a material is
+              selected, instead of showing a disabled input for every
+              unselected material. Adding "Glass" (or any future category)
+              in the backend shows up here automatically. */}
           <div className="grid md:grid-cols-2 grid-cols-1 gap-3 md:gap-5">
-            <div className="flex flex-col gap-2">
-              <label
-                className="pr-6 text-text-primary capitalized"
-                htmlFor="plastics"
-              >
-                Plastics
-              </label>
-              <div className="flex flex-col gap-2">
-                {plastics?.map((p) => (
-                  <div
-                    className={`flex flex-row justify-between items-center gap-3  ${materialState[p.id]?.isChecked ? "opacity-100" : "opacity-40"}`}
-                    key={p.id}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={materialState[p.id]?.isChecked ?? false}
-                      onChange={(e) => {
-                        setMaterialState({
-                          ...materialState,
-                          [p.id]: {
-                            ...materialState[p.id],
-                            isChecked: e.target.checked,
-                            value: !e.target.checked
-                              ? ""
-                              : materialState[p.id]?.value,
-                          },
-                        });
-                      }}
-                    />
-
-                    <div
-                      className="input flex flex-row items-center justify-between flex-1 mb-0"
-                      onClick={(e) =>
-                        e.currentTarget.querySelector("input")?.focus()
-                      }
-                    >
-                      <label className="text-gray-700 w-auto text-sm">
-                        {p.name}
-                      </label>
-
-                      <div className="flex flex-row gap-2 items-center">
-                        <input
-                          type="number"
-                          className="outline-none max-w-20 z-50"
-                          min={0}
-                          disabled={!materialState[p.id]?.isChecked ?? false}
-                          value={materialState[p.id]?.value ?? ""}
-                          onChange={(e) => {
-                            setMaterialState({
-                              ...materialState,
-                              [p.id]: {
-                                ...materialState[p.id],
-                                value: e.target.value,
-                              },
-                            });
-                          }}
-                        />
-
-                        <p className="text-gray-700 text-sm">
-                          {isCashMode === "true" || isCashMode === true
-                            ? `₱/${p.defaultUnit.toLowerCase()}`
-                            : `pts/${p.defaultUnit.toLowerCase()}`}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label
-                className="pr-6 text-text-primary capitalized"
-                htmlFor="plastics"
-              >
-                Metals
-              </label>
-              <div className="flex flex-col gap-2">
-                {metals?.map((p) => (
-                  <div
-                    className={`flex flex-row justify-between items-center gap-3 ${materialState[p.id]?.isChecked ? "opacity-100" : "opacity-40"}`}
-                    key={p.id}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={materialState[p.id]?.isChecked ?? false}
-                      onChange={(e) => {
-                        setMaterialState({
-                          ...materialState,
-                          [p.id]: {
-                            ...materialState[p.id],
-                            isChecked: e.target.checked,
-                            value: !e.target.checked
-                              ? ""
-                              : materialState[p.id]?.value,
-                          },
-                        });
-                      }}
-                    />
-
-                    <div
-                      className="input flex flex-row items-center justify-between flex-1 mb-0"
-                      onClick={(e) =>
-                        e.currentTarget.querySelector("input")?.focus()
-                      }
-                    >
-                      <label className="text-gray-700 w-auto text-sm">
-                        {p.name}
-                      </label>
-
-                      <div className="flex flex-row gap-2 items-center">
-                        <input
-                          type="number"
-                          className="outline-none max-w-20 z-50"
-                          min={0}
-                          disabled={!materialState[p.id]?.isChecked ?? false}
-                          value={materialState[p.id]?.value ?? ""}
-                          onChange={(e) => {
-                            setMaterialState({
-                              ...materialState,
-                              [p.id]: {
-                                ...materialState[p.id],
-                                value: e.target.value,
-                              },
-                            });
-                          }}
-                        />
-
-                        <p className="text-gray-700 text-sm">
-                          {isCashMode === "true" || isCashMode === true
-                            ? `₱/${p.defaultUnit.toLowerCase()}`
-                            : `pts/${p.defaultUnit.toLowerCase()}`}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label
-                className="pr-6 text-text-primary capitalized"
-                htmlFor="plastics"
-              >
-                Papers
-              </label>
-              <div className="flex flex-col gap-2">
-                {papers?.map((p) => (
-                  <div
-                    className={`flex flex-row justify-between items-center gap-3 ${materialState[p.id]?.isChecked ? "opacity-100" : "opacity-40"}`}
-                    key={p.id}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={materialState[p.id]?.isChecked ?? false}
-                      onChange={(e) => {
-                        setMaterialState({
-                          ...materialState,
-                          [p.id]: {
-                            ...materialState[p.id],
-                            isChecked: e.target.checked,
-                            value: !e.target.checked
-                              ? ""
-                              : materialState[p.id]?.value,
-                          },
-                        });
-                      }}
-                    />
-
-                    <div
-                      className="input flex flex-row items-center justify-between flex-1 mb-0"
-                      onClick={(e) =>
-                        e.currentTarget.querySelector("input")?.focus()
-                      }
-                    >
-                      <label className="text-gray-700 w-auto text-sm">
-                        {p.name}
-                      </label>
-
-                      <div className="flex flex-row gap-2 items-center">
-                        <input
-                          type="number"
-                          className="outline-none max-w-20 z-50"
-                          min={0}
-                          disabled={!materialState[p.id]?.isChecked ?? false}
-                          value={materialState[p.id]?.value ?? ""}
-                          onChange={(e) => {
-                            setMaterialState({
-                              ...materialState,
-                              [p.id]: {
-                                ...materialState[p.id],
-                                value: e.target.value,
-                              },
-                            });
-                          }}
-                        />
-
-                        <p className="text-gray-700 text-sm">
-                          {isCashMode === "true" || isCashMode === true
-                            ? `₱/${p.defaultUnit.toLowerCase()}`
-                            : `pts/${p.defaultUnit.toLowerCase()}`}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label
-                className="pr-6 text-text-primary capitalized"
-                htmlFor="plastics"
-              >
-                Bottles
-              </label>
-              <div className="flex flex-col gap-2">
-                {bottles?.map((p) => (
-                  <div
-                    className={`flex flex-row justify-between items-center gap-3 ${materialState[p.id]?.isChecked ? "opacity-100" : "opacity-40"}`}
-                    key={p.id}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={materialState[p.id]?.isChecked ?? false}
-                      onChange={(e) => {
-                        setMaterialState({
-                          ...materialState,
-                          [p.id]: {
-                            ...materialState[p.id],
-                            isChecked: e.target.checked,
-                            value: !e.target.checked
-                              ? ""
-                              : materialState[p.id]?.value,
-                          },
-                        });
-                      }}
-                    />
-
-                    <div
-                      className="input flex flex-row items-center justify-between flex-1 mb-0"
-                      onClick={(e) =>
-                        e.currentTarget.querySelector("input")?.focus()
-                      }
-                    >
-                      <label className="text-gray-700 w-auto text-sm ">
-                        {p.name}
-                      </label>
-
-                      <div className="flex flex-row gap-2 items-center">
-                        <input
-                          type="number"
-                          className="outline-none max-w-20 z-50"
-                          min={0}
-                          disabled={!materialState[p.id]?.isChecked ?? false}
-                          value={materialState[p.id]?.value ?? ""}
-                          onChange={(e) => {
-                            setMaterialState({
-                              ...materialState,
-                              [p.id]: {
-                                ...materialState[p.id],
-                                value: e.target.value,
-                              },
-                            });
-                          }}
-                        />
-
-                        <p className="text-gray-700 text-sm">
-                          {isCashMode === "true" || isCashMode === true
-                            ? `₱/${p.defaultUnit.toLowerCase()}`
-                            : `pts/${p.defaultUnit.toLowerCase()}`}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            {Object.entries(materialsByCategory).map(([categoryName, materials]) =>
+              renderCategoryColumn(categoryName, materials),
+            )}
           </div>
 
           {errors.materials && (
@@ -591,8 +408,8 @@ export const AddProgramModal = ({
           <p className="text-gray-700 text-sm mt-3">
             <span className="font-medium">Note: </span>
             {program
-              ? "Uncheck a material to remove it from the program, or update its value to change it."
-              : "Please leave the material unchecked if you don't want to include it in your program"}
+              ? "Deselect a material to remove it from the program, or update its value to change it."
+              : "Materials left unselected won't be included in your program."}
           </p>
         </div>
 
@@ -602,7 +419,8 @@ export const AddProgramModal = ({
               <div className="grid grid-cols-2 gap-3">
                 <button
                   className="py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:cursor-pointer"
-                  type="button" onClick={() => setIsConfirming(prev => !prev)}
+                  type="button"
+                  onClick={() => setIsConfirming((prev) => !prev)}
                 >
                   Cancel
                 </button>
@@ -649,7 +467,9 @@ export const AddProgramModal = ({
               </div>
             ) : (
               <button
-                className={`py-2.5 rounded-lg text-white w-full items-center justify-center hover:cursor-pointer transition-all duration-200 ease-in-out ${program?.isActive ? "gradient-button-red" : "gradient-button"}`} type="button" onClick={() => setIsConfirming(prev => !prev)}
+                className={`py-2.5 rounded-lg text-white w-full items-center justify-center hover:cursor-pointer transition-all duration-200 ease-in-out ${program?.isActive ? "gradient-button-red" : "gradient-button"}`}
+                type="button"
+                onClick={() => setIsConfirming((prev) => !prev)}
               >
                 {program?.isActive ? "Deactivate Program" : "Reactivate Program"}
               </button>

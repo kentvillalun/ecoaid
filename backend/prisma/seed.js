@@ -27,7 +27,7 @@ const DEV_BARANGAY = {
   contactNumber: "09177744669",
 };
 
-const DEV_CATEGORIES = ["Metals", "Papers", "Bottles", "Plastics"];
+const DEV_CATEGORIES = ["Metals", "Papers", "Plastics", "Glass"];
 
 async function main() {
   const passwordHash = await bcrypt.hash(DEV_BARANGAY.adminPassword, 10);
@@ -121,81 +121,109 @@ async function main() {
 
   const metals = categories.find((c) => c.name === "Metals");
   const papers = categories.find((c) => c.name === "Papers");
-  const bottles = categories.find((c) => c.name === "Bottles");
   const plastics = categories.find((c) => c.name === "Plastics");
+  const glass = categories.find((c) => c.name === "Glass");
 
-  const DEV_METALS = ["Aluminum Cans", "Steel/Iron Scraps"]
-  const DEV_PAPERS = ["Newspaper", "Cardboard"]
-  const DEV_BOTTLES = ["Plastic Bottles (PET)", "Glass Bottles"]
-  const DEV_PLASTICS = ["Plastic Bags", "Hard Plastics"]
+  const DEV_METALS = [
+    { name: "Aluminum Cans", defaultUnit: "KG" },
+    { name: "Tin Cans", defaultUnit: "PIECE" },
+    { name: "Steel Scraps", defaultUnit: "KG" },
+    { name: "Iron Scraps", defaultUnit: "KG" },
+  ]
+  const DEV_PAPERS = [
+    { name: "Newspaper", defaultUnit: "KG" },
+    { name: "Cardboard", defaultUnit: "KG" },
+  ]
+  const DEV_PLASTICS = [
+    { name: "Plastic Bottles (PET)", defaultUnit: "PIECE" },
+    { name: "Plastic Bags", defaultUnit: "KG" },
+    { name: "Hard Plastics", defaultUnit: "KG" },
+  ]
+  const DEV_GLASS = [
+    { name: "Alak Bottles", defaultUnit: "PIECE" },
+    { name: "Beer Bottles", defaultUnit: "PIECE" },
+  ]
 
-  for (const metalsName of DEV_METALS) {
+  for (const { name, defaultUnit } of DEV_METALS) {
     await prisma.material.upsert({
       where: {
         name_barangayId: {
-          name: metalsName,
-          barangayId: barangay.id,
-        }
-      },
-      update: {},
-      create: {
-       name: metalsName,
-       barangayId: barangay.id,
-       categoryId: metals.id
-      }
-    })
-  }
-
-  for (const papersName of DEV_PAPERS) {
-    await prisma.material.upsert({
-      where: {
-        name_barangayId: {
-          name: papersName,
-          barangayId: barangay.id,
-        }
-      },
-      update: {},
-      create: {
-       name: papersName,
-       barangayId: barangay.id,
-       categoryId: papers.id
-      }
-    })
-  }
-
-  for (const bottlesName of DEV_BOTTLES) {
-    await prisma.material.upsert({
-      where: {
-        name_barangayId: {
-          name: bottlesName,
+          name,
           barangayId: barangay.id,
         }
       },
       update: {
-        defaultUnit: "PIECE"
+        categoryId: metals.id,
+        defaultUnit
       },
       create: {
-       name: bottlesName,
+       name,
        barangayId: barangay.id,
-       categoryId: bottles.id,
-       defaultUnit: "PIECE"
+       categoryId: metals.id,
+       defaultUnit
       }
     })
   }
 
-  for (const plasticsName of DEV_PLASTICS) {
+  for (const { name, defaultUnit } of DEV_PAPERS) {
     await prisma.material.upsert({
       where: {
         name_barangayId: {
-          name: plasticsName,
+          name,
           barangayId: barangay.id,
         }
       },
-      update: {},
+      update: {
+        categoryId: papers.id,
+        defaultUnit
+      },
       create: {
-       name: plasticsName,
+       name,
        barangayId: barangay.id,
-       categoryId: plastics.id
+       categoryId: papers.id,
+       defaultUnit
+      }
+    })
+  }
+
+  for (const { name, defaultUnit } of DEV_PLASTICS) {
+    await prisma.material.upsert({
+      where: {
+        name_barangayId: {
+          name,
+          barangayId: barangay.id,
+        }
+      },
+      update: {
+        categoryId: plastics.id,
+        defaultUnit
+      },
+      create: {
+       name,
+       barangayId: barangay.id,
+       categoryId: plastics.id,
+       defaultUnit
+      }
+    })
+  }
+
+  for (const { name, defaultUnit } of DEV_GLASS) {
+    await prisma.material.upsert({
+      where: {
+        name_barangayId: {
+          name,
+          barangayId: barangay.id,
+        }
+      },
+      update: {
+        categoryId: glass.id,
+        defaultUnit
+      },
+      create: {
+       name,
+       barangayId: barangay.id,
+       categoryId: glass.id,
+       defaultUnit
       }
     })
   }

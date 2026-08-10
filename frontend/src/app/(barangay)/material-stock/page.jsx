@@ -57,11 +57,17 @@ const CATEGORY_STYLES = {
     dot: "bg-gray-400",
     text: "text-gray-600",
   },
-  Bottles: {
-    headerBg: "bg-emerald-50",
-    divider: "border-emerald-100",
-    dot: "bg-emerald-400",
-    text: "text-emerald-700",
+  Glass: {
+    headerBg: "bg-cyan-50",
+    divider: "border-cyan-100",
+    dot: "bg-cyan-400",
+    text: "text-cyan-700",
+  },
+  default: {
+    headerBg: "bg-icon-bg",
+    divider: "border-border",
+    dot: "bg-muted-accent",
+    text: "text-text-secondary",
   },
 };
 
@@ -111,7 +117,7 @@ function UnitToggle({ value, onChange }) {
 }
 
 function CategoryCard({ cat, displayUnit }) {
-  const styles = CATEGORY_STYLES[cat.name];
+  const styles = CATEGORY_STYLES[cat.name] ?? CATEGORY_STYLES.default;
 
   const totalKg = cat.materials
     .filter((m) => m.unit === "KG")

@@ -16,10 +16,10 @@ export const MaterialTag = ({
   const styles = {
     Plastics: { bg: "bg-blue-50", dot: "bg-blue-400", text: "text-blue-700" },
     Metals: { bg: "bg-gray-100", dot: "bg-gray-400", text: "text-gray-600" },
-    Bottles: {
-      bg: "bg-emerald-50",
-      dot: "bg-emerald-400",
-      text: "text-emerald-700",
+    Glass: {
+      bg: "bg-cyan-50",
+      dot: "bg-cyan-400",
+      text: "text-cyan-700",
     },
     Papers: {
       bg: "bg-yellow-50",

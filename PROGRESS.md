@@ -758,3 +758,314 @@ I'm building.
 - [ ] Pilot testing prep
 - [ ] Deployment hardening
 - [ ] SuperAdmin / system configurability (tackle when clearer)
+
+## Material Category Planning (started Aug 6, 2026)
+Next feature after theme picker fully wraps up: **Add Material** in
+Settings (add-only, no delete/edit of existing — avoids the FK/historical-
+data problem entirely, since `Material` has FK references from
+`PickupRequests`, `CollectionItem`, and `ProgramMaterial`).
+
+**Why this matters beyond just Settings UX:** the seeded material list is
+also the *training set* for the Teachable Machine image recognition
+feature (compliance-required, groupmates doing dataset capture). Important
+delimitation clarified this session: the AI assists but never
+auto-finalizes — a person always confirms/corrects the recognized
+material before it's recorded. Because of this, materials added later via
+"Add Material" do NOT need any special recognizability flag/schema field —
+the AI just won't suggest them, staff pick manually like any other case.
+So the seeded list needs to be right *now*, since groupmates are blocked
+on a finalized list to start capturing/training against.
+
+**Current seed (baseline being reviewed):**
+- Metals → Aluminum Cans, Steel/Iron Scraps
+- Papers → Newspaper, Cardboard
+- Bottles → Plastic Bottles (PET), Glass Bottles
+- Plastics → Plastic Bags, Hard Plastics
+
+**Decisions made this session:**
+- **Copper wire** — deliberately excluded. Real-world reasoning: residents
+  keep high-value scrap like copper wire to sell directly themselves
+  rather than surrender it to barangay collection, so it wouldn't
+  realistically flow through this system anyway.
+- **Tin cans** — confirmed missing, needs to be added. Piece-priced, not
+  weight-priced (see below).
+- **Papers priced by weight/kg** — confirmed correct as seeded, no change
+  needed (newspaper/cardboard are standard kilo-priced at junkshops).
+- **"Bottles" as a category — being removed.** Root cause traced: it
+  wasn't really a material-type category, it was acting as a proxy for
+  "this material is priced/sold per piece" (per an actual panel
+  requirement: certain items — bottles etc. — must be priced per piece,
+  not per kilo). Since materials likely already have a `unit` field
+  (KG/GRAMS/LBS/PIECE per the schema overhaul), the cleaner fix is
+  reading `unit` directly off each `Material` record instead of using
+  category name as a proxy for pricing unit. Planned reorganization:
+  - Plastic Bottles (PET) → category Plastics, unit PIECE
+  - Glass Bottles → category Glass (new) or similar, unit PIECE
+  - Tin Cans → category Metals, unit PIECE
+  - Aluminum Cans, Steel/Iron Scraps → category Metals, unit KG
+  - Newspaper, Cardboard → category Papers, unit KG
+- **Steel/Iron Scraps splitting — under consideration, not decided.**
+  Reasoning for splitting into separate "Steel Scraps" / "Iron Scraps":
+  image classifiers generally perform better on narrower, visually
+  distinct classes than a broad bucket containing visually different
+  objects (rusty nail vs. rebar vs. pipe). Reasoning against: doubles
+  the photo-capture/labeling workload for groupmates who are already the
+  bottleneck on this feature. **Not yet decided — revisit once workload
+  capacity from groupmates is clearer.**
+
+**CRITICAL — blocking issue found before restructuring can proceed:**
+Haru flagged that some existing logic (suspected in Redemption
+Management, possibly elsewhere) may have **hardcoded checks against the
+category name** (e.g. `category.name === "Bottles"`) to determine
+per-piece vs. per-kilo behavior, rather than reading the `unit` field
+directly off the `Material` record. If true, removing/renaming the
+"Bottles" category would silently break that logic. A read-only Claude
+Code audit prompt was written (not yet run) to search Redemption
+Management, Collection Requests/Manual Intake, Material Stock, and any
+frontend quantity-input logic for category-name-based unit derivation,
+reporting exact file/line/logic for each finding without making changes.
+
+**CRITICAL — blocking issue found before restructuring, RESOLVED (Aug 7):**
+Haru flagged that some existing logic (suspected in Redemption
+Management) may have **hardcoded checks against the category name**
+(e.g. `category.name === "Bottles"`) rather than reading `unit` directly.
+Ran the read-only Claude Code audit. **Good news: core transaction logic
+was already safe** — every controller/util that computes stock, converts
+quantities, or checks per-piece-vs-per-kilo reads `material.defaultUnit`
+/ `item.unit` directly, never `category.name`. The "Bottles = per-piece"
+relationship only ever existed as a seeding convention, not enforced code.
+
+Real findings, by severity:
+- 🔴 **`AddProgramModal.jsx`** — hardcoded exactly 4 category buckets
+  (Papers/Metals/Plastics/Bottles) with separate rendered sections per
+  bucket. Removing "Bottles" would make any material in it permanently
+  unselectable for redemption programs. **Fixed** — rebuilt using
+  `.reduce()` to group materials by whatever `category.name` values
+  actually exist (`materialsByCategory`), rendering one column per real
+  category dynamically. Also rebuilt the checkbox-row UI as clickable
+  cards per Haru's UX call (redemption programs are typically selective,
+  not "check most materials" — cards read better as a considered choice
+  than a dense checkbox list). Selected-state iterated further: final
+  version is outline-only (border color changes, no filled background),
+  X-mark icon when selected (not checkmark, since clicking removes it)
+- 🟡 `material-stock/page.jsx`'s `CATEGORY_STYLES` — needed a fallback
+  default style so an unmapped category doesn't throw at render.
+  **Fixed**, Glass entry added with distinct cyan styling.
+- 🟡 `MaterialTag.jsx` — already degraded gracefully but needed a real
+  Glass entry so materials don't fall back to generic gray.
+  **Fixed.**
+- 🟢 Resident home page promo tags, seed data — cosmetic/content only.
+  **Fixed** via the same consolidated Claude Code prompt.
+
+**Final locked material list (Aug 7):**
+- Metals: Aluminum Cans (KG), Tin Cans (PIECE), Steel Scraps (KG), Iron
+  Scraps (KG) — split from "Steel/Iron Scraps" decided in favor, despite
+  doubling groupmate photo-capture workload, since image classifiers
+  perform meaningfully better on narrower visually-distinct classes
+- Papers: Newspaper (KG), Cardboard (KG)
+- Plastics: Plastic Bottles PET (PIECE), Plastic Bags (KG), Hard Plastics (KG)
+- Glass (new category): Alak Bottles (PIECE), Beer Bottles (PIECE) —
+  narrowed down from a longer list (vinegar bottles, jars, old Coke
+  bottles excluded as lower-volume/inconsistent)
+- Excluded on purpose: Copper wire (residents sell directly themselves,
+  wouldn't realistically flow through barangay collection)
+- AI training subset (Teachable Machine) narrowed further from the full
+  list, given real sample-volume constraints per class: Aluminum Cans,
+  Plastic Bottles (PET), Cardboard, Glass Bottles (alak/beer, possibly
+  combined into one class pending a visual-similarity check) — everything
+  else stays manual-selection-only, no AI class trained for it
+- Units: aluminum cans corrected to KG (not PIECE as Haru first assumed)
+  after reasoning through actual junkshop pricing practice
+- Material CRUD scope reconfirmed: **add-only, no edit, no delete/archive**
+  — archive pattern for Materials explicitly deferred to post-defense
+  Block J debt, not built now. Wrong-unit mistakes handled by adding a
+  corrected new material and abandoning the old one, not editing in place
+  (protects historical transaction accuracy)
+- New-category creation (e.g. hypothetical "Clothing/Textiles") — decided
+  NOT to build now; speculative, no validated pilot-barangay need yet,
+  revisit only if pilot testing surfaces a real gap
+
+**Stale seed data note:** old "Steel/Iron Scraps" and "Glass Bottles"
+records still exist alongside their new split replacements — not yet
+cleaned up (no historical test transactions blocking a hard delete, so a
+fresh reseed is the planned fix, not manual deletion).
+
+## Settings Module — COMPLETE (Aug 7)
+Three sections, each independently fetched/managed:
+1. **Junkshops** — pre-existing, unchanged
+2. **Materials** — add-only creation. Backend: `addMaterial` in
+   `settings.controller.js`, `POST /settings/materials` (roles: CAPTAIN,
+   SECRETARY — same precedent as theme). Validates required fields →
+   category exists → relies on the DB's existing `@@unique([barangayId,
+   name])` constraint (not a duplicate category, but a duplicate
+   anywhere for the barangay) caught via Prisma's `P2002` error code,
+   not a manual pre-check. `.trim()` applied to name before insert to
+   prevent whitespace-only "duplicate" bugs. Frontend: category dropdown
+   fetched live (categories are dynamic), unit dropdown hardcoded (units
+   are a fixed Prisma enum, no reason to fetch something that can't
+   change) — good example of when hardcoding vs. fetching is the right
+   call, decided per-field based on whether the source data is actually
+   dynamic. Used plain `useState` per field instead of `react-hook-form`
+   (Haru's standing convention: only reach for the form library when
+   validation complexity justifies it — a 3-field add-only form doesn't)
+3. **Appearance** — theme picker, from earlier sessions, unchanged
+
+**Barangay info editing (name, municipality, contact number, logo) —
+explicitly NOT built, parked under Super Admin scope** alongside module
+configuration — same reasoning: this is "official identity" data that
+belongs to onboarding/Super Admin territory, not barangay self-service,
+consistent with the SaaS registration model ("barangay registers through
+the dev team/Super Admin, not self-service").
+
+**Major refactor (Aug 7):** `settings/page.jsx` had grown to 300+ lines
+covering three unrelated concerns in one file (Junkshops, Materials,
+Appearance — each with its own fetch, loading/error/empty states, and
+modal). Split into `components/settings/JunkshopsSection.jsx`,
+`MaterialsSection.jsx`, `AppearanceSection.jsx`, each owning its own
+state/fetch/modal. `page.jsx` now ~20 lines, just composes the three.
+Haru did this refactor himself.
+
+**Learning moments this session:**
+- The `.reduce()` grouping pattern (flat array → object grouped by a
+  key) — walked through manually step-by-step (accumulator building up
+  one item at a time), and *why* the `if (!acc[key]) acc[key] = []`
+  guard is necessary (without it: `TypeError: Cannot read properties of
+  undefined (reading 'push')` on the first item of any new group — the
+  guard isn't error-catching, it's "make sure the bucket exists before
+  you try to put something in it"). Haru wants a dedicated future
+  session on `Object.keys()` / `Object.values()` / `Object.entries()`
+  specifically — currently shaky on when to reach for which one, plans
+  to watch YouTube tutorials on this before we revisit it together.
+- Real bug: `<Error ... />` used in `MaterialsSection.jsx` without
+  importing the actual `Error` component — JS silently resolved to the
+  *global built-in* `Error` constructor instead (no import error thrown,
+  since `Error` is always globally available), causing "Objects are not
+  valid as a React child (found: [object Error])" at render. Good
+  reminder that missing imports don't always throw a clear error if the
+  name collides with something already global.
+- `.reduce()`'s initial value must match the accumulator's actual shape
+  — caught a bug where the accumulator was built as an object
+  (`acc[key] = []`, `acc[key].push(...)`) but the initial value passed
+  was `[]` (an array) instead of `{}`.
+
+## Manuscript / Documentation (Aug 6)
+Clarified via actual compliance matrix PDF (pre-final defense, 9 items,
+UNP CCIT): the matrix is **panel recommendations from pre-final defense**,
+not a broad feature checklist. Only concrete, unambiguous system-feature
+requirement in it: **Image Recognition** — confirmed via item 1, changing
+the title itself to include "with Image Recognition." Item 8 ("main
+functionalities should be discussed in activity diagrams") directly
+answers Haru's original question about diagram scope — matches the
+existing 18-figure list pattern in the manuscript.
+
+**Important correction:** the multi-barangay/module-configuration
+requirement is NOT in the written compliance matrix — it was a verbal
+panel comment Haru recalled, not documented. This significantly changes
+its urgency relative to Image Recognition, which has hard documentation
+backing (literally in the title).
+
+Manuscript (FR table, activity diagrams) confirmed to be a **pre-final
+defense draft**, not locked — safe to revise freely to match actual
+final build, no need to force-fit new features into the old table.
+
+Built and delivered `Updated-Functional-Requirements.docx` — 26 FR rows,
+same "Action word → *The system should allow [role] to [action]...*"
+pattern as the original table, based on actual `PROGRESS.md` history.
+Notable corrections made during drafting:
+- Dropped "Assign Intended Use to Materials" (not a real built feature)
+- Split the old "Record Scheduled Collection"/"Confirm Collection
+  Record" pair into three rows matching the real REQUESTED→APPROVED→
+  IN_PROGRESS→COLLECTED lifecycle plus separate Manual Intake row
+- Added rows for real features missing from the old table: Compare
+  Junkshop Prices, Record Manual Stock Adjustment, Capture Recyclables
+  via Image Recognition, Customize Barangay Appearance, Manage
+  Recyclable Materials, Look Up Beneficiary Records
+- **Caught and fixed a real accuracy bug**: initially wrote several
+  redemption/reward rows as "SK Staff" only, but the actual
+  `requireRoles()` arrays in the route files include CAPTAIN/SECRETARY
+  (and TREASURER for reward inventory + beneficiary lookup) — corrected
+  after Haru caught the mismatch by pasting the actual route files.
+  General lesson worth repeating: verify role/permission claims in
+  documentation against actual route code, don't assume from a single
+  module's pattern.
+- Excluded Super Admin/module config and audit logs from the table,
+  consistent with their "not confirmed requirement" status
+
+**Next session:** resident-side `(resident)/layout.jsx` theme-apply
+logic still needs the same pattern as barangay (was completed earlier —
+confirm this is still accurate/tested). Fresh reseed needed to clear
+stale duplicate materials. Reports module still blocked on stakeholder
+conversation — this is now the highest-priority unblock, since it's the
+only major remaining piece not gated on groupmates' image capture work.
+
+## Super Admin — Scope Resolved (Aug 7)
+Adviser confirmed: **full UI required**, not the seed-file shortcut
+Haru had proposed as a lighter alternative. No longer an open question.
+
+Clarified scope, two distinct parts:
+1. **Super Admin management interface** (new build) — where Super Admin
+   toggles which modules (`has___` flags: `hasCollectionRequests`,
+   `hasRedemptionManagement`, `hasRewardInventory`, `hasLeaderboard`,
+   etc.) a given barangay has access to. Conceptually similar UI pattern
+   to the theme picker (select/toggle, save, PATCH to the barangay
+   record) but managing feature flags instead of a theme slug.
+2. **Conditional rendering on the barangay-facing side** (retrofit to
+   existing UI) — Sidebar and any other module-gated UI (dashboard stat
+   cards, etc.) need to check the barangay's actual flags before
+   rendering a nav item/section, so a barangay without e.g.
+   `hasLeaderboard: true` doesn't see Leaderboard in their sidebar at
+   all. Not yet started; open implementation question for later: does
+   the barangay layout already fetch these flags as part of an existing
+   call, or does this need a new fetch.
+
+**Explicitly deferred until this is actually picked up** — correctly
+self-caught by Haru mid-conversation that this isn't the current
+priority (Reports is), so implementation details intentionally not
+worked out yet. Revisit when Reports is unblocked/further along.
+
+## Image Recognition Tooling — Decided (Aug 7)
+Considered Nyckel (hosted classification API) as an alternative to
+Teachable Machine, specifically because Haru wanted to avoid building
+training infrastructure from scratch. Researched and compared:
+
+- **Nyckel** — real REST API (send image, get label + confidence),
+  which would've been a more natural fit for the Node/Express backend
+  than bundling a client-side model. But actual pricing (checked
+  directly on nyckel.com/pricing) ruled it out: Free tier is capped at
+  **100 invokes/month** — not enough to survive real pilot testing
+  volume — and the next tier up is $149/month, not viable for an
+  unfunded capstone project.
+- **Teachable Machine** — confirmed as the tool to proceed with. No
+  invoke limits (client-side model, no hosted API costs), fully free,
+  well-documented TensorFlow.js export pattern, and it's the tool
+  already referenced in shared context with the adviser (matches the
+  compliance-matrix-driven title change). Trade-off accepted: more
+  integration work client-side (loading/running the exported model in
+  the `capture` flow) versus a clean API call, but zero ongoing cost
+  risk.
+
+Delivered `Image-Capture-Guide.docx` to hand off to groupmates for
+dataset capture — covers general capture rules (lighting/background/
+angle/condition variety, 80–150 photos per class, multiple physical
+items per class not one item repeatedly) and the finalized 5 AI-training
+classes: Aluminum Cans, Plastic Bottles (PET), Cardboard, Alak Bottles,
+Beer Bottles. Alak vs. Beer confirmed as two separate classes (not
+combined) based on real brand examples Haru provided (Emperador
+Light/Ginebra San Miguel vs. San Miguel Pale Pilsen/Red Horse) — distinct
+enough in shape (tall/slender vs. short/stubby "steinie") and glass color
+that combining would likely hurt model accuracy rather than simplify
+capture work. Everything else in the material list stays
+manual-selection-only, no AI class trained.
+
+Adviser's item-counting-in-frame idea explicitly sequenced as
+post-recognition-works work, not now — object counting is a materially
+harder CV problem than single-image classification (closer to object
+detection, would likely need a different tool entirely), and Teachable
+Machine isn't built for it. Framing for adviser if raised again:
+sequencing for reliability, not skipping the idea outright.
+
+**Current focus, explicit:** Reports module stakeholder conversation is
+the priority unblock. Groupmates are working dataset capture in
+parallel, independently. Super Admin intentionally not being worked on
+right now despite scope being resolved — noted and parked, not
+forgotten.

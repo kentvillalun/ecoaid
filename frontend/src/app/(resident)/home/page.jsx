@@ -191,7 +191,7 @@ export default function HomePage() {
                 <div className="flex flex-wrap gap-1">
                   <MaterialTag type={"Plastics"} />
                   <MaterialTag type={"Papers"} />
-                  <MaterialTag type={"Bottles"} />
+                  <MaterialTag type={"Glass"} />
                   <MaterialTag type={"Metals"} />
                 </div>
               </div>

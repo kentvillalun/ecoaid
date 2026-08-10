@@ -5,3 +5,5 @@ AGENTS.md
 # Environment files
 .env
 .env.local
+
+/.claude

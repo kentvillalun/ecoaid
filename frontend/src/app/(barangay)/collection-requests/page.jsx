@@ -100,7 +100,7 @@ export default function CollectionRequests() {
         />
         <SearchInput />
         <div className="flex flex-col gap-3 relative">
-          <div className="sticky -top-5 z-30 bg-bg pt-4">
+          <div className="sticky -top-6 z-30 bg-bg pt-4">
             <StatusChip
               STATUS_TABS={STATUS_TABS}
               currentTab={currentTab}
