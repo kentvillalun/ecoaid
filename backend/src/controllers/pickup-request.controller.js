@@ -61,7 +61,7 @@ const listRequests = async (req, res) => {
       data: {
         status: "EXPIRED",
         closedAt: new Date(),
-      }
+      },
     });
 
     const requests = await prisma.pickupRequests.findMany({
@@ -395,11 +395,41 @@ const getMyRequestsById = async (req, res) => {
   }
 };
 
+const cancelRequest = async (req, res) => {
+  try {
+    const requestId = req.params.id;
+    const { id } = req.user;
+
+    const result = await prisma.pickupRequests.updateMany({
+      where: {
+        id: requestId,
+        userId: id,
+        status: "REQUESTED",
+      },
+      data: {
+        status: "CANCELLED",
+        closedAt: new Date(),
+      },
+    });
+
+    if (result.count === 0) {
+      return res.status(400).json({
+        error: "This request can no longer be cancelled.",
+      });
+    }
+
+    return res.status(200).json({ message: "Request has been cancelled" });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 export {
   pickupRequest,
   listRequests,
   updateStatus,
   getRequest,
   getMyRequest,
+  cancelRequest,
   getMyRequestsById,
 };

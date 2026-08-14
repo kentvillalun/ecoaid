@@ -3,7 +3,7 @@
 import { Page } from "@/components/layout/Page";
 import { PageContent } from "@/components/layout/PageContent";
 import { ResidentHeader } from "@/components/navigation/ResidentHeader";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useFetch } from "@/hooks/useFetch";
 import { Banner } from "@/components/ui/Banner";
@@ -14,10 +14,12 @@ import { statusStyles } from "@/lib/statusStyles";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { Error } from "@/components/ui/Error";
+import { CancelRequestAction } from "@/components/requests/actions/CancelRequestAction";
 
 export default function RequestDetailPage() {
   const [refetchCount, setRefetchCount] = useState(0);
   const { id } = useParams();
+  const router = useRouter();
   const url = `/api/pickup-requests/my-requests/${id}`;
   const { isLoading, isError, data } = useFetch({ url, refetchCount });
 
@@ -318,6 +320,14 @@ export default function RequestDetailPage() {
                 </div>
               )}
             </div>
+            {data?.request?.status === "REQUESTED" && (
+              <div className="p-3 flex flex-col gap-2">
+                <CancelRequestAction
+                  id={id}
+                  onSuccess={() => router.push("/requests")}
+                />
+              </div>
+            )}
           </>
         )}
       </PageContent>
