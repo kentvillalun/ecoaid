@@ -11,7 +11,7 @@ export const StatusBadge = ({ type }) => {
 
   return (
     <div
-      className={`py-1 px-2 text-xs rounded-3xl font-medium inline-block ${inter.className} capitalize ${
+      className={`py-1 px-2 text-xs rounded-3xl font-medium inline-block ${inter.className} capitalize text-nowrap ${
         statusStyles[type] || "bg-gray-200 text-gray-700"
       }`}
     >

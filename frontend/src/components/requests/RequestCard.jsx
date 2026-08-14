@@ -1,5 +1,4 @@
 import { Card } from "../ui/Card";
-import { useRouter } from "next/navigation";
 import { StatusBadge } from "../ui/StatusBadge";
 import { MaterialTag } from "../ui/MaterialTag";
 import { formatDate } from "@/lib/formatDate";
@@ -7,6 +6,8 @@ import { Error } from "../ui/Error";
 import { Empty } from "../ui/Empty";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 export const RequestCard = ({
   data,
@@ -16,10 +17,15 @@ export const RequestCard = ({
   isLoading,
   isError,
   handleRefetchCount,
+  STATUS_TABS,
 }) => {
-  const filteredRequest =
-    status === "ALL" ? data : data?.filter((req) => req.status === status);
   const router = useRouter();
+
+  const activeTabConfig = STATUS_TABS.find((tab) => tab.label === status);
+
+  const filteredRequest = activeTabConfig.key.includes("ALL")
+    ? data
+    : data?.filter((item) => activeTabConfig.key.includes(item.status));
 
   if (isLoading)
     return Array.from({ length: 3 }).map((_, index) => (
@@ -30,15 +36,14 @@ export const RequestCard = ({
       >
         {/* Top row */}
         <div className="flex flex-row justify-between w-full">
-          <div className="flex flex-col gap-0.5">
-            <Skeleton width={120} />
-            <Skeleton width={40} />
-            <Skeleton width={170} />
-            <Skeleton width={190} />
-          </div>
-          <div className="flex flex-col items-end gap-2">
-            <Skeleton width={120} />
-            <Skeleton width={120} />
+          <div className="flex flex-row gap-2">
+            <Skeleton width={90} height={93} />
+            <div className="flex flex-col gap-0.5">
+              <Skeleton width={110} />
+              <Skeleton width={45} />
+              <Skeleton width={140} />
+              <Skeleton width={170} />
+            </div>
           </div>
         </div>
 
@@ -62,7 +67,7 @@ export const RequestCard = ({
         />
       ) : (
         filteredRequest?.map((d) => {
-          const isApproved = status === "APPROVED";
+          const isApproved = status === "Approved";
           const isSelected = selectedIds.includes(d.id);
 
           return (
@@ -78,7 +83,7 @@ export const RequestCard = ({
                   className="sr-only"
                 />
               )}
-              {status === "APPROVED" ? (
+              {status === "Approved" ? (
                 <Card
                   className={`flex flex-col shadow-none! new-border items-start gap-3 transition-all hover:cursor-pointer hover:-translate-y-0.5 duration-200 ease-in-out ${
                     isSelected ? "bg-[#F0FAF0] ring-1 ring-accent" : ""
@@ -86,29 +91,40 @@ export const RequestCard = ({
                 >
                   {/* Top row */}
                   <div className="flex flex-row justify-between w-full">
-                    <div className="flex flex-col gap-0.5">
-                      <h3 className="font-semibold text-[#1F2937]">
-                        {d.user.firstName
-                          ? `${d.user.firstName} ${d.user.lastName}`
-                          : d?.user.phoneNumber}
-                      </h3>
-                      <p className="text-sm text-gray-500">
-                        {d.user.sitio.name}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {d?.isAssorted === true
-                          ? "Assorted materials"
-                          : d?.material?.name}
-                      </p>
-                      <p className="text-sm text-gray-400">
-                        Estimated value:{" "}
-                        <span className="font-medium text-gray-600 lowercase">
-                          {d.estimatedValue}{" "}
-                          {d.estimatedUnit === "PIECE"
-                            ? "pcs"
-                            : d.estimatedUnit}
-                        </span>
-                      </p>
+                    <div className="flex flex-row gap-2">
+                      <div className="flex flex-col items-start min-h-22 min-w-22 max-h-20 max-w-20 rounded-md overflow-hidden shrink-0">
+                        <Image
+                          src={d?.photoUrl}
+                          width={80}
+                          height={80}
+                          alt="Recyclables"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-0.5">
+                        <h3 className="font-semibold text-[#1F2937]">
+                          {d.user.firstName
+                            ? `${d.user.firstName} ${d.user.lastName}`
+                            : d?.user.phoneNumber}
+                        </h3>
+                        <p className="text-sm text-gray-500">
+                          {d.user.sitio.name}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {d?.isAssorted === true
+                            ? "Assorted"
+                            : d?.material?.name}
+                        </p>
+                        <p className="text-sm text-gray-400 text-nowrap">
+                          Estimated value:{" "}
+                          <span className="font-medium text-gray-600 lowercase">
+                            {d.estimatedValue}{" "}
+                            {d.estimatedUnit === "PIECE"
+                              ? "pcs"
+                              : d.estimatedUnit}
+                          </span>
+                        </p>
+                      </div>
                     </div>
                     <div className="flex flex-col items-end gap-2">
                       {status === "ALL" && <StatusBadge type={d.status} />}
@@ -125,9 +141,10 @@ export const RequestCard = ({
                     </p>
                     <button
                       className="text-xs text-gray-600 font-medium new-border px-3 py-1.5 rounded-xl"
-                      onClick={() =>
-                        router.push(`/collection-requests/${d.id}`)
-                      }
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(`/collection-requests/${d.id}`);
+                      }}
                     >
                       View Details
                     </button>
@@ -144,29 +161,40 @@ export const RequestCard = ({
                 >
                   {/* Top row */}
                   <div className="flex flex-row justify-between w-full">
-                    <div className="flex flex-col gap-0.5">
-                      <h3 className="font-semibold text-[#1F2937]">
-                        {d.user.firstName
-                          ? `${d.user.firstName} ${d.user.lastName}`
-                          : d?.user.phoneNumber}
-                      </h3>
-                      <p className="text-sm text-gray-500">
-                        {d.user.sitio.name}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {d?.isAssorted === true
-                          ? "Assorted"
-                          : d?.material?.name}
-                      </p>
-                      <p className="text-sm text-gray-400">
-                        Estimated value:{" "}
-                        <span className="font-medium text-gray-600 lowercase">
-                          {d.estimatedValue}{" "}
-                          {d.estimatedUnit === "PIECE"
-                            ? "pcs"
-                            : d.estimatedUnit}
-                        </span>
-                      </p>
+                    <div className="flex flex-row gap-2">
+                      <div className="flex flex-col items-start min-h-22 min-w-22 max-h-20 max-w-20 rounded-md overflow-hidden shrink-0">
+                        <Image
+                          src={d?.photoUrl}
+                          width={80}
+                          height={80}
+                          alt="Recyclables"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-0.5">
+                        <h3 className="font-semibold text-[#1F2937]">
+                          {d.user.firstName
+                            ? `${d.user.firstName} ${d.user.lastName}`
+                            : d?.user.phoneNumber}
+                        </h3>
+                        <p className="text-sm text-gray-500">
+                          {d.user.sitio.name}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {d?.isAssorted === true
+                            ? "Assorted"
+                            : d?.material?.name}
+                        </p>
+                        <p className="text-sm text-gray-400 text-nowrap">
+                          Estimated value:{" "}
+                          <span className="font-medium text-gray-600 lowercase">
+                            {d.estimatedValue}{" "}
+                            {d.estimatedUnit === "PIECE"
+                              ? "pcs"
+                              : d.estimatedUnit}
+                          </span>
+                        </p>
+                      </div>
                     </div>
                     <div className="flex flex-col items-end gap-2">
                       {status === "ALL" && <StatusBadge type={d.status} />}

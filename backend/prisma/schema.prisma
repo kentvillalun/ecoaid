@@ -85,6 +85,7 @@ model Barangay {
   rewardItems RewardItem[]
   rewardReleases RewardRelease[]
   beneficiaries Beneficiary[]
+  pickupRequests PickupRequests[]
 }
 
 enum RedemptionMode {
@@ -169,6 +170,9 @@ model PickupRequests {
   materialId String? @db.Uuid
   material Material? @relation(fields: [materialId], references: [id])
 
+  barangayId String? @db.Uuid()
+  barangay Barangay? @relation(fields: [barangayId], references: [id])
+
   estimatedValue Float 
   estimatedUnit Unit @default(KG)
   status Status @default(REQUESTED)
@@ -184,7 +188,10 @@ model PickupRequests {
   approvedAt DateTime?
   collectedAt DateTime?
   rejectedAt DateTime?
+  closedAt DateTime?
+  
   isAssorted Boolean @default(false)
+
 
   collectionItems CollectionItem[]
   stockTransactionLog StockTransactionLog[]
@@ -236,6 +243,8 @@ enum Status {
   IN_PROGRESS
   COLLECTED
   REJECTED
+  CANCELLED
+  EXPIRED
 }
 
 model CollectionItem {

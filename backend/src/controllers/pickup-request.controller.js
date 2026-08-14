@@ -13,6 +13,7 @@ const pickupRequest = async (req, res) => {
     } = req.body ?? {};
 
     const userId = req.user.id;
+    const barangayId = req.user.barangayId;
 
     if (
       !estimatedValue ||
@@ -32,6 +33,7 @@ const pickupRequest = async (req, res) => {
         photoUrl,
         notes,
         isAssorted,
+        barangayId,
       },
     });
 
@@ -43,7 +45,29 @@ const pickupRequest = async (req, res) => {
 
 const listRequests = async (req, res) => {
   try {
+    const { barangayId } = req.user;
+
+    const expiryThreshold = new Date();
+    expiryThreshold.setDate(expiryThreshold.getDate() - 2);
+
+    await prisma.pickupRequests.updateMany({
+      where: {
+        status: "REQUESTED",
+        barangayId,
+        createdAt: {
+          lt: expiryThreshold,
+        },
+      },
+      data: {
+        status: "EXPIRED",
+        closedAt: new Date(),
+      }
+    });
+
     const requests = await prisma.pickupRequests.findMany({
+      where: {
+        barangayId,
+      },
       orderBy: {
         createdAt: "asc",
       },
@@ -72,9 +96,11 @@ const listRequests = async (req, res) => {
         estimatedValue: true,
         estimatedUnit: true,
         status: true,
+        photoUrl: true,
         approvedAt: true,
         rejectedAt: true,
         isScheduled: true,
+        closedAt: true,
         rejectionReason: true,
         collectedAt: true,
         isAssorted: true,

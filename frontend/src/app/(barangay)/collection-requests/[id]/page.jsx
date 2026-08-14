@@ -32,7 +32,6 @@ export default function RequestDetails() {
     url: `/api/material/categories/barangay`,
     refetchCount: categoriesRefetchCount,
   });
-  console.log(categoriesData);
 
   const router = useRouter();
   const req = data?.request;
@@ -52,6 +51,11 @@ export default function RequestDetails() {
       show: status === "COLLECTED",
     },
     { label: "Rejected", value: req?.rejectedAt, show: status === "REJECTED" },
+    {
+      label: status === "CANCELLED" ? "Cancelled" : "Expired",
+      value: req?.closedAt,
+      show: ["CANCELLED", "EXPIRED"].includes(status),
+    },
   ].filter((e) => e.show);
 
   return (
@@ -163,10 +167,6 @@ export default function RequestDetails() {
                         className="grid grid-cols-4 gap-2 w-full pt-2 border-t border-gray-100"
                         key={index}
                       >
-
-                        {/* <p className="text-sm text-gray-700 col-span-2">
-                          {item?.material?.name}
-                        </p> */}
                         <MaterialTag materialName={item?.material?.name} textOnly={true} type={item?.material?.category?.name} className="col-span-2"/>
                         <p className="text-sm text-text-primary">
                           {item.actualValue}

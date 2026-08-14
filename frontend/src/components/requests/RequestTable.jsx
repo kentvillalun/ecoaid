@@ -10,7 +10,8 @@ import { Spinner } from "../ui/Spinner";
 import { Empty } from "../ui/Empty";
 import { Error } from "../ui/Error";
 import { MaterialTag } from "../ui/MaterialTag";
-import { p } from "motion/react-client";
+import { HoverPortal } from "../ui/HoverReveal";
+import Image from "next/image";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -27,11 +28,12 @@ export const RequestTable = ({
   isLoading,
   isError,
   categories,
+  STATUS_TABS,
 }) => {
   const router = useRouter();
 
   const tableConfig = {
-    ALL: [
+    All: [
       {
         header: "Household",
         render: (data) => (
@@ -51,21 +53,34 @@ export const RequestTable = ({
       {
         header: "Materials",
         render: (data) => (
-          <div className="flex  items-center">
-            {data?.isAssorted === true ? (
-              <MaterialTag
-                materialName={"Assorted"}
-                type={"Assorted"}
-                textOnly={true}
+          <HoverPortal
+            content={
+              <Image
+                src={data?.photoUrl}
+                width={200}
+                height={250}
+                alt="Recyclable materials"
+                priority
+                className="rounded-xl"
               />
-            ) : (
-              <MaterialTag
-                materialName={data?.material?.name}
-                type={data?.material?.category?.name}
-                textOnly={true}
-              />
-            )}
-          </div>
+            }
+          >
+            <div className="flex  items-center">
+              {data?.isAssorted === true ? (
+                <MaterialTag
+                  materialName={"Assorted"}
+                  type={"Assorted"}
+                  textOnly={true}
+                />
+              ) : (
+                <MaterialTag
+                  materialName={data?.material?.name}
+                  type={data?.material?.category?.name}
+                  textOnly={true}
+                />
+              )}
+            </div>
+          </HoverPortal>
         ),
       },
       {
@@ -127,7 +142,7 @@ export const RequestTable = ({
         ),
       },
     ],
-    REQUESTED: [
+    Pending: [
       {
         header: "Household",
         render: (data) => (
@@ -147,21 +162,34 @@ export const RequestTable = ({
       {
         header: "Materials",
         render: (data) => (
-          <div className="flex items-center">
-            {data?.isAssorted === true ? (
-              <MaterialTag
-                materialName={"Assorted"}
-                type={"Assorted"}
-                textOnly={true}
+          <HoverPortal
+            content={
+              <Image
+                src={data?.photoUrl}
+                width={200}
+                height={250}
+                alt="Recyclable materials"
+                loading="lazy"
+                className="rounded-xl"
               />
-            ) : (
-              <MaterialTag
-                materialName={data?.material?.name}
-                type={data?.material?.category?.name}
-                textOnly={true}
-              />
-            )}
-          </div>
+            }
+          >
+            <div className="flex items-center">
+              {data?.isAssorted === true ? (
+                <MaterialTag
+                  materialName={"Assorted"}
+                  type={"Assorted"}
+                  textOnly={true}
+                />
+              ) : (
+                <MaterialTag
+                  materialName={data?.material?.name}
+                  type={data?.material?.category?.name}
+                  textOnly={true}
+                />
+              )}
+            </div>
+          </HoverPortal>
         ),
       },
       {
@@ -198,7 +226,7 @@ export const RequestTable = ({
         ),
       },
     ],
-    APPROVED: [
+    Approved: [
       {
         header: "Select",
         render: (data) => (
@@ -229,21 +257,34 @@ export const RequestTable = ({
       {
         header: "Materials",
         render: (data) => (
-          <div className="flex items-center">
-            {data?.isAssorted === true ? (
-              <MaterialTag
-                materialName={"Assorted"}
-                type={"Assorted"}
-                textOnly={true}
+          <HoverPortal
+            content={
+              <Image
+                src={data?.photoUrl}
+                width={200}
+                height={250}
+                alt="Recyclable materials"
+                loading="lazy"
+                className="rounded-xl"
               />
-            ) : (
-              <MaterialTag
-                materialName={data?.material?.name}
-                type={data?.material?.category?.name}
-                textOnly={true}
-              />
-            )}
-          </div>
+            }
+          >
+            <div className="flex items-center">
+              {data?.isAssorted === true ? (
+                <MaterialTag
+                  materialName={"Assorted"}
+                  type={"Assorted"}
+                  textOnly={true}
+                />
+              ) : (
+                <MaterialTag
+                  materialName={data?.material?.name}
+                  type={data?.material?.category?.name}
+                  textOnly={true}
+                />
+              )}
+            </div>
+          </HoverPortal>
         ),
       },
       {
@@ -286,7 +327,7 @@ export const RequestTable = ({
         ),
       },
     ],
-    IN_PROGRESS: [
+    "In Progress": [
       {
         header: "Household",
         render: (data) => (
@@ -306,21 +347,34 @@ export const RequestTable = ({
       {
         header: "Materials",
         render: (data) => (
-          <div className="flex items-center">
-            {data?.isAssorted === true ? (
-              <MaterialTag
-                materialName={"Assorted"}
-                type={"Assorted"}
-                textOnly={true}
+          <HoverPortal
+            content={
+              <Image
+                src={data?.photoUrl}
+                width={200}
+                height={250}
+                alt="Recyclable materials"
+                loading="lazy"
+                className="rounded-xl"
               />
-            ) : (
-              <MaterialTag
-                materialName={data?.material?.name}
-                type={data?.material?.category?.name}
-                textOnly={true}
-              />
-            )}
-          </div>
+            }
+          >
+            <div className="flex items-center">
+              {data?.isAssorted === true ? (
+                <MaterialTag
+                  materialName={"Assorted"}
+                  type={"Assorted"}
+                  textOnly={true}
+                />
+              ) : (
+                <MaterialTag
+                  materialName={data?.material?.name}
+                  type={data?.material?.category?.name}
+                  textOnly={true}
+                />
+              )}
+            </div>
+          </HoverPortal>
         ),
       },
 
@@ -367,7 +421,7 @@ export const RequestTable = ({
         ),
       },
     ],
-    COLLECTED: [
+    Collected: [
       {
         header: "Household",
         render: (data) => (
@@ -387,21 +441,34 @@ export const RequestTable = ({
       {
         header: "Materials",
         render: (data) => (
-          <div className="flex items-center">
-            {data?.isAssorted === true ? (
-              <MaterialTag
-                materialName={"Assorted"}
-                type={"Assorted"}
-                textOnly={true}
+          <HoverPortal
+            content={
+              <Image
+                src={data?.photoUrl}
+                width={200}
+                height={250}
+                alt="Recyclable materials"
+                loading="lazy"
+                className="rounded-xl"
               />
-            ) : (
-              <MaterialTag
-                materialName={data?.material?.name}
-                type={data?.material?.category?.name}
-                textOnly={true}
-              />
-            )}
-          </div>
+            }
+          >
+            <div className="flex items-center">
+              {data?.isAssorted === true ? (
+                <MaterialTag
+                  materialName={"Assorted"}
+                  type={"Assorted"}
+                  textOnly={true}
+                />
+              ) : (
+                <MaterialTag
+                  materialName={data?.material?.name}
+                  type={data?.material?.category?.name}
+                  textOnly={true}
+                />
+              )}
+            </div>
+          </HoverPortal>
         ),
       },
 
@@ -433,7 +500,7 @@ export const RequestTable = ({
         ),
       },
     ],
-    REJECTED: [
+    Rejected: [
       {
         header: "Household",
         render: (data) => (
@@ -453,26 +520,39 @@ export const RequestTable = ({
       {
         header: "Material Name",
         render: (data) => (
-          <div className="flex items-center">
-            {data?.isAssorted === true ? (
-              <MaterialTag
-                materialName={"Assorted"}
-                type={"Assorted"}
-                textOnly={true}
+          <HoverPortal
+            content={
+              <Image
+                src={data?.photoUrl}
+                width={200}
+                height={250}
+                alt="Recyclable materials"
+                loading="lazy"
+                className="rounded-xl"
               />
-            ) : (
-              <MaterialTag
-                materialName={data?.material?.name}
-                type={data?.material?.category?.name}
-                textOnly={true}
-              />
-            )}
-          </div>
+            }
+          >
+            <div className="flex items-center">
+              {data?.isAssorted === true ? (
+                <MaterialTag
+                  materialName={"Assorted"}
+                  type={"Assorted"}
+                  textOnly={true}
+                />
+              ) : (
+                <MaterialTag
+                  materialName={data?.material?.name}
+                  type={data?.material?.category?.name}
+                  textOnly={true}
+                />
+              )}
+            </div>
+          </HoverPortal>
         ),
       },
 
       {
-        header: "Est. Value",
+        header: "Estimated Value",
         render: (data) => (
           <p className="text-gray-600">
             {`${data.estimatedValue} ${data.estimatedUnit === "PIECE" ? "pcs" : data.estimatedUnit.toLowerCase()}`}{" "}
@@ -505,12 +585,98 @@ export const RequestTable = ({
         ),
       },
     ],
+    Closed: [
+      {
+        header: "Household",
+        render: (data) => (
+          <p className="font-semibold text-text-primary">
+            {data.user.firstName
+              ? `${data.user.firstName} ${data.user.lastName}`
+              : data.user.phoneNumber}
+          </p>
+        ),
+      },
+      {
+        header: "Sitio",
+        render: (data) => (
+          <p className="text-gray-600">{data.user.sitio.name}</p>
+        ),
+      },
+      {
+        header: "Materials",
+        render: (data) => (
+          <HoverPortal
+            content={
+              <Image
+                src={data?.photoUrl}
+                width={200}
+                height={250}
+                alt="Recyclable materials"
+                loading="lazy"
+                className="rounded-xl"
+              />
+            }
+          >
+            <div className="flex items-center">
+              {data?.isAssorted === true ? (
+                <MaterialTag
+                  materialName={"Assorted"}
+                  type={"Assorted"}
+                  textOnly={true}
+                />
+              ) : (
+                <MaterialTag
+                  materialName={data?.material?.name}
+                  type={data?.material?.category?.name}
+                  textOnly={true}
+                />
+              )}
+            </div>
+          </HoverPortal>
+        ),
+      },
+
+      {
+        header: "Estimated Value",
+        render: (data) => (
+          <p className="text-gray-600">
+            {`${data.estimatedValue} ${data.estimatedUnit === "PIECE" ? "pcs" : data.estimatedUnit.toLowerCase()}`}{" "}
+          </p>
+        ),
+      },
+      {
+        header: "Status",
+        render: (data) => <StatusBadge type={data.status} />,
+      },
+      {
+        header: "Date Closed",
+        render: (data) => (
+          <p className="text-gray-600">{formatDate(data.closedAt)}</p>
+        ),
+      },
+      {
+        header: "Action",
+        render: (data) => (
+          <div className="flex items-center justify-start">
+            <button
+              className="text-gray-600 hover:underline"
+              onClick={() => router.push(`/collection-requests/${data.id}`)}
+            >
+              View Details
+            </button>
+          </div>
+        ),
+      },
+    ],
   };
 
   const columns = tableConfig[status];
 
-  const filteredRequest =
-    status === "ALL" ? data : data?.filter((req) => req.status === status);
+  const activeTabConfig = STATUS_TABS.find((tab) => tab.label === status);
+
+  const filteredRequest = activeTabConfig.key.includes("ALL")
+    ? data
+    : data?.filter((item) => activeTabConfig.key.includes(item.status));
 
   return (
     <Card
@@ -559,7 +725,7 @@ export const RequestTable = ({
           ) : (
             filteredRequest?.map((req) => (
               <tr
-                className={`text-start hover:bg-[#f8f8f8] transition-all transform ${isLoading && "hidden"}`}
+                className={`text-start hover:bg-bg transition-all transform ${isLoading && "hidden"}`}
                 key={req.id}
               >
                 {columns?.map((col) => (
