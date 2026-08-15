@@ -29,7 +29,7 @@ export default function RequestsPage() {
           ["REQUESTED", "APPROVED", "IN_PROGRESS"].includes(r.status),
         )
       : data?.requests?.filter((r) =>
-          ["COLLECTED", "REJECTED"].includes(r.status),
+          ["COLLECTED", "REJECTED", "EXPIRED", "CANCELLED"].includes(r.status),
         );
 
   const handleRefetchCount = () => setRefetchCount((prev) => prev + 1);
@@ -48,7 +48,7 @@ export default function RequestsPage() {
       >
         {/* Tab section */}
         <div className="flex flex-col gap-6 mt-2">
-          <div className="grid grid-cols-2 gap-2 ">
+          <div className="grid grid-cols-2 gap-2 z-50 bg-bg pb-3">
             <button
               className={`rounded-2xl py-3 font-medium text-gray-600 new-border ${currentTab === "ongoing" ? "text-white gradient-button" : "bg-white"} transition-all duration-250 ease-out`}
               onClick={() => setCurrectTab("ongoing")}
