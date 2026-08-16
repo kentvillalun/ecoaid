@@ -22,6 +22,7 @@ import { useFetch } from "@/hooks/useFetch";
 import { Spinner } from "@/components/ui/Spinner";
 import { Error } from "@/components/ui/Error";
 import { Empty } from "@/components/ui/Empty";
+import { EditResidentModal } from "@/components/residents/EditResidentModal";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 
@@ -40,14 +41,24 @@ const STATUS_LABELS = {
   UNVERIFIED: "Unverified",
 };
 
-const TABLE_HEADERS = ["Name", "Location", "Contact", "Status", "Registered"];
+const TABLE_HEADERS = [
+  "Name",
+  "Location",
+  "Contact",
+  "Status",
+  "Registered",
+  "Action",
+];
 
 export default function ResidentsPage() {
   const [refetchCount, setRefetchCount] = useState(0);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const { data, isLoading, isError } = useFetch({
     url: "/api/resident/",
     refetchCount,
   });
+
+  const [currentResidentData, setCurrentResidentData] = useState([]);
 
   const handleRefetchCount = () => setRefetchCount((prev) => prev + 1);
 
@@ -58,6 +69,7 @@ export default function ResidentsPage() {
   const unverifiedCount = data?.residents?.filter(
     (r) => r.isVerified === false,
   ).length;
+
   return (
     <Page className="bg-bg!">
       <BarangayTopBar title="Residents" />
@@ -76,7 +88,9 @@ export default function ResidentsPage() {
                 Total Residents
               </p>
               <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
+                icon={
+                  <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
+                }
                 className="rounded-full! p-2!"
                 containerColor="var(--color-icon-bg)"
               />
@@ -100,9 +114,13 @@ export default function ResidentsPage() {
 
           <Card className="shadow-none! new-border flex flex-col items-start">
             <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-text-secondary">Verified</p>
+              <p className="text-xs font-medium text-text-secondary">
+                Verified
+              </p>
               <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
+                icon={
+                  <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
+                }
                 className="rounded-full! p-2!"
                 containerColor="var(--color-icon-bg)"
               />
@@ -126,9 +144,13 @@ export default function ResidentsPage() {
 
           <Card className="shadow-none! new-border flex flex-col items-start col-span-2 lg:col-span-1">
             <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-text-secondary">Unverified</p>
+              <p className="text-xs font-medium text-text-secondary">
+                Unverified
+              </p>
               <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
+                icon={
+                  <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
+                }
                 className="rounded-full! p-2!"
                 containerColor="var(--color-icon-bg)"
               />
@@ -153,7 +175,7 @@ export default function ResidentsPage() {
           </Card>
         </section>
 
-        <SearchInput />
+        {/* <SearchInput /> */}
 
         <section className="flex flex-col gap-3">
           <SectionHeader
@@ -237,6 +259,17 @@ export default function ResidentsPage() {
                         <td className="p-4 text-nowrap text-gray-400 text-xs">
                           {formatDate(resident.createdAt)}
                         </td>
+                        <td className="p-4">
+                          <button
+                            className="text-gray-600 hover:underline"
+                            onClick={() => {
+                              setIsEditModalOpen(true);
+                              setCurrentResidentData(resident);
+                            }}
+                          >
+                            Edit
+                          </button>
+                        </td>
                       </tr>
                     ))
                   )}
@@ -301,15 +334,34 @@ export default function ResidentsPage() {
                       {resident.phoneNumber}
                     </p>
                   </div>
-                  <p className="text-xs text-gray-400">
-                    {formatDate(resident.createdAt)}
-                  </p>
+                  <div className="flex flex-row items-center justify-between w-full pt-2 border-t border-gray-100">
+                    <p className="text-xs text-gray-400">
+                      {formatDate(resident.createdAt)}
+                    </p>
+                    <button
+                      className="text-xs text-gray-600 font-medium new-border px-3 py-1.5 rounded-xl"
+                      onClick={() => {
+                        setIsEditModalOpen(true);
+                        setCurrentResidentData(resident)
+                      }}
+                    >
+                      Edit
+                    </button>
+                  </div>
                 </Card>
               ))
             )}
           </div>
         </section>
       </PageContent>
+
+      <EditResidentModal
+        key={currentResidentData?.id}
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        currentResidentData={currentResidentData}
+        handleRefetchCount={handleRefetchCount}
+      />
     </Page>
   );
 }

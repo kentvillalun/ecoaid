@@ -33,8 +33,12 @@ const TRUNCATE_THRESHOLD = 150;
 
 export default function AnnouncementsPage() {
   const [expandedIds, setExpandedIds] = useState(new Set());
-  const [refetchCount, setRefetchCount] = useState(0)
-  const { data, isLoading, isError} = useFetch({ url: "/api/announcements/residents", refetchCount})
+  const [refetchCount, setRefetchCount] = useState(0);
+  const { data, isLoading, isError } = useFetch({
+    url: "/api/announcements/residents",
+    refetchCount,
+  });
+  const { data: userData } = useFetch({ url: "/api/resident/me" });
 
   const handleRefetchCount = () => setRefetchCount((prev) => prev + 1);
 
@@ -52,13 +56,20 @@ export default function AnnouncementsPage() {
 
   const announcements = data?.announcements;
 
-  
-
   return (
     <Page className="bg-bg!">
       <ResidentHeader title={"Announcements"} className="shadow-none! bg-bg!" />
       <PageContent className="md:pl-3! gap-3!">
-        {isLoading ? (
+        {!userData?.user?.isVerified ? (
+          <div className="flex flex-col items-center text-center py-6 gap-1">
+            <p className="text-sm text-dark font-medium">
+              Announcements are locked
+            </p>
+            <p className="text-xs text-text-primary">
+              Complete your first pickup to view barangay announcements
+            </p>
+          </div>
+        ) : isLoading ? (
           <div className="flex flex-col gap-3">
             {Array.from({ length: 1 }).map((_, index) => (
               <Card

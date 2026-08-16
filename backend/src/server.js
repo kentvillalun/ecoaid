@@ -19,7 +19,8 @@ import leaderboardRoute from "./routes/leaderboard.route.js";
 import programFundsRoute from "./routes/program-funds.route.js";
 import rewardInventoryRoute from "./routes/reward-inventory.route.js"
 import settingsRoute from "./routes/settings.route.js"
-
+import barangayRoute from "./routes/barangay.route.js"
+ 
 config();
 connectDB();
 
@@ -54,6 +55,7 @@ app.use("/leaderboard", leaderboardRoute);
 app.use("/program-funds", programFundsRoute);
 app.use("/rewards", rewardInventoryRoute);
 app.use("/settings", settingsRoute);
+app.use("/barangay", barangayRoute)
 
 const PORT = process.env.PORT || 5001;
 const server = app.listen(PORT, () => {

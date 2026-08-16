@@ -11,7 +11,6 @@ import Skeleton from "react-loading-skeleton";
 import { Badge } from "@/components/ui/Badge";
 import { formatDate } from "@/lib/formatDate";
 import {
-  CalendarDaysIcon,
   ArrowPathIcon,
   BuildingLibraryIcon,
   ChevronRightIcon,
@@ -59,6 +58,8 @@ export default function CommunityPage() {
     isError: isMaterialsError,
   } = useFetch({ url: "/api/material/", refetchCount: materialRefetchCount });
 
+  const { data: userData } = useFetch({ url: "/api/resident/me" });
+
   const handleRefetchCount = () =>
     setAnnouncementRefetchCount((prev) => prev + 1);
 
@@ -102,32 +103,10 @@ export default function CommunityPage() {
         <div className="mt-4 flex flex-col gap-3">
           {/* Collection Schedule */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <Card className="flex gap-2 flex-col w-full items-start new-border shadow-none!">
-              <div className="flex flex-row gap-3 items-center ">
-                <div className="border p-3 border-none rounded-xl items-center bg-accent-light">
-                  <CalendarDaysIcon className="w-6 stroke-accent" />
-                </div>
-                <div className="text-text-primary">
-                  <p className="font-medium text-sm">Collection Schedule</p>
-                  <p className="text-xs text-text-secondary">
-                    Regular Pickup Schedule
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-col text-sm">
-                <div className="text-text-primary font-medium text-sm">
-                  Every Sunday
-                </div>
-                <div className="text-text-secondary text-xs">9:00 AM - 12:00 PM</div>
-              </div>
-            </Card>
-
             {/* Accepted Materials */}
             <Card className="flex gap-2 flex-col items-start new-border shadow-none!">
               <div className="flex flex-row gap-3 items-center ">
-                <div className="border p-3 border-none rounded-xl items-center bg-accent-light">
-                  <ArrowPathIcon className="w-6 stroke-accent" />
-                </div>
+                <ArrowPathIcon className="w-6 stroke-accent shrink-0" />
                 <div className="text-text-primary">
                   <p className="font-medium text-sm">Accepted Materials</p>
                   <p className="text-xs text-text-secondary">
@@ -135,8 +114,8 @@ export default function CommunityPage() {
                   </p>
                 </div>
               </div>
-              <div className="flex flex-col gap-4">
-                <div className="flex flex-row gap-2 items-center">
+              <div className="flex flex-col gap-5">
+                <div className="flex flex-col gap-2 items-start">
                   {isMaterialsLoading ? (
                     <>
                       <Skeleton width={100} />
@@ -206,7 +185,16 @@ export default function CommunityPage() {
                 <ChevronRightIcon className="w-3" />{" "}
               </Link>
             </div>
-            {isLatestAnnouncementsLoading ? (
+            {!userData?.user?.isVerified ? (
+              <div className="flex flex-col items-center text-center py-6 gap-1">
+                <p className="text-sm text-dark font-medium">
+                  Announcements are locked
+                </p>
+                <p className="text-xs text-text-primary">
+                  Complete your first pickup to view barangay announcements
+                </p>
+              </div>
+            ) : isLatestAnnouncementsLoading ? (
               <div className="flex flex-col gap-3">
                 {Array.from({ length: 1 }).map((_, index) => (
                   <Card

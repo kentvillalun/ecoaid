@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import {
-  CalendarDaysIcon,
+  CheckBadgeIcon,
   ArrowPathIcon,
   ChevronRightIcon,
 } from "@heroicons/react/24/outline";
@@ -50,8 +50,6 @@ export default function HomePage() {
     setShowBanner(false);
   };
 
- 
-
   return (
     <Page className="bg-bg!">
       <header className="flex flex-row items-start justify-between min-w-full max-h-18.75 bg-bg fixed top-0 p-5 pl-0 z-50">
@@ -72,6 +70,7 @@ export default function HomePage() {
       </header>
 
       <PageContent className="md:pl-3! gap-3!">
+        {/* Greetings */}
         <div className="flex flex-col items-start">
           {isLoading ? (
             <div>
@@ -99,6 +98,25 @@ export default function HomePage() {
           )}
         </div>
 
+        {/* Verification warning banner */}
+        {data?.user?.isVerified && (
+          <Card
+            customBorder="0.5px solid var(--color-border)"
+            className="shadow-none! flex flex-row items-center gap-3"
+          >
+            <CheckBadgeIcon className="w-6 stroke-accent shrink-0" />
+            <div>
+              <p className="text-sm text-dark font-medium">
+                Your account isn't verified yet
+              </p>
+              <p className="text-xs text-text-primary">
+                Complete your first pickup to unlock full access
+              </p>
+            </div>
+          </Card>
+        )}
+
+        {/* FAQs Banner */}
         <AnimatePresence>
           {showBanner && (
             <motion.div
@@ -136,19 +154,23 @@ export default function HomePage() {
           )}
         </AnimatePresence>
 
+        {/* Contribution card */}
         <Card
           customBorder="0.5px solid var(--color-border)"
-          className="shadow-none! gradient-card relative flex flex-col gap-2 items-start p-4! overflow-clip min-h-37"
+          className="shadow-none! gradient-card relative flex flex-col gap-2 items-start p-4! overflow-clip min-h-42 hover:cursor-pointer"
+          handleClick={() => router.push("/standings")}
         >
           <div className="absolute w-30 md:w-35 md:h-35 bg-accent/60 rounded-full h-30 -right-8 -top-8 md:-top-10 md:-right-10"></div>
           <div className="absolute w-25 md:w-35 md:h-35 bg-accent/50 rounded-full h-25 right-18 -bottom-12 md:right-45 md:-bottom-16"></div>
           <div className="flex flex-col gap-1 items-start justify-start w-full">
             <p className="text-xs text-[rgba(255,255,255,0.6)] font-medium uppercase">
-              Your Points
+              Your Contribution
             </p>
-            <p className="text-white font-bold text-4xl md:text-5xl">1,250</p>
+            <p className="text-white font-bold text-4xl md:text-5xl">
+              {data?.user?.isVerified ? 0 : 1250}
+            </p>
             <p className="text-xs text-[rgba(255,255,255,0.6)]">
-              Community contribution points
+              Community contribution
             </p>
           </div>
           <div
@@ -157,42 +179,31 @@ export default function HomePage() {
           >
             <TrophyIcon className="w-3.5 stroke-accent" />
             <p className="text-accent font-semibold ">
-              Rank #3 in your barangay
+              {data?.user?.isVerified ? "Unranked" : "Rank #3 in your barangay"}
             </p>
           </div>
+          <p className="text-xs text-[rgba(255,255,255,0.6)]">
+            View standings &gt;
+          </p>
         </Card>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3">
+          {/* Accepted materials card */}
           <Link href={"/community"} className="contents">
-            <Card className="flex-col items-start gap-2 new-border shadow-none md:flex-row md:items-center md:gap-3">
-              <div className="border p-3 border-none rounded-xl items-center bg-accent-light">
-                <CalendarDaysIcon className="w-6 stroke-accent" />
-              </div>
-              <div className="text-xs flex flex-col gap-1">
-                <p className="uppercase  text-text-secondary font-medium">
-                  EcoAid Collection
-                </p>
-                <div className="text-text-primary font-medium text-sm">
-                  <p className="">Every Sunday</p>
-                  <p className=" ">8:00 AM - 12:00 PM</p>
-                </div>
-              </div>
-            </Card>
-          </Link>
-          <Link href={"/community"} className="contents">
-            <Card className="flex-col items-start gap-2 new-border shadow-none! md:flex-row md:items-center md:gap-3">
-              <div className="border p-3 border-none rounded-xl items-center bg-accent-light">
+            <Card className="flex flex-row items-center gap-3 new-border shadow-none! md:flex-row md:items-center md:gap-3">
+              {/* <div className="border p-3 border-none rounded-xl items-center bg-accent-light">
                 <ArrowPathIcon className="w-6 stroke-accent" />
-              </div>
+              </div> */}
+              <ArrowPathIcon className="w-6 stroke-accent shrink-0" />
               <div className="text-xs flex flex-col gap-1">
-                <p className="uppercase  text-text-secondary font-medium">
+                <p className="capitalize text-sm text-text-primary font-medium">
                   accepted materials
                 </p>
-                <div className="flex flex-wrap gap-1">
-                  <MaterialTag type={"Plastics"} />
-                  <MaterialTag type={"Papers"} />
-                  <MaterialTag type={"Glass"} />
-                  <MaterialTag type={"Metals"} />
+                <div className="flex flex-wrap gap-3">
+                  <MaterialTag type={"Plastics"} textOnly={true} />
+                  <MaterialTag type={"Papers"} textOnly={true} />
+                  <MaterialTag type={"Glass"} textOnly={true} />
+                  <MaterialTag type={"Metals"} textOnly={true} />
                 </div>
               </div>
             </Card>
@@ -226,7 +237,6 @@ export default function HomePage() {
                     </div>
                     <div className="flex flex-col items-end gap-2">
                       <Skeleton width={120} />
-                      <Skeleton width={120} />
                     </div>
                   </div>
 
@@ -259,24 +269,28 @@ export default function HomePage() {
                   <div className="flex flex-row justify-between w-full">
                     <div className="flex flex-col gap-0.5">
                       <h3 className="font-semibold text-text-primary">
-                        {r?.isAssorted ? "Assorted Request" : r?.material?.name}
+                        {/* {r?.isAssorted ? "Assorted Request" : r?.material?.name} */}
+                        <MaterialTag
+                          type={r?.material?.category?.name}
+                          materialName={r?.material?.name}
+                          textOnly={true}
+                          className="text-sm"
+                        />
                       </h3>
-                      <p className="text-sm text-gray-500">
-                        {r.notes ? r.notes : "No notes available"}
-                      </p>
-                      <p className="text-sm text-gray-400">
+                     
+                      <p className="text-xs text-gray-400">
                         {formatDate(r.createdAt)}
                       </p>
                     </div>
                     <div className="flex flex-col items-end gap-2">
                       <StatusBadge type={r.status} />
-                      <MaterialTag
+                      {/* <MaterialTag
                         type={
                           r?.isAssorted === true
                             ? "Assorted"
                             : r?.material?.category?.name
                         }
-                      />
+                      /> */}
                     </div>
                   </div>
 

@@ -20,4 +20,24 @@ const getLeaderboardStats = async (req, res) => {
   }
 };
 
-export { getLeaderboardStats };
+const getResidentLeaderboardStats = async (req, res) => {
+  try {
+    const { barangayId, id } = req.user;
+
+    const [weightLeaderboard, pieceLeaderboard] = await Promise.all([
+      getRankedLeaderboard(barangayId, "KG"),
+      getRankedLeaderboard(barangayId, "PIECE"),
+    ]);
+
+    return res.status(200).json({
+      message: "Fetch resident leaderboard stats successful",
+      weightLeaderboard,
+      pieceLeaderboard,
+      currentUserId: id,
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+export { getLeaderboardStats, getResidentLeaderboardStats };

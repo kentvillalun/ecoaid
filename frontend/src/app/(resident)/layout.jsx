@@ -18,8 +18,9 @@ export default function ResidentLayout({ children }) {
     "/profile/personal-information",
     "/profile/notifications",
     "/profile/settings",
-    "/profile/help-support", 
+    "/profile/help-support",
     "/requests/",
+    "/standings",
   ];
   const hideNav = paths.some((paths) => pathname.startsWith(paths));
 

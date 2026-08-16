@@ -6,7 +6,14 @@ const getResidentProfile = async (req, res) => {
 
     const user = await prisma.user.findUnique({
       where: { id },
-      include: {
+      select: {
+        firstName: true,
+        lastName: true,
+        sitio: {
+          select: {
+            name: true,
+          },
+        },
         barangay: {
           select: {
             name: true,
@@ -14,11 +21,9 @@ const getResidentProfile = async (req, res) => {
             province: true,
           },
         },
-        sitio: {
-          select: {
-            name: true,
-          },
-        },
+        phoneNumber: true,
+        address: true,
+        isVerified: true,
       },
     });
 
@@ -37,6 +42,7 @@ const getResidentProfile = async (req, res) => {
         municipality: user.barangay.municipality,
         province: user.barangay.province,
         address: user.address,
+        isVerified: user.isVerified,
       },
     });
   } catch (error) {
@@ -154,10 +160,63 @@ const getResidents = async (req, res) => {
   }
 };
 
+const editResident = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { firstName, lastName, phoneNumber, sitioId, isVerified } =
+      req.body ?? {};
+    const { barangayId } = req.user;
+
+    const data = {};
+    if (firstName !== undefined) data.firstName = firstName;
+    if (lastName !== undefined) data.lastName = lastName;
+    if (phoneNumber !== undefined) data.phoneNumber = phoneNumber;
+    if (sitioId !== undefined) data.sitioId = sitioId;
+    if (isVerified !== undefined) data.isVerified = isVerified;
+
+    if (Object.keys(data).length === 0) {
+      return res.status(400).json({ error: "Invalid request" });
+    }
+
+    if (data.sitioId) {
+      const sitio = await prisma.sitio.findUnique({
+        where: {
+          id: sitioId,
+        },
+        select: {
+          name: true,
+        },
+      });
+      
+      if (!sitio) {
+        return res.status(400).json({ error: "Invalid sitio"})
+      }
+
+      data.purok = sitio.name
+    }
+
+    const result = await prisma.user.updateMany({
+      where: { id, barangayId },
+      data
+    });
+
+    if (result.count === 0) {
+      return res.status(400).json({ error: "No resident record affected " });
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Resident record updated successfully" });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 export {
   getResidentProfile,
   getBarangayInfo,
   updateResidentProfile,
   searchResident,
-  getResidents
+  getResidents,
+  editResident,
 };

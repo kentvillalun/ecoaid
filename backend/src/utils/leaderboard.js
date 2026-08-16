@@ -22,6 +22,7 @@ export const getRankedLeaderboard = async (barangayId, unit) => {
     const user = users.find((u) => u.id === entry.userId);
     return {
       rank: index + 1,
+      userId: user.id,
       name: `${user.firstName} ${user.lastName}`,
       purok: user.purok,
       total: entry._sum.quantity,
