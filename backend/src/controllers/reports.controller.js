@@ -11,7 +11,7 @@ const filterReports = async (req, res) => {
 
     if (
       ![
-        "material-stock",
+        "mrf-inventory",
         "collection-intake",
         "redemption",
         "program-funds",
@@ -21,7 +21,7 @@ const filterReports = async (req, res) => {
     }
 
     switch (type) {
-      case "material-stock":
+      case "mrf-inventory":
         const materials = await prisma.stockTransactionLog.findMany({
           where: {
             barangayId,

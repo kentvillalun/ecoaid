@@ -31,3 +31,17 @@ export const statusBannerMessage = {
     CANCELLED: "You cancelled this request",
     EXPIRED: "This request expired due to inactivity",
 }
+
+const notificationMessageTemplates = {
+    APPROVED: (materialName) => `Your ${materialName} request has been approved`,
+    IN_PROGRESS: (materialName) => `Your ${materialName} request is scheduled for collection`,
+    COLLECTED: (materialName) => `Your ${materialName} request has been completed`,
+    REJECTED: (materialName) => `Your ${materialName} request has been declined`,
+    EXPIRED: (materialName) => `This ${materialName} request expired due to inactivity`,
+}
+
+export const getNotificationMessage = (type, materialName) => {
+    if (!materialName) return statusBannerMessage[type];
+
+    return notificationMessageTemplates[type]?.(materialName) ?? statusBannerMessage[type];
+}

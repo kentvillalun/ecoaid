@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/Card";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { IconContainer } from "@/components/ui/IconContainer";
 import { MaterialTag } from "@/components/ui/MaterialTag";
+import { DropdownFilter } from "@/components/ui/DropdownFilter";
 import { RecordSaleModal } from "@/components/junkshop-sales/modals/RecordSaleModal";
 import {
   BuildingStorefrontIcon,
@@ -99,6 +100,7 @@ export default function JunkshopSalesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isJunkshopModalOpen, setIsJunkshopModalOpen] = useState(false);
   const [selectedJunkshop, setSelectedJunkshop] = useState("");
+  const [salesJunkshopFilter, setSalesJunkshopFilter] = useState("ALL");
 
   const [salesRefetchCount, setSalesRefetchCount] = useState(0);
   const [preselectedJunkshop, setPreselectedJunkshop] = useState("");
@@ -149,6 +151,51 @@ export default function JunkshopSalesPage() {
 
   const prices = allPriceItems?.map((item) => item.price);
   const highestPrices = prices ? Math.max(...prices) : 0;
+
+  const salesCountByJunkshopId = new Map();
+  salesData?.enrichedSales?.forEach((sale) => {
+    const shopId = sale?.junkshop?.id;
+    if (!shopId) return;
+    salesCountByJunkshopId.set(
+      shopId,
+      (salesCountByJunkshopId.get(shopId) ?? 0) + 1,
+    );
+  });
+
+  // Sourced from all junkshops on file (pricesData), not just ones with
+  // sales, so a junkshop with zero transactions still shows up as "(0)".
+  const salesJunkshopFilterOptions = [
+    {
+      value: "ALL",
+      label: "All",
+      count: salesData?.enrichedSales?.length ?? 0,
+    },
+    ...(pricesData?.junkshops?.map((shop) => ({
+      value: shop.id,
+      label: shop.name,
+      count: salesCountByJunkshopId.get(shop.id) ?? 0,
+    })) ?? []),
+  ];
+
+  const selectedSalesJunkshopName = pricesData?.junkshops?.find(
+    (shop) => shop.id === salesJunkshopFilter,
+  )?.name;
+
+  const filteredSales =
+    salesJunkshopFilter === "ALL"
+      ? salesData?.enrichedSales
+      : salesData?.enrichedSales?.filter(
+          (sale) => sale?.junkshop?.id === salesJunkshopFilter,
+        );
+
+  const salesEmptyText =
+    salesJunkshopFilter === "ALL" ? "No sale transactions yet" : "No items";
+
+  const salesEmptySubtext =
+    salesJunkshopFilter === "ALL"
+      ? "No sales yet. You can press the record sale button above to add sale transaction."
+      : `No sales recorded for ${selectedSalesJunkshopName ?? "this junkshop"} yet.`;
+
   return (
     <Page className="bg-bg! ">
       <BarangayTopBar title="Junkshop Sales" />
@@ -373,7 +420,7 @@ export default function JunkshopSalesPage() {
                               </td>
                             );
                           })}
-                          <td className="p-4 text-center bg-green-50/40">
+                          <td className="p-4 text-center bg-accent/2">
                             <div className="flex flex-col items-center gap-0.5">
                               <span className="font-bold text-accent text-base tabular-nums">
                                 ₱{bestPrice}
@@ -528,6 +575,13 @@ export default function JunkshopSalesPage() {
             noButton
           />
 
+          <DropdownFilter
+            id="salesJunkshopFilter"
+            options={salesJunkshopFilterOptions}
+            value={salesJunkshopFilter}
+            onChange={setSalesJunkshopFilter}
+          />
+
           {/* Desktop table */}
           <Card
             className={`${inter.className} hidden md:flex md:flex-col px-8 md:gap-3 md:items-start shadow-none! new-border`}
@@ -564,19 +618,17 @@ export default function JunkshopSalesPage() {
                         />
                       </td>
                     </tr>
-                  ) : salesData?.enrichedSales?.length === 0 ? (
+                  ) : filteredSales?.length === 0 ? (
                     <tr className="max-w-md">
                       <td className="text-center" colSpan={5}>
                         <Empty
-                          text={"No sale transactions yet"}
-                          subtext={
-                            "No sales yet. You can press the record sale button above to add sale transaction."
-                          }
+                          text={salesEmptyText}
+                          subtext={salesEmptySubtext}
                         />
                       </td>
                     </tr>
                   ) : (
-                    salesData?.enrichedSales?.map((row) => {
+                    filteredSales?.map((row) => {
                       const visible = row?.saleItems?.slice(0, 2);
                       const hidden = row?.saleItems?.slice(2);
                       return (
@@ -652,15 +704,10 @@ export default function JunkshopSalesPage() {
                 handleRefetchCount={handleSalesRefetchCount}
                 subtext={"Unable to get your sales history. Please try again."}
               />
-            ) : salesData?.enrichedSales?.length === 0 ? (
-              <Empty
-                text={"No sale transactions yet"}
-                subtext={
-                  "No sales yet. You can press the record sale button above to add sale transaction."
-                }
-              />
+            ) : filteredSales?.length === 0 ? (
+              <Empty text={salesEmptyText} subtext={salesEmptySubtext} />
             ) : (
-              salesData?.enrichedSales?.map((row, i) => (
+              filteredSales?.map((row, i) => (
                 <Card
                   key={row.id ?? i}
                   className="flex flex-col items-start gap-3 shadow-none! new-border"

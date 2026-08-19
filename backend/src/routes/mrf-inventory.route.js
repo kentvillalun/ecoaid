@@ -1,6 +1,6 @@
 import express from "express"
 import { authenticateBarangay, requireRoles } from "../middlewares/authMiddleware.js"
-import { getStockSummary, getTransactionLogs, recordStockOut } from "../controllers/material-stock.controller.js"
+import { getStockSummary, getTransactionLogs, recordStockOut } from "../controllers/mrf-inventory.controller.js"
 
 
 const router = express.Router()

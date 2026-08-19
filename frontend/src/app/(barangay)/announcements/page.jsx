@@ -43,18 +43,18 @@ const CATEGORY_LABELS = {
 };
 
 const CATEGORY_TABS = [
-  { key: "ALL", label: "All" },
-  { key: "GENERAL", label: "General" },
-  { key: "EVENT", label: "Event" },
-  { key: "REMINDER", label: "Reminder" },
-  { key: "NOTICE", label: "Notice" },
-  { key: "ALERT", label: "Alert" },
+  { key: ["ALL"], label: "All" },
+  { key: ["GENERAL"], label: "General" },
+  { key: ["EVENT"], label: "Event" },
+  { key: ["REMINDER"], label: "Reminder" },
+  { key: ["NOTICE"], label: "Notice" },
+  { key: ["ALERT"], label: "Alert" },
 ];
 
 const TABLE_HEADERS = ["Title", "Posted By", "Date", "Actions"];
 
 export default function AnnouncementsPage() {
-  const [currentTab, setCurrentTab] = useState("ALL");
+  const [currentTab, setCurrentTab] = useState(CATEGORY_TABS[0].key);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
@@ -68,15 +68,19 @@ export default function AnnouncementsPage() {
     setIsDetailModalOpen(true);
   };
 
-  const filteredAnnouncements =
-    currentTab === "ALL"
-      ? data?.announcements
-      : data?.announcements?.filter((item) => item.category === currentTab);
+  const activeCategoryConfig = CATEGORY_TABS.find(
+    (tab) => tab.key === currentTab,
+  );
 
-  const emptySubtext =
-    currentTab === "ALL"
-      ? "There are no announcements posted yet."
-      : `There are no ${CATEGORY_LABELS[currentTab]} announcements yet.`;
+  const filteredAnnouncements = activeCategoryConfig?.key?.includes("ALL")
+    ? data?.announcements
+    : data?.announcements?.filter((item) =>
+        activeCategoryConfig?.key?.includes(item.category),
+      );
+
+  const emptySubtext = activeCategoryConfig?.key?.includes("ALL")
+    ? "There are no announcements posted yet."
+    : `There are no ${activeCategoryConfig?.label} announcements yet.`;
 
 
 
@@ -105,6 +109,8 @@ export default function AnnouncementsPage() {
               STATUS_TABS={CATEGORY_TABS}
               currentTab={currentTab}
               setCurrentTab={setCurrentTab}
+              data={data?.announcements}
+              getItemValue={(item) => item.category}
             />
           </div>
 

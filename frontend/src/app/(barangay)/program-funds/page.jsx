@@ -36,9 +36,9 @@ const inter = Inter({
 });
 
 const FILTER_TABS = [
-  { key: "ALL", label: "All" },
-  { key: "income", label: "Income" },
-  { key: "expense", label: "Expenses" },
+  { key: ["ALL"], label: "All" },
+  { key: ["income"], label: "Income" },
+  { key: ["expense"], label: "Expenses" },
 ];
 
 const PROGRAM_TABLE_HEADERS = [
@@ -61,7 +61,7 @@ const TRANSACTION_TABLE_HEADERS = [
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function ProgramFundsPage() {
-  const [currentTab, setCurrentTab] = useState("ALL");
+  const [currentTab, setCurrentTab] = useState(FILTER_TABS[0].key);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [summaryRefetchCount, setSummaryRefetchCount] = useState(0);
   const {
@@ -82,24 +82,31 @@ export default function ProgramFundsPage() {
     refetchCount: transactionRefetchCount,
   });
 
+
   const handleSummaryRefetchCount = () =>
     setSummaryRefetchCount((prev) => prev + 1);
 
   const handleTransactionRefetchCount = () =>
     setTransactionRefetchCount((prev) => prev + 1);
 
+ 
   const netBalance =
     (summaryData?.totalIncome ?? 0) - (summaryData?.totalExpenses ?? 0);
 
-  const filteredTransactions =
-    currentTab === "ALL"
-      ? transactionData?.transactions
-      : transactionData?.transactions?.filter((t) => t.type === currentTab);
+ 
+  const activeTabConfig = FILTER_TABS.find((tab) => tab.key === currentTab)
 
+
+  const filteredTransactions =
+    activeTabConfig?.key?.includes("ALL")
+      ? transactionData?.transactions
+      : transactionData?.transactions?.filter((t) => activeTabConfig?.key?.includes(t.type));
+
+     
   const emptyTransactionsSubtext =
-    currentTab === "ALL"
+    activeTabConfig?.key?.includes("ALL")
       ? "No income or expense records yet."
-      : currentTab === "income"
+      : activeTabConfig?.key?.includes("income")
         ? "No income records yet."
         : "No expense records yet.";
 
@@ -416,6 +423,8 @@ export default function ProgramFundsPage() {
               STATUS_TABS={FILTER_TABS}
               currentTab={currentTab}
               setCurrentTab={setCurrentTab}
+              data={transactionData?.transactions}
+              getItemValue={(item) => item.type}
             />
           </div>
 

@@ -58,6 +58,7 @@ export default function ProfilePage() {
       <Toaster position="top-center" />
       <ResidentHeader
         title={"Profile"}
+        action={"notification"}
         className="py-6 shadow-none bg-bg!"
       />
 

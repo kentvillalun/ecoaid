@@ -18,6 +18,7 @@ import {
   CubeIcon,
   ArrowUpRightIcon,
   ArrowDownTrayIcon,
+  FunnelIcon,
 } from "@heroicons/react/24/outline";
 import { useFetch } from "@/hooks/useFetch";
 import Skeleton from "react-loading-skeleton";
@@ -71,7 +72,18 @@ const CATEGORY_STYLES = {
   },
 };
 
-const TABLE_HEADERS = ["Material", "Quantity", "Unit", "Source", "Date"];
+const TABLE_HEADERS = [
+  "Material",
+  "Quantity",
+  "Current Total",
+  "Source",
+  "Date",
+];
+
+const VIEW_OPTIONS = [
+  { key: "log", label: "Stock Movements" },
+  { key: "overview", label: "Category Overview" },
+];
 
 const KG_TO_LBS = 2.20462;
 
@@ -116,6 +128,55 @@ function UnitToggle({ value, onChange }) {
   );
 }
 
+function ViewToggle({ value, onChange }) {
+  return (
+    <div className="flex flex-row bg-surface new-border rounded-xl p-0.5 gap-0.5">
+      {VIEW_OPTIONS.map((opt) => (
+        <button
+          key={opt.key}
+          onClick={() => onChange(opt.key)}
+          className={`
+            text-xs px-4 py-1.5 rounded-[9px] font-semibold text-nowrap
+            transition-all duration-200 hover:cursor-pointer
+            ${
+              value === opt.key
+                ? "gradient-button text-white"
+                : "text-gray-400 hover:text-gray-600"
+            }
+          `}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function MaterialFilter({ value, onChange, categorizedMaterials }) {
+  return (
+    <div className="flex flex-row items-center gap-2">
+      <div className="flex flex-row text-gray-600 text-sm items-center justify-center gap-1">
+        <FunnelIcon className="w-4" />
+        <p>Filter:</p>
+      </div>
+      <div className="bg-surface new-border rounded-xl px-3 py-1.5 text-sm text-gray-600 outline-none hover:cursor-pointer max-w-50">
+        <select value={value} onChange={(e) => onChange(e.target.value)} className="outline-none">
+          <option value="ALL">All materials</option>
+          {categorizedMaterials.map((cat) => (
+            <optgroup label={cat.name} key={cat.name}>
+              {cat.materials.map((m) => (
+                <option key={m.materialId} value={m.materialId}>
+                  {m.materialName}
+                </option>
+              ))}
+            </optgroup>
+          ))}
+        </select>
+      </div>
+    </div>
+  );
+}
+
 function CategoryCard({ cat, displayUnit }) {
   const styles = CATEGORY_STYLES[cat.name] ?? CATEGORY_STYLES.default;
 
@@ -143,9 +204,7 @@ function CategoryCard({ cat, displayUnit }) {
         `}
       >
         <div className="flex items-center gap-2">
-          <span
-            className={`w-2 h-2 rounded-full shrink-0 ${styles.dot}`}
-          />
+          <span className={`w-2 h-2 rounded-full shrink-0 ${styles.dot}`} />
           <h4 className={`font-semibold text-sm ${styles.text}`}>{cat.name}</h4>
           <span className="text-xs text-gray-400 font-normal">
             {cat.materials.length === 0
@@ -192,9 +251,11 @@ function CategoryCard({ cat, displayUnit }) {
 
 export default function MaterialStockPage() {
   const [displayUnit, setDisplayUnit] = useState("kg");
+  const [activeView, setActiveView] = useState("log");
+  const [materialFilter, setMaterialFilter] = useState("ALL");
   const [refetchCount, setRefetchCount] = useState(0);
   const { data, isLoading, isError } = useFetch({
-    url: "/api/material-stock/",
+    url: "/api/mrf-inventory/",
     refetchCount,
   });
 
@@ -204,7 +265,7 @@ export default function MaterialStockPage() {
     isLoading: isTransactionLogsLoading,
     isError: isTransactionLogsError,
   } = useFetch({
-    url: "/api/material-stock/transaction-logs",
+    url: "/api/mrf-inventory/transaction-logs",
     refetchCount: transactionRefetchCount,
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -237,6 +298,10 @@ export default function MaterialStockPage() {
 
   const results = Object.values(categorizedMaterials ?? {});
 
+  const filteredTransactionLogs = transactionLogsData?.transactionLogs?.filter(
+    (row) => materialFilter === "ALL" || row.materialId === materialFilter,
+  );
+
   const ALL_MATERIALS = data?.enrichedResults;
   const TOTAL_WEIGHT_KG = ALL_MATERIALS?.filter((m) => m?.unit === "KG").reduce(
     (s, m) => s + m?.balance,
@@ -264,7 +329,7 @@ export default function MaterialStockPage() {
     toast.loading("Creating stock out transaction");
 
     const success = await makeRequest({
-      url: "/api/material-stock/transaction-logs/out",
+      url: "/api/mrf-inventory/transaction-logs/out",
       body: {
         materialId: selectedMaterialId,
         quantity: parseFloat(quantity),
@@ -294,11 +359,11 @@ export default function MaterialStockPage() {
 
   return (
     <Page className="bg-bg!">
-      <BarangayTopBar title="Material Stock" />
+      <BarangayTopBar title="MRF Inventory" />
       <PageContent className="md:pl-70! md:p-6 md:gap-7">
         {/* Header */}
         <BarangayHeaderCard
-          title="Material Stock"
+          title="MRF Inventory"
           subtitle="Overview of collected recyclable materials"
         />
 
@@ -390,9 +455,13 @@ export default function MaterialStockPage() {
         <section className="grid grid-cols-2 gap-3">
           <Card className="shadow-none! new-border flex flex-col items-start">
             <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-text-secondary">Total Weight</p>
+              <p className="text-xs font-medium text-text-secondary">
+                Total Weight
+              </p>
               <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
+                icon={
+                  <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
+                }
                 className="rounded-full! p-2!"
                 containerColor="var(--color-icon-bg)"
               />
@@ -414,9 +483,13 @@ export default function MaterialStockPage() {
 
           <Card className="shadow-none! new-border flex flex-col items-start">
             <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-text-secondary">Total Pieces</p>
+              <p className="text-xs font-medium text-text-secondary">
+                Total Pieces
+              </p>
               <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
+                icon={
+                  <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
+                }
                 className="rounded-full! p-2!"
                 containerColor="var(--color-icon-bg)"
               />
@@ -432,232 +505,303 @@ export default function MaterialStockPage() {
             </p>
             <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-2">
               <CubeIcon className="w-3 stroke-accent" />
-              <p className="text-accent font-medium">
-                Piece-based materials
-              </p>
+              <p className="text-accent font-medium">Piece-based materials</p>
             </div>
           </Card>
         </section>
-
-        <section className="flex flex-col gap-3">
-          <SectionHeader
-            title="Category Overview"
-            subtitle="Recyclable materials grouped by category"
-            icon={<ArchiveBoxIcon className="w-6 stroke-accent" />}
-            noButton
-          />
-
+        <div className="flex flex-row items-center justify-between flex-wrap gap-3">
+          <ViewToggle value={activeView} onChange={setActiveView} />
           <UnitToggle value={displayUnit} onChange={setDisplayUnit} />
+        </div>
 
-          {isLoading ? (
-            <Spinner className="p-10! min-h-auto!" />
-          ) : isError ? (
-            <Error
-              subtext={
-                "Unable to get the stock overview for every category. Please try again."
-              }
-              handleRefetchCount={handleRefetchCount}
-            />
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {results.map((cat) => (
-                <CategoryCard
-                  key={cat.name}
-                  cat={cat}
-                  displayUnit={displayUnit}
+        {activeView === "overview" && (
+          <>
+            <section className="flex flex-col gap-3">
+              <SectionHeader
+                title="Category Overview"
+                subtitle="Recyclable materials grouped by category"
+                icon={<ArchiveBoxIcon className="w-6 stroke-accent" />}
+                noButton
+              />
+
+              {isLoading ? (
+                <Spinner className="p-10! min-h-auto!" />
+              ) : isError ? (
+                <Error
+                  subtext={
+                    "Unable to get the stock overview for every category. Please try again."
+                  }
+                  handleRefetchCount={handleRefetchCount}
                 />
-              ))}
-            </div>
-          )}
-        </section>
-
-        <section className="flex flex-col gap-3">
-          <SectionHeader
-            title="Transaction Log"
-            subtitle="History of all stock movements"
-            icon={<Bars3BottomLeftIcon className="w-6 stroke-accent" />}
-            buttonLabel="Stock Out"
-            buttonIcon={<ArrowUpTrayIcon className="w-5 hidden md:flex" />}
-            onAction={() => setIsModalOpen((prev) => !prev)}
-          />
-
-          {/* Desktop table */}
-          <Card
-            className={`${inter.className} hidden md:flex md:flex-col px-8 overflow-x-auto md:gap-3 md:items-start shadow-none! new-border`}
-          >
-            <table className="w-full text-sm border-collapse text-gray-600 overflow-x-auto">
-              <thead className="border-b border-border">
-                <tr>
-                  {TABLE_HEADERS.map((h) => (
-                    <th
-                      key={h}
-                      className="font-medium text-start p-4 text-nowrap"
-                    >
-                      {h}
-                    </th>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {results.map((cat) => (
+                    <CategoryCard
+                      key={cat.name}
+                      cat={cat}
+                      displayUnit={displayUnit}
+                    />
                   ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
+                </div>
+              )}
+            </section>
+          </>
+        )}
+
+        {activeView === "log" && (
+          <>
+            <section className="flex flex-col gap-3">
+              <SectionHeader
+                title="Stock Movements"
+                subtitle="History of all stock movements"
+                icon={<Bars3BottomLeftIcon className="w-6 stroke-accent" />}
+                buttonLabel="Stock Out"
+                buttonIcon={<ArrowUpTrayIcon className="w-5 hidden md:flex" />}
+                onAction={() => setIsModalOpen((prev) => !prev)}
+              />
+
+              <MaterialFilter
+                value={materialFilter}
+                onChange={setMaterialFilter}
+                categorizedMaterials={results}
+              />
+
+              {/* Desktop table */}
+              <Card
+                className={`${inter.className} hidden md:flex md:flex-col px-8 overflow-x-auto md:gap-3 md:items-start shadow-none! new-border`}
+              >
+                <table className="w-full text-sm border-collapse text-gray-600 overflow-x-auto">
+                  <thead className="border-b border-border">
+                    <tr>
+                      {TABLE_HEADERS.map((h) => (
+                        <th
+                          key={h}
+                          className="font-medium text-start p-4 text-nowrap"
+                        >
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {isTransactionLogsLoading ? (
+                      <tr className="max-w-md">
+                        <td
+                          className="text-center"
+                          colSpan={TABLE_HEADERS.length}
+                        >
+                          <Spinner className="min-h-auto! p-12!" />
+                        </td>
+                      </tr>
+                    ) : isTransactionLogsError ? (
+                      <tr className="max-w-md">
+                        <td
+                          className="text-center"
+                          colSpan={TABLE_HEADERS.length}
+                        >
+                          <Error
+                            handleRefetchCount={handleTransactionRefetchCount}
+                            text={"Unable to get transaction logs"}
+                            subtext={
+                              "Unable to get stock transaction logs. Please try again."
+                            }
+                          />
+                        </td>
+                      </tr>
+                    ) : transactionLogsData?.transactionLogs?.length === 0 ? (
+                      <tr className="max-w-md">
+                        <td
+                          className="text-center"
+                          colSpan={TABLE_HEADERS.length}
+                        >
+                          <Empty
+                            text={"No transaction logs yet"}
+                            subtext={
+                              "No stock transaction logs yet. You can add by making transaction in (Pickup Request, Manual Intake, Redemption modules, or just press the stock out button to reduce "
+                            }
+                          />
+                        </td>
+                      </tr>
+                    ) : filteredTransactionLogs?.length === 0 ? (
+                      <tr className="max-w-md">
+                        <td
+                          className="text-center"
+                          colSpan={TABLE_HEADERS.length}
+                        >
+                          <Empty
+                            text={"No stock movements found"}
+                            subtext={
+                              "No stock movements match the selected material filter."
+                            }
+                          />
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredTransactionLogs?.map((row) => {
+                        const { qty, label } = applyUnit(
+                          row.quantity,
+                          row.unit,
+                          displayUnit,
+                        );
+                        const { qty: totalQty, label: totalLabel } = applyUnit(
+                          row.currentTotal,
+                          row.unit,
+                          displayUnit,
+                        );
+                        return (
+                          <tr
+                            key={row.id}
+                            className="text-start hover:bg-bg transition-all duration-150"
+                          >
+                            <td className="p-4">
+                              <MaterialTag
+                                textOnly={true}
+                                type={row?.material?.category?.name}
+                                materialName={row?.material?.name}
+                              />
+                            </td>
+                            <td className="p-4 font-semibold text-text-primary tabular-nums">
+                              {qty}
+                              <span className="text-xs font-normal text-gray-400 ml-1">
+                                {label}
+                              </span>
+                            </td>
+                            <td className="p-4 font-semibold text-text-primary tabular-nums">
+                              {totalQty}
+                              <span className="text-xs font-normal text-gray-400 ml-1">
+                                {totalLabel}
+                              </span>
+                            </td>
+                            <td className="p-4 text-gray-500 text-nowrap flex flex-row gap-1 items-center ">
+                              <p className=" capitalize">
+                                {row.source.split("_").join(" ").toLowerCase()}
+                              </p>
+                              <div
+                                className={`capitalize font-semibold rounded-2xl text-xs px-2.5 py-0.5  ${row.transactionType === "IN" ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"} flex flex-row gap-1`}
+                              >
+                                <p className="">
+                                  {row.transactionType === "IN"
+                                    ? "Stock in"
+                                    : "Stock out"}
+                                </p>
+                              </div>
+                            </td>
+                            <td className="p-4 text-nowrap text-gray-400 text-xs">
+                              {formatDate(row.createdAt)}
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </Card>
+
+              {/* Mobile cards */}
+              <div className="flex md:hidden flex-col gap-2">
                 {isTransactionLogsLoading ? (
-                  <tr className="max-w-md">
-                    <td className="text-center" colSpan={5}>
-                      <Spinner className="min-h-auto! p-12!" />
-                    </td>
-                  </tr>
+                  Array.from({ length: 5 }).map((_, index) => (
+                    <Card
+                      key={index}
+                      className="flex flex-col items-start gap-3 shadow-none! new-border"
+                    >
+                      <div className="flex flex-row items-center justify-between w-full">
+                        <Skeleton width={168} />
+                        <Skeleton width={100} />
+                      </div>
+                      <div className="flex flex-row items-center justify-between w-full pt-2 border-t border-gray-100">
+                        <Skeleton width={155} />
+                        <Skeleton width={80} />
+                      </div>
+                    </Card>
+                  ))
                 ) : isTransactionLogsError ? (
-                  <tr className="max-w-md">
-                    <td className="text-center" colSpan={5}>
-                      <Error
-                        handleRefetchCount={handleTransactionRefetchCount}
-                        text={"Unable to get transaction logs"}
-                        subtext={
-                          "Unable to get stock transaction logs. Please try again."
-                        }
-                      />
-                    </td>
-                  </tr>
+                  <Error
+                    handleRefetchCount={handleTransactionRefetchCount}
+                    text={"Unable to get transaction logs"}
+                    subtext={
+                      "Unable to get stock transaction logs. Please try again."
+                    }
+                  />
                 ) : transactionLogsData?.transactionLogs?.length === 0 ? (
-                  <tr className="max-w-md">
-                    <td className="text-center" colSpan={5}>
-                      <Empty
-                        text={"No transaction logs yet"}
-                        subtext={
-                          "No stock transaction logs yet. You can add by making transaction in (Pickup Request, Manual Intake, Redemption modules, or just press the stock out button to reduce "
-                        }
-                      />
-                    </td>
-                  </tr>
+                  <Empty
+                    text={"No transaction logs yet"}
+                    subtext={
+                      "No stock transaction logs yet. You can add by making transaction in (Pickup Request, Manual Intake, Redemption modules, or just press the stock out button to reduce "
+                    }
+                  />
+                ) : filteredTransactionLogs?.length === 0 ? (
+                  <Empty
+                    text={"No stock movements found"}
+                    subtext={
+                      "No stock movements match the selected material filter."
+                    }
+                  />
                 ) : (
-                  transactionLogsData?.transactionLogs?.map((row) => {
+                  filteredTransactionLogs?.map((row) => {
                     const { qty, label } = applyUnit(
                       row.quantity,
                       row.unit,
                       displayUnit,
                     );
+                    const { qty: totalQty, label: totalLabel } = applyUnit(
+                      row.currentTotal,
+                      row.unit,
+                      displayUnit,
+                    );
                     return (
-                      <tr
+                      <Card
                         key={row.id}
-                        className="text-start hover:bg-bg transition-all duration-150"
+                        className="flex flex-col items-start gap-3 shadow-none! new-border"
                       >
-                        <td className="p-4">
+                        <div className="flex flex-row items-center justify-between w-full">
                           <MaterialTag
-                            textOnly={true}
                             type={row?.material?.category?.name}
                             materialName={row?.material?.name}
                           />
-                        </td>
-                        <td className="p-4 font-semibold text-text-primary tabular-nums">
-                          {qty}
-                        </td>
-                        <td className="p-4 text-gray-400">{label}</td>
-                        <td className="p-4 text-gray-500 text-nowrap flex flex-row gap-1 items-center ">
-                          <p className=" capitalize">
-                            {row.source.split("_").join(" ").toLowerCase()}
-                          </p>
-                          <div
-                            className={`capitalize font-semibold rounded-2xl text-xs px-2.5 py-0.5  ${row.transactionType === "IN" ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"} flex flex-row gap-1`}
-                          >
-                            <p className="">
-                              {row.transactionType === "IN"
-                                ? "Stock in"
-                                : "Stock out"}
-                            </p>
+                          <div className="flex flex-row gap-1 items-center">
+                            <span className="text-xs text-gray-500 capitalize">
+                              {row.source.split("_").join(" ").toLowerCase()}
+                            </span>
+                            <div
+                              className={`capitalize font-medium rounded-2xl text-xs px-2.5 py-0.5  ${row.transactionType === "IN" ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"} flex flex-row gap-1`}
+                            >
+                              <p className="">
+                                {row.transactionType === "IN"
+                                  ? "Stock in"
+                                  : "Stock out"}
+                              </p>
+                            </div>
                           </div>
-                        </td>
-                        <td className="p-4 text-nowrap text-gray-400 text-xs">
-                          {formatDate(row.createdAt)}
-                        </td>
-                      </tr>
+                        </div>
+                        <div className="flex flex-row items-center justify-between w-full pt-2 border-t border-gray-100">
+                          <p className="text-xs text-gray-400">
+                            {formatDate(row.createdAt)}
+                          </p>
+                          <p className="text-sm font-bold text-text-primary tabular-nums">
+                            {qty}
+                            <span className="text-xs font-normal text-gray-400 ml-1">
+                              {label}
+                            </span>
+                          </p>
+                        </div>
+                        <div className="flex flex-row items-center justify-between w-full">
+                          <p className="text-xs text-gray-400">Current total</p>
+                          <p className="text-xs font-semibold text-text-primary tabular-nums">
+                            {totalQty}
+                            <span className="text-xs font-normal text-gray-400 ml-1">
+                              {totalLabel}
+                            </span>
+                          </p>
+                        </div>
+                      </Card>
                     );
                   })
                 )}
-              </tbody>
-            </table>
-          </Card>
-
-          {/* Mobile cards */}
-          <div className="flex md:hidden flex-col gap-2">
-            {isTransactionLogsLoading ? (
-              Array.from({ length: 5 }).map((_, index) => (
-                <Card
-                  key={index}
-                  className="flex flex-col items-start gap-3 shadow-none! new-border"
-                >
-                  <div className="flex flex-row items-center justify-between w-full">
-                    <Skeleton width={168} />
-                    <Skeleton width={100} />
-                  </div>
-                  <div className="flex flex-row items-center justify-between w-full pt-2 border-t border-gray-100">
-                    <Skeleton width={155} />
-                    <Skeleton width={80} />
-                  </div>
-                </Card>
-              ))
-            ) : isTransactionLogsError ? (
-              <Error
-                handleRefetchCount={handleTransactionRefetchCount}
-                text={"Unable to get transaction logs"}
-                subtext={
-                  "Unable to get stock transaction logs. Please try again."
-                }
-              />
-            ) : transactionLogsData?.transactionLogs?.length === 0 ? (
-              <Empty
-                text={"No transaction logs yet"}
-                subtext={
-                  "No stock transaction logs yet. You can add by making transaction in (Pickup Request, Manual Intake, Redemption modules, or just press the stock out button to reduce "
-                }
-              />
-            ) : (
-              transactionLogsData?.transactionLogs?.map((row) => {
-                const { qty, label } = applyUnit(
-                  row.quantity,
-                  row.unit,
-                  displayUnit,
-                );
-                return (
-                  <Card
-                    key={row.id}
-                    className="flex flex-col items-start gap-3 shadow-none! new-border"
-                  >
-                    <div className="flex flex-row items-center justify-between w-full">
-                      <MaterialTag
-                        type={row?.material?.category?.name}
-                        materialName={row?.material?.name}
-                      />
-                      <div className="flex flex-row gap-1 items-center">
-                        <span className="text-xs text-gray-500 capitalize">
-                          {row.source.split("_").join(" ").toLowerCase()}
-                        </span>
-                        <div
-                          className={`capitalize font-medium rounded-2xl text-xs px-2.5 py-0.5  ${row.transactionType === "IN" ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"} flex flex-row gap-1`}
-                        >
-                          <p className="">
-                            {row.transactionType === "IN"
-                              ? "Stock in"
-                              : "Stock out"}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex flex-row items-center justify-between w-full pt-2 border-t border-gray-100">
-                      <p className="text-xs text-gray-400">
-                        {formatDate(row.createdAt)}
-                      </p>
-                      <p className="text-sm font-bold text-text-primary tabular-nums">
-                        {qty}
-                        <span className="text-xs font-normal text-gray-400 ml-1">
-                          {label}
-                        </span>
-                      </p>
-                    </div>
-                  </Card>
-                );
-              })
-            )}
-          </div>
-        </section>
+              </div>
+            </section>
+          </>
+        )}
       </PageContent>
     </Page>
   );

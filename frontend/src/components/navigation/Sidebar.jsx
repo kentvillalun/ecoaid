@@ -77,13 +77,19 @@ export const Sidebar = () => {
       href: "/residents",
       solidIcon: UserIcon,
     },
+    {
+      icon: SettingsIcon,
+      label: "Settings",
+      href: "/settings",
+      solidIcon: Cog6ToothIcon,
+    },
   ];
 
   const managementItems = [
     {
       icon: MaterialStockIcon,
-      label: "Material Stock",
-      href: "/material-stock",
+      label: "MRF Inventory",
+      href: "/mrf-inventory",
       solidIcon: CubeIcon,
     },
     {
@@ -130,12 +136,6 @@ export const Sidebar = () => {
       label: "Reports",
       href: "/reports",
       solidIcon: ChartBarIcon,
-    },
-    {
-      icon: SettingsIcon,
-      label: "Settings",
-      href: "/settings",
-      solidIcon: Cog6ToothIcon,
     },
   ];
 

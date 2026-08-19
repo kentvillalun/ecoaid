@@ -4,10 +4,11 @@ import { getRankedLeaderboard } from "../utils/leaderboard.js";
 const getLeaderboardStats = async (req, res) => {
   try {
     const { barangayId } = req.user;
+    const { timeFrame } = req.query
 
     const [weightLeaderboard, pieceLeaderboard] = await Promise.all([
-      getRankedLeaderboard(barangayId, "KG"),
-      getRankedLeaderboard(barangayId, "PIECE"),
+      getRankedLeaderboard(barangayId, "KG", timeFrame),
+      getRankedLeaderboard(barangayId, "PIECE", timeFrame),
     ]);
 
     return res.status(200).json({
@@ -23,10 +24,11 @@ const getLeaderboardStats = async (req, res) => {
 const getResidentLeaderboardStats = async (req, res) => {
   try {
     const { barangayId, id } = req.user;
+    const { timeFrame } = req.query;
 
     const [weightLeaderboard, pieceLeaderboard] = await Promise.all([
-      getRankedLeaderboard(barangayId, "KG"),
-      getRankedLeaderboard(barangayId, "PIECE"),
+      getRankedLeaderboard(barangayId, "KG", timeFrame),
+      getRankedLeaderboard(barangayId, "PIECE", timeFrame),
     ]);
 
     return res.status(200).json({

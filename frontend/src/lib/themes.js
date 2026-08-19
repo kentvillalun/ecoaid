@@ -34,6 +34,20 @@ export const THEMES = {
     accentLight: "#FEE2E2",
     accentDark: "#5C1414"
   },
+    EARTH_BROWN: {
+    name: "Earth Brown",
+    accent: "#78350F",
+    accentHover: "#B45309",
+    accentLight: "#FEF3E2",
+    accentDark: "#4A2107",
+  },
+  SUNFLOWER_GOLD: {
+    name: "Sunflower Gold",
+    accent: "#A16207",
+    accentHover: "#EAB308",
+    accentLight: "#FEF9C3",
+    accentDark: "#713F12",
+  },
 };
 
 export const applyTheme = (themeKey) => {

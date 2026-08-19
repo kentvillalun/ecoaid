@@ -19,11 +19,21 @@ const inter = Inter({
   weight: ["400", "500", "600", "700"],
 });
 
+const STATUS_TABS = [
+  { key: ["ALL"], label: "All" },
+  { key: ["REQUESTED"], label: "Pending" },
+  { key: ["APPROVED"], label: "Approved" },
+  { key: ["IN_PROGRESS"], label: "In Progress" },
+  { key: ["COLLECTED"], label: "Collected" },
+  { key: ["REJECTED"], label: "Rejected" },
+  { key: ["CANCELLED", "EXPIRED"], label: "Closed" },
+];
+
 export default function CollectionRequests() {
   const [refetchCount, setRefetchCount] = useState(1);
   const url = `/api/pickup-requests/collection-requests`;
   const { isLoading, isError, error, data } = useFetch({ url, refetchCount });
-  const [currentTab, setCurrentTab] = useState("All");
+  const [currentTab, setCurrentTab] = useState(STATUS_TABS[0].key);
 
   const { updateStatus } = useUpdate();
   const [categoriesRefetchCount, setCategotiesRefetchCount] = useState(0);
@@ -70,18 +80,8 @@ export default function CollectionRequests() {
     }
   };
 
-  
-
-  const STATUS_TABS = [
-  { key: ["ALL"], label: "All" },
-  { key: ["REQUESTED"], label: "Pending" },
-  { key: ["APPROVED"], label: "Approved" },
-  { key: ["IN_PROGRESS"], label: "In Progress" },
-  { key: ["COLLECTED"], label: "Collected" },
-  { key: ["REJECTED"], label: "Rejected" },
-  { key: ["CANCELLED", "EXPIRED"], label: "Closed" },
-];
-
+  const activeTabConfig = STATUS_TABS.find((tab) => tab.key === currentTab);
+  const activeTabLabel = activeTabConfig?.label;
 
   const titles = {
     All: "All Requests",
@@ -114,6 +114,7 @@ export default function CollectionRequests() {
               currentTab={currentTab}
               setCurrentTab={setCurrentTab}
               data={data?.requests}
+              getItemValue={(item) => item.status}
             />
           </div>
           {pendingCount > 0 && (
@@ -126,16 +127,16 @@ export default function CollectionRequests() {
               tab to manage {pendingCount === 1 ? "it" : "them"}.
             </p>
           )}
-          {currentTab && (
+          {activeTabLabel && (
             <div className={`${inter.className}`}>
               <h2 className="font-semibold text-xl pb-2 pl-3 md:pl-0">
-                {titles[currentTab]}
+                {titles[activeTabLabel]}
               </h2>
 
               <div className="flex md:hidden flex-col gap-2">
                 <RequestCard
                   data={data?.requests}
-                  status={currentTab}
+                  status={activeTabLabel}
                   selectedIds={selectedApprovedRequests}
                   onToggleSelect={handleApprovedRequestSelect}
                   isLoading={isLoading}
@@ -148,7 +149,7 @@ export default function CollectionRequests() {
 
               <RequestTable
                 data={data?.requests}
-                status={currentTab}
+                status={activeTabLabel}
                 selectedIds={selectedApprovedRequests}
                 onToggleSelect={handleApprovedRequestSelect}
                 handleRefetchCount={handleRefetchCount}
@@ -161,7 +162,7 @@ export default function CollectionRequests() {
             </div>
           )}
         </div>
-        {currentTab === "Approved" && selectedApprovedRequests.length > 0 && (
+        {activeTabLabel === "Approved" && selectedApprovedRequests.length > 0 && (
           <div className="fixed bottom-6 left-4 right-4 z-20 md:left-auto md:right-6">
             <button
               className="w-full rounded-2xl gradient-button px-5 py-4 text-white shadow-lg transition-all duration-200 hover:cursor-pointer hover:opacity-90 md:w-auto"

@@ -30,6 +30,8 @@ const updateTheme = async (req, res) => {
       "SUNRISE_ORANGE",
       "ROYAL_PURPLE",
       "DEEP_MAROON",
+      "EARTH_BROWN",
+      "SUNFLOWER_GOLD"
     ];
 
     if (!themes.includes(themeAccent)) {

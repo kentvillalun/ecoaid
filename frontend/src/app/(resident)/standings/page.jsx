@@ -1,17 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Page } from "@/components/layout/Page";
 import { PageContent } from "@/components/layout/PageContent";
 import { ResidentHeader } from "@/components/navigation/ResidentHeader";
 import { Card } from "@/components/ui/Card";
 import { Empty } from "@/components/ui/Empty";
 import { Error } from "@/components/ui/Error";
+import { IconContainer } from "@/components/ui/IconContainer";
+import {
+  CalendarDaysIcon,
+  ChevronDownIcon,
+  TrophyIcon,
+} from "@heroicons/react/24/outline";
 import { useFetch } from "@/hooks/useFetch";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 
 const TYPES = ["By Kilogram", "By Piece"];
+const PERIODS = [
+  { key: "all", label: "All Time" },
+  { key: "weekly", label: "This Week" },
+  { key: "monthly", label: "This Month" },
+];
 
 const MEDAL_CONFIG = {
   1: {
@@ -39,16 +50,29 @@ const MEDAL_CONFIG = {
 
 export default function StandingsPage() {
   const [type, setType] = useState("By Kilogram");
+  const [period, setPeriod] = useState("all");
+  const [showPeriodDropdown, setShowPeriodDropdown] = useState(false);
+  const periodDropdownRef = useRef(null);
 
   const { data: userData } = useFetch({ url: "/api/resident/me" });
 
   const [refetchCount, setRefetchCount] = useState(0);
   const { data, isLoading, isError } = useFetch({
-    url: "/api/leaderboard/residents",
+    url: `/api/leaderboard/residents?timeFrame=${period}`,
     refetchCount,
   });
 
   const handleRefetchCount = () => setRefetchCount((prev) => prev + 1);
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (!periodDropdownRef?.current?.contains(e.target))
+        setShowPeriodDropdown(false);
+    };
+
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   const unitLabel = type === "By Kilogram" ? "kg" : "pcs";
   const leaderboard =
@@ -62,6 +86,24 @@ export default function StandingsPage() {
     <Page className="bg-bg!">
       <ResidentHeader title={"Standings"} className="shadow-none! bg-bg!" />
       <PageContent className="md:pl-3! gap-3!">
+        {/* Helper message */}
+        <Card className="shadow-none! new-border flex-row! items-center! gap-3">
+          <IconContainer
+            icon={<TrophyIcon className="w-5 stroke-accent" />}
+            className="rounded-full! p-2.5! shrink-0"
+            containerColor="var(--color-icon-bg)"
+          />
+          <div className="flex flex-col gap-0.5">
+            <p className="text-sm font-semibold text-text-primary">
+              Climb the standings
+            </p>
+            <p className="text-xs text-text-secondary">
+              Submit a pickup request and get your recyclables collected to
+              earn your spot on the leaderboard.
+            </p>
+          </div>
+        </Card>
+
         {!userData?.user?.isVerified ? (
           <div className="flex flex-col items-center text-center py-6 gap-1">
             <p className="text-sm text-dark font-medium">
@@ -73,21 +115,76 @@ export default function StandingsPage() {
           </div>
         ) : (
           <>
-            {/* Type Filter */}
-            <div className="flex flex-row gap-2 items-center flex-wrap">
-              {TYPES.map((t) => (
+            {/* Type + Period Filters */}
+            <div className="flex flex-row gap-2 items-center justify-between flex-wrap">
+              {/* Type Filter */}
+              <div className="flex flex-row gap-2 items-center flex-wrap">
+                {TYPES.map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setType(t)}
+                    className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all duration-150 border hover:cursor-pointer ${
+                      type === t
+                        ? "gradient-button text-white border-transparent"
+                        : "bg-surface text-text-secondary border-border"
+                    }`}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+
+              {/* Period Filter — desktop pills */}
+              <div className="hidden md:flex flex-row gap-2 items-center flex-wrap">
+                <div className="flex items-center gap-1.5 text-text-secondary">
+                  <CalendarDaysIcon className="w-4" />
+                </div>
+                {PERIODS.map((p) => (
+                  <button
+                    key={p.key}
+                    onClick={() => setPeriod(p.key)}
+                    className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all duration-150 hover:cursor-pointer border ${
+                      period === p.key
+                        ? "gradient-button text-white border-transparent"
+                        : "bg-surface text-text-secondary border-border"
+                    }`}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Period Filter — mobile dropdown */}
+              <div className="relative md:hidden" ref={periodDropdownRef}>
                 <button
-                  key={t}
-                  onClick={() => setType(t)}
-                  className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all duration-150 border hover:cursor-pointer ${
-                    type === t
-                      ? "gradient-button text-white border-transparent"
-                      : "bg-surface text-text-secondary border-border"
-                  }`}
+                  onClick={() => setShowPeriodDropdown((v) => !v)}
+                  className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium border bg-surface text-text-secondary border-border"
                 >
-                  {t}
+                  <CalendarDaysIcon className="w-4" />
+                  {PERIODS.find((p) => p.key === period)?.label}
+                  <ChevronDownIcon className="w-3.5" />
                 </button>
-              ))}
+                {showPeriodDropdown && (
+                  <div className="absolute right-0 top-9 z-40 flex flex-col items-start w-36 bg-surface rounded-lg new-border text-xs py-2">
+                    {PERIODS.map((p) => (
+                      <div
+                        key={p.key}
+                        onClick={() => {
+                          setPeriod(p.key);
+                          setShowPeriodDropdown(false);
+                        }}
+                        className={`px-3.5 py-1.5 w-full hover:cursor-pointer hover:bg-gray-50 ${
+                          period === p.key
+                            ? "text-accent font-semibold"
+                            : "text-text-secondary"
+                        }`}
+                      >
+                        {p.label}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Top 3 podium */}
@@ -109,14 +206,20 @@ export default function StandingsPage() {
                 <Error handleRefetchCount={handleRefetchCount} />
               </Card>
             ) : !topThree || topThree.length === 0 ? (
-              <Card className="shadow-none! new-border">
-                <Empty
-                  text="No rankings yet"
-                  subtext="No residents have logged contributions yet."
-                />
-              </Card>
+              <Empty
+                text="No rankings yet"
+                subtext="No residents have logged contributions yet."
+              />
             ) : (
-              <div className="grid grid-cols-3 gap-3">
+              <div
+                className={`grid gap-3 ${
+                  topThree.length === 1
+                    ? "grid-cols-1"
+                    : topThree.length === 2
+                      ? "grid-cols-2"
+                      : "grid-cols-3"
+                }`}
+              >
                 {[topThree[1], topThree[0], topThree[2]]
                   .filter(Boolean)
                   .map((resident) => {

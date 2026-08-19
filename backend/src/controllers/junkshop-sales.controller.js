@@ -52,6 +52,36 @@ const recordSale = async (req, res) => {
       };
     });
 
+    const stockSummary = await prisma.stockTransactionLog.groupBy({
+      where: {
+        barangayId,
+        materialId: { in: items.map((item) => item.materialId) },
+      },
+      by: ["materialId", "transactionType"],
+      _sum: { quantity: true },
+    });
+
+    const insufficientItems = saleItems.filter((item) => {
+      const inQty =
+        stockSummary.find(
+          (s) => s.materialId === item.materialId && s.transactionType === "IN",
+        )?._sum?.quantity ?? 0;
+      const outQty =
+        stockSummary.find(
+          (s) => s.materialId === item.materialId && s.transactionType === "OUT",
+        )?._sum?.quantity ?? 0;
+      const currentBalance = inQty - outQty;
+
+      return convertToKg(item.quantity, item.unit) > currentBalance;
+    });
+
+    if (insufficientItems.length > 0) {
+      return res.status(400).json({
+        error: "Current balance is not enough for deduction",
+        insufficientMaterials: insufficientItems.map((item) => item.materialId),
+      });
+    }
+
     await prisma.$transaction(async (tx) => {
       const sale = await tx.junkshopSale.create({
         data: {
@@ -105,6 +135,7 @@ const getJunkshopSales = async (req, res) => {
         id: true,
         junkshop: {
           select: {
+            id: true,
             name: true,
           },
         },

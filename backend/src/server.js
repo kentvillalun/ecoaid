@@ -12,7 +12,7 @@ import redemptionRoute from "./routes/redemption.route.js";
 import residentRoute from "./routes/resident.route.js";
 import materialRoute from "./routes/material.route.js";
 import manualIntakeRoute from "./routes/manual-intake.route.js";
-import materialStockRoute from "./routes/material-stock.route.js";
+import mrfInventoryRoute from "./routes/mrf-inventory.route.js";
 import junkshopSalesRoute from "./routes/junkshop-sales.route.js";
 import announcementRoute from "./routes/announcement.route.js";
 import leaderboardRoute from "./routes/leaderboard.route.js";
@@ -20,6 +20,7 @@ import programFundsRoute from "./routes/program-funds.route.js";
 import rewardInventoryRoute from "./routes/reward-inventory.route.js"
 import settingsRoute from "./routes/settings.route.js"
 import barangayRoute from "./routes/barangay.route.js"
+import notificationRoute from "./routes/notification.route.js"
  
 config();
 connectDB();
@@ -48,7 +49,7 @@ app.use("/redemption", redemptionRoute);
 app.use("/resident", residentRoute);
 app.use("/material", materialRoute);
 app.use("/manual-intake", manualIntakeRoute);
-app.use("/material-stock", materialStockRoute);
+app.use("/mrf-inventory", mrfInventoryRoute);
 app.use("/junkshop-sales", junkshopSalesRoute);
 app.use("/announcements", announcementRoute);
 app.use("/leaderboard", leaderboardRoute);
@@ -56,6 +57,7 @@ app.use("/program-funds", programFundsRoute);
 app.use("/rewards", rewardInventoryRoute);
 app.use("/settings", settingsRoute);
 app.use("/barangay", barangayRoute)
+app.use("/notifications", notificationRoute)
 
 const PORT = process.env.PORT || 5001;
 const server = app.listen(PORT, () => {

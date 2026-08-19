@@ -50,7 +50,7 @@ const listRequests = async (req, res) => {
     const expiryThreshold = new Date();
     expiryThreshold.setDate(expiryThreshold.getDate() - 2);
 
-    await prisma.pickupRequests.updateMany({
+    const expiringRequests = await prisma.pickupRequests.findMany({
       where: {
         status: "REQUESTED",
         barangayId,
@@ -58,58 +58,90 @@ const listRequests = async (req, res) => {
           lt: expiryThreshold,
         },
       },
-      data: {
-        status: "EXPIRED",
-        closedAt: new Date(),
+      select: {
+        id: true,
+        user: {
+          select: {
+            id: true,
+          },
+        },
       },
     });
 
-    const requests = await prisma.pickupRequests.findMany({
-      where: {
-        barangayId,
-      },
-      orderBy: {
-        createdAt: "asc",
-      },
-      select: {
-        user: {
-          select: {
-            firstName: true,
-            lastName: true,
-            sitio: { select: { name: true } },
-            phoneNumber: true,
+    const updatedRequests = await prisma.$transaction(async (tx) => {
+      await tx.pickupRequests.updateMany({
+        where: {
+          status: "REQUESTED",
+          barangayId,
+          createdAt: {
+            lt: expiryThreshold,
           },
         },
-        id: true,
-        createdAt: true,
-        material: {
-          select: {
-            id: true,
-            name: true,
-            category: {
-              select: {
-                name: true,
+        data: {
+          status: "EXPIRED",
+          closedAt: new Date(),
+        },
+      });
+
+      if (expiringRequests.length > 0) {
+        await tx.notifications.createMany({
+          data: expiringRequests.map((r) => ({
+            userId: r.user.id,
+            pickupRequestId: r.id,
+            type: "EXPIRED",
+          })),
+          skipDuplicates: true,
+        });
+      }
+
+      const requests = await tx.pickupRequests.findMany({
+        where: {
+          barangayId,
+        },
+        orderBy: {
+          createdAt: "asc",
+        },
+        select: {
+          user: {
+            select: {
+              firstName: true,
+              lastName: true,
+              sitio: { select: { name: true } },
+              phoneNumber: true,
+            },
+          },
+          id: true,
+          createdAt: true,
+          material: {
+            select: {
+              id: true,
+              name: true,
+              category: {
+                select: {
+                  name: true,
+                },
               },
             },
           },
+          estimatedValue: true,
+          estimatedUnit: true,
+          status: true,
+          photoUrl: true,
+          approvedAt: true,
+          rejectedAt: true,
+          isScheduled: true,
+          closedAt: true,
+          rejectionReason: true,
+          collectedAt: true,
+          isAssorted: true,
         },
-        estimatedValue: true,
-        estimatedUnit: true,
-        status: true,
-        photoUrl: true,
-        approvedAt: true,
-        rejectedAt: true,
-        isScheduled: true,
-        closedAt: true,
-        rejectionReason: true,
-        collectedAt: true,
-        isAssorted: true,
-      },
+      });
+      
+      return requests;
     });
-
     return res.status(200).json({
       message: "Fetching requests successful",
-      requests,
+      requests: updatedRequests,
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -123,18 +155,34 @@ const updateStatus = async (req, res) => {
     const { barangayId } = req.user;
 
     if (status === "APPROVED") {
-      await prisma.pickupRequests.update({
+      const request = await prisma.pickupRequests.update({
         where: { id },
         data: { status: "APPROVED", approvedAt: new Date() },
+      });
+
+      await prisma.notifications.create({
+        data: {
+          userId: request.userId,
+          pickupRequestId: id,
+          type: "APPROVED",
+        },
       });
 
       return res.status(200).json({ message: "Request Approved" });
     }
 
     if (status === "IN_PROGRESS") {
-      await prisma.pickupRequests.update({
+      const request = await prisma.pickupRequests.update({
         where: { id },
         data: { isScheduled: true, status: "IN_PROGRESS" },
+      });
+
+      await prisma.notifications.create({
+        data: {
+          userId: request.userId,
+          pickupRequestId: id,
+          type: "IN_PROGRESS",
+        },
       });
 
       return res.status(200).json({ message: "Request Scheduled " });
@@ -181,6 +229,14 @@ const updateStatus = async (req, res) => {
           },
         });
 
+        await tx.notifications.create({
+          data: {
+            userId,
+            pickupRequestId: id,
+            type: "COLLECTED",
+          },
+        });
+
         await tx.user.update({
           where: { id: userId },
           data: {
@@ -199,12 +255,20 @@ const updateStatus = async (req, res) => {
           .json({ error: "Missing rejection reason field" });
       }
 
-      await prisma.pickupRequests.update({
+      const request = await prisma.pickupRequests.update({
         where: { id },
         data: {
           status: "REJECTED",
           rejectedAt: new Date(),
           rejectionReason: rejectionReason,
+        },
+      });
+
+      await prisma.notifications.create({
+        data: {
+          userId: request.userId,
+          pickupRequestId: request.id,
+          type: "REJECTED",
         },
       });
 

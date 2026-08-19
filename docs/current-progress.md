@@ -160,17 +160,35 @@
 
 ---
 
+## Completed (continued — Aug 19, 2026 update)
+
+- **Settings — Theme Picker shipped, then extended** — `Theme` enum grew from 5 to 7 presets (`EARTH_BROWN`, `SUNFLOWER_GOLD` added on top of Forest Green/Ocean Teal/Sunrise Orange/Royal Purple/Deep Maroon); `settings.controller.js` validation and `frontend/src/lib/themes.js` updated to match
+- **Settings — Add Material** shipped (add-only, category dropdown fetched live, unit dropdown hardcoded against the fixed `Unit` enum); `settings/page.jsx` split into `JunkshopsSection.jsx`/`MaterialsSection.jsx`/`AppearanceSection.jsx`
+- **Material Stock renamed to MRF Inventory** — `material-stock` controller/route/page deleted, replaced 1:1 by `mrf-inventory.controller.js`/`route.js`/`app/(barangay)/mrf-inventory/`; `getStockSummary`/`recordStockOut` logic unchanged, but `getTransactionLogs` now computes a running per-material balance (`currentTotal`) chronologically instead of just returning a flat log list; mounted at `/mrf-inventory`; Sidebar and `proxy.js` updated
+- **Notifications module built end-to-end** — new `Notifications` model (`userId`, optional `pickupRequestId`, `type` reusing the `Status` enum, `isRead`, `createdAt`); `User.lastSeenAnnouncementAt` added; `notification.controller.js` — `getNotifications` (lists + auto-marks-read + prunes read notifications older than 30 days + computes `hasUnreadAnnouncements`) and `getUnreadStatus` (badge check); mounted at `/notifications` (resident-only, no POST — notifications are a side effect of pickup-request status transitions, written by `pickup-request.controller.js`'s `listRequests`/`updateStatus` on APPROVED/IN_PROGRESS/COLLECTED/REJECTED/EXPIRED). Frontend: `NotificationBell.jsx` (polls unread-status, badge dot) replaces the old dead bell in `ResidentHeader`; new `/notifications` page; `getNotificationMessage()` helper added to `statusStyles.js`
+- **Residents module (barangay-side) built** — new `barangay.controller.js`/`route.js` (`GET /barangay/sitio`); `EditResidentModal.jsx` lets staff edit a resident's name/phone/sitio/verified status from `/residents`; `resident.controller.js` gained `editResident` (`PATCH /resident/:id`); `GET /resident/me` now also returns `isVerified`
+- **Resident Standings page built** (`/standings`) — top-3 podium + rank list, By Kilogram/By Piece type filter, gated behind `isVerified`. This session added a timeframe filter (mirrors the barangay Leaderboard page's All Time/This Week/This Month pattern), corrected the podium grid to 1/2/3 columns depending on how many residents are actually ranked (was hardcoded to 3), and added a helper message card ("Climb the standings...")
+- **Barangay Leaderboard timeframe filter** — `getRankedLeaderboard` gained `timeFrame` support (`weekly`/`monthly` cutoffs, else all-time); `leaderboard/page.jsx` got a desktop-pill + mobile-dropdown period filter UI; `getResidentLeaderboardStats` (used by the resident Standings page above) updated this session to forward `timeFrame` the same way
+- **Collection Request overhaul ("from adviser suggestion")** — `PickupRequests` gained `barangayId` (direct FK, requests now barangay-scoped) and `closedAt`; `Status` enum gained `CANCELLED`/`EXPIRED`; `listRequests` lazily auto-expires `REQUESTED` requests older than 2 days on every fetch (pull-based, no cron job) and writes matching `Notifications` rows; `RequestCard`/`RequestTable`/`HoverReveal` overhauled to render the new statuses; `StatusChip` gained its first-ever counts feature in this commit
+- **Resident request cancellation** — `PATCH /pickup-requests/:id/cancel` (ownership + `REQUESTED`-only guard via `updateMany`, rejects otherwise); `CancelRequestAction.jsx` confirmation modal wired into `/requests/[id]`
+- **`ResidentRequestCard` shared component** — new `components/requests/ResidentRequestCard.jsx` with `compact` (Home "Recent Requests") and `list` (`/requests`) variants, replacing near-duplicate inline card JSX that previously lived separately in each page
+- **Redemption transaction breakdown UI** — `TransactionTable.jsx` now shows up to 2 material tags + "+N more" with a `HoverPortal` popover breaking down every line item (material/amount/value/total in ₱ or pts); `getTransactions` selects `material.defaultUnit`
+- **`StatusChip` generalized + bug fixes** (this session) — replaced the hardcoded `from="collection-requests"|"program-funds"` branching (added in the collection-request-overhaul commit above) with a generic `getItemValue={(item) => item.field}` prop, so any page can wire it up without editing StatusChip's own source; fixed the Announcements page's category filter tabs always showing empty counts (`data` prop was never passed to `StatusChip`, and `CATEGORY_TABS` used bare-string keys instead of the array-key convention used elsewhere); fixed `collection-requests/page.jsx`'s `STATUS_TABS` being recreated every render (moved to module scope) and its initial tab state being a hardcoded string instead of `STATUS_TABS[0].key`
+- **`DropdownFilter` shared component** (this session) — new `components/ui/DropdownFilter.jsx`, extracted from the Redemption Management page's existing program filter; Junkshop Sales' Sales History table gained a junkshop filter dropdown (lists every junkshop on file with a correct sales count, including 0, plus a junkshop-specific empty state) built on the same component; fixed a backend bug where `getJunkshopSales` never selected `junkshop.id`, which silently broke the new filter's per-junkshop grouping
+
+---
+
 ## In Progress
 
-- **Reports module** — still a static UI scaffold with hardcoded mock data, not linked in the barangay sidebar. Needs discovery with actual barangay staff (Secretary/Treasurer) on exact fields/breakdowns before backend design, since the real workflow today is manual Excel compilation from multiple sources.
-- **Settings page** — Add Junkshop modal done; next up is a curated theme-picker feature (preset palette options, not full user color control) to preserve brand identity while giving barangays some customization.
+- **Reports module** — `reports.controller.js` exists but is not functional yet: only the `"mrf-inventory"` report type has a `case` implemented, and even that branch never sends a response (missing `res.json(...)`, so a request would hang); the other three declared types (`collection-intake`, `redemption`, `program-funds`) aren't implemented; there's no `reports.route.js` and nothing mounted in `server.js`, so the controller isn't reachable yet. Frontend page is still the old static scaffold. Still needs discovery with actual barangay staff (Secretary/Treasurer) on exact fields/breakdowns before finishing the aggregation logic.
+- **Super Admin module configuration** — scope confirmed (full UI required, not a seed-file shortcut) but not started; barangay `has___` feature flags exist on the schema but nothing manages or reads them yet.
 
 ---
 
 ## Next Steps (priority order)
 
-1. Settings — theme picker (curated palette presets)
-2. Reports module — gather real requirements from barangay staff first, then design aggregation approach (Material Stock, Junkshop Sales, Redemption, Program Funds) and likely Excel export
+1. Reports module — finish the backend (`reports.controller.js` is missing a response on its one implemented case, 3 of 4 report types, and has no route file/mount), ideally after confirming real field/breakdown requirements with barangay staff
+2. Super Admin module configuration — full UI to toggle `has___` feature flags per barangay, plus conditional rendering on the barangay-facing side (Sidebar, dashboard, etc.) so a barangay without a flag doesn't see that module at all
 3. Technical debt batch:
    - Archive pattern (soft delete) — panel forbids hard deletion
    - Rate limiting
@@ -195,5 +213,6 @@
 - Override pickups use request lifecycle
 - Batch collection moves approved requests into IN_PROGRESS
 - Redemption is separate from intake
-- Material Stock is read-only and derived from intake transactions
-- Material Stock currently nets only Manual Intake (`IN`) and manual stock-out adjustments (`OUT`); it does not yet include pickup-request collections or redemption transactions
+- MRF Inventory (renamed from Material Stock) is read-only and derived from intake transactions
+- MRF Inventory currently nets only Manual Intake (`IN`) and manual stock-out adjustments (`OUT`); it does not yet include pickup-request collections or redemption transactions
+- Notifications are created server-side only, as a side effect of pickup-request status transitions (APPROVED/IN_PROGRESS/COLLECTED/REJECTED/EXPIRED) — there is no endpoint for a client to create one directly

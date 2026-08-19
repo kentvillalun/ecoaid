@@ -9,6 +9,7 @@ import { BarangayHeaderCard } from "@/components/ui/BarangayHeaderCard";
 import { Card } from "@/components/ui/Card";
 import { LabelValue } from "@/components/ui/LabelValue";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import { DropdownFilter } from "@/components/ui/DropdownFilter";
 import { GiftIcon, Bars3BottomLeftIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { createPortal } from "react-dom";
@@ -24,11 +25,14 @@ import { Empty } from "@/components/ui/Empty";
 export default function RedemptionProgramPage() {
   const [isProgramModalOpen, setIsProgramModalOpen] = useState(false);
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+  const [programFilter, setProgramFilter] = useState("ALL");
   const url = "/api/redemption/programs";
   const [refetchCount, setRefetchCount] = useState(0);
   const [transactionRefetchCount, setTransactionRefetchCount] = useState(0);
   const { data, isError, isLoading } = useFetch({ url, refetchCount });
   const router = useRouter();
+
+  const activePrograms = data?.programs?.filter((p) => p.isActive) ?? [];
 
   const transactionUrl = "/api/redemption/transactions";
   const {
@@ -43,6 +47,28 @@ export default function RedemptionProgramPage() {
   const { data: currentBarangayData } = useFetch({
     url: "/api/auth/barangay/me",
   });
+
+  const filteredTransactions =
+    programFilter === "ALL"
+      ? transactionData?.transactions
+      : transactionData?.transactions?.filter(
+          (t) => t?.program?.id === programFilter,
+        );
+
+  const programFilterOptions = [
+    {
+      value: "ALL",
+      label: "All Programs",
+      count: transactionData?.transactions?.length ?? 0,
+    },
+    ...activePrograms.map((p) => ({
+      value: p.id,
+      label: p.name,
+      count:
+        transactionData?.transactions?.filter((t) => t?.program?.id === p.id)
+          .length ?? 0,
+    })),
+  ];
 
   const handleTransactionRefetch = () =>
     setTransactionRefetchCount((prev) => prev + 1);
@@ -128,7 +154,7 @@ export default function RedemptionProgramPage() {
                       value={`₱ ${p.allotedBudget.toLocaleString()}`}
                     />
                     <LabelValue
-                    className="text-nowrap"
+                      className="text-nowrap"
                       name="Redemption Mode"
                       value={p.isCashMode ? "Cash" : "Points"}
                     />
@@ -164,14 +190,22 @@ export default function RedemptionProgramPage() {
             buttonLabel={"Record transaction"}
             onAction={() => setIsTransactionModalOpen(true)}
           />
+
+          <DropdownFilter
+            id="programFilter"
+            options={programFilterOptions}
+            value={programFilter}
+            onChange={setProgramFilter}
+          />
+
           <TransactionTable
-            data={transactionData}
+            data={{ transactions: filteredTransactions }}
             isLoading={transactionIsLoading}
             isError={transactionIsError}
             handleRefetchCount={handleTransactionRefetch}
           />
           <TransactionCard
-            data={transactionData}
+            data={{ transactions: filteredTransactions }}
             isLoading={transactionIsLoading}
             isError={transactionIsError}
             handleRefetchCount={handleTransactionRefetch}

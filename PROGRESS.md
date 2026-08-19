@@ -1069,3 +1069,167 @@ the priority unblock. Groupmates are working dataset capture in
 parallel, independently. Super Admin intentionally not being worked on
 right now despite scope being resolved — noted and parked, not
 forgotten.
+
+## Update — Aug 19, 2026
+
+A lot landed between the last entry above (Aug 7) and now — some already
+committed (`e0829a7` Resident overhaul, `141cf65` Collection Request
+overhaul, `5d18e9a` cancel button, `3f36a69` requests-page fix), some
+still sitting uncommitted. None of it was individually logged here as it
+happened, so this is a retroactive audit-based catch-up entry rather than
+a same-day session note. Ran a Claude Code audit of `git log` + full
+`git diff` across both `frontend/` and `backend/` to reconstruct what
+actually shipped, since the docs had drifted well behind the real
+codebase state.
+
+**Material Stock → MRF Inventory (rename, plus one real improvement).**
+`material-stock.controller.js`/`route.js` and the `/material-stock` page
+deleted; replaced 1:1 by `mrf-inventory.controller.js`/`route.js`/
+`/mrf-inventory`. `getStockSummary` and `recordStockOut` are unchanged
+logic. `getTransactionLogs` gained a genuine upgrade: it now computes a
+running per-material balance (`currentTotal`) chronologically instead of
+just returning a flat ordered log — the old version made you eyeball the
+running total yourself. Sidebar label/href and `proxy.js` matcher updated
+to match.
+
+**Notifications module — built end-to-end, no session log existed for
+this.** New `Notifications` model: `userId` FK, optional
+`pickupRequestId` FK (`SET NULL` on delete), `type` reuses the
+pickup-request `Status` enum rather than inventing a separate one,
+`isRead`, `createdAt`. `User` gained `lastSeenAnnouncementAt` for
+tracking unread announcements separately from unread pickup-status
+notifications. `getNotifications` does more than list — it auto-marks
+everything read on fetch, prunes read notifications older than 30 days
+(no separate cleanup job needed), and computes `hasUnreadAnnouncements`
+by comparing the latest `Announcement.createdAt` against the user's
+`lastSeenAnnouncementAt`, updating that timestamp each call.
+`getUnreadStatus` is a separate lightweight endpoint with no side
+effects, meant for polling a badge dot without triggering the
+mark-as-read behavior of the full list endpoint. Deliberately no POST
+endpoint — notifications are never created directly by a client, only as
+a side effect of `pickup-request.controller.js` transitions (APPROVED,
+IN_PROGRESS, COLLECTED, REJECTED, and bulk on auto-EXPIRE). Frontend:
+`NotificationBell.jsx` replaces what the audit found was actually a
+**dead** bell icon in `ResidentHeader.jsx` — it had pointed at a
+nonexistent `/updates` unread-tracking scheme using localStorage that
+never actually got wired to anything real. New bell polls
+`/notifications/unread-status`, shows a badge dot, links to the new
+`/notifications` list page. Worth flagging: this means notifications as
+a feature effectively didn't exist in any working form before this
+batch, despite the UI element having been present.
+
+**Resident overhaul (`e0829a7`).** Residents module born on the
+barangay side: `barangay.controller.js`/`route.js` (`GET
+/barangay/sitio`) feeds a new `EditResidentModal.jsx` used from
+`/residents` to edit a resident's name/phone/sitio/verified status
+in-place. `resident.controller.js` gained `editResident`
+(`PATCH /resident/:id`) — when `sitioId` changes it re-derives and
+writes the denormalized `purok` name too, validating the sitio exists
+first. `GET /resident/me` now also returns `isVerified`, which is what
+gates the "Standings are locked" message on the new `/standings` page
+(also born in this commit). `community`, `home`, and `updates` pages
+reworked in the same commit (not fully re-diffed line by line during
+this audit — flagging as a known gap, not a false "verified clean"
+claim).
+
+**Collection Request overhaul (`141cf65`, "from adviser suggestion").**
+Real schema changes: `PickupRequests` gained `barangayId` as a direct FK
+(requests are now barangay-scoped independent of walking through the
+requesting user's barangay) and `closedAt`; `Status` enum gained
+`CANCELLED` and `EXPIRED`. `listRequests` now does a lazy/pull-based
+auto-expiry: every list fetch scans for `REQUESTED` requests older than
+2 days and bulk-transitions them to `EXPIRED` — no cron job, expiry only
+actually happens the next time someone loads the list. This is also
+where `StatusChip` got its first-ever counts feature (previously had an
+unused `tab?.count` prop nobody passed) — this session's `getItemValue`
+generalization (below) builds directly on top of that first version.
+`RequestCard`/`RequestTable`/`HoverReveal` overhauled for the new
+statuses (scope not fully re-diffed line by line — same caveat as
+above).
+
+**Resident-side follow-ups.** `5d18e9a` added resident-initiated request
+cancellation end-to-end: `PATCH /pickup-requests/:id/cancel`, guarded by
+`updateMany` (only succeeds if the request still belongs to the
+requesting user AND is still `REQUESTED`, checked via `result.count ===
+0` rather than a separate existence query first), plus a
+`CancelRequestAction.jsx` confirmation modal ("this action cannot be
+undone") wired into `/requests/[id]`. `3f36a69` was a small follow-up fix
+(tab spacing, confirmed the History tab already correctly includes
+`EXPIRED`/`CANCELLED` alongside `COLLECTED`/`REJECTED`). Uncommitted on
+top of both: a new `ResidentRequestCard.jsx` shared component
+(`compact`/`list` variants) that de-duplicates what had been near-
+identical inline card JSX separately maintained in `home/page.jsx` and
+`requests/page.jsx`.
+
+**Reports — first backend step exists, but it doesn't work yet.**
+Correcting the record here: the last progress update (and, until this
+audit, the current-progress doc) described Reports as "still a static UI
+scaffold, not linked in the sidebar." That's now only half true.
+`reports.controller.js` exists (born in the collection-request-overhaul
+commit) with a `switch(type)` intended to cover four report types
+(`mrf-inventory`, `collection-intake`, `redemption`, `program-funds`),
+but only `mrf-inventory` has a `case` implemented, and even that one
+**never calls `res.json(...)`** — any request to it would just hang.
+There's no `reports.route.js` and nothing mounted in `server.js`, so
+none of this is reachable over HTTP yet regardless. Good to know before
+the stakeholder conversation happens: the backend design work has
+technically started, just not in a usable state, so "still just a mock
+UI, nothing built" would be an inaccurate thing to tell the adviser now.
+
+**Small stuff, same batch:** `redemption.controller.js`'s
+`getTransactions` now selects `material.defaultUnit`; `TransactionTable`
+grew a hover-breakdown popover for multi-material transactions (same
+`HoverPortal` pattern as Junkshop Sales/Program Funds). Two new theme
+presets, `EARTH_BROWN` and `SUNFLOWER_GOLD`, added to the `Theme` enum
+and `themes.js` — 7 presets total now, no design-decision write-up
+happened for these two the way the original 5 got (worth doing if there
+was actual reasoning behind the picks, otherwise just flagging that the
+docs don't currently explain *why* these two).
+
+**This session's own work, on top of all of the above:**
+- `StatusChip.jsx` generalized — the `from="collection-requests"|
+  "program-funds"` branching added in the collection-request-overhaul
+  commit doesn't scale (every new consumer needs a source edit), so it's
+  now driven entirely by a `getItemValue={(item) => item.field}` prop
+  passed in by the consuming page, with tab identity/comparison always
+  via `tab.key` (array) reference equality. Real bug fixed along the
+  way: the Announcements page's category filter always showed empty
+  counts ("General ()") because `data` was never passed to `StatusChip`
+  at all, compounded by `CATEGORY_TABS` using bare-string keys instead
+  of the array-key convention every other consumer uses. Also fixed:
+  `collection-requests/page.jsx`'s `STATUS_TABS` was declared inside the
+  component body (a fresh array every render) with its initial tab state
+  hardcoded to the string `"All"` instead of `STATUS_TABS[0].key` —
+  cosmetically harmless there since that page compares tabs by label
+  string not array reference, but inconsistent with the pattern
+  everywhere else and worth normalizing regardless.
+- New shared `components/ui/DropdownFilter.jsx` — extracted from the
+  Redemption Management page's existing (undocumented until this audit)
+  program filter dropdown. Junkshop Sales' Sales History table got a new
+  junkshop filter using the same component, sourced from *all* junkshops
+  on file (not just ones with recorded sales) so a junkshop with zero
+  sales still shows up as "(0)" instead of silently not appearing. Fixed
+  a real backend bug surfaced while building this: `getJunkshopSales`
+  never selected `junkshop.id` in its Prisma query (only `name`), which
+  silently broke the filter's group-by-id logic — every sale's
+  `junkshop.id` was `undefined`.
+- Resident `/standings` page: added a timeframe filter mirroring the
+  barangay Leaderboard's already-existing (uncommitted, pre-dating this
+  session) period-filter pattern; `getResidentLeaderboardStats` updated
+  to forward `timeFrame` to `getRankedLeaderboard` the same way the
+  barangay endpoint already did. Fixed the top-3 podium grid, which was
+  hardcoded to `grid-cols-3` even when fewer than 3 residents are
+  ranked — now 1/2/3 columns depending on actual count, matching the
+  barangay Leaderboard page's existing (correct) implementation. Added a
+  helper message card at the top of the page.
+
+**Known gaps in this catch-up entry itself** (flagging rather than
+glossing over): the audit didn't line-by-line re-diff `RequestCard.jsx`,
+`RequestTable.jsx`, `HoverReveal.jsx` (collection-request overhaul), or
+`residents/page.jsx`/`community/page.jsx`/`home/page.jsx`/`updates/page.jsx`
+(resident overhaul) — file-level scope is accurate, but exact functional
+detail inside those files isn't independently confirmed here. The
+`frontend/src/app/(barangay)/mrf-inventory/` page itself also wasn't
+opened (assumed to mirror the old material-stock page given the
+controller is byte-identical, but not verified). Worth a closer pass
+next time any of those files are touched.

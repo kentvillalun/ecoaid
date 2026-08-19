@@ -70,6 +70,7 @@ const getTransactionLogs = async (req, res) => {
       where: { barangayId },
       select: {
         id: true,
+        materialId: true,
         material: {
           select: {
             name: true,
@@ -87,13 +88,31 @@ const getTransactionLogs = async (req, res) => {
         transactionType: true,
       },
       orderBy: {
-        createdAt: 'desc'
+        createdAt: 'asc'
       }
     });
 
+    // Running balance per material, applied in chronological order, so each
+    // row can carry the balance as of that transaction (currentTotal).
+    const runningBalances = {};
+
+    const transactionLogsWithRunningTotal = transactionLogs.map((log) => {
+      const balanceBefore = runningBalances[log.materialId] ?? 0;
+      const balanceAfter =
+        log.transactionType === "IN"
+          ? balanceBefore + log.quantity
+          : balanceBefore - log.quantity;
+
+      runningBalances[log.materialId] = balanceAfter;
+
+      return { ...log, currentTotal: balanceAfter };
+    });
+
+    transactionLogsWithRunningTotal.reverse();
+
     return res.status(200).json({
       message: "Fetching stock transaction logs success",
-      transactionLogs,
+      transactionLogs: transactionLogsWithRunningTotal,
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });

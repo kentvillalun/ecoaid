@@ -16,12 +16,12 @@ import {
   ChevronRightIcon,
 } from "@heroicons/react/24/outline";
 import { MaterialTag } from "@/components/ui/MaterialTag";
-import { StatusBadge } from "@/components/ui/StatusBadge";
-import { formatDate } from "@/lib/formatDate";
 import { Error } from "@/components/ui/Error";
 import { Empty } from "@/components/ui/Empty";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
+import { NotificationBell } from "@/components/navigation/NotificationBell";
+import { ResidentRequestCard } from "@/components/requests/ResidentRequestCard";
 
 export default function HomePage() {
   const [refetchCount, setRefetchCount] = useState(0);
@@ -63,9 +63,7 @@ export default function HomePage() {
               loading={"eager"}
             />
           </div>
-          {/* <Link href={"/announcements"} className="bg-white rounded-full p-2" style={{ border: "0.5px solid #e5e7eb"}}>
-            <BellIcon className="w-5 h-5" />
-          </Link> */}
+          <NotificationBell />
         </div>
       </header>
 
@@ -223,26 +221,27 @@ export default function HomePage() {
           </div>
           <div className="flex flex-col gap-3">
             {requestLoading ? (
-              Array.from({ length: 3 }).map((_, index) => (
+              Array.from({ length: 1 }).map((_, index) => (
                 <Card
-                  className={`flex flex-col items-start gap-3 transition-all hover:cursor-pointer hover:-translate-y-0.5 duration-200 ease-in-out new-border shadow-none`}
+                  className="flex-col! items-start! gap-3 transition-all hover:cursor-pointer hover:-translate-y-0.5 duration-200 ease-in-out new-border shadow-none"
                   key={index}
                 >
                   {/* Top row */}
                   <div className="flex flex-row justify-between w-full">
                     <div className="flex flex-col gap-0.5">
-                      <Skeleton width={80} />
-                      <Skeleton width={130} />
-                      <Skeleton width={150} />
+                      <Skeleton width={155} />
+                      <Skeleton width={160} />
                     </div>
                     <div className="flex flex-col items-end gap-2">
-                      <Skeleton width={120} />
+                      <Skeleton width={85} />
+                  
                     </div>
                   </div>
 
                   {/* Footer row */}
                   <div className="flex flex-row items-end justify-end w-full pt-2 border-t border-gray-100">
-                    <Skeleton width={50} />
+                      <Skeleton width={53} />
+                    
                   </div>
                 </Card>
               ))
@@ -260,50 +259,7 @@ export default function HomePage() {
               />
             ) : (
               requestData?.requests?.map((r) => (
-                <Card
-                  className={`flex flex-col items-start gap-3 transition-all hover:cursor-pointer hover:-translate-y-0.5 duration-200 ease-in-out new-border shadow-none`}
-                  key={r.id}
-                  handleClick={() => router.push(`/requests/${r.id}`)}
-                >
-                  {/* Top row */}
-                  <div className="flex flex-row justify-between w-full">
-                    <div className="flex flex-col gap-0.5">
-                      <h3 className="font-semibold text-text-primary">
-                        {/* {r?.isAssorted ? "Assorted Request" : r?.material?.name} */}
-                        <MaterialTag
-                          type={r?.material?.category?.name}
-                          materialName={r?.material?.name}
-                          textOnly={true}
-                          className="text-sm"
-                        />
-                      </h3>
-                     
-                      <p className="text-xs text-gray-400">
-                        {formatDate(r.createdAt)}
-                      </p>
-                    </div>
-                    <div className="flex flex-col items-end gap-2">
-                      <StatusBadge type={r.status} />
-                      {/* <MaterialTag
-                        type={
-                          r?.isAssorted === true
-                            ? "Assorted"
-                            : r?.material?.category?.name
-                        }
-                      /> */}
-                    </div>
-                  </div>
-
-                  {/* Footer row */}
-                  <div className="flex flex-row items-end justify-end w-full pt-2 border-t border-gray-100">
-                    <p className="text-xs text-gray-400">
-                      Est. {r.estimatedValue}{" "}
-                      <span className="lowercase">
-                        {r.estimatedUnit === "PIECE" ? "pcs" : r.estimatedUnit}
-                      </span>
-                    </p>
-                  </div>
-                </Card>
+                <ResidentRequestCard key={r.id} request={r} variant="compact" />
               ))
             )}
           </div>

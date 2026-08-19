@@ -336,6 +336,7 @@ const getTransactions = async (req, res) => {
                 material: {
                   select: {
                     name: true,
+                    defaultUnit: true,
                     category: {
                       select: {
                         name: true,

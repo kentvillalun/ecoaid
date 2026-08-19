@@ -30,7 +30,12 @@ const inter = Inter({
 });
 
 const TYPES = ["By Kilogram", "By Piece"];
-const PERIODS = ["All Time", "This Month", "This Week"];
+const PERIODS = [
+  { key: "all", label: "All Time" }, 
+  { key: "weekly", label: "This Week"},
+  { key: "monthly", label: "This Month"}
+];
+
 
 const TABLE_HEADERS = ["Rank", "Resident", "Sitio", "Contribution"];
 
@@ -72,7 +77,7 @@ export default function LeaderboardPage() {
 
   const [refetchCount, setRefetchCount] = useState(0);
   const { data, isLoading, isError } = useFetch({
-    url: "/api/leaderboard",
+    url: `/api/leaderboard?timeFrame=${period}`,
     refetchCount,
   });
 
@@ -204,15 +209,15 @@ export default function LeaderboardPage() {
               </div>
               {PERIODS.map((p) => (
                 <button
-                  key={p}
-                  onClick={() => setPeriod(p)}
+                  key={p.key}
+                  onClick={() => setPeriod(p.key)}
                   className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all duration-150 hover:cursor-pointer border ${
-                    period === p
+                    period === p.key
                       ? "gradient-button text-white border-transparent"
                       : "bg-surface text-text-secondary border-border hover:border-border "
                   }`}
                 >
-                  {p}
+                  {p.label}
                 </button>
               ))}
             </div>
@@ -221,7 +226,7 @@ export default function LeaderboardPage() {
             <div className="relative md:hidden" ref={periodDropdownRef}>
               <button
                 onClick={() => setShowPeriodDropdown((v) => !v)}
-                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium border bg-surface text-text-secondary border-border"
+                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium border bg-surface text-text-secondary border-border capitalize"
               >
                 <CalendarDaysIcon className="w-4" />
                 {period}
@@ -231,18 +236,18 @@ export default function LeaderboardPage() {
                 <div className="absolute right-0 top-9 z-40 flex flex-col items-start w-36 bg-surface rounded-lg new-border text-xs py-2">
                   {PERIODS.map((p) => (
                     <div
-                      key={p}
+                      key={p.key}
                       onClick={() => {
-                        setPeriod(p);
+                        setPeriod(p.key);
                         setShowPeriodDropdown(false);
                       }}
                       className={`px-3.5 py-1.5 w-full hover:cursor-pointer hover:bg-gray-50 ${
-                        period === p
+                        period === p.key
                           ? "text-accent font-semibold"
                           : "text-text-secondary"
                       }`}
                     >
-                      {p}
+                      {p.label}
                     </div>
                   ))}
                 </div>
@@ -270,7 +275,7 @@ export default function LeaderboardPage() {
               <Error handleRefetchCount={handleRefetchCount} />
             </Card>
           ) : !topThree || topThree.length === 0 ? (
-            <Card className="shadow-none! new-border">
+            <Card className="shadow-none! new-border grid grid-cols-1">
               <Empty
                 text="No rankings yet"
                 subtext="No residents have logged contributions for this filter yet."

@@ -48,6 +48,8 @@ enum Theme {
   SUNRISE_ORANGE
   ROYAL_PURPLE
   DEEP_MAROON
+  EARTH_BROWN
+  SUNFLOWER_GOLD
 }
 
 
@@ -148,6 +150,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  lastSeenAnnouncementAt DateTime?
+
   pickupRequest PickupRequests[]
   manualIntakeTransaction ManualIntakeTransaction[] @relation("ResidentIntakes")
   collectedIntakeTransaction ManualIntakeTransaction[] @relation("CollectorIntakes")
@@ -156,6 +160,7 @@ model User {
   announcement Announcement[]
   programExpense ProgramExpense[]
   rewardReleases RewardRelease[]
+  notification Notifications[]
   
   @@index([barangayId])
   @@index([sitioId])
@@ -195,6 +200,7 @@ model PickupRequests {
 
   collectionItems CollectionItem[]
   stockTransactionLog StockTransactionLog[]
+  notification Notifications[]
 }
 
 model Category {
@@ -594,4 +600,20 @@ model Beneficiary {
 
   redemptionTransaction RedemptionTransaction[]
   rewardReleases RewardRelease[]
+}
+
+model Notifications {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
+
+  userId String @db.Uuid()
+  user User @relation(fields: [userId], references: [id])
+
+  pickupRequestId String? @db.Uuid()
+  pickupRequests PickupRequests? @relation(fields: [pickupRequestId], references: [id])
+
+  type Status @default(REQUESTED)
+
+  isRead Boolean @default(false)
+
+  createdAt DateTime @default(now())
 }
