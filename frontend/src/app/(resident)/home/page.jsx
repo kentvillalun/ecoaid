@@ -22,6 +22,7 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { NotificationBell } from "@/components/navigation/NotificationBell";
 import { ResidentRequestCard } from "@/components/requests/ResidentRequestCard";
+import { LogoWithName } from "@/components/branding/LogoWithName";
 
 export default function HomePage() {
   const [refetchCount, setRefetchCount] = useState(0);
@@ -54,15 +55,9 @@ export default function HomePage() {
     <Page className="bg-bg!">
       <header className="flex flex-row items-start justify-between min-w-full max-h-18.75 bg-bg fixed top-0 p-5 pl-0 z-50">
         <div className="flex flex-row justify-between min-w-full items-center pl-5">
-          <div className="max-w-35 relative w-full aspect-4/1">
-            <Image
-              src="/ecoaid-logo/logo-wordmark.svg"
-              alt="EcoAid logo"
-              fill
-              priority
-              loading={"eager"}
-            />
-          </div>
+       
+          <LogoWithName nameSize="text-4xl" logoSize="max-w-8.5" />
+
           <NotificationBell />
         </div>
       </header>
@@ -234,14 +229,12 @@ export default function HomePage() {
                     </div>
                     <div className="flex flex-col items-end gap-2">
                       <Skeleton width={85} />
-                  
                     </div>
                   </div>
 
                   {/* Footer row */}
                   <div className="flex flex-row items-end justify-end w-full pt-2 border-t border-gray-100">
-                      <Skeleton width={53} />
-                    
+                    <Skeleton width={53} />
                   </div>
                 </Card>
               ))

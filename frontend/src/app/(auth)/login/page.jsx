@@ -12,6 +12,8 @@ import { API_BASE_URL } from "@/lib/config";
 import Image from "next/image";
 import { DesktopGuard } from "@/components/ui/DesktopGuard";
 import { motion } from "motion/react";
+import { LogoCircle } from "@/components/branding/LogoCircle";
+import { ButtonSpinner } from "@/components/ui/buttonSpinner";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -171,16 +173,7 @@ export default function LoginPage() {
               className="min-h-auto bg-surface p-8 rounded-t-4xl flex flex-col relative justify-center max-w-full"
               onSubmit={handleSubmit(onSubmit)}
             >
-              <div className="-top-6 left-6 absolute rounded-full bg-dark w-16 h-16 flex items-center justify-center">
-                <div className="w-8 relative aspect-square ">
-                  <Image
-                    src="/ecoaid-logo/ecoaid-green-logo.png"
-                    alt="EcoAid logo"
-                    fill
-                    priority
-                  />
-                </div>
-              </div>
+              <LogoCircle />
 
               <motion.div
                 initial={{ opacity: 0, y: 16 }}
@@ -261,7 +254,12 @@ export default function LoginPage() {
                     type="submit"
                     disabled={isSubmitting}
                   >
-                    {isSubmitting ? "Signing In..." : "Sign In"}
+                    {isSubmitting ? (
+                      <div className="flex flex-row gap-2 items-center justify-center">
+                        <p>Sign In</p>
+                        <ButtonSpinner />
+                      </div>
+                    ) : "Sign In"}
                   </button>
 
                   <Link

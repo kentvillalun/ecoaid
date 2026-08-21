@@ -9,6 +9,8 @@ import { useRouter } from "next/navigation";
 import { API_BASE_URL } from "@/lib/config";
 import { BARANGAY_ROLES } from "@/lib/roles";
 import Image from "next/image";
+import { LogoWithName } from "@/components/branding/LogoWithName";
+import { ButtonSpinner } from "@/components/ui/buttonSpinner";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -76,14 +78,7 @@ export default function BarangayLoginPage() {
     >
       <div className="flex flex-col items-center justify-center gap-8">
         <div className="flex flex-col items-center justify-center">
-          <div className="max-w-90 relative w-full aspect-4/1">
-            <Image
-              src="/ecoaid-logo/logo-wordmark.svg"
-              alt="EcoAid logo"
-              fill
-              priority
-            />
-          </div>
+          <LogoWithName nameSize="text-[42px]" />
           <p className="text-base md:text-base text-gray-600">
             Barangay Admin Portal
           </p>
@@ -163,12 +158,21 @@ export default function BarangayLoginPage() {
                 type="submit"
                 disabled={isLoading}
               >
-                {isLoading ? "Logging In..." : "Log In"}
+                {isLoading ? (
+                  <div className="flex flex-row gap-2 items-center justify-center">
+                    <p>Log In</p>
+                    <ButtonSpinner />
+                  </div>
+                ) : (
+                  "Log In"
+                )}
               </button>
             </div>
           </form>
         </div>
-        <p className="text-xs text-gray-400">EcoAid &copy; 2026 — Bararangay Recycling Management</p>
+        <p className="text-xs text-gray-400">
+          EcoAid &copy; 2026 — Bararangay Recycling Management
+        </p>
       </div>
     </main>
   );

@@ -10,6 +10,7 @@ import { motion } from "motion/react";
 import { Page } from "@/components/layout/Page";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { haptic } from "@/lib/haptics";
+import { LogoWithName } from "@/components/branding/LogoWithName";
 
 export default function OnboardingPage() {
   const [step, setStep] = useState(1);
@@ -33,15 +34,8 @@ export default function OnboardingPage() {
           className="flex flex-col items-center justify-between min-w-full pt-6 "
         >
           <div className="w-full flex flex-col items-center gap-3.5 min-h-18.75">
-            <div className="w-full max-w-30 max-h-9.25 aspect-3/1 relative">
-              <Image
-                className="absolute"
-                src={"/ecoaid-logo/logo-wordmark.svg"}
-                fill
-                priority
-                alt="EcoAid logo"
-              />
-            </div>
+            
+            <LogoWithName logoSize="max-w-8" nameSize="text-3xl" className="justify-center"/>
             <div
               className={`${step === 3 ? "hidden" : "flex"} items-center justify-end w-full pr-4 md:px-15`}
             >
@@ -79,6 +73,7 @@ export default function OnboardingPage() {
                       loading="eager"
                       className="z-50"
                     />
+                    
 
                     <div
                       className="xs:w-45 xs:h-45 mobile:w-55 mobile:h-55 md:w-70 md:h-70 bg-success/25 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
@@ -96,7 +91,7 @@ export default function OnboardingPage() {
                   </div>
 
                   <div className="bg-white mobile:min-h-69 w-full rounded-t-4xl mobile:p-8.25 xs:p-6 ">
-                    <div className="flex flex-col items-center gap-4 md:max-w-xl md:mx-auto md:gap-8">
+                    <div className="flex flex-col items-center gap-4 md:max-w-xl md:mx-auto md:gap-8 mobile:mb-10 xs:mb-5">
                       <div className="flex flex-col items-center gap-2">
                         <motion.div
                           key={`headline-${step}`}
@@ -176,8 +171,8 @@ export default function OnboardingPage() {
 
                   <div className="bg-white mobile:min-h-69 w-full rounded-t-4xl mobile:p-8.25 xs:p-6">
                     {step === 2 && (
-                      <div className="flex flex-col items-center gap-4 md:max-w-xl md:mx-auto md:gap-8">
-                        <div className="flex flex-col items-center gap-2">
+                      <div className="flex flex-col items-center gap-4 md:max-w-xl md:mx-auto md:gap-8 mobile:mb-10 xs:mb-5">
+                        <div className="flex flex-col items-center gap-2 ">
                           <motion.div
                             key={`headline-${step}`}
                             initial={{ opacity: 0, y: 12 }}
@@ -255,7 +250,7 @@ export default function OnboardingPage() {
                   </div>
                   <div className="bg-white mobile:min-h-69 w-full rounded-t-4xl mobile:p-8.25 xs:p-6">
                     {step === 3 && (
-                      <div className="flex flex-col items-center gap-4 md:max-w-xl md:mx-auto md:gap-8">
+                      <div className="flex flex-col items-center gap-4 md:max-w-xl md:mx-auto md:gap-8 mobile:mb-10 xs:mb-5">
                         <div className="flex flex-col items-center gap-2">
                           <motion.div
                             key={`headline-${step}`}

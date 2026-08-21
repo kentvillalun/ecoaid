@@ -11,6 +11,8 @@ import { API_BASE_URL } from "@/lib/config";
 import { DesktopGuard } from "@/components/ui/DesktopGuard";
 import Image from "next/image";
 import { motion } from "motion/react";
+import { LogoCircle } from "@/components/branding/LogoCircle";
+import { ButtonSpinner } from "@/components/ui/buttonSpinner";
 
 const schema = yup.object().shape({
   phoneNumber: yup.string().required("Phone number is required"),
@@ -63,17 +65,7 @@ export default function ForgotPasswordPage() {
             className="min-h-auto bg-surface p-8 rounded-t-4xl flex flex-col relative justify-center max-w-full"
             onSubmit={handleSubmit(onSubmit)}
           >
-            <div className="-top-6 left-6 absolute rounded-full bg-dark w-16 h-16 flex items-center justify-center">
-              <div className="w-8 relative aspect-square ">
-                <Image
-                  src="/ecoaid-logo/ecoaid-green-logo.png"
-                  alt="EcoAid logo"
-                  fill
-                  priority
-                  loading="eager"
-                />
-              </div>
-            </div>
+            <LogoCircle />
 
             <motion.div
               initial={{ opacity: 0, y: 16 }}
@@ -106,7 +98,7 @@ export default function ForgotPasswordPage() {
                   <input
                     id="contact"
                     type="text"
-                    placeholder="09xxxxxxxxx"
+                    placeholder="ex. 09171234567"
                     className="input text-base mb-0"
                     {...register("phoneNumber")}
                   />
@@ -127,7 +119,14 @@ export default function ForgotPasswordPage() {
                   disabled={isSubmitting}
                   className="bg-accent text-white font-medium py-3.75 px-24 rounded-[14px] disabled:opacity-70 text-sm gradient-button"
                 >
-                  {isSubmitting ? "Sending..." : "Submit"}
+                  {isSubmitting ? (
+                    <div className="flex flex-row gap-2 items-center justify-center">
+                      <p>Submit</p>
+                      <ButtonSpinner />
+                    </div>
+                  ) : (
+                    "Submit"
+                  )}
                 </button>
               </div>
             </motion.div>

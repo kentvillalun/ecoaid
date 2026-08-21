@@ -226,7 +226,7 @@ export const Sidebar = () => {
         <div className="flex flex-row justify-start gap-2 border-b-border border pb-4">
           <div className="max-w-10 relative w-full aspect-square">
             <Image
-              src="/ecoaid-logo/logo-w-container.svg"
+              src="/ecoaid-logo/logo-gradient-background.svg"
               alt="EcoAid logo"
               fill
               priority

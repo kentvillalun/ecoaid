@@ -8,6 +8,8 @@ import { API_BASE_URL } from "@/lib/config";
 import { DesktopGuard } from "@/components/ui/DesktopGuard";
 import Image from "next/image";
 import { motion } from "motion/react";
+import { LogoCircle } from "@/components/branding/LogoCircle";
+import { ButtonSpinner } from "@/components/ui/buttonSpinner";
 
 // Outside component — only created once, never recreated on rerender
 
@@ -289,17 +291,7 @@ export default function OtpPage() {
       <Page className="lg:hidden bg-bg!">
         <div className={`min-w-full flex flex-col justify-end`}>
           <div className="min-h-auto bg-surface p-8 rounded-t-4xl flex flex-col relative justify-center max-w-full">
-            <div className="-top-6 left-6 absolute rounded-full bg-dark w-16 h-16 flex items-center justify-center">
-              <div className="w-8 relative aspect-square ">
-                <Image
-                  src="/ecoaid-logo/ecoaid-green-logo.png"
-                  alt="EcoAid logo"
-                  fill
-                  priority
-                  loading="eager"
-                />
-              </div>
-            </div>
+            <LogoCircle />
 
             <motion.div
               initial={{ opacity: 0, y: 16 }}
@@ -362,7 +354,14 @@ export default function OtpPage() {
                   disabled={isSubmitting}
                   type="button"
                 >
-                  {isSubmitting ? "Verifying..." : "Verify Code"}
+                  {isSubmitting ? (
+                    <div className="flex flex-row gap-2 items-center justify-center">
+                      <p>Verify Code</p>
+                      <ButtonSpinner />
+                    </div>
+                  ) : (
+                    "Verify Code"
+                  )}
                 </button>
 
                 {/* ── Resend button with cooldown ── */}
@@ -372,12 +371,17 @@ export default function OtpPage() {
                   disabled={countdown > 0 || isResending}
                   className="text-sm text-text-primary font-medium disabled:opacity-50"
                 >
-                  {isResending
-                    ? "Sending..."
-                    : countdown > 0
-                      ? // Shows "Resend code in 60s" counting down to 0
-                        `Resend code in ${countdown}s`
-                      : "Resend code"}
+                  {isResending ? (
+                    <div className="flex flex-row gap-2 items-center justify-center">
+                      <p>Resend code</p>
+                      <ButtonSpinner />
+                    </div>
+                  ) : countdown > 0 ? (
+                    // Shows "Resend code in 60s" counting down to 0
+                    `Resend code in ${countdown}s`
+                  ) : (
+                    "Resend code"
+                  )}
                 </button>
               </div>
             </motion.div>
