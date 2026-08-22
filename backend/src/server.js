@@ -21,6 +21,7 @@ import rewardInventoryRoute from "./routes/reward-inventory.route.js"
 import settingsRoute from "./routes/settings.route.js"
 import barangayRoute from "./routes/barangay.route.js"
 import notificationRoute from "./routes/notification.route.js"
+import reportsRoute from "./routes/reports.route.js"
  
 config();
 connectDB();
@@ -58,6 +59,7 @@ app.use("/rewards", rewardInventoryRoute);
 app.use("/settings", settingsRoute);
 app.use("/barangay", barangayRoute)
 app.use("/notifications", notificationRoute)
+app.use("/reports", reportsRoute)
 
 const PORT = process.env.PORT || 5001;
 const server = app.listen(PORT, () => {

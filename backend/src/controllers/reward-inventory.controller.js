@@ -1,4 +1,5 @@
 import { prisma } from "../config/db.js";
+import { getBeneficiaryProgramBalance } from "../utils/beneficiaryPoints.js";
 
 const addRewardItem = async (req, res) => {
   try {
@@ -113,7 +114,6 @@ const releaseReward = async (req, res) => {
       where: { barangayId, id: beneficiaryId },
       select: {
         name: true,
-        points: true,
       },
     });
 
@@ -154,32 +154,74 @@ const releaseReward = async (req, res) => {
       return total + rewardItem.pointCost * item.quantity;
     }, 0);
 
-    if (beneficiary.points < totalPointCost) {
+    // points are scoped per program, so eligibility must be checked against
+    // this program's balance, not the beneficiary's global running total
+    const programBalance = await getBeneficiaryProgramBalance(
+      beneficiaryId,
+      programId,
+    );
+
+    if (programBalance < totalPointCost) {
       return res.status(400).json({ error: "Insufficient points" });
     }
 
-    await prisma.$transaction(async (tx) => {
-      await tx.rewardRelease.createMany({
-        data: items.map((item) => ({
-          rewardItemId: item.rewardItemId,
-          userId: id,
-          beneficiaryId,
-          programId,
-          barangayId,
-          beneficiaryName: beneficiary.name,
-          performedBy: `${user.firstName} ${user.lastName}`,
-          performedByRole: role,
-          quantity: item.quantity,
-        })),
-      });
-
-      await tx.beneficiary.update({
-        where: { id: beneficiaryId },
-        data: { points: { decrement: totalPointCost } },
-      });
+    await prisma.rewardRelease.createMany({
+      data: items.map((item) => ({
+        rewardItemId: item.rewardItemId,
+        userId: id,
+        beneficiaryId,
+        programId,
+        barangayId,
+        beneficiaryName: beneficiary.name,
+        performedBy: `${user.firstName} ${user.lastName}`,
+        performedByRole: role,
+        quantity: item.quantity,
+      })),
     });
 
     return res.status(200).json({ message: "Reward released successful" });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+const searchBeneficiary = async (req, res) => {
+  try {
+    const { barangayId } = req.user;
+    const { name, programId } = req.query;
+
+    if (!programId) {
+      return res.status(400).json({ error: "Program is required" });
+    }
+
+    // a beneficiary can only spend points in a program they've actually
+    // earned points in, so only surface beneficiaries with a redemption
+    // transaction under this program
+    const beneficiaries = await prisma.beneficiary.findMany({
+      where: {
+        barangayId,
+        name: { contains: name, mode: "insensitive" },
+        redemptionTransaction: {
+          some: { programId },
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+
+    const beneficiariesWithPoints = await Promise.all(
+      beneficiaries.map(async (beneficiary) => ({
+        ...beneficiary,
+        points: await getBeneficiaryProgramBalance(beneficiary.id, programId),
+      })),
+    );
+
+    return res.status(200).json({
+      message: "Searching beneficiaries successful",
+      beneficiaries: beneficiariesWithPoints,
+    });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -268,4 +310,11 @@ const getRewardSummary = async (req, res) => {
   }
 };
 
-export { getRewardItems, addRewardItem, releaseReward, getRewardReleases, getRewardSummary };
+export {
+  getRewardItems,
+  addRewardItem,
+  releaseReward,
+  getRewardReleases,
+  getRewardSummary,
+  searchBeneficiary,
+};

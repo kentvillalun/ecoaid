@@ -5,7 +5,7 @@ import { authenticateBarangay, requireRoles } from '../middlewares/authMiddlewar
 const router = express.Router()
 
 router.post("/programs", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY", "SK"]), createProgram)
-router.get("/programs", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY", "SK"]), getPrograms)
+router.get("/programs", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY", "SK", "TREASURER"]), getPrograms)
 router.get("/programs/:id", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY", "SK"]), getProgram)
 router.post("/transactions", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY", "SK"]), createTransaction)
 router.get("/transactions", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY", "SK"]), getTransactions)

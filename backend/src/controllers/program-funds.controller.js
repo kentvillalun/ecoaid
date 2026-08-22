@@ -174,6 +174,7 @@ const getTransactionLogs = async (req, res) => {
           },
         },
         performedBy: true,
+        performedByRole: true,
         createdAt: true,
       },
     });

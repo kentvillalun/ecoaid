@@ -466,6 +466,7 @@ model JunkshopSale {
   user User? @relation(fields: [userId], references: [id])
 
   performedBy String?
+  performedByRole String?
   createdAt DateTime @default(now())
 
   saleItems JunkshopSaleItem[]

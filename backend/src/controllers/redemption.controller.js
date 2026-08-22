@@ -1,5 +1,6 @@
 import { prisma } from "../config/db.js";
 import { convertToKg } from "../utils/covertToKg.js";
+import { getBeneficiaryProgramBalance } from "../utils/beneficiaryPoints.js";
 
 const createProgram = async (req, res) => {
   try {
@@ -435,7 +436,11 @@ const getBeneficiaries = async (req, res) => {
 const searchBeneficiary = async (req, res) => {
   try {
     const { barangayId } = req.user;
-    const { name } = req.query;
+    const { name, programId } = req.query;
+
+    if (!programId) {
+      return res.status(400).json({ error: "Program is required" });
+    }
 
     const beneficiaries = await prisma.beneficiary.findMany({
       where: {
@@ -445,13 +450,22 @@ const searchBeneficiary = async (req, res) => {
       select: {
         id: true,
         name: true,
-        points: true,
       },
     });
 
-    return res
-      .status(200)
-      .json({ message: "Searching beneficiaries successful", beneficiaries });
+    // points shown here are scoped to the selected program, not the
+    // beneficiary's global running total
+    const beneficiariesWithPoints = await Promise.all(
+      beneficiaries.map(async (beneficiary) => ({
+        ...beneficiary,
+        points: await getBeneficiaryProgramBalance(beneficiary.id, programId),
+      })),
+    );
+
+    return res.status(200).json({
+      message: "Searching beneficiaries successful",
+      beneficiaries: beneficiariesWithPoints,
+    });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }

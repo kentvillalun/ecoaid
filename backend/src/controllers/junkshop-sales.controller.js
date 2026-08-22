@@ -4,7 +4,7 @@ import { convertToKg } from "../utils/covertToKg.js";
 const recordSale = async (req, res) => {
   try {
     const { junkshopId, items } = req.body ?? {};
-    const { id, barangayId } = req.user;
+    const { id, barangayId, role } = req.user;
 
     const user = await prisma.user.findUnique({
       where: { id },
@@ -88,6 +88,7 @@ const recordSale = async (req, res) => {
           junkshopId,
           userId: id,
           performedBy: `${user.firstName} ${user.lastName}`,
+          performedByRole: role,
           saleItems: {
             createMany: {
               data: saleItems.map((item) => ({
@@ -140,6 +141,7 @@ const getJunkshopSales = async (req, res) => {
           },
         },
         performedBy: true,
+        performedByRole: true,
         createdAt: true,
         saleItems: {
           select: {
