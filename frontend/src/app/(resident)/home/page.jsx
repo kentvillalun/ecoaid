@@ -40,6 +40,18 @@ export default function HomePage() {
 
   const handleRefetchCount = () => setRequestsRefetchCount((prev) => prev + 1);
 
+  const [leaderboardRefetchCount, setLeaderboardRefetchCount] = useState(0);
+  const leaderboardUrl = `/api/leaderboard/residents`;
+  const {
+    isLoading: leaderboardLoading,
+    isError: leaderboardError,
+    data: leaderboardData,
+  } = useFetch({ url: leaderboardUrl, refetchCount: leaderboardRefetchCount });
+
+  const myStanding = leaderboardData?.weightLeaderboard?.find(
+    (r) => r.userId === leaderboardData?.currentUserId,
+  );
+
   const [showBanner, setShowBanner] = useState(false);
 
   useEffect(() => {
@@ -92,7 +104,7 @@ export default function HomePage() {
         </div>
 
         {/* Verification warning banner */}
-        {data?.user?.isVerified && (
+        {!isLoading && !data?.user?.isVerified && (
           <Card
             customBorder="0.5px solid var(--color-border)"
             className="shadow-none! flex flex-row items-center gap-3"
@@ -160,7 +172,15 @@ export default function HomePage() {
               Your Contribution
             </p>
             <p className="text-white font-bold text-4xl md:text-5xl">
-              {data?.user?.isVerified ? 0 : 1250}
+              {!data?.user?.isVerified ? (
+                0
+              ) : leaderboardLoading ? (
+                <Skeleton width={90} baseColor="#ffffff33" highlightColor="#ffffff55" />
+              ) : leaderboardError ? (
+                "—"
+              ) : (
+                `${(myStanding?.total ?? 0).toFixed(1)} kg`
+              )}
             </p>
             <p className="text-xs text-[rgba(255,255,255,0.6)]">
               Community contribution
@@ -172,7 +192,13 @@ export default function HomePage() {
           >
             <TrophyIcon className="w-3.5 stroke-accent" />
             <p className="text-accent font-semibold ">
-              {data?.user?.isVerified ? "Unranked" : "Rank #3 in your barangay"}
+              {!data?.user?.isVerified
+                ? "Unranked"
+                : leaderboardLoading
+                  ? "Loading..."
+                  : leaderboardError || !myStanding
+                    ? "Unranked"
+                    : `Rank #${myStanding.rank} in your barangay`}
             </p>
           </div>
           <p className="text-xs text-[rgba(255,255,255,0.6)]">

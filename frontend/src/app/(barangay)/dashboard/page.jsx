@@ -27,6 +27,7 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 import { useRouter } from "next/navigation";
 import { RecentTransactionTable } from "@/components/dashboard/RecentTransactionTable";
 import { RecentTransactionCard } from "@/components/dashboard/RecentTransactionCard";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 export default function BarangayDashboardPage() {
   const [refetchCount, setRefetchCount] = useState(0);
@@ -194,7 +195,7 @@ export default function BarangayDashboardPage() {
                     Total Recyclables Collected
                   </p>
                   <p className="text-white font-bold text-3xl md:text-5xl">
-                    1,250 kg
+                    {(data?.totalCollectedKg ?? 0).toLocaleString()} kg
                   </p>
                   <p className="text-xs text-[rgba(255,255,255,0.6)]">
                     Across all collection sources
@@ -214,7 +215,7 @@ export default function BarangayDashboardPage() {
                     Current Fund Balance
                   </p>
                   <p className="text-white font-bold text-3xl md:text-5xl">
-                    ₱ 17,500
+                    {formatCurrency(data?.fundBalance ?? 0)}
                   </p>
                   <p className="text-xs text-[rgba(255,255,255,0.6)] text-end text-nowrap">
                     Available program funds
@@ -303,7 +304,7 @@ export default function BarangayDashboardPage() {
                 />
               </div>
               <p className="md:text-2xl font-bold text-text-primary text-lg">
-                ₱ 43,500
+                {formatCurrency(data?.programExpenses ?? 0)}
               </p>
               <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
                 <ReceiptPercentIcon className="w-3 stroke-accent" />

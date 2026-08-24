@@ -164,11 +164,13 @@ function MaterialFilter({ value, onChange, categorizedMaterials }) {
           <option value="ALL">All materials</option>
           {categorizedMaterials.map((cat) => (
             <optgroup label={cat.name} key={cat.name}>
-              {cat.materials.map((m) => (
-                <option key={m.materialId} value={m.materialId}>
-                  {m.materialName}
-                </option>
-              ))}
+              {[...new Map(cat.materials.map((m) => [m.materialId, m])).values()].map(
+                (m) => (
+                  <option key={m.materialId} value={m.materialId}>
+                    {m.materialName}
+                  </option>
+                ),
+              )}
             </optgroup>
           ))}
         </select>
@@ -226,7 +228,7 @@ function CategoryCard({ cat, displayUnit }) {
             const { qty, label } = applyUnit(m?.balance, m?.unit, displayUnit);
             return (
               <div
-                key={m?.materialId}
+                key={`${m?.materialId}_${m?.unit}`}
                 className="flex items-center justify-between py-3.5"
               >
                 <span className="text-sm text-text-primary font-medium">

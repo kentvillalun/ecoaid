@@ -211,6 +211,10 @@ export default function OtpPage() {
     sessionStorage.removeItem("pendingRegistration");
     sessionStorage.removeItem("otpFlow");
 
+    // Clear any stale session from a previously logged-in resident on this
+    // browser — mirrors the backend clearing the stale resident_token cookie.
+    localStorage.removeItem("ecoprofitResidentSession");
+
     // Registration complete — go to login
     sessionStorage.setItem(
       "authSuccessMessage",

@@ -197,7 +197,7 @@ export const InProgressActions = ({
                       </select>
                     </div>
 
-                    <div className="flex flex-row gap-2">
+                    <div className="grid grid-cols-2 gap-2">
                       <div className="input flex-1 mb-0">
                         <input
                           type="number"

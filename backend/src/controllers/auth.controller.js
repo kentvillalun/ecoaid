@@ -220,11 +220,17 @@ const verifyOtp = async (req, res) => {
       lastName,
       firstName,
     } = req.body ?? {};
+    const token = req.cookies.resident_token;
 
     if (!phoneNumber || !code || !username || !lastName || !firstName) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
+    if (termsAccepted !== true) {
+      return res
+        .status(400)
+        .json({ error: "You must check the Terms and Conditions" });
+    }
     // ── Find a valid OTP record ───────────────────────────────
     // Checks all three at once:
     // 1. phoneNumber matches
@@ -284,7 +290,7 @@ const verifyOtp = async (req, res) => {
         passwordHash: hashedPassword,
         barangay: { connect: { id: barangayRecord.id } },
         sitio: { connect: { id: sitioRecord.id } },
-        termsAccepted: true,
+        termsAccepted,
         termsAcceptedAt: new Date(),
         username,
         lastName,
@@ -304,6 +310,23 @@ const verifyOtp = async (req, res) => {
     await prisma.otpVerification.delete({
       where: { id: otpRecord.id },
     });
+
+    if (token) {
+      const decode = jwt.decode(token);
+
+      if (decode?.exp) {
+        const expiresAt = new Date(decode.exp * 1000);
+
+        await prisma.blackListedToken.create({
+          data: {
+            token,
+            expiresAt,
+          },
+        });
+      }
+    }
+
+    res.clearCookie("resident_token");
 
     return res.status(201).json({ status: "success", data: user });
   } catch (error) {
@@ -819,5 +842,5 @@ export {
   logoutBarangay,
   me,
   logoutResident,
-  barangayMe
+  barangayMe,
 };

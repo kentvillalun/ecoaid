@@ -388,20 +388,32 @@ export default function CapturePage() {
                 </>
               )}
 
-              <div className="flex flex-col gap-1">
-                <label className="font-medium text-sm text-[#727272] ">
-                  Estimated value
-                </label>
-                <div className="outline-1 py-2.5 pl-3.5 text-text-secondary outline-border rounded-lg focus-within:outline-accent transition-colors flex items-center justify-between">
-                  <div className="flex flex-row justify-center items-center w-full pr-4">
-                    <input
-                      type="number"
-                      className="outline-none w-full"
-                      placeholder="e.g. 1"
-                      {...register("estimatedValue")}
-                    />
+              <div className="grid grid-cols-2 gap-3 w-full">
+                <div className="flex flex-col gap-1">
+                  <label className="font-medium text-sm text-[#727272] ">
+                    Estimated value
+                  </label>
+                  <input
+                    type="number"
+                    className="input mb-0"
+                    placeholder="e.g. 1"
+                    min={0}
+                    {...register("estimatedValue")}
+                  />
+                  {errors.estimatedValue && (
+                    <p className="text-xs text-red-500 text-start">
+                      {errors.estimatedValue?.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="font-medium text-sm text-[#727272] ">
+                    Unit
+                  </label>
+                  <div className="input text-base mb-0">
                     <select
-                      className="outline-none"
+                      className="w-full outline-none"
                       {...register("estimatedUnit")}
                     >
                       <option value="" hidden disabled>
@@ -413,21 +425,12 @@ export default function CapturePage() {
                       <option value="PIECE">piece/s</option>
                     </select>
                   </div>
+                  {errors.estimatedUnit && (
+                    <p className="text-xs text-red-500 text-start">
+                      {errors.estimatedUnit?.message}
+                    </p>
+                  )}
                 </div>
-                {(errors.estimatedValue || errors.estimatedUnit) && (
-                  <div className="flex flex-row items-center justify-between">
-                    {errors.estimatedValue && (
-                      <p className="text-xs text-red-500 text-start">
-                        {errors.estimatedValue?.message}
-                      </p>
-                    )}
-                    {errors.estimatedUnit && (
-                      <p className="text-xs text-red-500 text-start pr-7">
-                        {errors.estimatedUnit?.message}
-                      </p>
-                    )}
-                  </div>
-                )}
               </div>
 
               <div className="flex flex-col gap-1">

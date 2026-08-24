@@ -3,23 +3,53 @@ import { pickupRequest } from "./pickup-request.controller.js";
 
 const getDashboardStats = async (req, res) => {
   try {
-    const [requestedCount, totalRecords, unverified] = await Promise.all([
+    const { barangayId } = req.user;
+
+    const [
+      requestedCount,
+      totalRecords,
+      unverified,
+      totalCollected,
+      totalExpenses,
+      saleItems,
+    ] = await Promise.all([
       prisma.pickupRequests.count({
-        where: { status: "REQUESTED" },
+        where: { barangayId, status: "REQUESTED" },
       }),
       prisma.pickupRequests.count({
-        where: { status: "COLLECTED" },
+        where: { barangayId, status: "COLLECTED" },
       }),
       prisma.user.count({
-        where: { isVerified: false, role: "RESIDENT" },
+        where: { barangayId, isVerified: false, role: "RESIDENT" },
+      }),
+      prisma.stockTransactionLog.aggregate({
+        where: { barangayId, transactionType: "IN", unit: "KG" },
+        _sum: { quantity: true },
+      }),
+      prisma.programExpense.aggregate({
+        where: { barangayId },
+        _sum: { amount: true },
+      }),
+      prisma.junkshopSaleItem.findMany({
+        where: { junkshopSale: { junkshop: { barangayId } } },
+        select: { cost: true, quantity: true },
       }),
     ]);
+
+    const totalIncome = saleItems.reduce(
+      (total, item) => total + item.cost * item.quantity,
+      0,
+    );
+    const expenses = totalExpenses._sum.amount ?? 0;
 
     return res.status(200).json({
       message: "Fetch success",
       requestedCount,
       totalRecords,
       unverified,
+      totalCollectedKg: totalCollected._sum.quantity ?? 0,
+      fundBalance: totalIncome - expenses,
+      programExpenses: expenses,
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
