@@ -239,7 +239,7 @@ export default function ManualIntakePage() {
                   <div className="input flex flex-row relative mb-0">
                     <input
                       type="text"
-                      className="w-full outline-none px-3.5"
+                      className="w-full outline-none"
                       id="searchResident"
                       placeholder="Search and select resident name"
                       onChange={(e) => {
@@ -265,7 +265,7 @@ export default function ManualIntakePage() {
                     />
                     {selectedResident !== null && (
                       <button
-                        className="pr-3.5 hover:cursor-pointer"
+                        className="hover:cursor-pointer"
                         type="button"
                         onClick={() => {
                           setSearchTerm("");
@@ -278,7 +278,7 @@ export default function ManualIntakePage() {
                     )}
                     {showDropdown && (
                       <div
-                        className="absolute bg-surface flex flex-col w-full items-start z-40 rounded-lg new-border text-sm py-2.5 top-11.5"
+                        className="absolute bg-surface flex flex-col w-full items-start z-40 rounded-lg new-border text-sm py-2.5 top-11.5 right-0"
                         ref={dropdownRef}
                       >
                         {residentsList.length === 0 ? (

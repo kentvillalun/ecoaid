@@ -19,6 +19,7 @@ import {
   ArrowUpRightIcon,
   CalendarDaysIcon,
   ChevronDownIcon,
+  FunnelIcon,
 } from "@heroicons/react/24/outline";
 import { useFetch } from "@/hooks/useFetch";
 import Skeleton from "react-loading-skeleton";
@@ -71,7 +72,7 @@ const MEDAL_CONFIG = {
 
 export default function LeaderboardPage() {
   const [type, setType] = useState("By Kilogram");
-  const [period, setPeriod] = useState("All Time");
+  const [period, setPeriod] = useState("all");
   const [showPeriodDropdown, setShowPeriodDropdown] = useState(false);
   const periodDropdownRef = useRef(null);
 
@@ -112,7 +113,7 @@ export default function LeaderboardPage() {
         />
 
         {/* Summary Cards */}
-        <section className="grid grid-rows-2 gap-3">
+        <section className="grid grid-rows-2 lg:grid-cols-2 lg:grid-rows-1 gap-3">
           <Card className="shadow-none! new-border flex flex-col items-start">
             <div className="flex flex-row items-start justify-between w-full">
               <p className="text-xs font-medium text-text-secondary">
@@ -187,6 +188,10 @@ export default function LeaderboardPage() {
           <div className="flex flex-row gap-2 items-center justify-between flex-wrap">
             {/* Type Filter */}
             <div className="flex flex-row gap-2 items-center flex-wrap">
+              <div className="flex flex-row text-gray-600 text-sm items-center justify-center gap-1">
+                <FunnelIcon className="w-4" />
+                <p>Filter:</p>
+              </div>
               {TYPES.map((t) => (
                 <button
                   key={t}
@@ -202,34 +207,14 @@ export default function LeaderboardPage() {
               ))}
             </div>
 
-            {/* Period Filter — desktop pills */}
-            <div className="hidden md:flex flex-row gap-2 items-center flex-wrap">
-              <div className="flex items-center gap-1.5 text-text-secondary">
-                <CalendarDaysIcon className="w-4" />
-              </div>
-              {PERIODS.map((p) => (
-                <button
-                  key={p.key}
-                  onClick={() => setPeriod(p.key)}
-                  className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all duration-150 hover:cursor-pointer border ${
-                    period === p.key
-                      ? "gradient-button text-white border-transparent"
-                      : "bg-surface text-text-secondary border-border hover:border-border "
-                  }`}
-                >
-                  {p.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Period Filter — mobile dropdown */}
-            <div className="relative md:hidden" ref={periodDropdownRef}>
+            {/* Period Filter — select */}
+            <div className="relative" ref={periodDropdownRef}>
               <button
                 onClick={() => setShowPeriodDropdown((v) => !v)}
-                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium border bg-surface text-text-secondary border-border capitalize"
+                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium border bg-surface text-text-secondary border-border hover:cursor-pointer"
               >
                 <CalendarDaysIcon className="w-4" />
-                {period}
+                {PERIODS.find((p) => p.key === period)?.label}
                 <ChevronDownIcon className="w-3.5" />
               </button>
               {showPeriodDropdown && (

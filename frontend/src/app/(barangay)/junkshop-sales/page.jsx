@@ -408,7 +408,7 @@ export default function JunkshopSalesPage() {
                                   >
                                     {priceItem?.price
                                       ? `₱${priceItem.price}`
-                                      : "N/a"}
+                                      : "—"}
                                   </span>
                                   {i === bestIdx && (
                                     <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-green-100 text-green-700">
@@ -543,7 +543,7 @@ export default function JunkshopSalesPage() {
                                 </div>
                               ) : (
                                 <span className="text-xs text-text-primary">
-                                  N/a
+                                  —
                                 </span>
                               )}
                             </span>
@@ -663,8 +663,17 @@ export default function JunkshopSalesPage() {
                           <td className="p-4 font-bold text-text-primary tabular-nums text-nowrap">
                             {formatCurrency(row.totalAmount)}
                           </td>
-                          <td className="p-4 text-gray-500 text-nowrap">
-                            {row.performedBy}
+                          <td className="p-4 text-nowrap">
+                            <div className="flex flex-col">
+                              <p className="text-text-primary font-medium">
+                                {row.performedBy}
+                              </p>
+                              {row?.performedByRole && (
+                                <p className="text-xs text-gray-400 capitalize">
+                                  {row.performedByRole.toLowerCase()}
+                                </p>
+                              )}
+                            </div>
                           </td>
                           <td className="p-4 text-nowrap text-gray-400 text-xs">
                             {formatDate(row.createdAt)}
@@ -727,7 +736,16 @@ export default function JunkshopSalesPage() {
                     <p className="text-xs text-gray-400">
                       {formatDate(row.createdAt)}
                     </p>
-                    <p className="text-xs text-gray-500">{row.performedBy}</p>
+                    <div className="flex flex-col items-end">
+                      <p className="text-xs font-medium text-text-primary">
+                        {row.performedBy}
+                      </p>
+                      {row?.performedByRole && (
+                        <p className="text-xs text-gray-400 capitalize">
+                          {row.performedByRole.toLowerCase()}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </Card>
               ))

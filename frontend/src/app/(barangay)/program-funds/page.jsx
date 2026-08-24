@@ -51,6 +51,7 @@ const PROGRAM_TABLE_HEADERS = [
 
 const TRANSACTION_TABLE_HEADERS = [
   "Type",
+  "Name",
   "Description",
   "Program",
   "Amount",
@@ -500,10 +501,13 @@ export default function ProgramFundsPage() {
                           />
                         </td>
                         <td className="p-4 text-text-primary font-medium text-nowrap">
+                          {t.type === "income" ? t?.junkshop?.name : t?.name}
+                        </td>
+                        <td className="p-4 text-gray-500 text-nowrap">
                           {t?.description ?? `Sold to: ${t?.junkshop?.name}`}
                         </td>
                         <td className="p-4 text-gray-500 text-nowrap">
-                          {t?.program?.name ?? "Junkshop Sales"}
+                          {t.type === "income" ? "—" : t?.program?.name}
                         </td>
                         <td
                           className={`p-4 font-bold text-nowrap tabular-nums ${t.type === "income" ? "text-green-600" : "text-red-600"}`}
@@ -588,10 +592,13 @@ export default function ProgramFundsPage() {
                     </p>
                   </div>
                   <p className="text-sm font-medium text-text-primary">
+                    {t.type === "income" ? t?.junkshop?.name : t?.name}
+                  </p>
+                  <p className="text-xs text-gray-500">
                     {t?.description ?? `Sold to: ${t?.junkshop?.name}`}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {t?.program?.name ?? "Junkshop Sales"}
+                    {t.type === "income" ? "—" : t?.program?.name}
                   </p>
                   <div className="flex flex-row items-center justify-between w-full pt-2 border-t border-gray-100">
                     <div className="flex flex-col">

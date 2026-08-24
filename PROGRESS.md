@@ -1232,4 +1232,295 @@ detail inside those files isn't independently confirmed here. The
 `frontend/src/app/(barangay)/mrf-inventory/` page itself also wasn't
 opened (assumed to mirror the old material-stock page given the
 controller is byte-identical, but not verified). Worth a closer pass
+at some point, not urgent.
+
+## Update — Aug 23, 2026
+
+**Reports module — backend complete, all four report types working.**
+Picking up directly from the Aug 19 finding that `filterReports` only had
+one (broken) case implemented: all four types are now fully built —
+`mrf-inventory`, `collection-intake`, `redemption`, `program-funds` — each
+returning a real response. `select` is used over `include` throughout
+(consistent with the rest of the codebase's convention), and each case
+uses a different aggregation shape appropriate to its data:
+- **Material Stock** (`mrf-inventory`) — `.reduce()` groups
+  `StockTransactionLog` rows by material+day into a running
+  `quantityIn`/`quantityOut`/`net` object. Caught and fixed one real gap
+  while building the frontend for this: the grouped result was missing
+  `category` even though it was already being selected off `material`
+  in the same query — added it so `MaterialTag` has something to render.
+- **Collection & Intake** (`collection-intake`) — two independent
+  sources (`PickupRequests` COLLECTED records and
+  `ManualIntakeTransaction` records) each `.map()`ped into a common
+  shape, then combined via array spread (`[...mappedRequests,
+  ...mappedManualIntakes]`) — no aggregation needed since these are
+  parallel, non-overlapping sources, not values to merge together.
+- **Redemption & Rewards** (`redemption`) — `.map()` over
+  `RedemptionTransaction` as the base record, `.find()` to look up a
+  matching `RewardRelease` by `beneficiaryName` per row, with explicit
+  null-handling: `dateReleased`/`rewardReceived` are `null` and
+  `pointsSpent` is `0` when no matching release exists yet (a
+  beneficiary who redeemed but hasn't been given a reward yet).
+- **Program Funds** (`program-funds`) — dual-source normalization:
+  `JunkshopSale` rows and `ProgramExpense` rows are each mapped into a
+  common `{ type, name, description, program, amount, materials,
+  performedBy, performedByRole, date }` shape (`program` is hardcoded to
+  `"—"` on the income/sale side, since sales aren't program-scoped),
+  merged into one `mergedRows` array, alongside separately-computed
+  `totalIncome`/`totalExpense`/`net` summary numbers returned at the top
+  level of the response for the summary cards.
+
+**Key technical patterns established, worth remembering for future report
+types or any other date-filtered endpoint:**
+- Date-range filtering always uses `gte: new Date(startDate)` combined
+  with `lt` against **the day after `endDate` at midnight** (`end =
+  new Date(endDate); end.setDate(end.getDate() + 1)`), not `lte` at
+  `endDate`'s own midnight — the latter would silently exclude the
+  entire end date itself, since a bare `new Date("2026-08-23")` parses
+  to `2026-08-23T00:00:00`, not end-of-day.
+- Each `case` block in the `switch(type)` is wrapped in its own `{ }`
+  braces — necessary because multiple cases declare same-named `const`s
+  (e.g. `const mappedSales`), and without block scoping those would
+  collide across cases under `let`/`const`'s block-scoping rules.
+
+**Reports page (`/reports`) — UI scaffolding built, four independent
+sections.** Old page was a hardcoded-mock placeholder (fake stat cards,
+bar chart, "Recent Activity" table) that actually duplicated content
+already live and real on the Dashboard page — removed rather than moved,
+since Dashboard's version was already the real, working one. New
+structure: a page header (title/subtitle, no per-section buttons) with a
+single page-level **"Export all"** button sitting in its own row below
+the header (not inline in the header row) — currently a stub
+(`handleExportAll` shows a toast; actual Excel export logic not wired up
+yet). Below that, four independent sections in order — Material Stock,
+Collection & Intake, Redemption & Rewards, Program Funds — each owning
+its own date-range state, its own `useFetch` call against
+`GET /reports?type=...&startDate=...&endDate=...`, and its own table (no
+shared state between sections, so changing one section's date range
+doesn't affect any other). Program Funds additionally gets three summary
+cards (Total Income/Total Expense/Net) above its ledger table, and uses
+the existing `HoverPortal` component (same one Junkshop Sales already
+uses) to show a materials breakdown on hover for income rows, rather
+than adding a new column.
+
+**`DateRangePicker` component revised** (`components/reports/
+DateRangePicker.jsx`) — went through two iterations this session. First
+version used preset pill buttons (This week/This month/Custom) plus
+always-visible date inputs. Revised to match the icon+dropdown pattern
+already used by Leaderboard's period filter: a single button (calendar
+icon + current selection label + chevron) that opens a dropdown list,
+same visual language as `StatusChip`'s `FunnelIcon` + "Filter:" prefix
+convention. Four options — **This week**, **This month**, **Custom
+range**, **Custom date** — where This week/This month compute the range
+internally and show no date inputs at all, Custom range reveals two date
+inputs, and Custom date reveals one (mirrored into both `startDate` and
+`endDate` on change, since the backend already treats a single-day range
+correctly via the `gte`/`lt` pattern above — no backend change needed
+for that case). Defaults to "This month" on mount, for every section
+independently. The custom date `<input type="date">` elements were
+restyled to exactly match the select button's classes (was previously a
+visibly different rounded-xl/text-sm/gray-600 combo) so the whole control
+group reads as one consistent set rather than a mismatched pair.
+
+**Leaderboard period filter — real bug found and fixed while reusing its
+pattern for Reports.** `period` state was initialized to the literal
+string `"All Time"` (a label, not a `PERIODS` key), which never matched
+any `p.key`, so the initial highlighted state was wrong on first load;
+worse, the mobile dropdown button rendered `{period}` directly, so after
+selecting a period it displayed the raw key (`"weekly"`, `"monthly"`)
+instead of its label. Fixed by initializing to `"all"` and rendering
+`PERIODS.find(p => p.key === period)?.label`. Also consolidated what had
+been two separate blocks (desktop pill row + mobile-only dropdown) into
+one dropdown control shown at every breakpoint, and added the same
+`FunnelIcon` + "Filter:" prefix used by `StatusChip`/`DropdownFilter` for
+visual consistency with the rest of the app's filter UI. Separately
+confirmed (via a one-off diagnostic script against the dev DB) that an
+earlier "nothing shows for This week/This month" report was **not** a
+bug — the barangay's only recent stock-in transactions are recorded in
+PIECE units, while all KG-unit transactions are ~2 months old, so the
+default "By Kilogram" toggle legitimately has zero rows in either
+window; switching to "By Piece" shows the recent data correctly.
+
+**Small fixes landed alongside the above, all intentional, not
+leftover debt:**
+- `JunkshopSale.performedByRole String?` added to the schema (migration
+  applied, nullable since existing rows have no historical value to
+  backfill) — brings `JunkshopSale` in line with `ProgramExpense` and
+  `RewardRelease`, which both already snapshot `performedBy` +
+  `performedByRole` at write time. `recordSale` now captures `role` from
+  `req.user` the same way `addExpense`/`releaseReward` already do;
+  `getJunkshopSales` and the Program Funds transaction-log query both
+  select it; both the Junkshop Sales page and the Program Funds
+  transaction log display it (name + role subtext, same pattern already
+  used for expense rows).
+- `"N/a"` replaced with an em dash (`—`) across the Junkshop Sales price
+  comparison table (both desktop and mobile) — a consistent
+  "intentionally not applicable" convention rather than looking like
+  missing data, matching how the Program Funds ledger already shows `—`
+  for income rows' Program column.
+- Program Funds Transaction Log gained a "Name" column — `ProgramExpense.
+  name` existed on the schema and was already being fetched but was
+  never rendered anywhere; Description now correctly holds
+  `ProgramExpense.description` (expense rows) / `"Sold to: {junkshop}"`
+  (income rows), separate from Name.
+- Non-functional global search bar removed from `BarangayHeaderCard`
+  (shared by every barangay page, so this took effect site-wide in one
+  change) — it was decorative only, never wired to anything, flagged by
+  the adviser as misleading. Left a code comment noting it's temporary.
+  Broader principle agreed for when real search gets built: only add it
+  to modules with unbounded data growth and no existing narrowing filter
+  (Collection Requests, Redemption, Manual Intake logs) — skip it on
+  modules where another filter already narrows results (Reports' own
+  date range) or where data volume stays naturally small at pilot scale
+  (Residents).
+
+**Known technical debt / flagged business concern, not yet fixed:**
+**Points-scoping bug** — `Beneficiary.points` is currently a single
+global running balance, not scoped per-program, which means a
+beneficiary can earn points under one program and spend them under a
+completely unrelated one — undermines each program's own collection
+incentive. Fix in progress: compute points per-program on the fly
+(`sum(RedemptionTransactionItem.amount * currentValue)` minus
+`sum(RewardRelease.quantity * RewardItem.pointCost)`, both scoped to the
+same `programId`) instead of trusting the stored global field. Affects
+both the Redemption "Record Transaction" modal and the Reward Release
+modal — neither has been touched yet.
+
+**Up next:**
+1. Excel export for the Reports page — multi-sheet workbook, one sheet
+   per report type, each sheet respecting that section's independently-
+   selected date range at the moment "Export all" is clicked.
+2. Backend rate limiting and other security/hardening concerns — not yet
+   scoped in detail.
 next time any of those files are touched.
+
+## Update — Aug 24, 2026
+
+**Reports module — Excel export shipped, "Export all" is no longer a
+stub.** `POST /reports/export` (new `exportReports` handler in
+`reports.controller.js`, registered in `reports.route.js` alongside the
+existing `GET /reports` `filterReports`) accepts a nested JSON body —
+`mrfInventory`, `collectionIntake`, `redemption`, `programFunds`, each
+carrying its own `startDate`/`endDate` (redemption also optionally takes
+`programId`) — because each section on the live page already owns an
+independent date range, and export needed to respect whatever was
+selected in each section at the moment the button is clicked, not one
+shared range. Rather than duplicating the four report-shape queries that
+already lived inline in `filterReports`, they were pulled out into
+`backend/src/utils/reportHelpers.js` (`getMrfInventoryReport`,
+`getCollectionIntakeReports`, `getRedemptionReports`,
+`getProgramFundsReport`) and both `filterReports` and `exportReports` now
+call the same functions — one source of truth for report aggregation
+logic. `exportReports` runs all four concurrently via `Promise.all`
+rather than sequentially, since they're independent queries with no data
+dependency between them.
+
+**Workbook generation via `exceljs`** — one workbook, four sheets (MRF
+Inventory, Collection & Intake, Redemption & Rewards, Program Funds).
+Each gets a merged title row (report name + the date range actually
+used, via a small shared `addTitleRow` helper), header rows set manually
+cell-by-cell rather than through `sheet.columns` — Program Funds needed
+two differently-shaped tables in one sheet (a 3-row income/expense/net
+summary block, then a full ledger with its own header), which
+`sheet.columns` has no clean way to express since it assumes one header
+row per sheet. Explicit column widths set per sheet, wrap-text alignment
+applied to any column holding line-broken or multi-value content, thin
+borders applied to every data cell via `.eachCell()`, and landscape +
+`fitToPage` page setup on the wider sheets (Redemption & Rewards, Program
+Funds) so they print reasonably.
+
+**Multi-value cells use `.map().join("\n")`, not merged cells.**
+Materials/quantities/categories (Collection & Intake) and materials/
+quantities/categories/reward-received/date-released (Redemption &
+Rewards) are rendered as separate parallel columns, each cell
+line-broken and positionally aligned to the others by array index,
+rather than using Excel's native cell merging. Deliberate simplicity
+trade-off, not an oversight — Reports isn't a print-critical visual
+deliverable the way, say, an official receipt would be, and
+`.join("\n")` sidesteps the extra bookkeeping merged cells need to stay
+aligned when the underlying arrays are variable length per row.
+
+**Frontend export trigger** — `handleExportAll` in `/reports/page.jsx`
+fetches `POST /api/reports/export` with all four sections' current date
+range state, reads the response back as a `Blob`, and triggers a
+download via a programmatically created, clicked, and immediately
+removed `<a>` element pointed at a `URL.createObjectURL(blob)` (revoked
+right after). No visible intermediate UI or new page — single click from
+the user's perspective, browser handles the actual save-file prompt.
+
+**Real bug found and fixed while building this: Redemption & Rewards was
+silently dropping reward releases.** `getRedemptionReports` (in the newly
+extracted helper) previously used `.find()` to match a beneficiary's
+redemption row to their reward release by `beneficiaryName` — which
+means if a beneficiary had more than one release, only the first one
+`.find()` happened to hit was ever shown; the rest were silently
+dropped, not just hidden. This was already latent in the `filterReports`
+version before the export work started, so exporting real historical
+data during Excel-export testing is what actually surfaced it. Fixed:
+`.find()` → `.filter()`, and `rewardReceived` is now an array (each
+entry keeping its own `date`) instead of a single nullable object with
+one shared `dateReleased` field — the old top-level `dateReleased` field
+is gone entirely, replaced by per-entry dates. Both the live report UI
+and the Excel export were updated to render the array (join on `\n` for
+the export, matching the existing multi-value-column convention above).
+
+**Cash-mode vs. points-mode labeling fixed to match reality.**
+`RedemptionTransaction`'s report row now carries `isCashMode` (joined
+from `program.isCashMode` at query time in the helper); both the live
+Redemption & Rewards report and the Excel export now format Earned/Spent
+as `₱` currency for cash-mode programs and as `pts` for points-mode
+programs, instead of a one-size-fits-all label. Cash-mode rows show `—`
+for Reward Received / Date Released / Spent, since cash payouts happen
+at redemption time with no separate release step to report on.
+Points-mode rows that haven't had a release yet correctly show "Not yet
+released" (not `—`, which would misleadingly read as "not applicable"
+rather than "pending") and "0 pts" for Spent.
+
+**`Material.unit` added to the Redemption report's `materialsCollected`.**
+Previously missing — `RedemptionTransactionItem` never stored a unit of
+its own. Confirmed with real-world constraints that a material's unit is
+fixed and physically determined (e.g. aluminum cans are always sold by
+weight, never by piece), so pulling `Material.defaultUnit` at query time
+is correct and doesn't need a schema change or a stored snapshot.
+
+**Program filter added to the live Redemption & Rewards report
+section** — new dropdown next to the existing `DateRangePicker`,
+defaulting to "All Programs." The backend already supported filtering by
+`programId` on `filterReports` (and now on `exportReports` too, passed
+through from the same section's date-range state); this was purely a
+frontend gap where the UI never exposed a control for it.
+
+**Known technical debt / flagged limitations surfaced or reconfirmed
+this session, not yet fixed:**
+- **Redemption-to-release matching is still by `beneficiaryName` only** —
+  there's still no direct schema link between `RedemptionTransaction` and
+  `RewardRelease`. The `.find()` → `.filter()` fix above stops releases
+  from being silently dropped, but it doesn't fully solve matching:
+  if a beneficiary has multiple redemption transactions *and* multiple
+  reward releases within the same report period, every one of that
+  beneficiary's releases in the period will appear duplicated across
+  every one of their redemption rows (each row shows all matching
+  releases, not just "the one release that belongs to this specific
+  redemption"). Deliberately not fixed now — confirmed via testing that
+  this is a testing-data artifact (multiple test transactions/releases
+  created in quick succession to exercise the export), not a pattern
+  that occurs in SK's real one-day, one-visit-per-event program model.
+  Revisit only if stakeholders confirm multi-visit scenarios actually
+  happen in real operations; the real fix would need a direct FK between
+  the two models, not more matching-logic cleverness.
+- Points-scoping bug (`Beneficiary.points` as a single global running
+  balance, not scoped per-program) — carried over from the Aug 23 entry,
+  still open, unrelated to this session's work.
+- `JunkshopSale.performedByRole` display, UI polish ("N/a" → em dash),
+  non-functional global search bar — all carried over from the Aug 23
+  entry and prior sessions, still open outside of what this session
+  touched.
+
+**Up next:**
+1. Backend rate limiting and other security/hardening — explicitly
+   deprioritized until core features are complete, not yet scoped in
+   detail.
+2. Super Admin UI (module `has___` flag management + conditional
+   barangay-side rendering) and Teachable Machine image recognition
+   integration — see earlier roadmap entries above (Aug 7, Jul 20) for
+   full context; neither started yet.

@@ -40,6 +40,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { Logo } from "../branding/Logo";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -224,14 +225,7 @@ export const Sidebar = () => {
       </div>
       <div className="p-4 flex flex-col gap-4 lg:gap-9">
         <div className="flex flex-row justify-start gap-2 border-b-border border pb-4">
-          <div className="max-w-10 relative w-full aspect-square">
-            <Image
-              src="/ecoaid-logo/logo-gradient-background.svg"
-              alt="EcoAid logo"
-              fill
-              priority
-            />
-          </div>
+          <Logo />
           <div className="flex flex-col gap-0">
             <p className="font-baloo text-xl text-dark font-medium leading-none">
               ecoaid

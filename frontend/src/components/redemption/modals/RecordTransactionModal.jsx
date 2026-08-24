@@ -12,6 +12,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation } from "@/hooks/useMutation";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 const schema = yup.object().shape({
   programId: yup.string().required("Program is required"),
@@ -64,6 +65,7 @@ export const RecordTransactionModal = ({
   const selectedProgramId = watch("programId");
   const selectedProgram =
     preselectedProgram ?? filteredData?.find((p) => p.id === selectedProgramId);
+  const activeProgramId = selectedProgram?.id ?? "";
 
   const onSubmit = async (formData) => {
     if (
@@ -143,15 +145,17 @@ export const RecordTransactionModal = ({
     );
   }, 0);
 
+  // beneficiary points are scoped to a program, so search can only run once
+  // a program is selected, and results are re-fetched whenever it changes
   useEffect(() => {
-    if (!searchQuery) {
+    if (!searchQuery || !activeProgramId) {
       setSearchResults([]);
       return;
     }
 
     const timeout = setTimeout(async () => {
       const res = await fetch(
-        `/api/redemption/beneficiaries/search?name=${searchQuery}`,
+        `/api/redemption/beneficiaries/search?name=${searchQuery}&programId=${activeProgramId}`,
         {
           credentials: "include",
         },
@@ -162,7 +166,14 @@ export const RecordTransactionModal = ({
     }, 300);
 
     return () => clearTimeout(timeout);
-  }, [searchQuery]);
+  }, [searchQuery, activeProgramId]);
+
+  // a beneficiary's points are only valid for the program they were looked
+  // up under, so clear the selection whenever the program changes
+  const handleProgramChange = () => {
+    setSelectedBeneficiary(null);
+    setSearchQuery("");
+  };
 
   return (
     <Modal
@@ -193,7 +204,7 @@ export const RecordTransactionModal = ({
               <select
                 className="w-full outline-none"
                 defaultValue=""
-                {...register("programId")}
+                {...register("programId", { onChange: handleProgramChange })}
               >
                 <option value="" disabled hidden>
                   Select program
@@ -262,14 +273,21 @@ export const RecordTransactionModal = ({
                 <input
                   type="text"
                   className="w-full outline-none"
-                  placeholder="Search Beneficiary"
+                  placeholder={
+                    activeProgramId
+                      ? "Search Beneficiary"
+                      : "Select program first"
+                  }
+                  disabled={!activeProgramId}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
 
                 {selectedBeneficiary && (
                   <span className="text-xs font-medium text-accent bg-accent-light rounded-3xl py-1 px-2 text-nowrap">
-                    {selectedBeneficiary.points} pts
+                    {selectedProgram?.isCashMode
+                      ? formatCurrency(selectedBeneficiary.points)
+                      : `${selectedBeneficiary.points} pts`}
                   </span>
                 )}
                 {selectedBeneficiary && (
@@ -298,7 +316,9 @@ export const RecordTransactionModal = ({
                         >
                           <p className="text-text-primary">{r.name}</p>
                           <p className="text-xs text-gray-500">
-                            {r.points} pts
+                            {selectedProgram?.isCashMode
+                              ? formatCurrency(r.points)
+                              : `${r.points} pts`}
                           </p>
                         </div>
                       ))
@@ -429,7 +449,7 @@ export const RecordTransactionModal = ({
               </label>
               <p className="text-gray-700">
                 {selectedProgram?.isCashMode
-                  ? `₱ ${totalValue}`
+                  ? formatCurrency(totalValue)
                   : `${totalValue} pts`}
               </p>
             </div>
