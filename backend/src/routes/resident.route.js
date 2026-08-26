@@ -7,8 +7,8 @@ const router = express.Router()
 router.get("/me", authenticateResident, getResidentProfile)
 router.patch("/me", authenticateResident, updateResidentProfile)
 router.get("/barangay-info", authenticateResident, getBarangayInfo)
-router.get("/search", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY", "COLLECTOR", "SK"]), searchResident)
-router.get("/", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY", "TREASURER", "SK"]), getResidents)
+router.get("/search", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY", "COLLECTOR", "SK"]), searchResident) // This is for manual intake transaction
+router.get("/", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY"]), getResidents)
 router.patch("/:id", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY"]), editResident )
 
 export default router

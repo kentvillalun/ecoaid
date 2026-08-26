@@ -27,6 +27,37 @@ const DEV_BARANGAY = {
   contactNumber: "09177744669",
 };
 
+const DEV_STAFF = [
+  {
+    phoneNumber: "09990000002",
+    firstName: "Secretary",
+    lastName: "Dev",
+    role: Role.SECRETARY,
+    username: "secretarydev",
+  },
+  {
+    phoneNumber: "09990000003",
+    firstName: "Treasurer",
+    lastName: "Dev",
+    role: Role.TREASURER,
+    username: "treasurerdev",
+  },
+  {
+    phoneNumber: "09990000004",
+    firstName: "SK",
+    lastName: "Dev",
+    role: Role.SK,
+    username: "skdev",
+  },
+  {
+    phoneNumber: "09990000005",
+    firstName: "Collector",
+    lastName: "Dev",
+    role: Role.COLLECTOR,
+    username: "collectordev",
+  },
+];
+
 const DEV_CATEGORIES = ["Metals", "Papers", "Plastics", "Glass"];
 
 async function main() {
@@ -68,6 +99,42 @@ async function main() {
       },
     });
   }
+
+  for (const staff of DEV_STAFF) {
+    await prisma.user.upsert({
+      where: { phoneNumber: staff.phoneNumber },
+      update: {
+        firstName: staff.firstName,
+        lastName: staff.lastName,
+        role: staff.role,
+        passwordHash,
+        barangayId: barangay.id,
+        address: `Barangay Hall, ${DEV_BARANGAY.name}, ${DEV_BARANGAY.municipality}`,
+        isActive: true,
+        termsAccepted: true,
+        termsAcceptedAt: new Date(),
+        username: staff.username,
+      },
+      create: {
+        phoneNumber: staff.phoneNumber,
+        firstName: staff.firstName,
+        lastName: staff.lastName,
+        role: staff.role,
+        passwordHash,
+        barangayId: barangay.id,
+        address: `Barangay Hall, ${DEV_BARANGAY.name}, ${DEV_BARANGAY.municipality}`,
+        isActive: true,
+        termsAccepted: true,
+        termsAcceptedAt: new Date(),
+        username: staff.username,
+      },
+    });
+  }
+
+  console.log(
+    "Seeded staff accounts:",
+    DEV_STAFF.map((s) => `${s.username} (${s.role})`),
+  );
 
   await prisma.user.upsert({
     where: {
@@ -129,20 +196,20 @@ async function main() {
     { name: "Tin Cans", defaultUnit: "PIECE" },
     { name: "Steel Scraps", defaultUnit: "KG" },
     { name: "Iron Scraps", defaultUnit: "KG" },
-  ]
+  ];
   const DEV_PAPERS = [
     { name: "Newspaper", defaultUnit: "KG" },
     { name: "Cardboard", defaultUnit: "KG" },
-  ]
+  ];
   const DEV_PLASTICS = [
     { name: "Plastic Bottles (PET)", defaultUnit: "PIECE" },
     { name: "Plastic Bags", defaultUnit: "KG" },
     { name: "Hard Plastics", defaultUnit: "KG" },
-  ]
+  ];
   const DEV_GLASS = [
     { name: "Alak Bottles", defaultUnit: "PIECE" },
     { name: "Beer Bottles", defaultUnit: "PIECE" },
-  ]
+  ];
 
   for (const { name, defaultUnit } of DEV_METALS) {
     await prisma.material.upsert({
@@ -150,19 +217,19 @@ async function main() {
         name_barangayId: {
           name,
           barangayId: barangay.id,
-        }
+        },
       },
       update: {
         categoryId: metals.id,
-        defaultUnit
+        defaultUnit,
       },
       create: {
-       name,
-       barangayId: barangay.id,
-       categoryId: metals.id,
-       defaultUnit
-      }
-    })
+        name,
+        barangayId: barangay.id,
+        categoryId: metals.id,
+        defaultUnit,
+      },
+    });
   }
 
   for (const { name, defaultUnit } of DEV_PAPERS) {
@@ -171,19 +238,19 @@ async function main() {
         name_barangayId: {
           name,
           barangayId: barangay.id,
-        }
+        },
       },
       update: {
         categoryId: papers.id,
-        defaultUnit
+        defaultUnit,
       },
       create: {
-       name,
-       barangayId: barangay.id,
-       categoryId: papers.id,
-       defaultUnit
-      }
-    })
+        name,
+        barangayId: barangay.id,
+        categoryId: papers.id,
+        defaultUnit,
+      },
+    });
   }
 
   for (const { name, defaultUnit } of DEV_PLASTICS) {
@@ -192,19 +259,19 @@ async function main() {
         name_barangayId: {
           name,
           barangayId: barangay.id,
-        }
+        },
       },
       update: {
         categoryId: plastics.id,
-        defaultUnit
+        defaultUnit,
       },
       create: {
-       name,
-       barangayId: barangay.id,
-       categoryId: plastics.id,
-       defaultUnit
-      }
-    })
+        name,
+        barangayId: barangay.id,
+        categoryId: plastics.id,
+        defaultUnit,
+      },
+    });
   }
 
   for (const { name, defaultUnit } of DEV_GLASS) {
@@ -213,19 +280,19 @@ async function main() {
         name_barangayId: {
           name,
           barangayId: barangay.id,
-        }
+        },
       },
       update: {
         categoryId: glass.id,
-        defaultUnit
+        defaultUnit,
       },
       create: {
-       name,
-       barangayId: barangay.id,
-       categoryId: glass.id,
-       defaultUnit
-      }
-    })
+        name,
+        barangayId: barangay.id,
+        categoryId: glass.id,
+        defaultUnit,
+      },
+    });
   }
 }
 

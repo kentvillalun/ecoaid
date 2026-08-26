@@ -782,7 +782,7 @@ const barangayMe = async (req, res) => {
     const { id, role, barangayId } = req.user ?? {};
 
     const user = await prisma.user.findUnique({
-      where: { id },
+      where: { id, barangayId },
       select: {
         firstName: true,
         lastName: true,
@@ -793,7 +793,7 @@ const barangayMe = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    return res.status(200).json({ message: "Fetch succesfull", user });
+    return res.status(200).json({ message: "Fetch succesfull", user, role });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }

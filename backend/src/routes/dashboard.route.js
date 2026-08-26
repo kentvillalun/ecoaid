@@ -5,8 +5,8 @@ import { getDashboardStats, getRecentTransactions } from "../controllers/dashboa
 
 const router = express.Router();
 
-router.get("/", authenticateBarangay, requireRoles(['CAPTAIN']), getDashboardStats)
-router.get("/recent-transactions", authenticateBarangay, requireRoles(['CAPTAIN']), getRecentTransactions)
+router.get("/", authenticateBarangay, requireRoles(['CAPTAIN', 'SECRETARY']), getDashboardStats)
+router.get("/recent-transactions", authenticateBarangay, requireRoles(['CAPTAIN', 'SECRETARY']), getRecentTransactions)
 
 
 export default router;
