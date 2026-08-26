@@ -16,6 +16,6 @@ router.get("/", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY", "TRE
 router.get("/prices", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY", "TREASURER", "SK"]), getJunkshopWithPrices)
 router.post("/junkshop", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY", "TREASURER"]), addJunkshop)
 router.get("/junkshop/:junkshopId", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY", "TREASURER"]), getJunkshopDetails)
-router.get("/junkshop", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY"]), getJunkshops)
+router.get("/junkshop", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY", "TREASURER"]), getJunkshops)
 
 export default router
