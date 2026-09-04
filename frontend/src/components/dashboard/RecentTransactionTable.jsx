@@ -119,10 +119,10 @@ export const RecentTransactionTable = ({
             </tr>
           ) : (
             data?.recentTransactions?.map((t) => {
-              console.log(t);
+           
               return (
                 <tr
-                  className="text-start hover:bg-[#f8f8f8] transition-all transform"
+                  className="text-start hover:bg-bg transition-all transform"
                   key={t.id}
                 >
                   {tableConfig.map((col) => (

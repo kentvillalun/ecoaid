@@ -92,7 +92,7 @@ export const RequestCard = ({
                   {/* Top row */}
                   <div className="flex flex-row justify-between w-full">
                     <div className="flex flex-row gap-2">
-                      <div className="flex flex-col items-start min-h-22 min-w-22 max-h-20 max-w-20 rounded-md overflow-hidden shrink-0">
+                      <div className="flex flex-col items-start min-h-20 min-w-20 max-h-20 max-w-20 rounded-md overflow-hidden shrink-0">
                         <Image
                           src={d?.photoUrl}
                           width={80}
@@ -102,20 +102,20 @@ export const RequestCard = ({
                         />
                       </div>
                       <div className="flex flex-col gap-0.5">
-                        <h3 className="font-semibold text-[#1F2937]">
+                        <h3 className="font-semibold text-text-primary ">
                           {d.user.firstName
                             ? `${d.user.firstName} ${d.user.lastName}`
                             : d?.user.phoneNumber}
                         </h3>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-xs text-gray-500">
                           {d.user.sitio.name}
                         </p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-xs text-gray-500">
                           {d?.isAssorted === true
                             ? "Assorted"
                             : d?.material?.name}
                         </p>
-                        <p className="text-sm text-gray-400 text-nowrap">
+                        <p className="text-xs text-gray-400 text-nowrap">
                           Estimated value:{" "}
                           <span className="font-medium text-gray-600 lowercase">
                             {d.estimatedValue}{" "}
@@ -162,7 +162,7 @@ export const RequestCard = ({
                   {/* Top row */}
                   <div className="flex flex-row justify-between w-full">
                     <div className="flex flex-row gap-2">
-                      <div className="flex flex-col items-start min-h-22 min-w-22 max-h-20 max-w-20 rounded-md overflow-hidden shrink-0">
+                      <div className="flex flex-col items-start min-h-20 min-w-20 max-h-20 max-w-20 rounded-md overflow-hidden shrink-0">
                         <Image
                           src={d?.photoUrl}
                           width={80}
@@ -172,20 +172,20 @@ export const RequestCard = ({
                         />
                       </div>
                       <div className="flex flex-col gap-0.5">
-                        <h3 className="font-semibold text-[#1F2937]">
+                        <h3 className="font-semibold text-text-primary ">
                           {d.user.firstName
                             ? `${d.user.firstName} ${d.user.lastName}`
                             : d?.user.phoneNumber}
                         </h3>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-xs text-gray-500">
                           {d.user.sitio.name}
                         </p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-xs text-gray-500">
                           {d?.isAssorted === true
                             ? "Assorted"
                             : d?.material?.name}
                         </p>
-                        <p className="text-sm text-gray-400 text-nowrap">
+                        <p className="text-xs text-gray-400 text-nowrap">
                           Estimated value:{" "}
                           <span className="font-medium text-gray-600 lowercase">
                             {d.estimatedValue}{" "}

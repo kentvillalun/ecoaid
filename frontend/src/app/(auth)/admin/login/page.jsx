@@ -1,16 +1,13 @@
 "use client";
 
 import { Inter } from "next/font/google";
+import { LogoWithName } from "@/components/branding/LogoWithName";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useRouter } from "next/navigation";
-import { API_BASE_URL } from "@/lib/config";
-import { BARANGAY_ROLES } from "@/lib/roles";
-import { LogoWithName } from "@/components/branding/LogoWithName";
+import { useForm } from "react-hook-form";
 import { ButtonSpinner } from "@/components/ui/buttonSpinner";
-import { ROLE_MATRIX } from "@/lib/roles";
+import { useRouter } from "next/navigation";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -22,11 +19,11 @@ const schema = yup.object().shape({
   password: yup.string().required("Password is required"),
 });
 
-export default function BarangayLoginPage() {
+export default function AdminLoginPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
+  const router = useRouter()
 
   const {
     register,
@@ -42,123 +39,113 @@ export default function BarangayLoginPage() {
 
   const onSubmit = async (data) => {
     try {
-      setIsLoading(true);
-      const response = await fetch(`${API_BASE_URL}/auth/barangay/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-        credentials: "include",
-      });
+        setIsLoading(true)
+        const response = await fetch(`/api/auth/admin/login`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+            credentials: "include"
+        })
 
-      const result = await response.json();
+        const result = await response.json();
 
-      if (!response.ok) {
-        setErrorMessage(result.error || "Login failed");
-        return;
-      }
+        if (!response.ok) {
+            setErrorMessage(result.error || "Login failed")
+            return;
+        }
 
-      if (!BARANGAY_ROLES.includes(result.user?.role)) {
-        setErrorMessage("This page is for barangay staff login only.");
-        return;
-      }
-
-      const firstAccessibleRoute = ROLE_MATRIX.find((entry) =>
-        entry.roles.includes(result?.user?.role),
-      );
-
-      router.push(firstAccessibleRoute.route ?? "/403");
+        router.push("/admin-dashboard")
     } catch (error) {
-      setErrorMessage("Something went wrong. Please try again.");
-      return;
+        setErrorMessage("Something went wrong. Please try again.")
     } finally {
-      setIsLoading(false);
+        setIsLoading(false)
     }
   };
+
   return (
     <main
       className={`min-h-svh flex items-center justify-center w-full bg-bg  ${inter.className} `}
     >
       <div className="flex flex-col items-center justify-center gap-8">
         <div className="flex flex-col items-center justify-center">
-          <LogoWithName nameSize="text-[42px]" />
+          <LogoWithName nameSize="text-[42px]" logoSize="min-w-10!" />
           <p className="text-base md:text-base text-gray-600">
-            Barangay Admin Portal
+            Super Admin Portal
           </p>
         </div>
         <div className=" bg-surface p-10 rounded-4xl flex flex-col gap-8 new-border md:min-w-171 md:max-w-172.5 text-text-primary">
           <div className="flex flex-col justify-center items-start">
             <h3 className="text-2xl font-semibold">Sign In</h3>
-            <p className="text-sm text-gray-600">
-              Manage your barangay's recycling program
-            </p>
+            <p className="text-sm text-gray-600">Manage the EcoAid platform</p>
           </div>
           <form
-            className="flex flex-col gap-8 "
+            className="flex flex-col gap-8"
             onSubmit={handleSubmit(onSubmit)}
           >
             <div className="flex flex-col gap-3">
               <div className="flex flex-col gap-1.5">
                 <label
-                  htmlFor=""
+                  htmlFor="username"
                   className="text-text-primary font-medium text-base text-start"
                 >
                   Username
                 </label>
                 <input
                   type="text"
-                  className="input duration-300 ease-in-out text-base mb-0"
+                  id="username"
+                  name="username"
+                  className="input duration-300 ease-in-out text-base mb-0 focus-within:outline-admin-accent"
                   placeholder="Enter your username"
                   {...register("username")}
                 />
-                {errors.username && (
+                {errors?.username && (
                   <p className="text-xs text-red-500 text-start">
-                    {errors.username?.message}
+                    {errors?.username?.message}
                   </p>
                 )}
               </div>
 
               <div className="flex flex-col gap-1.5">
                 <label
-                  htmlFor=""
+                  htmlFor="password"
                   className="text-text-primary font-medium text-base text-start"
                 >
                   Password
                 </label>
-                <div className="input flex flex-row justify-between duration-300 ease-in-out mb-0">
+                <div className="input flex flex-row justify-between duration-300 ease-in-out mb-0 focus-within:outline-admin-accent">
                   <input
-                    type={showPassword ? `text` : `password`}
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    name="password"
                     className="outline-none max-w-full min-w-[70%] "
                     placeholder="Enter your password"
                     {...register("password")}
                   />
                   <button
                     type="button"
-                    className="hover:cursor-pointer "
-                    onClick={() => {
-                      setShowPassword((prev) => !prev);
-                    }}
+                    className="hover:cursor-pointer"
+                    onClick={() => setShowPassword((prev) => !prev)}
                   >
                     {showPassword ? "Hide" : "Show"}
                   </button>
                 </div>
-                {errors.password && (
+                {errors?.password && (
                   <p className="text-xs text-red-500 text-start">
-                    {errors.password?.message}
+                    {errors?.password?.message}
                   </p>
                 )}
               </div>
-
               {errorMessage && (
                 <p className="text-xs text-red-500 text-start">
-                  {errorMessage}
+                    {errorMessage}
                 </p>
               )}
             </div>
             <div className="flex flex-col gap-1 justify-center ">
               <button
-                className="bg-accent text-white font-medium py-3.75 px-24 rounded-[14px] disabled:opacity-70 text-sm gradient-button hover:cursor-pointer"
+                className="bg-admin-accent text-white font-medium py-3.75 px-24 rounded-[14px] disabled:opacity-70 text-sm gradient-button-admin hover:cursor-pointer"
                 type="submit"
                 disabled={isLoading}
               >
@@ -175,7 +162,7 @@ export default function BarangayLoginPage() {
           </form>
         </div>
         <p className="text-xs text-gray-400">
-          EcoAid &copy; 2026 — Bararangay Recycling Management
+          EcoAid &copy; 2026 — Platform Administration
         </p>
       </div>
     </main>

@@ -73,27 +73,25 @@ export const ResidentRequestCard = ({ request: r, variant = "compact" }) => {
       handleClick={handleClick}
     >
       {/* Top row */}
-      <div className="flex flex-row justify-between w-full">
-        <div className="flex flex-col gap-0.5">
-          <h3 className="font-semibold text-text-primary">
-            <MaterialTag
-              type={r?.material?.category?.name}
-              materialName={r?.material?.name}
-              textOnly={true}
-              className="text-sm"
-            />
-          </h3>
+      <div className="flex flex-col gap-1 justify-between w-full">
+        <div className="flex flex-row gap-0.5 items-center h-auto justify-between w-full">
+          <MaterialTag
+            type={r?.material?.category?.name ?? "Assorted"}
+            materialName={r?.material?.name ?? "Assorted"}
+            textOnly={true}
+            className="text-sm"
+          />
 
-          <p className="text-xs text-gray-400">{formatDate(r.createdAt)}</p>
+          <div className="flex flex-col items-end gap-2">
+            <StatusBadge type={r.status} />
+          </div>
         </div>
-        <div className="flex flex-col items-end gap-2">
-          <StatusBadge type={r.status} />
-        </div>
+        <p className="text-xs text-text-secondary">{formatDate(r.createdAt)}</p>
       </div>
 
       {/* Footer row */}
       <div className="flex flex-row items-end justify-end w-full pt-2 border-t border-gray-100">
-        <p className="text-xs text-gray-400">
+        <p className="text-xs text-text-secondary">
           Est. {r.estimatedValue}{" "}
           <span className="lowercase">
             {r.estimatedUnit === "PIECE" ? "pcs" : r.estimatedUnit}

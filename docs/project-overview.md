@@ -36,9 +36,15 @@ All resident data-driven pages work end-to-end (home, community, requests list, 
 
 **Material Stock (MRF) is built end-to-end.** `/material-stock` nets `StockTransactionLog` rows per material into a live balance, lists the full transaction log, and supports manual stock-out adjustments via a modal. The ledger currently only receives entries from Manual Intake and manual adjustments — pickup-request collections and redemption transactions don't write to it yet, even though the `Source` enum already reserves values for both.
 
+**Junkshop Sales, Announcements, Leaderboard, Program Funds, and Reward Inventory modules are all built end-to-end**, alongside Settings (theme picker, add material/junkshop), Notifications, the barangay-side Residents module, and Resident Standings. The barangay dashboard's stat cards are now fully wired to real data (previously three were hardcoded pending Program Funds).
+
+**Reports module is complete end-to-end, including Excel export.** `/reports` has four independently-filterable sections (Material Stock/MRF Inventory, Collection & Intake, Redemption & Rewards, Program Funds), each with its own date-range picker. A single "Export all" button generates a 4-sheet Excel workbook (`exceljs`) covering all sections at their currently-selected date ranges. Query logic is shared between the live filter and the export endpoint via `backend/src/utils/reportHelpers.js`.
+
+**Role-based authorization with automatic role-scoped interfaces is in place.** A single `ROLE_MATRIX` (`frontend/src/lib/roles.js`) maps every barangay route to the staff roles allowed to access it. The Next.js middleware (`proxy.js`) verifies the `barangay_token` JWT at the edge and redirects to `/403` when the logged-in role can't access the requested route; the Sidebar filters navigation items against the same matrix so a role only ever sees the modules it's permitted to use; barangay login redirects each role to the first route it can access rather than a hardcoded `/dashboard`. Dev seed data now includes one staff account per role (CAPTAIN, SECRETARY, TREASURER, SK, COLLECTOR) for testing.
+
 The system is deployed. Backend runs on Railway. Frontend proxies via next.config.mjs rewrites.
 
-Active development focus: Junkshop Sales module (price comparison across junkshops). It currently exists only as a static UI scaffold with hardcoded mock data, unlinked in the barangay sidebar.
+Active development focus: Super Admin module — a full UI (not yet started) for toggling each barangay's `has___` feature flags, plus conditional rendering on the barangay-facing side so a barangay without a given flag doesn't see that module.
 
 ---
 

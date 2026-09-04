@@ -1,44 +1,18 @@
 "use client";
 
-import { Sidebar } from "@/components/navigation/Sidebar";
-import { useState, createContext, useEffect } from "react";
+import { AdminSidebar } from "@/components/navigation/AdminSidebar";
+import { useState, createContext } from "react";
 import { Toaster } from "sonner";
 import { motion, AnimatePresence } from "motion/react";
-import { applyTheme } from "@/lib/themes";
-import { useFetch } from "@/hooks/useFetch";
 
-export const DrawerContext = createContext();
+export const AdminDrawerContext = createContext();
 
-export default function BarangayLayout({ children }) {
+export default function AdminLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { data: barangayThemeData } = useFetch({
-    url: "/api/settings/theme/staff",
-  });
-
-  const { data: userData } = useFetch({ url: "/api/auth/barangay/me"})
-
-  const role = userData?.role
-  const user = userData?.user
-  const modules = barangayThemeData?.modules
-
-  useEffect(() => {
-    const cachedTheme = localStorage.getItem("barangayTheme");
-    if (cachedTheme) {
-      applyTheme(cachedTheme);
-    }
-  }, []);
-
-  const theme = barangayThemeData?.theme?.themeAccent;
-  useEffect(() => {
-    if (!theme) return;
-
-    applyTheme(theme);
-    localStorage.setItem("barangayTheme", theme);
-  }, [theme]);
 
   return (
     <>
-      <DrawerContext.Provider value={{ sidebarOpen, setSidebarOpen, role, user, modules }}>
+      <AdminDrawerContext.Provider value={{ sidebarOpen, setSidebarOpen }}>
         <div className="md:hidden">
           <Toaster position="top-center" />
         </div>
@@ -49,7 +23,7 @@ export default function BarangayLayout({ children }) {
         {sidebarOpen && (
           <AnimatePresence mode="wait">
             <motion.div
-              key={"sidebar-backdrop"}
+              key={"admin-sidebar-backdrop"}
               className="fixed inset-0 bg-black/40 z-40 md:hidden"
               onClick={() => setSidebarOpen(!sidebarOpen)}
               initial={{ opacity: 0 }}
@@ -61,7 +35,7 @@ export default function BarangayLayout({ children }) {
               transition={{ duration: 0.15, ease: "easeOut" }}
             >
               <motion.div
-                key={"sidebar"}
+                key={"admin-sidebar"}
                 initial={{ x: "-100%" }}
                 animate={{ x: 0 }}
                 exit={{
@@ -70,15 +44,15 @@ export default function BarangayLayout({ children }) {
                 }}
                 transition={{ duration: 0.35, ease: "easeOut" }}
               >
-                <Sidebar />
+                <AdminSidebar />
               </motion.div>
             </motion.div>
           </AnimatePresence>
         )}
         <aside className="hidden md:block">
-          <Sidebar />
+          <AdminSidebar />
         </aside>
-      </DrawerContext.Provider>
+      </AdminDrawerContext.Provider>
     </>
   );
 }

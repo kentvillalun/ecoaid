@@ -24,7 +24,9 @@ export const Modal = ({
   status,
   isPill,
   cancelLabel = "Cancel",
-  buttonLabelSize = "text-md"
+  buttonLabelSize = "text-md",
+  formOnSubmit,
+  confirmType = "button"
 }) => {
   return (
     // blur background
@@ -55,7 +57,7 @@ export const Modal = ({
               </div>
             </div>
 
-            <form className="flex flex-col overflow-hidden">
+            <form className="flex flex-col overflow-hidden" onSubmit={formOnSubmit}>
               <div className="overflow-y-auto flex-1 min-h-0">
 
                 {/* Fields */}
@@ -75,7 +77,7 @@ export const Modal = ({
                 <button
                   className={`py-2.5 ${confirmClassName}  text-white rounded-lg hover:cursor-pointer hover:opacity-95 transition-all duration-200 ease-in-out transform active:scale-95`}
                   onClick={onConfirm}
-                  type="button"
+                  type={confirmType}
                 >
                   {confirmLabel}
                 </button>

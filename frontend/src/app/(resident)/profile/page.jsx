@@ -114,23 +114,14 @@ export default function ProfilePage() {
                 </Card>
               </Link>
 
-              <Link href={"/profile/notifications"}>
+              {/* <Link href={"/profile/notifications"}>
                 <Card className="flex-row gap-5 shadow-none new-border">
                   <div className="min-w-10 min-h-10 rounded-full bg-muted-accent/15 flex items-center justify-center">
                     <BellIcon className="w-6 h-6" />
                   </div>
                   <p className="font-medium">Notification Settings</p>
                 </Card>
-              </Link>
-
-              <Link href={"/profile/settings"}>
-                <Card className="flex-row gap-5 shadow-none new-border">
-                  <div className="min-w-10 min-h-10 rounded-full bg-muted-accent/15 flex items-center justify-center">
-                    <Cog8ToothIcon className="w-6 h-6" />
-                  </div>
-                  <p className="font-medium">Settings</p>
-                </Card>
-              </Link>
+              </Link> */}
 
               <Link href={"/profile/help-support"}>
                 <Card className="flex-row gap-5 shadow-none new-border">
@@ -138,6 +129,15 @@ export default function ProfilePage() {
                     <QuestionMarkCircleIcon className="w-6 h-6" />
                   </div>
                   <p className="font-medium">Help & Support</p>
+                </Card>
+              </Link>
+              
+              <Link href={"/profile/settings"}>
+                <Card className="flex-row gap-5 shadow-none new-border">
+                  <div className="min-w-10 min-h-10 rounded-full bg-muted-accent/15 flex items-center justify-center">
+                    <Cog8ToothIcon className="w-6 h-6" />
+                  </div>
+                  <p className="font-medium">Settings</p>
                 </Card>
               </Link>
             </div>

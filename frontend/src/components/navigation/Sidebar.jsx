@@ -41,17 +41,30 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Logo } from "../branding/Logo";
+import { ROLE_MATRIX } from "@/lib/roles";
 
 const inter = Inter({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
 });
 export const Sidebar = () => {
-  const { sidebarOpen, setSidebarOpen } = useContext(DrawerContext);
+  const { sidebarOpen, setSidebarOpen, role, user, modules } =
+    useContext(DrawerContext);
   const router = useRouter();
   const pathName = usePathname();
-  // const {isLoading, data} = useFetch({ url: "/api/auth/barangay/me"})
 
+  const MODULE_FLAG_MAP = {
+    "/collection-requests": "hasCollectionRequests",
+    "/redemption": "hasRedemptionManagement",
+    "/reward-inventory": "hasRewardInventory",
+    "/leaderboard": "hasLeaderboard",
+  };
+
+  const passesModuleCheck = (item) => {
+    const flagKey = MODULE_FLAG_MAP[item.href];
+    if (!flagKey) return true;
+    return !!modules?.[flagKey];
+  };
 
   const topLevelItems = [
     {
@@ -143,6 +156,21 @@ export const Sidebar = () => {
   const [isManagementOpen, setIsManagementOpen] = useState(false);
   const [isCommunicationOpen, setIsCommunicationOpen] = useState(false);
 
+  const filteredTopLevelItems = topLevelItems.filter((item) => {
+    const matchedEntry = ROLE_MATRIX.find((entry) => item.href === entry.route);
+    return matchedEntry?.roles?.includes(role) && passesModuleCheck(item);
+  });
+
+  const filteredManagementItems = managementItems.filter((item) => {
+    const matchedEntry = ROLE_MATRIX.find((entry) => item.href === entry.route);
+    return matchedEntry?.roles?.includes(role) && passesModuleCheck(item);
+  });
+
+  const filteredCommunicationItems = communicationItems.filter((item) => {
+    const matchedEntry = ROLE_MATRIX.find((entry) => item.href === entry.route);
+    return matchedEntry?.roles?.includes(role) && passesModuleCheck(item);
+  });
+
   const renderNavItem = (item) => (
     <Link
       className={`flex flex-row gap-3.5 hover:cursor-pointer p-2 px-3 rounded-xl hover:bg-accent/10 transition-all ease-in-out items-center group ${pathName === item.href ? "gradient-button" : ""}`}
@@ -223,30 +251,45 @@ export const Sidebar = () => {
           onClick={() => setSidebarOpen(!sidebarOpen)}
         />
       </div>
-      <div className="p-4 flex flex-col gap-4 lg:gap-9">
-        <div className="flex flex-row justify-start gap-2 border-b-border border pb-4">
-          <Logo />
-          <div className="flex flex-col gap-0">
-            <p className="font-baloo text-xl text-dark font-medium leading-none">
-              ecoaid
+      <div className="p-4 flex flex-col md:gap-4 gap-8 lg:gap-9">
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-row justify-start gap-2 border-b-border border pb-4">
+            <Logo />
+            <div className="flex flex-col gap-0">
+              <p className="font-baloo text-xl text-dark font-medium leading-none">
+                ecoaid
+              </p>
+              <p className="text-text-secondary text-xs">
+                Recycling Management
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-col">
+            <p className="text-text-primary font-medium">
+              {user ? `${user.firstName} ${user.lastName}` : " "}
             </p>
-            <p className="text-text-secondary text-xs">Recycling Management</p>
+            {role && (
+              <p className="text-xs text-gray-400 capitalize">
+                {role.toLowerCase()}
+              </p>
+            )}
           </div>
         </div>
 
         <div className="flex flex-col gap-2 lg:gap-3">
-          {topLevelItems.map(renderNavItem)}
+          {filteredTopLevelItems.map(renderNavItem)}
 
           {renderGroup(
             "Management",
-            managementItems,
+            filteredManagementItems,
             isManagementOpen,
             setIsManagementOpen,
           )}
 
           {renderGroup(
             "Communication",
-            communicationItems,
+            filteredCommunicationItems,
             isCommunicationOpen,
             setIsCommunicationOpen,
           )}

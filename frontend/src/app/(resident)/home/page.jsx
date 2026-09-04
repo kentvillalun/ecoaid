@@ -37,6 +37,11 @@ export default function HomePage() {
     isError: requestError,
     data: requestData,
   } = useFetch({ url: requestsUrl, refetchCount: requestsRefetchCount });
+  const { data: barangayThemeData } = useFetch({
+    url: "/api/settings/theme/resident",
+  });
+
+  console.log(requestData)
 
   const handleRefetchCount = () => setRequestsRefetchCount((prev) => prev + 1);
 
@@ -67,7 +72,6 @@ export default function HomePage() {
     <Page className="bg-bg!">
       <header className="flex flex-row items-start justify-between min-w-full max-h-18.75 bg-bg fixed top-0 p-5 pl-0 z-50">
         <div className="flex flex-row justify-between min-w-full items-center pl-5">
-       
           <LogoWithName nameSize="text-4xl" logoSize="max-w-8.5" />
 
           <NotificationBell />
@@ -162,8 +166,12 @@ export default function HomePage() {
         {/* Contribution card */}
         <Card
           customBorder="0.5px solid var(--color-border)"
-          className="shadow-none! gradient-card relative flex flex-col gap-2 items-start p-4! overflow-clip min-h-42 hover:cursor-pointer"
-          handleClick={() => router.push("/standings")}
+          className={`shadow-none! gradient-card relative flex flex-col gap-2 items-start p-4! overflow-clip ${barangayThemeData?.modules?.hasLeaderboard ? "min-h-42" : "min-h-30"}  hover:cursor-pointer`}
+          handleClick={
+            barangayThemeData?.modules?.hasLeaderboard
+              ? () => router.push("/standings")
+              : undefined
+          }
         >
           <div className="absolute w-30 md:w-35 md:h-35 bg-accent/60 rounded-full h-30 -right-8 -top-8 md:-top-10 md:-right-10"></div>
           <div className="absolute w-25 md:w-35 md:h-35 bg-accent/50 rounded-full h-25 right-18 -bottom-12 md:right-45 md:-bottom-16"></div>
@@ -175,7 +183,11 @@ export default function HomePage() {
               {!data?.user?.isVerified ? (
                 0
               ) : leaderboardLoading ? (
-                <Skeleton width={90} baseColor="#ffffff33" highlightColor="#ffffff55" />
+                <Skeleton
+                  width={90}
+                  baseColor="#ffffff33"
+                  highlightColor="#ffffff55"
+                />
               ) : leaderboardError ? (
                 "—"
               ) : (
@@ -186,24 +198,28 @@ export default function HomePage() {
               Community contribution
             </p>
           </div>
-          <div
-            className="text-xs flex flex-row gap-1 items-center justify-start bg-accent/20 px-3 py-1 rounded-xl"
-            style={{ border: "0.5px solid var(--color-accent)" }}
-          >
-            <TrophyIcon className="w-3.5 stroke-accent" />
-            <p className="text-accent font-semibold ">
-              {!data?.user?.isVerified
-                ? "Unranked"
-                : leaderboardLoading
-                  ? "Loading..."
-                  : leaderboardError || !myStanding
+          {barangayThemeData?.modules?.hasLeaderboard && (
+            <>
+              <div
+                className="text-xs flex flex-row gap-1 items-center justify-start bg-accent/20 px-3 py-1 rounded-xl"
+                style={{ border: "0.5px solid var(--color-accent)" }}
+              >
+                <TrophyIcon className="w-3.5 stroke-accent" />
+                <p className="text-accent font-semibold ">
+                  {!data?.user?.isVerified
                     ? "Unranked"
-                    : `Rank #${myStanding.rank} in your barangay`}
-            </p>
-          </div>
-          <p className="text-xs text-[rgba(255,255,255,0.6)]">
-            View standings &gt;
-          </p>
+                    : leaderboardLoading
+                      ? "Loading..."
+                      : leaderboardError || !myStanding
+                        ? "Unranked"
+                        : `Rank #${myStanding.rank} in your barangay`}
+                </p>
+              </div>
+              <p className="text-xs text-[rgba(255,255,255,0.6)]">
+                View standings &gt;
+              </p>
+            </>
+          )}
         </Card>
 
         <div className="grid grid-cols-1 gap-3">

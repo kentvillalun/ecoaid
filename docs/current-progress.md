@@ -209,6 +209,20 @@
 
 ---
 
+## Completed (continued — Aug 27, 2026 update)
+
+- **Role-based authorization with automatic role-scoped interfaces.** Backend half committed as `b8545cf` ("done role based authentication system with automatic interfaces"); frontend half (below) still uncommitted in the working tree as of this update.
+  - **Backend**: `barangayMe` controller now scopes the user lookup by `barangayId` in addition to `id` (closes a gap where a stale/cross-barangay token could resolve to a user row in a different barangay) and returns `role` alongside `user` in the response. Route-level `requireRoles` sets adjusted per-module: dashboard endpoints opened to `SECRETARY` (previously `CAPTAIN`-only); redemption endpoints opened to `TREASURER`; junkshop-sales endpoints narrowed off `SK` except `/prices` (still allows `SK`); `resident.route.js`'s `GET /` (`getResidents`) narrowed to `CAPTAIN`/`SECRETARY` only (previously also allowed `TREASURER`).
+  - **Dev seed**: four additional staff accounts seeded, one per remaining role — `secretarydev` (SECRETARY), `treasurerdev` (TREASURER), `skdev` (SK), `collectordev` (COLLECTOR), phones `09990000002`–`09990000005`, same dev password as the existing CAPTAIN account — so every role can be logged into and tested locally.
+  - **Frontend — `ROLE_MATRIX`** (`frontend/src/lib/roles.js`): new export mapping every barangay route to the staff roles allowed to access it (e.g. `/dashboard`: CAPTAIN/SECRETARY; `/collection-requests`: CAPTAIN/SECRETARY/COLLECTOR; `/residents`: CAPTAIN/SECRETARY; full list mirrors the backend `requireRoles` sets above, with one known inconsistency flagged below).
+  - **Frontend — middleware (`proxy.js`) now enforces role, not just presence, of a token.** Added `jose` as a dependency to verify the `barangay_token` JWT at the edge (`jwtVerify`); on a barangay route it decodes the token, matches the pathname against `ROLE_MATRIX`, and redirects to `/403` if there's no matching route entry or the decoded role isn't in that entry's `roles` list; redirects to `/barangay/login` if verification throws (expired/invalid token). Previously `proxy.js` only checked whether the `barangay_token` cookie existed, not who it belonged to.
+  - **Frontend — Sidebar now renders only the nav items the logged-in role can reach.** `(barangay)/layout.jsx` fetches `GET /api/auth/barangay/me` and passes the resolved `role` down through `DrawerContext`; `Sidebar.jsx` filters `topLevelItems`/`managementItems`/`communicationItems` against `ROLE_MATRIX` before rendering, so a role without access to a module simply doesn't see it in navigation (rather than seeing a link that 403s).
+  - **Frontend — barangay login redirect is now role-aware.** `barangay/login/page.jsx` no longer hardcodes `router.push("/dashboard")` after a successful login; it looks up the first `ROLE_MATRIX` entry the returned role can access and redirects there (falls back to `/403` if none match) — e.g. a COLLECTOR who can't see `/dashboard` lands on `/collection-requests` instead of hitting the middleware redirect on their first navigation.
+  - **`/403` page added** (`frontend/src/app/403/page.jsx`) — plain "Access Denied" message; the back-to-dashboard link is commented out for now since a role without dashboard access shouldn't be sent there.
+  - **Known inconsistency (not yet fixed)**: `/junkshop-sales` in `ROLE_MATRIX` allows only CAPTAIN/SECRETARY/TREASURER, but the backend's `GET /junkshop-sales/prices` endpoint still allows `SK`. Since the frontend route itself is blocked for SK at the proxy/sidebar level, an SK user can never reach the page to exercise that backend allowance in practice — harmless today, but the two lists should be reconciled if the module boundary for SK on junkshop pricing changes.
+
+---
+
 ## In Progress
 
 - **Super Admin module configuration** — scope confirmed (full UI required, not a seed-file shortcut) but not started; barangay `has___` feature flags exist on the schema but nothing manages or reads them yet.
@@ -250,3 +264,5 @@
 - Notifications are created server-side only, as a side effect of pickup-request status transitions (APPROVED/IN_PROGRESS/COLLECTED/REJECTED/EXPIRED) — there is no endpoint for a client to create one directly
 - Redemption report rows carry `rewardReceived` as an array (one entry per release, each with its own date), not a single nullable object — both the live report UI and the Excel export must handle multiple releases per beneficiary per period
 - Reports export (`POST /reports/export`) and the live filter (`GET /reports`) share the same query logic via `backend/src/utils/reportHelpers.js` — any future report-shape change should go in the helper, not be duplicated in both places
+- Route-to-role mapping now lives in one place on the frontend (`ROLE_MATRIX` in `frontend/src/lib/roles.js`), consumed by both the edge middleware (`proxy.js`) and the Sidebar — a new barangay route needs an entry here or it's unreachable (`proxy.js` redirects to `/403` when no matching entry exists) and invisible in navigation
+- `ROLE_MATRIX` should stay in sync with each route file's `requireRoles(...)` on the backend; nothing currently enforces this automatically (see the junkshop-sales `/prices` inconsistency noted above)

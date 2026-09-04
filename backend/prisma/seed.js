@@ -60,6 +60,56 @@ const DEV_STAFF = [
 
 const DEV_CATEGORIES = ["Metals", "Papers", "Plastics", "Glass"];
 
+async function seedSuperAdmin() {
+  const DEV_SUPER_ADMIN = {
+    username: "superadmin",
+    phoneNumber: "00000000000",
+    passwordHash: "SuperAdmin@123",
+    role: Role.SUPER_ADMIN,
+    barangayId: null,
+    isActive: true,
+    firstName: "Kent",
+    lastName: "Villalun",
+  };
+
+  const passwordHash = await bcrypt.hash(DEV_SUPER_ADMIN.passwordHash, 10);
+
+  await prisma.user.upsert({
+    where: {
+      username: DEV_SUPER_ADMIN.username,
+    },
+    update: {
+      username: DEV_SUPER_ADMIN.username,
+      phoneNumber: DEV_SUPER_ADMIN.phoneNumber,
+      passwordHash,
+      role: DEV_SUPER_ADMIN.role,
+      barangayId: DEV_SUPER_ADMIN.barangayId,
+      isActive: DEV_SUPER_ADMIN.isActive,
+      firstName: DEV_SUPER_ADMIN.firstName,
+      lastName: DEV_SUPER_ADMIN.lastName,
+    },
+    create: {
+      username: DEV_SUPER_ADMIN.username,
+      phoneNumber: DEV_SUPER_ADMIN.phoneNumber,
+      passwordHash,
+      role: DEV_SUPER_ADMIN.role,
+      barangayId: DEV_SUPER_ADMIN.barangayId,
+      isActive: DEV_SUPER_ADMIN.isActive,
+      firstName: DEV_SUPER_ADMIN.firstName,
+      lastName: DEV_SUPER_ADMIN.lastName,
+    },
+  });
+
+  console.log("Seeded Super Admin account", {
+    username: DEV_SUPER_ADMIN.username,
+    phoneNumber: DEV_SUPER_ADMIN.phoneNumber,
+    role: DEV_SUPER_ADMIN.role,
+    barangayId: DEV_SUPER_ADMIN.barangayId,
+    firstName: DEV_SUPER_ADMIN.firstName,
+    lastName: DEV_SUPER_ADMIN.lastName,
+  });
+}
+
 async function main() {
   const passwordHash = await bcrypt.hash(DEV_BARANGAY.adminPassword, 10);
 
@@ -294,6 +344,8 @@ async function main() {
       },
     });
   }
+
+  seedSuperAdmin()
 }
 
 main()

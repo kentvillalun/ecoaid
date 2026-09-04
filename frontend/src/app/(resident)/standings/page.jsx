@@ -16,6 +16,7 @@ import {
 import { useFetch } from "@/hooks/useFetch";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+import { useRouter } from "next/navigation";
 
 const TYPES = ["By Kilogram", "By Piece"];
 const PERIODS = [
@@ -61,6 +62,16 @@ export default function StandingsPage() {
     url: `/api/leaderboard/residents?timeFrame=${period}`,
     refetchCount,
   });
+
+  const { data: barangayThemeData, isLoading: themeLoading } = useFetch({ url: "/api/settings/theme/resident"})
+  const router = useRouter()
+  const hasLeaderboard = barangayThemeData?.modules?.hasLeaderboard;
+
+  useEffect(() => {
+    if (!themeLoading && barangayThemeData && !hasLeaderboard) {
+      router.push("/home")
+    }
+  }, [themeLoading, barangayThemeData, hasLeaderboard, router])
 
   const handleRefetchCount = () => setRefetchCount((prev) => prev + 1);
 

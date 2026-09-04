@@ -20,7 +20,13 @@
   --breakpoint-xs: 300px;
   --breakpoint-mobile: 400px;
   --color-accent-dark: #092517;
-  
+
+  /* Fixed brand green for Super Admin — not affected by per-barangay theme overrides */
+  --color-admin-accent: #14532D;
+  --color-admin-accent-hover: #1f7a42;
+  --color-admin-accent-light: #EAF7E3;
+  --color-admin-accent-dark: #092517;
+
   --font-baloo: var(--font-baloo)
 }
 
@@ -47,6 +53,14 @@ body {
 
 .gradient-button-blue {
   background-image: linear-gradient(to bottom, #3b82f6, #2563eb);
+}
+
+.gradient-button-admin {
+  background-image: linear-gradient(
+    to bottom,
+    var(--color-admin-accent-hover),
+    var(--color-admin-accent)
+  );
 }
 
 .gradient-card {

@@ -8,12 +8,25 @@ const getTheme = async (req, res) => {
       where: { id: barangayId },
       select: {
         themeAccent: true,
+        hasCollectionRequests: true,
+        hasRedemptionManagement: true,
+        hasRewardInventory: true,
+        hasLeaderboard: true,
       },
     });
 
-    return res
-      .status(200)
-      .json({ message: "Fetch barangay theme successful", theme });
+    return res.status(200).json({
+      message: "Fetch barangay theme successful",
+      theme: {
+        themeAccent: theme.themeAccent,
+      },
+      modules: {
+        hasCollectionRequests: theme.hasCollectionRequests,
+        hasRedemptionManagement: theme.hasRedemptionManagement,
+        hasRewardInventory: theme.hasRewardInventory,
+        hasLeaderboard: theme.hasLeaderboard,
+      },
+    });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -31,7 +44,7 @@ const updateTheme = async (req, res) => {
       "ROYAL_PURPLE",
       "DEEP_MAROON",
       "EARTH_BROWN",
-      "SUNFLOWER_GOLD"
+      "SUNFLOWER_GOLD",
     ];
 
     if (!themes.includes(themeAccent)) {
@@ -77,10 +90,12 @@ const addMaterial = async (req, res) => {
       },
     });
 
-    return (res.status(201).json({ message: "Material added", material }));
+    return res.status(201).json({ message: "Material added", material });
   } catch (error) {
     if (error.code === "P2002") {
-      return res.status(409).json({ error: "A material with this name already exists"})
+      return res
+        .status(409)
+        .json({ error: "A material with this name already exists" });
     }
     return res.status(500).json({ error: error.message });
   }

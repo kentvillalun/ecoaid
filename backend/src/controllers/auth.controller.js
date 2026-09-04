@@ -646,14 +646,12 @@ const barangayLogin = async (req, res) => {
   try {
     const { username, password } = req.body ?? {};
 
-    //  Valide both field
     if (!username || !password) {
       return res
         .status(400)
         .json({ error: "Username and password are required" });
     }
 
-    // Find user by phone number in the database
     const user = await prisma.user.findUnique({
       where: { username },
       include: {
@@ -661,7 +659,6 @@ const barangayLogin = async (req, res) => {
       },
     });
 
-    // If the user not found -> return error
     if (!user) {
       return res.status(401).json({ error: "Invalid username or password" });
     }
@@ -821,8 +818,110 @@ const logoutResident = async (req, res) => {
     res.clearCookie("resident_token");
 
     return res.status(200).json({
-      message: "Logout succesful",
+      message: "Logout successful",
     });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+const superAdminLogin = async (req, res) => {
+  try {
+    const { username, password } = req.body ?? {};
+
+    if (!username || !password) {
+      return res
+        .status(400)
+        .json({ error: "Username and password are required" });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { username },
+      select: {
+        passwordHash: true,
+        isActive: true,
+        id: true,
+        role: true,
+        username: true,
+        firstName: true,
+        lastName: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(401).json({ error: "Invalid username or password" });
+    }
+
+    const passwordMatches = await bcrypt.compare(password, user.passwordHash);
+
+    if (!passwordMatches) {
+      return res.status(401).json({ error: "Invalid username or password" });
+    }
+
+    if (user.role !== "SUPER_ADMIN") {
+      return res
+        .status(403)
+        .json({ error: "Unauthorized access to admin portal" });
+    }
+
+    if (!user.isActive) {
+      return res.status(403).json({ error: "This account is inactive" });
+    }
+
+    if (!process.env.JWT_SECRET) {
+      throw new Error("JWT_SECRET is not configured");
+    }
+
+    const token = generateToken({
+      id: user.id,
+      role: user.role,
+      barangayId: null,
+    });
+
+    res.cookie("admin_token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production" ? "none" : "lax",
+      sameSite: "none",
+      maxAge: 604800000,
+    });
+
+    return res.status(200).json({
+      message: "Login successful",
+      user: {
+        id: user.id,
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const superAdminLogout = async (req, res) => {
+  try {
+    const token = req.cookies.admin_token;
+
+    if (!token) {
+      res.clearCookie("admin_token");
+      return res.status(200).json({ message: "User already logged out" });
+    }
+
+    const decode = jwt.decode(token);
+    const expiresAt = new Date(decode.exp * 1000);
+
+    await prisma.blackListedToken.create({
+      data: {
+        token,
+        expiresAt,
+      },
+    });
+
+    res.clearCookie("admin_token");
+
+    return res.status(200).json({ message: "Logout successful" });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -843,4 +942,6 @@ export {
   me,
   logoutResident,
   barangayMe,
+  superAdminLogin,
+  superAdminLogout
 };

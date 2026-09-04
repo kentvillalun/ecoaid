@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Inter } from "next/font/google";
 import { Page } from "@/components/layout/Page";
 import { PageContent } from "@/components/layout/PageContent";
@@ -29,6 +29,7 @@ import { formatDate } from "@/lib/formatDate";
 import { Spinner } from "@/components/ui/Spinner";
 import { Error } from "@/components/ui/Error";
 import { Empty } from "@/components/ui/Empty";
+import { DrawerContext } from "../layout";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -82,7 +83,7 @@ export default function ProgramFundsPage() {
     url: "/api/program-funds/transactions",
     refetchCount: transactionRefetchCount,
   });
-
+  const { modules } = useContext(DrawerContext);
 
   const handleSummaryRefetchCount = () =>
     setSummaryRefetchCount((prev) => prev + 1);
@@ -90,27 +91,24 @@ export default function ProgramFundsPage() {
   const handleTransactionRefetchCount = () =>
     setTransactionRefetchCount((prev) => prev + 1);
 
- 
   const netBalance =
     (summaryData?.totalIncome ?? 0) - (summaryData?.totalExpenses ?? 0);
 
- 
-  const activeTabConfig = FILTER_TABS.find((tab) => tab.key === currentTab)
+  const activeTabConfig = FILTER_TABS.find((tab) => tab.key === currentTab);
 
+  const filteredTransactions = activeTabConfig?.key?.includes("ALL")
+    ? transactionData?.transactions
+    : transactionData?.transactions?.filter((t) =>
+        activeTabConfig?.key?.includes(t.type),
+      );
 
-  const filteredTransactions =
-    activeTabConfig?.key?.includes("ALL")
-      ? transactionData?.transactions
-      : transactionData?.transactions?.filter((t) => activeTabConfig?.key?.includes(t.type));
+  const emptyTransactionsSubtext = activeTabConfig?.key?.includes("ALL")
+    ? "No income or expense records yet."
+    : activeTabConfig?.key?.includes("income")
+      ? "No income records yet."
+      : "No expense records yet.";
 
-     
-  const emptyTransactionsSubtext =
-    activeTabConfig?.key?.includes("ALL")
-      ? "No income or expense records yet."
-      : activeTabConfig?.key?.includes("income")
-        ? "No income records yet."
-        : "No expense records yet.";
-
+  console.log(modules);
   return (
     <Page className="bg-bg!">
       <BarangayTopBar title="Program Funds" />
@@ -125,9 +123,13 @@ export default function ProgramFundsPage() {
         <section className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <Card className="shadow-none! new-border flex flex-col items-start">
             <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-text-secondary">Total Income</p>
+              <p className="text-xs font-medium text-text-secondary">
+                Total Income
+              </p>
               <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
+                icon={
+                  <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
+                }
                 className="rounded-full! p-2!"
                 containerColor="var(--color-icon-bg)"
               />
@@ -153,7 +155,9 @@ export default function ProgramFundsPage() {
                 Total Expenses
               </p>
               <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
+                icon={
+                  <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
+                }
                 className="rounded-full! p-2!"
                 containerColor="var(--color-icon-bg)"
               />
@@ -174,9 +178,13 @@ export default function ProgramFundsPage() {
 
           <Card className="shadow-none! new-border flex flex-col items-start">
             <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-text-secondary">Net Balance</p>
+              <p className="text-xs font-medium text-text-secondary">
+                Net Balance
+              </p>
               <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
+                icon={
+                  <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
+                }
                 className="rounded-full! p-2!"
                 containerColor="var(--color-icon-bg)"
               />
@@ -209,204 +217,206 @@ export default function ProgramFundsPage() {
         </section>
 
         {/* Program Budget Breakdown */}
-        <section className="flex flex-col gap-3">
-          <SectionHeader
-            title="Program Budgets"
-            subtitle="Allocated budget vs actual spending per program"
-            icon={<ChartPieIcon className="w-6 stroke-accent" />}
-            noButton
-          />
+        {(modules?.hasRedemptionManagement && modules?.hasRewardInventory) && (
+          <section className="flex flex-col gap-3">
+            <SectionHeader
+              title="Program Budgets"
+              subtitle="Allocated budget vs actual spending per program"
+              icon={<ChartPieIcon className="w-6 stroke-accent" />}
+              noButton
+            />
 
-          {/* Desktop table */}
-          <Card
-            className={`${inter.className} hidden md:flex md:flex-col px-8 md:gap-3 md:items-start shadow-none! new-border`}
-          >
-            <div className="w-full overflow-x-auto">
-              <table className="w-full text-sm border-collapse text-gray-600">
-                <thead className="border-b border-border">
-                  <tr>
-                    {PROGRAM_TABLE_HEADERS.map((h) => (
-                      <th
-                        key={h}
-                        className="font-medium text-start p-4 text-nowrap"
-                      >
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {isSummaryLoading ? (
-                    <tr className="max-w-md">
-                      <td
-                        className="text-center"
-                        colSpan={PROGRAM_TABLE_HEADERS.length}
-                      >
-                        <Spinner className="min-h-auto! p-12!" />
-                      </td>
-                    </tr>
-                  ) : isSummaryError ? (
-                    <tr className="max-w-md">
-                      <td
-                        className="text-center"
-                        colSpan={PROGRAM_TABLE_HEADERS.length}
-                      >
-                        <Error
-                          handleRefetchCount={handleSummaryRefetchCount}
-                          text={"Unable to get program budgets"}
-                          subtext={
-                            "Unable to get program budget breakdown. Please try again."
-                          }
-                        />
-                      </td>
-                    </tr>
-                  ) : summaryData?.programBreakdown?.length === 0 ? (
-                    <tr className="max-w-md">
-                      <td
-                        className="text-center"
-                        colSpan={PROGRAM_TABLE_HEADERS.length}
-                      >
-                        <Empty
-                          text={"No programs yet"}
-                          subtext={
-                            "No redemption programs have been created yet."
-                          }
-                        />
-                      </td>
-                    </tr>
-                  ) : (
-                    summaryData?.programBreakdown?.map((p) => {
-                      const isOverBudget = p.remaining < 0;
-                      return (
-                        <tr
-                          key={p.id}
-                          className="hover:bg-bg transition-all duration-150"
+            {/* Desktop table */}
+            <Card
+              className={`${inter.className} hidden md:flex md:flex-col px-8 md:gap-3 md:items-start shadow-none! new-border`}
+            >
+              <div className="w-full overflow-x-auto">
+                <table className="w-full text-sm border-collapse text-gray-600">
+                  <thead className="border-b border-border">
+                    <tr>
+                      {PROGRAM_TABLE_HEADERS.map((h) => (
+                        <th
+                          key={h}
+                          className="font-medium text-start p-4 text-nowrap"
                         >
-                          <td className="p-4 font-semibold text-text-primary text-nowrap">
-                            {p.name}
-                          </td>
-                          <td className="p-4 text-nowrap tabular-nums">
-                            {formatCurrency(p.allotedBudget ?? 0)}
-                          </td>
-                          <td className="p-4 text-nowrap tabular-nums">
-                            {formatCurrency(p.totalSpent ?? 0)}
-                          </td>
-                          <td
-                            className={`p-4 text-nowrap font-semibold tabular-nums ${isOverBudget ? "text-red-600" : "text-green-600"}`}
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {isSummaryLoading ? (
+                      <tr className="max-w-md">
+                        <td
+                          className="text-center"
+                          colSpan={PROGRAM_TABLE_HEADERS.length}
+                        >
+                          <Spinner className="min-h-auto! p-12!" />
+                        </td>
+                      </tr>
+                    ) : isSummaryError ? (
+                      <tr className="max-w-md">
+                        <td
+                          className="text-center"
+                          colSpan={PROGRAM_TABLE_HEADERS.length}
+                        >
+                          <Error
+                            handleRefetchCount={handleSummaryRefetchCount}
+                            text={"Unable to get program budgets"}
+                            subtext={
+                              "Unable to get program budget breakdown. Please try again."
+                            }
+                          />
+                        </td>
+                      </tr>
+                    ) : summaryData?.programBreakdown?.length === 0 ? (
+                      <tr className="max-w-md">
+                        <td
+                          className="text-center"
+                          colSpan={PROGRAM_TABLE_HEADERS.length}
+                        >
+                          <Empty
+                            text={"No programs yet"}
+                            subtext={
+                              "No redemption programs have been created yet."
+                            }
+                          />
+                        </td>
+                      </tr>
+                    ) : (
+                      summaryData?.programBreakdown?.map((p) => {
+                        const isOverBudget = p.remaining < 0;
+                        return (
+                          <tr
+                            key={p.id}
+                            className="hover:bg-bg transition-all duration-150"
                           >
-                            {formatCurrency(p.remaining ?? 0)}
-                          </td>
-                          <td className="p-4">
-                            <Badge
-                              label={
-                                isOverBudget ? "Over Budget" : "Under Budget"
-                              }
-                              color={
-                                isOverBudget
-                                  ? "bg-red-50 text-red-700"
-                                  : "bg-green-50 text-green-700"
-                              }
-                            />
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </Card>
+                            <td className="p-4 font-semibold text-text-primary text-nowrap">
+                              {p.name}
+                            </td>
+                            <td className="p-4 text-nowrap tabular-nums">
+                              {formatCurrency(p.allotedBudget ?? 0)}
+                            </td>
+                            <td className="p-4 text-nowrap tabular-nums">
+                              {formatCurrency(p.totalSpent ?? 0)}
+                            </td>
+                            <td
+                              className={`p-4 text-nowrap font-semibold tabular-nums ${isOverBudget ? "text-red-600" : "text-green-600"}`}
+                            >
+                              {formatCurrency(p.remaining ?? 0)}
+                            </td>
+                            <td className="p-4">
+                              <Badge
+                                label={
+                                  isOverBudget ? "Over Budget" : "Under Budget"
+                                }
+                                color={
+                                  isOverBudget
+                                    ? "bg-red-50 text-red-700"
+                                    : "bg-green-50 text-green-700"
+                                }
+                              />
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
 
-          {/* Mobile cards */}
-          <div className="flex md:hidden flex-col gap-2">
-            {isSummaryLoading ? (
-              Array.from({ length: 1 }).map((_, index) => (
-                <Card
-                  key={index}
-                  className="flex flex-col items-start gap-3 shadow-none! new-border"
-                >
-                  <div className="flex flex-row items-center justify-between w-full">
-                    <Skeleton width={160} />
-                    <Skeleton width={90} />
-                  </div>
-                  <div className="grid grid-cols-3 gap-2 w-full">
-                    <div className="flex flex-col gap-1">
-                      <Skeleton width={55} />
-                      <Skeleton width={75} />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <Skeleton width={45} />
-                      <Skeleton width={75} />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <Skeleton width={65} />
-                      <Skeleton width={75} />
-                    </div>
-                  </div>
-                </Card>
-              ))
-            ) : isSummaryError ? (
-              <Error
-                handleRefetchCount={handleSummaryRefetchCount}
-                text={"Unable to get program budgets"}
-                subtext={
-                  "Unable to get program budget breakdown. Please try again."
-                }
-              />
-            ) : summaryData?.programBreakdown?.length === 0 ? (
-              <Empty
-                text={"No programs yet"}
-                subtext={"No redemption programs have been created yet."}
-              />
-            ) : (
-              summaryData?.programBreakdown?.map((p) => {
-                const isOverBudget = p?.remaining < 0;
-                return (
+            {/* Mobile cards */}
+            <div className="flex md:hidden flex-col gap-2">
+              {isSummaryLoading ? (
+                Array.from({ length: 1 }).map((_, index) => (
                   <Card
-                    key={p.id}
+                    key={index}
                     className="flex flex-col items-start gap-3 shadow-none! new-border"
                   >
                     <div className="flex flex-row items-center justify-between w-full">
-                      <p className="text-sm font-bold text-text-primary">
-                        {p.name}
-                      </p>
-                      <Badge
-                        label={isOverBudget ? "Over Budget" : "Under Budget"}
-                        color={
-                          isOverBudget
-                            ? "bg-red-50 text-red-700"
-                            : "bg-green-50 text-green-700"
-                        }
-                      />
+                      <Skeleton width={160} />
+                      <Skeleton width={90} />
                     </div>
                     <div className="grid grid-cols-3 gap-2 w-full">
-                      <div className="flex flex-col gap-0.5">
-                        <p className="text-xs text-gray-400">Allocated</p>
-                        <p className="text-sm font-semibold text-text-primary tabular-nums">
-                          {formatCurrency(p.allotedBudget ?? 0)}
-                        </p>
+                      <div className="flex flex-col gap-1">
+                        <Skeleton width={55} />
+                        <Skeleton width={75} />
                       </div>
-                      <div className="flex flex-col gap-0.5">
-                        <p className="text-xs text-gray-400">Spent</p>
-                        <p className="text-sm font-semibold text-text-primary tabular-nums">
-                          {formatCurrency(p.totalSpent ?? 0)}
-                        </p>
+                      <div className="flex flex-col gap-1">
+                        <Skeleton width={45} />
+                        <Skeleton width={75} />
                       </div>
-                      <div className="flex flex-col gap-0.5">
-                        <p className="text-xs text-gray-400">Remaining</p>
-                        <p
-                          className={`text-sm font-semibold tabular-nums ${isOverBudget ? "text-red-600" : "text-green-600"}`}
-                        >
-                          {formatCurrency(p.remaining ?? 0)}
-                        </p>
+                      <div className="flex flex-col gap-1">
+                        <Skeleton width={65} />
+                        <Skeleton width={75} />
                       </div>
                     </div>
                   </Card>
-                );
-              })
-            )}
-          </div>
-        </section>
+                ))
+              ) : isSummaryError ? (
+                <Error
+                  handleRefetchCount={handleSummaryRefetchCount}
+                  text={"Unable to get program budgets"}
+                  subtext={
+                    "Unable to get program budget breakdown. Please try again."
+                  }
+                />
+              ) : summaryData?.programBreakdown?.length === 0 ? (
+                <Empty
+                  text={"No programs yet"}
+                  subtext={"No redemption programs have been created yet."}
+                />
+              ) : (
+                summaryData?.programBreakdown?.map((p) => {
+                  const isOverBudget = p?.remaining < 0;
+                  return (
+                    <Card
+                      key={p.id}
+                      className="flex flex-col items-start gap-3 shadow-none! new-border"
+                    >
+                      <div className="flex flex-row items-center justify-between w-full">
+                        <p className="text-sm font-bold text-text-primary">
+                          {p.name}
+                        </p>
+                        <Badge
+                          label={isOverBudget ? "Over Budget" : "Under Budget"}
+                          color={
+                            isOverBudget
+                              ? "bg-red-50 text-red-700"
+                              : "bg-green-50 text-green-700"
+                          }
+                        />
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 w-full">
+                        <div className="flex flex-col gap-0.5">
+                          <p className="text-xs text-gray-400">Allocated</p>
+                          <p className="text-sm font-semibold text-text-primary tabular-nums">
+                            {formatCurrency(p.allotedBudget ?? 0)}
+                          </p>
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                          <p className="text-xs text-gray-400">Spent</p>
+                          <p className="text-sm font-semibold text-text-primary tabular-nums">
+                            {formatCurrency(p.totalSpent ?? 0)}
+                          </p>
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                          <p className="text-xs text-gray-400">Remaining</p>
+                          <p
+                            className={`text-sm font-semibold tabular-nums ${isOverBudget ? "text-red-600" : "text-green-600"}`}
+                          >
+                            {formatCurrency(p.remaining ?? 0)}
+                          </p>
+                        </div>
+                      </div>
+                    </Card>
+                  );
+                })
+              )}
+            </div>
+          </section>
+        )}
 
         {/* Transaction Log */}
         <section className="flex flex-col gap-3">
@@ -416,6 +426,7 @@ export default function ProgramFundsPage() {
             icon={<Bars3BottomLeftIcon className="w-6 stroke-accent" />}
             buttonLabel="Add Expense"
             onAction={() => setIsModalOpen(true)}
+            noButton={!(modules?.hasRedemptionManagement && modules?.hasRewardInventory)}
           />
 
           {/* Filter tabs */}

@@ -14,6 +14,8 @@ import {
   me,
   logoutResident,
   barangayMe,
+  superAdminLogin,
+  superAdminLogout,
 } from "../controllers/auth.controller.js";
 import { authenticateResident, authenticateBarangay } from '../middlewares/authMiddleware.js';
 
@@ -33,5 +35,7 @@ router.post("/barangay/logout", logoutBarangay);
 router.get("/me", authenticateResident, me);
 router.get("/barangay/me", authenticateBarangay, barangayMe);
 router.post("/logout", logoutResident)
+router.post("/admin/login", superAdminLogin)
+router.post("/admin/logout", superAdminLogout)
 
 export default router;
