@@ -270,7 +270,96 @@ const getStaffAccountsByBarangay = async (req, res) => {
       },
     });
 
-    return res.status(200).json({ message: "Barangay staff accounts fetched successful", accounts})
+    return res
+      .status(200)
+      .json({
+        message: "Barangay staff accounts fetched successful",
+        accounts,
+      });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+const createSitio = async (req, res) => {
+  try {
+    const { name } = req.body ?? {};
+    const { id } = req.params;
+
+    if (!name) {
+      return res.status(400).json({ error: "Sitio name is required" });
+    }
+
+    const existingSitio = await prisma.sitio.findUnique({
+      where: { barangayId_name: { barangayId: id, name } },
+    });
+
+    if (existingSitio) {
+      return res
+        .status(400)
+        .json({ error: "This sitio already exists for this barangay" });
+    }
+
+    await prisma.sitio.create({
+      data: {
+        name,
+        barangayId: id,
+      },
+    });
+
+    return res.status(201).json({ message: "Sitio registered successfully" });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+const getSitios = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const sitios = await prisma.sitio.findMany({
+      where: { barangayId: id },
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+
+    return res
+      .status(200)
+      .json({ message: "Sitios fetched successfully", sitios });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+const editSitios = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name } = req.body ?? {};
+
+    if (!name) {
+      return res.status(400).json({ error: "Sitio name is required" });
+    }
+
+    const sitio = await prisma.sitio.findUnique({ where: { id } });
+    if (!sitio) {
+      return res.status(404).json({ error: "Sitio not found" });
+    }
+
+    const existingSitio = await prisma.sitio.findFirst({
+      where: { barangayId: sitio.barangayId, name, id: { not: id } },
+    });
+
+    if (existingSitio) {
+      return res
+        .status(400)
+        .json({ error: "This sitio already exists for this barangay" });
+    }
+
+    await prisma.sitio.update({ where: { id }, data: { name } });
+
+    return res.status(200).json({ message: "Sitio updated successfully" });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -282,5 +371,8 @@ export {
   editBarangay,
   getBarangayDetails,
   registerStaffAccount,
-  getStaffAccountsByBarangay
+  getStaffAccountsByBarangay,
+  createSitio,
+  getSitios,
+  editSitios
 };

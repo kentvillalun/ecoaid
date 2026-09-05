@@ -212,13 +212,13 @@ export default function BarangayDashboardPage() {
               <div className="flex flex-col gap-2 items-end lg:items-start justify-start h-full z-40 lg:border-l lg:border-white/10 lg:pl-3">
                 <div className="flex flex-col gap-1 items-end lg:items-start justify-start w-full">
                   <p className="text-xs text-[rgba(255,255,255,0.6)] font-medium uppercase text-end">
-                    Current Fund Balance
+                    Net Balance
                   </p>
                   <p className="text-white font-bold text-3xl md:text-5xl">
                     {formatCurrency(data?.fundBalance ?? 0)}
                   </p>
                   <p className="text-xs text-[rgba(255,255,255,0.6)] text-end text-nowrap">
-                    Available program funds
+                    Current balance
                   </p>
                 </div>
                 <div
@@ -226,7 +226,7 @@ export default function BarangayDashboardPage() {
                   style={{ border: "0.5px solid var(--color-accent)" }}
                 >
                   <WalletOutline className="w-3.5 stroke-accent" />
-                  <p className="text-accent font-semibold">Available funds</p>
+                  <p className="text-accent font-semibold">Income minus expenses</p>
                 </div>
               </div>
             </Card>

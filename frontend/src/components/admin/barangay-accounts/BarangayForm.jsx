@@ -8,6 +8,7 @@ import * as yup from "yup";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 const MODULE_LABELS = [
   { key: "hasCollectionRequests", label: "Collection Requests" },
@@ -91,6 +92,7 @@ export function BarangayForm({
     hasLeaderboard: false,
     ...defaultModules,
   });
+  const router = useRouter()
 
   const {
     register,
@@ -268,6 +270,7 @@ export function BarangayForm({
           <button
             type="button"
             className="py-2.5 border border-gray-300 rounded-xl text-gray-700 hover:cursor-pointer"
+            onClick={() => router.back()}
           >
             Cancel
           </button>

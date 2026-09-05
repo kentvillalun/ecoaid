@@ -173,18 +173,18 @@ export const Sidebar = () => {
 
   const renderNavItem = (item) => (
     <Link
-      className={`flex flex-row gap-3.5 hover:cursor-pointer p-2 px-3 rounded-xl hover:bg-accent/10 transition-all ease-in-out items-center group ${pathName === item.href ? "gradient-button" : ""}`}
+      className={`flex flex-row gap-3.5 hover:cursor-pointer p-2 px-3 rounded-xl hover:bg-accent/10 transition-all ease-in-out items-center group ${pathName.startsWith(item.href) ? "gradient-button" : ""}`}
       key={item.label}
       href={item.href}
     >
-      {pathName === item.href ? (
+      {pathName.startsWith(item.href) ? (
         <item.solidIcon className="h-4 w-4 md:block hidden" />
       ) : (
         <item.icon className="h-4 w-4 md:block hidden hover:cursor-pointer stroke-text-secondary group-hover:stroke-accent " />
       )}
 
       <label
-        className={`text-base hover:cursor-pointer  ${pathName === item.href ? "text-surface" : "text-text-secondary group-hover:text-accent"}`}
+        className={`text-base hover:cursor-pointer  ${pathName.startsWith(item.href) ? "text-surface" : "text-text-secondary group-hover:text-accent"}`}
       >
         {item.label}
       </label>

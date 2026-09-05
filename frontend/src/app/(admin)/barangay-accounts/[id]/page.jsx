@@ -15,6 +15,7 @@ import { THEMES } from "@/lib/themes";
 import { useFetch } from "@/hooks/useFetch";
 import { StaffTable } from "@/components/admin/barangay-accounts/StaffTable";
 import { AddStaffModal } from "@/components/admin/barangay-accounts/AddStaffModal";
+import { SitiosSection } from "@/components/admin/barangay-accounts/SitiosSection";
 import {
   ArrowLeftIcon,
   BuildingOffice2Icon,
@@ -68,9 +69,11 @@ export default function BarangayAccountDetailsPage() {
   const [refetchCount, setRefetchCount] = useState(0);
   const [staffRefetchCount, setStaffRefetchCount] = useState(0);
   const [isStaffModalOpen, setIsStaffModalOpen] = useState(false);
+  const [sitiosRefetchCount, setSitiosRefetchCount] = useState(0);
 
   const handleRefetchCount = () => setRefetchCount((prev) => prev + 1);
   const handleStaffRefetchCount = () => setStaffRefetchCount((prev) => prev + 1);
+  const handleSitiosRefetchCount = () => setSitiosRefetchCount((prev) => prev + 1);
 
   const {
     data: staffData,
@@ -79,6 +82,15 @@ export default function BarangayAccountDetailsPage() {
   } = useFetch({
     url: id ? `/api/admin/barangays/${id}/staff` : null,
     refetchCount: staffRefetchCount,
+  });
+
+  const {
+    data: sitiosData,
+    isLoading: isSitiosLoading,
+    isError: isSitiosError,
+  } = useFetch({
+    url: id ? `/api/admin/barangays/${id}/sitios` : null,
+    refetchCount: sitiosRefetchCount,
   });
 
   console.log(staffData)
@@ -162,7 +174,7 @@ export default function BarangayAccountDetailsPage() {
             </Link>
             <Link
               href={`/barangay-accounts/${id}/edit`}
-              className="hidden md:flex items-center gap-1.5 py-2 px-4 text-sm text-white rounded-xl hover:cursor-pointer gradient-button-admin transition-all duration-200 ease-in-out"
+              className="hidden md:flex items-center gap-1.5 py-3 px-4 text-sm text-white rounded-lg hover:cursor-pointer gradient-button-admin transition-all duration-200 ease-in-out"
             >
               <PencilSquareIcon className="w-4 h-4" />
               Edit
@@ -217,6 +229,15 @@ export default function BarangayAccountDetailsPage() {
                   value={formatDate(barangay?.createdAt)}
                 />
               </Card>
+
+              {/* Sitios */}
+              <SitiosSection
+                barangayId={id}
+                sitios={sitiosData?.sitios}
+                isLoading={isSitiosLoading}
+                isError={isSitiosError}
+                handleRefetchCount={handleSitiosRefetchCount}
+              />
 
               {/* Theme and Modules */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -274,7 +295,7 @@ export default function BarangayAccountDetailsPage() {
                   <button
                     type="button"
                     onClick={() => setIsStaffModalOpen(true)}
-                    className="hidden md:flex flex-row items-center gap-1.5 py-2 px-4 text-sm text-white rounded-xl hover:cursor-pointer gradient-button-admin transition-all duration-200 ease-in-out text-nowrap"
+                    className="hidden md:flex flex-row items-center gap-1.5 py-3 px-4 text-sm text-white rounded-lg hover:cursor-pointer gradient-button-admin transition-all duration-200 ease-in-out text-nowrap"
                   >
                     <PlusIcon className="w-4 h-4" />
                     Add staff
