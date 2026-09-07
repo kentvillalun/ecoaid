@@ -96,14 +96,16 @@ export default function ResidentsPage() {
               />
             </div>
             {isLoading ? (
-              <Skeleton width={40} />
+              <p className="md:text-2xl font-bold text-text-primary text-base">
+                0
+              </p>
             ) : isError ? (
               <p className="font-bold text-text-primary text-sm">
                 Data not available
               </p>
             ) : (
               <p className="md:text-2xl font-bold text-text-primary text-base">
-                {totalCount}
+                {totalCount ?? 0}
               </p>
             )}
             <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1 ">
@@ -126,14 +128,16 @@ export default function ResidentsPage() {
               />
             </div>
             {isLoading ? (
-              <Skeleton width={40} />
+              <p className="md:text-2xl font-bold text-text-primary text-base">
+                0
+              </p>
             ) : isError ? (
               <p className="font-bold text-text-primary text-sm">
                 Data not available
               </p>
             ) : (
               <p className="md:text-2xl font-bold text-text-primary text-base">
-                {verifiedCount}
+                {verifiedCount ?? 0}
               </p>
             )}
             <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
@@ -156,14 +160,16 @@ export default function ResidentsPage() {
               />
             </div>
             {isLoading ? (
-              <Skeleton width={40} />
+              <p className="md:text-2xl font-bold text-text-primary text-base">
+                0
+              </p>
             ) : isError ? (
               <p className="font-bold text-text-primary text-sm">
                 Data not available
               </p>
             ) : (
               <p className="md:text-2xl font-bold text-text-primary text-base">
-                {unverifiedCount}
+                {unverifiedCount ?? 0}
               </p>
             )}
             <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
@@ -281,7 +287,7 @@ export default function ResidentsPage() {
           {/* Mobile cards */}
           <div className="flex md:hidden flex-col gap-2">
             {isLoading ? (
-              Array.from({ length: 3 }).map((_, index) => (
+              Array.from({ length: 1 }).map((_, index) => (
                 <Card
                   key={index}
                   className="flex flex-col items-start gap-2 shadow-none! new-border"
@@ -342,7 +348,7 @@ export default function ResidentsPage() {
                       className="text-xs text-accent font-medium new-border px-3 py-1.5 rounded-xl"
                       onClick={() => {
                         setIsEditModalOpen(true);
-                        setCurrentResidentData(resident)
+                        setCurrentResidentData(resident);
                       }}
                     >
                       Edit

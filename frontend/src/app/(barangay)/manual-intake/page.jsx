@@ -547,7 +547,7 @@ export default function ManualIntakePage() {
           {/* Mobile cards */}
           <div className="flex md:hidden flex-col gap-2">
             {isLoading ? (
-              Array.from({ length: 3 }).map((_, index) => (
+              Array.from({ length: 1 }).map((_, index) => (
                 <Card
                   className="flex flex-col items-start gap-3 shadow-none! new-border"
                   key={index}

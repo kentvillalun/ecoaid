@@ -135,11 +135,9 @@ export default function ProgramFundsPage() {
               />
             </div>
             <p className="md:text-2xl font-bold text-green-600 text-lg flex flex-row items-center gap-1.5">
-              {isSummaryLoading ? (
-                <Skeleton width={180} />
-              ) : (
-                formatCurrency(summaryData?.totalIncome ?? 0)
-              )}
+              {isSummaryLoading
+                ? "₱0.00"
+                : formatCurrency(summaryData?.totalIncome ?? 0)}
 
               <ArrowTrendingUpIcon className="w-5 stroke-green-600" />
             </p>
@@ -163,11 +161,9 @@ export default function ProgramFundsPage() {
               />
             </div>
             <p className="md:text-2xl font-bold text-red-600 text-lg flex flex-row items-center gap-1.5">
-              {isSummaryLoading ? (
-                <Skeleton width={180} />
-              ) : (
-                formatCurrency(summaryData?.totalExpenses ?? 0)
-              )}
+              {isSummaryLoading
+                ? "₱0.00"
+                : formatCurrency(summaryData?.totalExpenses ?? 0)}
               <ArrowTrendingDownIcon className="w-5 stroke-red-600" />
             </p>
             <div className="flex flex-row items-center w-auto bg-red-50 px-3 py-1 rounded-xl text-xs gap-2">
@@ -192,11 +188,7 @@ export default function ProgramFundsPage() {
             <p
               className={`md:text-2xl font-bold text-lg flex flex-row items-center gap-1.5 ${netBalance >= 0 ? "text-green-600" : "text-red-600"}`}
             >
-              {isSummaryLoading ? (
-                <Skeleton width={180} />
-              ) : (
-                formatCurrency(netBalance)
-              )}
+              {isSummaryLoading ? "₱0.00" : formatCurrency(netBalance)}
               <ScaleIcon
                 className={`w-5 ${netBalance >= 0 ? "stroke-green-600" : "stroke-red-600"}`}
               />
@@ -217,7 +209,7 @@ export default function ProgramFundsPage() {
         </section>
 
         {/* Program Budget Breakdown */}
-        {(modules?.hasRedemptionManagement && modules?.hasRewardInventory) && (
+        {modules?.hasRedemptionManagement && modules?.hasRewardInventory && (
           <section className="flex flex-col gap-3">
             <SectionHeader
               title="Program Budgets"
@@ -426,7 +418,9 @@ export default function ProgramFundsPage() {
             icon={<Bars3BottomLeftIcon className="w-6 stroke-accent" />}
             buttonLabel="Add Expense"
             onAction={() => setIsModalOpen(true)}
-            noButton={!(modules?.hasRedemptionManagement && modules?.hasRewardInventory)}
+            noButton={
+              !(modules?.hasRedemptionManagement && modules?.hasRewardInventory)
+            }
           />
 
           {/* Filter tabs */}

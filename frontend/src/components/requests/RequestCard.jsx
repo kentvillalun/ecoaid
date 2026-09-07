@@ -28,7 +28,7 @@ export const RequestCard = ({
     : data?.filter((item) => activeTabConfig.key.includes(item.status));
 
   if (isLoading)
-    return Array.from({ length: 3 }).map((_, index) => (
+    return Array.from({ length: 1 }).map((_, index) => (
       <Card
         className={`flex flex-col items-start gap-3 transition-all hover:cursor-pointer hover:-translate-y-0.5 duration-200 ease-in-out shadow-none! new-border
         }`}

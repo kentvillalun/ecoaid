@@ -121,7 +121,7 @@ export const JunkshopSection = () => {
       {/* Mobile cards */}
       <div className="flex md:hidden flex-col gap-2">
         {isLoading ? (
-          Array.from({ length: 3 }).map((_, index) => (
+          Array.from({ length: 1 }).map((_, index) => (
             <Card
               key={index}
               className="flex flex-col items-start gap-2 shadow-none! new-border"

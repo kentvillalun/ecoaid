@@ -535,6 +535,11 @@ export default function MaterialStockPage() {
                   }
                   handleRefetchCount={handleRefetchCount}
                 />
+              ) : results.length === 0 ? (
+                <Empty
+                  text={"No categories yet"}
+                  subtext={"No recyclable materials have been recorded yet."}
+                />
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {results.map((cat) => (

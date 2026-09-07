@@ -15,7 +15,7 @@ export const RecentTransactionCard = ({
   return (
     <>
       {isLoading ? (
-        Array.from({ length: 3 }).map((_, index) => (
+        Array.from({ length: 1 }).map((_, index) => (
           <Card
             className={`flex flex-col md:hidden items-start gap-3 shadow-none! new-border`}
             key={index}
@@ -41,7 +41,7 @@ export const RecentTransactionCard = ({
         <div className="md:hidden">
           <Error handleRefetchCount={handleRefetchCount} />
         </div>
-      ) : data?.length === 0 ? (
+      ) : data?.recentTransactions.length === 0 ? (
         <div className="flex flex-col items-center justify-center min-h-full p-20 gap-1 md:hidden">
           <h1 className="text-3xl font-semibold text-text-primary">
             No transactions yet
@@ -85,7 +85,9 @@ export const RecentTransactionCard = ({
               <p className="text-xs text-gray-500 font-medium">
                 Actual value: {d?.actualValue}{" "}
                 <span className="">
-                  {d?.actualUnit === "PIECE" ? "pcs" : d?.actualUnit.toLowerCase()}
+                  {d?.actualUnit === "PIECE"
+                    ? "pcs"
+                    : d?.actualUnit.toLowerCase()}
                 </span>
               </p>
             </div>

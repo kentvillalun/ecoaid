@@ -15,9 +15,7 @@ import {
   ReceiptPercentIcon,
   ClipboardDocumentCheckIcon as ClipboardDocumentCheckIconOutline,
 } from "@heroicons/react/24/outline";
-import {
-  ArrowTrendingUpIcon,
-} from "@heroicons/react/24/solid";
+import { ArrowTrendingUpIcon } from "@heroicons/react/24/solid";
 import { useFetch } from "@/hooks/useFetch";
 import { useState } from "react";
 import Skeleton from "react-loading-skeleton";
@@ -70,7 +68,9 @@ export default function BarangayDashboardPage() {
                   <p className="text-xs text-[rgba(255,255,255,0.6)] font-medium uppercase">
                     Total Recyclables Collected
                   </p>
-                  <Skeleton width={158} height={46}/>
+                  <p className="text-white font-bold text-3xl md:text-5xl">
+                    0 kg
+                  </p>
                   <p className="text-xs text-[rgba(255,255,255,0.6)]">
                     Across all collection sources
                   </p>
@@ -88,7 +88,10 @@ export default function BarangayDashboardPage() {
                   <p className="text-xs text-[rgba(255,255,255,0.6)] font-medium uppercase">
                     Current Fund Balance
                   </p>
-                  <Skeleton width={157} height={46}/>
+
+                  <p className="text-white font-bold text-3xl md:text-5xl">
+                    ₱0.00
+                  </p>
                   <p className="text-xs text-[rgba(255,255,255,0.6)]">
                     Available program funds
                   </p>
@@ -109,12 +112,16 @@ export default function BarangayDashboardPage() {
                   Pending requests
                 </p>
                 <IconContainer
-                  icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
+                  icon={
+                    <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
+                  }
                   className="rounded-full! p-2!"
                   containerColor={"var(--color-icon-bg)"}
                 />
               </div>
-              <Skeleton width={100}/>
+              <p className="md:text-2xl font-bold text-text-primary text-lg">
+                0
+              </p>
               <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
                 <ClockIcon className="w-3 stroke-accent" />
                 <p className="text-accent font-medium">Awaiting approval</p>
@@ -127,12 +134,16 @@ export default function BarangayDashboardPage() {
                   Intake transactions
                 </p>
                 <IconContainer
-                  icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
+                  icon={
+                    <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
+                  }
                   className="rounded-full! p-2!"
                   containerColor={"var(--color-icon-bg)"}
                 />
               </div>
-              <Skeleton width={100}/>
+              <p className="md:text-2xl font-bold text-text-primary text-lg">
+                0
+              </p>
               <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
                 <ClipboardDocumentCheckIconOutline className="w-3 stroke-accent" />
                 <p className="text-accent font-medium">Recorded entries</p>
@@ -145,17 +156,19 @@ export default function BarangayDashboardPage() {
                   Unverified residents
                 </p>
                 <IconContainer
-                  icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
+                  icon={
+                    <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
+                  }
                   className="rounded-full! p-2!"
                   containerColor={"var(--color-icon-bg)"}
                 />
               </div>
-              <Skeleton width={100}/>
+              <p className="md:text-2xl font-bold text-text-primary text-lg">
+                0
+              </p>
               <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
                 <ExclamationCircleIcon className="w-3 stroke-accent" />
-                <p className="text-accent font-medium">
-                  Pending verification
-                </p>
+                <p className="text-accent font-medium">Pending verification</p>
               </div>
             </Card>
             <Card className="shadow-none! new-border flex flex-col items-start">
@@ -164,12 +177,16 @@ export default function BarangayDashboardPage() {
                   Program expenses
                 </p>
                 <IconContainer
-                  icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
+                  icon={
+                    <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
+                  }
                   className="rounded-full! p-2!"
                   containerColor={"var(--color-icon-bg)"}
                 />
               </div>
-              <Skeleton width={100}/>
+              <p className="md:text-2xl font-bold text-text-primary text-lg">
+                ₱0.00
+              </p>
               <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
                 <ReceiptPercentIcon className="w-3 stroke-accent" />
                 <p className="text-accent font-medium">Cumulative total</p>
@@ -226,7 +243,9 @@ export default function BarangayDashboardPage() {
                   style={{ border: "0.5px solid var(--color-accent)" }}
                 >
                   <WalletOutline className="w-3.5 stroke-accent" />
-                  <p className="text-accent font-semibold">Income minus expenses</p>
+                  <p className="text-accent font-semibold">
+                    Income minus expenses
+                  </p>
                 </div>
               </div>
             </Card>
@@ -237,13 +256,15 @@ export default function BarangayDashboardPage() {
                   Pending requests
                 </p>
                 <IconContainer
-                  icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
+                  icon={
+                    <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
+                  }
                   className="rounded-full! p-2!"
                   containerColor={"var(--color-icon-bg)"}
                 />
               </div>
               <p className="md:text-2xl font-bold text-text-primary text-lg">
-                {data?.requestedCount}
+                {data?.requestedCount ?? 0}
               </p>
               <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
                 <ClockIcon className="w-3 stroke-accent" />
@@ -257,13 +278,15 @@ export default function BarangayDashboardPage() {
                   Intake transactions
                 </p>
                 <IconContainer
-                  icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
+                  icon={
+                    <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
+                  }
                   className="rounded-full! p-2!"
                   containerColor={"var(--color-icon-bg)"}
                 />
               </div>
               <p className="md:text-2xl font-bold text-text-primary text-lg">
-                {data?.totalRecords}
+                {data?.totalRecords ?? 0}
               </p>
               <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
                 <ClipboardDocumentCheckIconOutline className="w-3 stroke-accent" />
@@ -277,19 +300,19 @@ export default function BarangayDashboardPage() {
                   Unverified residents
                 </p>
                 <IconContainer
-                  icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
+                  icon={
+                    <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
+                  }
                   className="rounded-full! p-2!"
                   containerColor={"var(--color-icon-bg)"}
                 />
               </div>
               <p className="md:text-2xl font-bold text-text-primary text-lg">
-                {data?.unverified}
+                {data?.unverified ?? 0}
               </p>
               <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
                 <ExclamationCircleIcon className="w-3 stroke-accent" />
-                <p className="text-accent font-medium">
-                  For verification
-                </p>
+                <p className="text-accent font-medium">For verification</p>
               </div>
             </Card>
             <Card className="shadow-none! new-border flex flex-col items-start">
@@ -298,7 +321,9 @@ export default function BarangayDashboardPage() {
                   Program expenses
                 </p>
                 <IconContainer
-                  icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
+                  icon={
+                    <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
+                  }
                   className="rounded-full! p-2!"
                   containerColor={"var(--color-icon-bg)"}
                 />

@@ -106,7 +106,7 @@ export default function CollectionRequests() {
             "Review and manage resident pickup requests for recyclable collection."
           }
         />
-        <SearchInput />
+        {/* <SearchInput /> */}
         <div className="flex flex-col gap-3 relative">
           <div className="sticky -top-6 z-30 bg-bg pt-4">
             <StatusChip

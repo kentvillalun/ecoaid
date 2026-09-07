@@ -196,6 +196,7 @@ export default function JunkshopSalesPage() {
       ? "No sales yet. You can press the record sale button above to add sale transaction."
       : `No sales recorded for ${selectedSalesJunkshopName ?? "this junkshop"} yet.`;
 
+      console.log(highestPrices)
   return (
     <Page className="bg-bg! ">
       <BarangayTopBar title="Junkshop Sales" />
@@ -214,20 +215,24 @@ export default function JunkshopSalesPage() {
                 Junkshops Tracked
               </p>
               <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
+                icon={
+                  <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
+                }
                 className="rounded-full! p-2!"
                 containerColor="var(--color-icon-bg)"
               />
             </div>
             {isPricesLoading ? (
-              <Skeleton width={20} />
+              <p className="md:text-2xl font-bold text-text-primary text-base">
+                0
+              </p>
             ) : isPricesError ? (
               <p className="md:text-2xl font-bold text-text-primary text-sm">
                 Data not available
               </p>
             ) : (
               <p className="md:text-2xl font-bold text-text-primary text-base">
-                {pricesData?.junkshops?.length}
+                {pricesData?.junkshops?.length ?? 0}
               </p>
             )}
             <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
@@ -238,24 +243,32 @@ export default function JunkshopSalesPage() {
 
           <Card className="shadow-none! new-border flex flex-col items-start">
             <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-text-secondary">Best Overall</p>
+              <p className="text-xs font-medium text-text-secondary">
+                Best Overall
+              </p>
               <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
+                icon={
+                  <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
+                }
                 className="rounded-full! p-2!"
                 containerColor="var(--color-icon-bg)"
               />
             </div>
-            <p className="md:text-xl font-bold text-text-primary text-base leading-tight mt-1 mb-1">
-              {isPricesLoading ? (
-                <Skeleton width={140} />
-              ) : isPricesError ? (
-                <p className="md:text-2xl font-bold text-text-primary text-sm">
-                  Data not available
-                </p>
-              ) : (
-                bestJunkshop
-              )}
-            </p>
+
+            {isPricesLoading ? (
+              <p className="md:text-2xl font-bold text-text-primary text-base">
+                -
+              </p>
+            ) : isPricesError ? (
+              <p className="md:text-2xl font-bold text-text-primary text-sm">
+                Data not available
+              </p>
+            ) : (
+              <p className="md:text-2xl font-bold text-text-primary text-base">
+                {bestJunkshop ?? "-"}
+              </p>
+            )}
+
             <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
               <TrophyIcon className="w-3 stroke-accent" />
               <p className="text-accent font-medium">Top performer</p>
@@ -264,16 +277,31 @@ export default function JunkshopSalesPage() {
 
           <Card className="shadow-none! new-border flex flex-col items-start col-span-2 lg:col-span-1">
             <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-text-secondary">Stat TBD</p>
+              <p className="text-xs font-medium text-text-secondary">
+                Stat TBD
+              </p>
               <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
+                icon={
+                  <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
+                }
                 className="rounded-full! p-2!"
                 containerColor="var(--color-icon-bg)"
               />
             </div>
-            <p className="md:text-2xl font-bold text-lg select-none">
-              {formatCurrency(highestPrices)}
-            </p>
+            {isPricesLoading ? (
+              <p className="md:text-2xl font-bold text-text-primary text-base">
+                ₱0
+              </p>
+            ) : isPricesError ? (
+              <p className="md:text-2xl font-bold text-text-primary text-sm">
+                Data not available
+              </p>
+            ) : (
+              <p className="md:text-2xl font-bold text-lg select-none">
+                {highestPrices === "Infinity" ? formatCurrency(highestPrices) : "₱0"}
+              </p>
+            )}
+
             <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
               <QuestionMarkCircleIcon className="w-3 stroke-accent" />
               <p className="text-accent font-medium">Placeholder</p>
@@ -374,7 +402,7 @@ export default function JunkshopSalesPage() {
                         );
                         return p?.price;
                       });
-                      const normalizedPrices = prices.map(p => p ?? 0)
+                      const normalizedPrices = prices.map((p) => p ?? 0);
                       const bestIdx = getBestPriceIndex(normalizedPrices);
                       const bestPrice = Math.max(...normalizedPrices);
                       return (
@@ -488,7 +516,9 @@ export default function JunkshopSalesPage() {
                   };
                 });
 
-                const bestIdx = getBestPriceIndex(prices.map((p) => p.price ?? 0));
+                const bestIdx = getBestPriceIndex(
+                  prices.map((p) => p.price ?? 0),
+                );
 
                 return (
                   <Card
@@ -569,9 +599,7 @@ export default function JunkshopSalesPage() {
           <SectionHeader
             title="Sales History"
             subtitle="Recent transactions across junkshops"
-            icon={
-              <ClipboardDocumentListIcon className="w-6 stroke-accent" />
-            }
+            icon={<ClipboardDocumentListIcon className="w-6 stroke-accent" />}
             noButton
           />
 
