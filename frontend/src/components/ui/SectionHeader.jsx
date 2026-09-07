@@ -9,7 +9,7 @@ export const SectionHeader = ({
   buttonLabel,
   onAction,
   buttonIcon = <PlusIcon className="w-5 hidden md:flex" />,
-  buttonClassName,
+  buttonClassName = "gradient-button",
   noButton = false,
   className = ""
 }) => {
@@ -29,7 +29,7 @@ export const SectionHeader = ({
         </div>
         {!noButton && (
           <button
-            className={`gradient-button text-white new-border px-3.5 rounded-lg py-2.5 flex flex-row items-center gap-2 justify-center hover:cursor-pointer transition-all duration-200 ease-in-out min-w-35 md:min-w-45 text-nowrap ${buttonClassName}`}
+            className={` text-white new-border px-3.5 rounded-lg py-2.5 flex flex-row items-center gap-2 justify-center hover:cursor-pointer transition-all duration-200 ease-in-out min-w-35 md:min-w-45 text-nowrap ${buttonClassName}`}
             onClick={onAction}
           >
             {buttonIcon}

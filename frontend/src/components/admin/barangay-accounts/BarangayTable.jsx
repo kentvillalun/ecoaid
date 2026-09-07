@@ -7,6 +7,7 @@ import { getBarangayModules } from "@/lib/getBarangayModules";
 import { Spinner } from "@/components/ui/Spinner";
 import { Empty } from "@/components/ui/Empty";
 import { Error } from "@/components/ui/Error";
+import { useRouter } from "next/navigation";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -29,6 +30,7 @@ const TABLE_HEADERS = [
   "Contact Number",
   "Registered On",
   "Modules",
+  "Action"
 ];
 
 const ModuleTag = ({ label, enabled }) => {
@@ -43,6 +45,7 @@ const ModuleTag = ({ label, enabled }) => {
   );
 };
 export const BarangayTable = ({ data, isLoading, isError, handleRefetchCount }) => {
+  const router = useRouter()
   return (
     <Card
       className={`${inter.className} hidden md:flex md:flex-col new-border px-8 overflow-x-auto md:gap-3 md:items-start shadow-none! rounded-xl!`}
@@ -114,6 +117,9 @@ export const BarangayTable = ({ data, isLoading, isError, handleRefetchCount }) 
                       />
                     ))}
                   </div>
+                </td>
+                <td className="p-4">
+                    <button className="text-text-secondary text-sm hover:underline" onClick={() => router.push(`/barangay-accounts/${b.id}`)}>View details</button>
                 </td>
               </tr>
             ))

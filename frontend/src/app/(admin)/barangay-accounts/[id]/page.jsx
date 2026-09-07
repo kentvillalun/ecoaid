@@ -93,7 +93,7 @@ export default function BarangayAccountDetailsPage() {
     refetchCount: sitiosRefetchCount,
   });
 
-  console.log(staffData)
+  
   useEffect(() => {
     const fetchBarangay = async () => {
       try {
@@ -143,12 +143,12 @@ export default function BarangayAccountDetailsPage() {
         <div className="grid grid-cols-1 gap-3">
           {/* Header card — always visible, independent of loading/error state */}
           <Card className="flex flex-row items-center gap-4 shadow-none! new-border">
-            <Link
-              href="/barangay-accounts"
+            <button
+              onClick={() => router.back()}
               className="flex items-center justify-center w-9 h-9 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <ArrowLeftIcon className="h-4 w-4 text-gray-500" />
-            </Link>
+            </button>
 
             <div className="flex flex-row gap-4 items-center flex-1">
               <div className="border p-3 border-gray-200 rounded-lg md:flex items-center hidden bg-white">

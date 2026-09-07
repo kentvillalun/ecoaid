@@ -22,7 +22,7 @@
   --color-accent-dark: #092517;
 
   /* Fixed brand green for Super Admin — not affected by per-barangay theme overrides */
-  --color-admin-accent: #14532D;
+  --color-admin-accent: #14532d;
   --color-admin-accent-hover: #1f7a42;
   --color-admin-accent-light: #EAF7E3;
   --color-admin-accent-dark: #092517;
@@ -68,6 +68,14 @@ body {
     to bottom,
     var(--color-accent),
     var(--color-accent-dark)
+  );
+}
+
+.gradient-card-admin {
+  background-image: linear-gradient(
+    to bottom,
+    var(--color-admin-accent),
+    var(--color-admin-accent-dark)
   );
 }
 

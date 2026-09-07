@@ -64,10 +64,12 @@ const getAnnouncements = async (req, res) => {
 const deleteAnnouncement = async (req, res) => {
   try {
     const { announcementId } = req.params;
+    const { barangayId } = req.user
 
     const announcement = await prisma.announcement.findUnique({
       where: {
         id: announcementId,
+        barangayId,
       },
     });
 
@@ -77,7 +79,8 @@ const deleteAnnouncement = async (req, res) => {
 
     await prisma.announcement.delete({
       where: {
-        id: announcementId,
+        id: announcement.id,
+        barangayId,
       },
     });
 

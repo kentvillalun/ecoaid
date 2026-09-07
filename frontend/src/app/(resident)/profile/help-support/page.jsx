@@ -22,11 +22,11 @@ export default function HelpAndSupportPage() {
       question: "When will the barangay pick up my recyclables?",
       answer: `Recyclables are pickup every Sunday based on the barangay's default schedule. If you need pickup on a different date, you can submit a pickup request in the app. The barangay will review your request and set a schedule. You can track the status of your request inside the app, and you will receive a notification once it is approved or scheduled.`,
     },
-    {
-      key: "q3",
-      question: "How are rewards computed?",
-      answer: `All collected recyclables will be sorted and checked by the barangay. Based on the type and amount of recyclables you submitted, you will earn rewards. The rewards may include goods or services such as canned goods or other available items. The available rewards depend on what you collected and the barangay’s reward list.`,
-    },
+    // {
+    //   key: "q3",
+    //   question: "How are rewards computed?",
+    //   answer: `All collected recyclables will be sorted and checked by the barangay. Based on the type and amount of recyclables you submitted, you will earn rewards. The rewards may include goods or services such as canned goods or other available items. The available rewards depend on what you collected and the barangay’s reward list.`,
+    // },
     {
       key: "q4",
       question: "What happens during pickup?",

@@ -49,12 +49,12 @@ export const AdminSidebar = () => {
     //   href: "/staff-management",
     //   solidIcon: UsersIcon,
     // },
-    {
-      icon: SettingsIcon,
-      label: "Settings",
-      href: "/settings",
-      solidIcon: Cog6ToothIcon,
-    },
+    // {
+    //   icon: SettingsIcon,
+    //   label: "Settings",
+    //   href: "/settings",
+    //   solidIcon: Cog6ToothIcon,
+    // },
   ];
 
   const handleLogout = async () => {
@@ -100,7 +100,7 @@ export const AdminSidebar = () => {
 
   return (
     <aside
-      className={`w-60 md:w-65 h-svh flex flex-col bg-surface fixed top-0 text-white left-0 z-50 ${inter.className} overflow-y-auto sidebar new-border`}
+      className={`w-60 md:w-65 h-svh flex flex-col bg-surface fixed top-0 text-white left-0 z-40 ${inter.className} overflow-y-auto sidebar new-border`}
     >
       <div className="md:hidden flex pt-4 pr-4 items-end w-full justify-end">
         <XMarkIcon

@@ -23,6 +23,7 @@ import barangayRoute from "./routes/barangay.route.js"
 import notificationRoute from "./routes/notification.route.js"
 import reportsRoute from "./routes/reports.route.js"
 import barangayAccountsRoute from "./routes/barangay-accounts.route.js"
+import adminDashboardRoute from "./routes/admin-dashboard.route.js"
  
 config();
 connectDB();
@@ -62,6 +63,7 @@ app.use("/barangay", barangayRoute)
 app.use("/notifications", notificationRoute)
 app.use("/reports", reportsRoute)
 app.use("/admin", barangayAccountsRoute)
+app.use("/admin", adminDashboardRoute)
 
 const PORT = process.env.PORT || 5001;
 const server = app.listen(PORT, () => {

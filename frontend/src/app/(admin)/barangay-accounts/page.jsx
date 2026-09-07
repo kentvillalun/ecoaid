@@ -34,6 +34,7 @@ export default function BarangayAccountsPage() {
           icon={<BuildingOffice2Icon className="w-6 stroke-admin-accent" />}
           buttonLabel="Register barangay"
           onAction={() => router.push("/barangay-accounts/register")}
+          buttonClassName={"gradient-button-admin"}          
         />
 
         <BarangayTable
