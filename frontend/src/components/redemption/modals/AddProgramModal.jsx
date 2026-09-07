@@ -52,6 +52,8 @@ export const AddProgramModal = ({
     refetchCount: materialRefetchCount,
   });
 
+  
+
   const [isConfirming, setIsConfirming] = useState(false);
 
   const [materialState, setMaterialState] = useState({});
@@ -145,6 +147,7 @@ export const AddProgramModal = ({
       name: program.name,
       description: program.description,
       allotedBudget: program.allotedBudget,
+      isCashMode: program.isCashMode,
     });
   }, [program]);
 

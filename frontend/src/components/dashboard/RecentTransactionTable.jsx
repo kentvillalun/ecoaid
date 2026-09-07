@@ -67,7 +67,7 @@ export const RecentTransactionTable = ({
       header: "Action",
       render: (data) => (
         <button
-          className="text-gray-600 hover:underline"
+          className="text-accent hover:underline"
           onClick={() => {
             router.push(`/collection-requests/${data.requestId}`);
           }}

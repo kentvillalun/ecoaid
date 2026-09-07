@@ -134,6 +134,7 @@ const updateProgram = async (req, res) => {
     const { id } = req.params;
     const { name, allotedBudget, description, maxPoints, isActive, materials } =
       req.body ?? {};
+    const { barangayId } = req.user
 
     const data = {};
     if (name !== undefined) data.name = name;
@@ -143,7 +144,7 @@ const updateProgram = async (req, res) => {
     if (isActive !== undefined) data.isActive = isActive;
 
     await prisma.program.update({
-      where: { id },
+      where: { id, barangayId},
       data,
     });
 

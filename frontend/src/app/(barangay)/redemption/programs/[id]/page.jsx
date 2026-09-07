@@ -74,7 +74,7 @@ const TABLE_COLUMNS = [
     render: (t, isCashMode, router) => (
       <div className="flex items-center justify-center">
         <button
-          className="text-gray-600 hover:underline hover:cursor-pointer"
+          className="text-accent hover:underline hover:cursor-pointer"
           onClick={() => router.push(`/redemption/transactions/${t.id}`)}
         >
           View Details

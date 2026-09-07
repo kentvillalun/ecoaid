@@ -106,7 +106,7 @@ export const RequestTable = ({
         render: (data) => (
           <div className="flex items-center justify-start flex-row gap-3">
             <button
-              className="text-gray-600 hover:underline"
+              className="text-accent hover:underline"
               onClick={() => {
                 router.push(`/collection-requests/${data.id}`);
               }}
@@ -211,7 +211,7 @@ export const RequestTable = ({
         render: (data) => (
           <div className="flex items-center justify-start flex-row gap-3">
             <button
-              className="text-gray-600 hover:underline"
+              className="text-accent hover:underline"
               onClick={() => {
                 router.push(`/collection-requests/${data.id}`);
               }}
@@ -314,7 +314,7 @@ export const RequestTable = ({
         render: (data) => (
           <div className="flex items-center justify-start flex-row gap-3">
             <button
-              className="text-gray-600 hover:underline"
+              className="text-accent hover:underline"
               onClick={() => router.push(`/collection-requests/${data.id}`)}
             >
               View
@@ -405,7 +405,7 @@ export const RequestTable = ({
         render: (data) => (
           <div className="flex items-center justify-start flex-row gap-3">
             <button
-              className="text-gray-600 hover:underline"
+              className="text-accent hover:underline"
               onClick={() => router.push(`/collection-requests/${data.id}`)}
             >
               View
@@ -491,7 +491,7 @@ export const RequestTable = ({
         render: (data) => (
           <div className="flex items-center justify-start">
             <button
-              className="text-gray-600 hover:underline"
+              className="text-accent hover:underline"
               onClick={() => router.push(`/collection-requests/${data.id}`)}
             >
               View Details
@@ -576,7 +576,7 @@ export const RequestTable = ({
         render: (data) => (
           <div className="flex items-center justify-start">
             <button
-              className="text-gray-600 hover:underline"
+              className="text-accent hover:underline"
               onClick={() => router.push(`/collection-requests/${data.id}`)}
             >
               View Details
@@ -659,7 +659,7 @@ export const RequestTable = ({
         render: (data) => (
           <div className="flex items-center justify-start">
             <button
-              className="text-gray-600 hover:underline"
+              className="text-accent hover:underline"
               onClick={() => router.push(`/collection-requests/${data.id}`)}
             >
               View Details

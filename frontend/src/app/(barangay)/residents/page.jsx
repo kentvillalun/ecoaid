@@ -261,7 +261,7 @@ export default function ResidentsPage() {
                         </td>
                         <td className="p-4">
                           <button
-                            className="text-gray-600 hover:underline"
+                            className="text-accent hover:underline"
                             onClick={() => {
                               setIsEditModalOpen(true);
                               setCurrentResidentData(resident);
@@ -339,7 +339,7 @@ export default function ResidentsPage() {
                       {formatDate(resident.createdAt)}
                     </p>
                     <button
-                      className="text-xs text-gray-600 font-medium new-border px-3 py-1.5 rounded-xl"
+                      className="text-xs text-accent font-medium new-border px-3 py-1.5 rounded-xl"
                       onClick={() => {
                         setIsEditModalOpen(true);
                         setCurrentResidentData(resident)

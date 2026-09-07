@@ -156,7 +156,7 @@ const updateStatus = async (req, res) => {
 
     if (status === "APPROVED") {
       const request = await prisma.pickupRequests.update({
-        where: { id },
+        where: { id, barangayId },
         data: { status: "APPROVED", approvedAt: new Date() },
       });
 
@@ -173,7 +173,7 @@ const updateStatus = async (req, res) => {
 
     if (status === "IN_PROGRESS") {
       const request = await prisma.pickupRequests.update({
-        where: { id },
+        where: { id, barangayId },
         data: { isScheduled: true, status: "IN_PROGRESS" },
       });
 
@@ -189,12 +189,18 @@ const updateStatus = async (req, res) => {
     }
 
     if (status === "COLLECTED") {
-      const { userId } = await prisma.pickupRequests.findUnique({
-        where: { id },
+      const requestData = await prisma.pickupRequests.findUnique({
+        where: { id, barangayId },
         select: {
           userId: true,
         },
       });
+
+      if (!requestData) {
+        return res.status(400).json({ error: "Request not found"})
+      }
+
+      const { userId } = requestData
 
       await prisma.$transaction(async (tx) => {
         await tx.collectionItem.createMany({
@@ -222,7 +228,7 @@ const updateStatus = async (req, res) => {
         });
 
         await tx.pickupRequests.update({
-          where: { id },
+          where: { id, barangayId },
           data: {
             status: "COLLECTED",
             collectedAt: new Date(),
@@ -256,7 +262,7 @@ const updateStatus = async (req, res) => {
       }
 
       const request = await prisma.pickupRequests.update({
-        where: { id },
+        where: { id, barangayId },
         data: {
           status: "REJECTED",
           rejectedAt: new Date(),
@@ -284,9 +290,11 @@ const updateStatus = async (req, res) => {
 const getRequest = async (req, res) => {
   try {
     const { id } = req.params;
+    const { barangayId } = req.user;
+    
 
     const request = await prisma.pickupRequests.findUnique({
-      where: { id },
+      where: { id, barangayId },
       select: {
         user: {
           select: {

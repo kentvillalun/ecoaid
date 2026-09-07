@@ -169,7 +169,7 @@ export const TransactionTable = ({
       render: (data) => (
         <div className="flex items-center justify-start">
           <button
-            className="text-gray-600 hover:underline hover:cursor-pointer"
+            className="text-accent hover:underline hover:cursor-pointer"
             onClick={() => router.push(`/redemption/transactions/${data.id}`)}
           >
             View Details
