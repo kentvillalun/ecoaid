@@ -12,6 +12,7 @@ import { useFetch } from "@/hooks/useFetch";
 import { BuildingStorefrontIcon } from "@heroicons/react/24/outline";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+import { Empty } from "../ui/Empty";
 
 const TABLE_HEADERS = ["Junkshop", "Location", "Status"];
 export const JunkshopSection = () => {
