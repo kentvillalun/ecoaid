@@ -7,7 +7,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "ecoprofit-production.up.railway.app",
+        hostname: "ecoaid-ydrs.onrender.com",
       },
       {
         protocol: "https",
@@ -19,7 +19,7 @@ const nextConfig = {
     const backendUrl =
       process.env.NODE_ENV === "development"
         ? "http://localhost:5001"
-        : "https://ecoprofit-production.up.railway.app";
+        : "https://ecoaid-ydrs.onrender.com"; //  "https://ecoprofit-production.up.railway.app";
 
     return [
       {
