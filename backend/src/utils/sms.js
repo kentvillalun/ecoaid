@@ -29,8 +29,10 @@ const sendOtp = async (phoneNumber) => {
   const result = await response.json();
   const code = result[0]?.code?.toString();
 
+
+
   if (!code) {
-    throw new Error("Semaphore did not return an OTP code");
+    throw new Error("We couldn't send your verification code. Please try again in a moment.");
   }
 
   return code;

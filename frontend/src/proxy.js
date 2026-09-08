@@ -120,6 +120,6 @@ export const config = {
     "/reports/:path*",
     "/admin-dashboard/:path*",
     "/barangay-accounts/:path*",
-
+    
   ],
 };

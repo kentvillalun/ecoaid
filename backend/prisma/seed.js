@@ -60,6 +60,44 @@ const DEV_STAFF = [
 
 const DEV_CATEGORIES = ["Metals", "Papers", "Plastics", "Glass"];
 
+async function seedSampleResident() {
+  const DEV_SAMPLE_RESIDENT = {
+    username: "kentvillalun",
+    phoneNumber: "09265065614",
+    passwordHash: "kent123",
+    role: Role.RESIDENT,
+    barangayId: "c354a84f-e168-45c8-a54c-c1fb28d5495d",
+    firstName: "Kent",
+    lastName: "Villalun",
+  };
+
+  const passwordHash = await bcrypt.hash(DEV_SAMPLE_RESIDENT.passwordHash, 10);
+
+  await prisma.user.upsert({
+    where: {
+      username: DEV_SAMPLE_RESIDENT.username,
+    },
+    update: {
+      username: DEV_SAMPLE_RESIDENT.username,
+      phoneNumber: DEV_SAMPLE_RESIDENT.phoneNumber,
+      passwordHash,
+      role: DEV_SAMPLE_RESIDENT.role,
+      barangayId: DEV_SAMPLE_RESIDENT.barangayId,
+      firstName: DEV_SAMPLE_RESIDENT.firstName,
+      lastName: DEV_SAMPLE_RESIDENT.lastName,
+    },
+    create: {
+      username: DEV_SAMPLE_RESIDENT.username,
+      phoneNumber: DEV_SAMPLE_RESIDENT.phoneNumber,
+      passwordHash,
+      role: DEV_SAMPLE_RESIDENT.role,
+      barangayId: DEV_SAMPLE_RESIDENT.barangayId,
+      firstName: DEV_SAMPLE_RESIDENT.firstName,
+      lastName: DEV_SAMPLE_RESIDENT.lastName,
+    },
+  });
+}
+
 async function seedSuperAdmin() {
   const DEV_SUPER_ADMIN = {
     username: "superadmin",
@@ -345,7 +383,8 @@ async function main() {
     });
   }
 
-  seedSuperAdmin()
+  seedSuperAdmin();
+  seedSampleResident()
 }
 
 main()
