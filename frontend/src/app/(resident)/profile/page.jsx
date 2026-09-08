@@ -44,7 +44,7 @@ export default function ProfilePage() {
       }
 
       sessionStorage.setItem("skipSplash", "true");
-      localStorage.removeItem("ecoprofitResidentSession");
+      localStorage.removeItem("ecoaidResidentSession");
       router.push("/login");
     } catch (error) {
       toast.error("Logout failed");

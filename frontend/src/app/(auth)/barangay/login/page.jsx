@@ -1,7 +1,7 @@
 "use client";
 
 import { Inter } from "next/font/google";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -68,6 +68,13 @@ export default function BarangayLoginPage() {
         entry.roles.includes(result?.user?.role),
       );
 
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(
+          "ecoaidBarangaySession",
+          JSON.stringify(result?.user),
+        );
+      }
+
       router.push(firstAccessibleRoute.route ?? "/403");
     } catch (error) {
       setErrorMessage("Something went wrong. Please try again.");
@@ -76,6 +83,20 @@ export default function BarangayLoginPage() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+     
+    const session = localStorage.getItem("ecoaidBarangaySession");
+    if (session) {
+      const user = JSON.parse(session);
+      const firstAccessibleRoute = ROLE_MATRIX.find((entry) =>
+        entry.roles.includes(user?.role),
+      );
+      router.push(firstAccessibleRoute.route ?? "/403")
+    }
+  }, []);
+
   return (
     <main
       className={`min-h-svh flex items-center justify-center w-full bg-bg  ${inter.className} `}

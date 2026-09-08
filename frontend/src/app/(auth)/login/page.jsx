@@ -85,7 +85,7 @@ export default function LoginPage() {
 
     if (typeof window !== "undefined") {
       window.localStorage.setItem(
-        "ecoprofitResidentSession",
+        "ecoaidResidentSession",
         JSON.stringify(result.data),
       );
     }
@@ -99,7 +99,7 @@ export default function LoginPage() {
     if (isAndroid || sessionStorage.getItem("skipSplash")) {
       sessionStorage.removeItem("skipSplash");
 
-      if (localStorage.getItem("ecoprofitResidentSession")) {
+      if (localStorage.getItem("ecoaidResidentSession")) {
         router.push("/home");
         return;
       }
@@ -120,7 +120,7 @@ export default function LoginPage() {
       setTimeout(() => {
         const checking = () => {
           // Checks if the user has already logged in, if yes redirect to home
-          if (localStorage.getItem("ecoprofitResidentSession")) {
+          if (localStorage.getItem("ecoaidResidentSession")) {
             router.push("/home");
             return;
           }

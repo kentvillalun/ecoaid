@@ -5,11 +5,13 @@ import { PageContent } from "@/components/layout/PageContent.jsx";
 import { ResidentHeader } from "@/components/navigation/ResidentHeader.jsx";
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function SettingsPage() {
+  const router = useRouter()
   return (
     <Page className="bg-bg!">
-      <ResidentHeader title={"Settings"} className="shadow-none bg-bg!" />
+      <ResidentHeader title={"Settings"} className="shadow-none bg-bg!" handleClick={() => router.push("/profile")}/>
 
       <PageContent>
         <div className="">
