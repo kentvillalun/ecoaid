@@ -507,7 +507,7 @@ export default function MaterialStockPage() {
             </p>
             <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-2">
               <CubeIcon className="w-3 stroke-accent" />
-              <p className="text-accent font-medium">Piece-based materials</p>
+              <p className="text-accent font-medium">Piece-based</p>
             </div>
           </Card>
         </section>

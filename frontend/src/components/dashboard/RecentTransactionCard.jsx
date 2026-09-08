@@ -4,6 +4,7 @@ import { Error } from "../ui/Error";
 import { MaterialTag } from "../ui/MaterialTag";
 import { formatDate } from "@/lib/formatDate";
 import { useRouter } from "next/navigation";
+import { Empty } from "../ui/Empty";
 
 export const RecentTransactionCard = ({
   data,
@@ -42,14 +43,10 @@ export const RecentTransactionCard = ({
           <Error handleRefetchCount={handleRefetchCount} />
         </div>
       ) : data?.recentTransactions.length === 0 ? (
-        <div className="flex flex-col items-center justify-center min-h-full p-20 gap-1 md:hidden">
-          <h1 className="text-3xl font-semibold text-text-primary">
-            No transactions yet
-          </h1>
-          <p className="text-sm text-[#6B7280]">
-            There are no redemption trasaction yet.
-          </p>
-        </div>
+        <Empty
+          text={"No transactions yet"}
+          subtext={"There are no intake transactions yet"}
+        />
       ) : (
         data?.recentTransactions?.map((d) => (
           <Card
