@@ -2,7 +2,7 @@
 
 import { Inter } from "next/font/google";
 import { LogoWithName } from "@/components/branding/LogoWithName";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
@@ -23,7 +23,7 @@ export default function AdminLoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter()
+  const router = useRouter();
 
   const {
     register,
@@ -39,30 +39,43 @@ export default function AdminLoginPage() {
 
   const onSubmit = async (data) => {
     try {
-        setIsLoading(true)
-        const response = await fetch(`/api/auth/admin/login`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(data),
-            credentials: "include"
-        })
+      setIsLoading(true);
+      const response = await fetch(`/api/auth/admin/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+        credentials: "include",
+      });
 
-        const result = await response.json();
+      const result = await response.json();
 
-        if (!response.ok) {
-            setErrorMessage(result.error || "Login failed")
-            return;
-        }
+      if (!response.ok) {
+        setErrorMessage(result.error || "Login failed");
+        return;
+      }
 
-        router.push("/admin-dashboard")
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(
+          "ecoaidAdminSession",
+          JSON.stringify(result?.user),
+        );
+      }
+      router.push("/admin-dashboard");
     } catch (error) {
-        setErrorMessage("Something went wrong. Please try again.")
+      setErrorMessage("Something went wrong. Please try again.");
     } finally {
-        setIsLoading(false)
+      setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (localStorage.getItem("ecoaidAdminSession")) {
+      router.push("/admin-dashboard")
+    }
+
+  }, [])
 
   return (
     <main
@@ -139,7 +152,7 @@ export default function AdminLoginPage() {
               </div>
               {errorMessage && (
                 <p className="text-xs text-red-500 text-start">
-                    {errorMessage}
+                  {errorMessage}
                 </p>
               )}
             </div>

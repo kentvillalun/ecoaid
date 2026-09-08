@@ -72,6 +72,7 @@ export const AdminSidebar = () => {
         return;
       }
 
+      localStorage.removeItem("ecoaidAdminSession")
       router.push("/admin/login")
     } catch (error) {
       toast.error("Logout failed")
