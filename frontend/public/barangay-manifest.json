@@ -19,5 +19,6 @@
   "background_color": "#092517",
   "display": "standalone",
   "start_url": "/barangay/login",
+  "scope": "/",
   "description": "EcoAid turns waste materials into worth through a Community Buyback and management platform."
 }
