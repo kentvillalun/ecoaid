@@ -3,7 +3,7 @@
 import { Inter } from "next/font/google";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import { useContext } from "react";
-import { DrawerContext } from "@/app/(barangay)/layout.jsx";
+import { DrawerContext } from "@/app/(barangay)/BarangayLayoutClient.jsx";
 
 const inter = Inter({
   subsets: ["latin"],

@@ -29,7 +29,7 @@ import { formatDate } from "@/lib/formatDate";
 import { Spinner } from "@/components/ui/Spinner";
 import { Error } from "@/components/ui/Error";
 import { Empty } from "@/components/ui/Empty";
-import { DrawerContext } from "../layout";
+import { DrawerContext } from "../BarangayLayoutClient";
 
 const inter = Inter({
   subsets: ["latin"],

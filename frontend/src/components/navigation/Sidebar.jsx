@@ -32,7 +32,7 @@ import {
   ChevronDownIcon,
 } from "@heroicons/react/24/outline";
 import { useContext, useState } from "react";
-import { DrawerContext } from "@/app/(barangay)/layout.jsx";
+import { DrawerContext } from "@/app/(barangay)/BarangayLayoutClient.jsx";
 import Link from "next/link";
 import { Inter } from "next/font/google";
 import { API_BASE_URL } from "@/lib/config";
