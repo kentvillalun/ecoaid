@@ -38,7 +38,6 @@ import { Inter } from "next/font/google";
 import { API_BASE_URL } from "@/lib/config";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Logo } from "../branding/Logo";
 import { ROLE_MATRIX } from "@/lib/roles";
@@ -235,6 +234,7 @@ export const Sidebar = () => {
         return;
       }
 
+      localStorage.removeItem("ecoaidBarangaySession")
       router.push("/barangay/login");
     } catch (error) {
       toast.error("Logout failed");

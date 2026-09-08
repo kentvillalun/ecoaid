@@ -91,7 +91,7 @@ export default function BarangayLoginPage() {
     if (session) {
       const user = JSON.parse(session);
       const firstAccessibleRoute = ROLE_MATRIX.find((entry) =>
-        entry.roles.includes(user?.role),
+        entry.roles.includes(user?.role)
       );
       router.push(firstAccessibleRoute.route ?? "/403")
     }
