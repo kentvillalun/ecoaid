@@ -261,7 +261,7 @@ export default function CapturePage() {
 
           {/* The open camera button */}
           {capturedImageUrl ? (
-            <div className="grid w-full max-w-md gap-3 grid-cols-2 items-center justify-center">
+            <div className="grid w-full gap-3 grid-cols-2 items-center justify-center">
               <button
                 className="text-gray-600 p-3 rounded-xl text-sm new-border min-w-27 bg-white"
                 onClick={() => {
