@@ -82,102 +82,92 @@ export default function ResidentsPage() {
 
         {/* Summary Cards */}
         <section className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-          <Card className="shadow-none! new-border flex flex-col items-start">
-            <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-text-secondary">
-                Total Residents
-              </p>
-              <IconContainer
-                icon={
-                  <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
-                }
-                className="rounded-full! p-2!"
-                containerColor="var(--color-icon-bg)"
-              />
-            </div>
-            {isLoading ? (
-              <p className="md:text-2xl font-bold text-text-primary text-base">
-                0
-              </p>
-            ) : isError ? (
-              <p className="font-bold text-text-primary text-sm">
-                Data not available
-              </p>
-            ) : (
-              <p className="md:text-2xl font-bold text-text-primary text-base">
-                {totalCount ?? 0}
-              </p>
-            )}
-            <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1 ">
-              <UsersIcon className="w-3 stroke-accent" />
-              <p className="text-accent font-medium hidden md:flex">Registered accounts</p>
-              <p className="text-accent font-medium flex md:hidden">Registered</p>
+          <Card className="shadow-none! new-border flex flex-col items-start gap-3">
+            <p className="text-xs font-medium text-text-secondary">
+              Total Residents
+            </p>
+
+            <div className="flex flex-col items-start gap-1">
+              {isLoading ? (
+                <p className="md:text-2xl font-bold text-text-primary text-base">
+                  0
+                </p>
+              ) : isError ? (
+                <p className="font-bold text-text-primary text-sm">
+                  Data not available
+                </p>
+              ) : (
+                <p className="md:text-2xl font-bold text-text-primary text-base">
+                  {totalCount ?? 0}
+                </p>
+              )}
+              <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1 ">
+                <UsersIcon className="w-3 stroke-accent" />
+                <p className="text-accent font-medium hidden md:flex">
+                  Registered accounts
+                </p>
+                <p className="text-accent font-medium flex md:hidden">
+                  Registered
+                </p>
+              </div>
             </div>
           </Card>
 
-          <Card className="shadow-none! new-border flex flex-col items-start">
-            <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-text-secondary">
-                Verified
-              </p>
-              <IconContainer
-                icon={
-                  <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
-                }
-                className="rounded-full! p-2!"
-                containerColor="var(--color-icon-bg)"
-              />
-            </div>
-            {isLoading ? (
-              <p className="md:text-2xl font-bold text-text-primary text-base">
-                0
-              </p>
-            ) : isError ? (
-              <p className="font-bold text-text-primary text-sm">
-                Data not available
-              </p>
-            ) : (
-              <p className="md:text-2xl font-bold text-text-primary text-base">
-                {verifiedCount ?? 0}
-              </p>
-            )}
-            <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
-              <CheckBadgeIcon className="w-3 stroke-accent" />
-              <p className="text-accent font-medium">Verified accounts</p>
+          <Card className="shadow-none! new-border flex flex-col items-start gap-3">
+            <p className="text-xs font-medium text-text-secondary">Verified</p>
+
+            <div className="flex flex-col items-start gap-1">
+              {isLoading ? (
+                <p className="md:text-2xl font-bold text-text-primary text-base">
+                  0
+                </p>
+              ) : isError ? (
+                <p className="font-bold text-text-primary text-sm">
+                  Data not available
+                </p>
+              ) : (
+                <p className="md:text-2xl font-bold text-text-primary text-base">
+                  {verifiedCount ?? 0}
+                </p>
+              )}
+              <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+                <CheckBadgeIcon className="w-3 stroke-accent" />
+
+                <p className="text-accent font-medium md:hidden flex">
+                  Verified
+                </p>
+                <p className="text-accent font-medium md:flex hidden">
+                  Verified accounts
+                </p>
+              </div>
             </div>
           </Card>
 
-          <Card className="shadow-none! new-border flex flex-col items-start col-span-2 lg:col-span-1">
-            <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-text-secondary">
-                Unverified
-              </p>
-              <IconContainer
-                icon={
-                  <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
-                }
-                className="rounded-full! p-2!"
-                containerColor="var(--color-icon-bg)"
-              />
-            </div>
-            {isLoading ? (
-              <p className="md:text-2xl font-bold text-text-primary text-base">
-                0
-              </p>
-            ) : isError ? (
-              <p className="font-bold text-text-primary text-sm">
-                Data not available
-              </p>
-            ) : (
-              <p className="md:text-2xl font-bold text-text-primary text-base">
-                {unverifiedCount ?? 0}
-              </p>
-            )}
-            <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
-              <ExclamationCircleIcon className="w-3 stroke-accent" />
-              <p className="text-accent font-medium">
-                No completed transactions yet
-              </p>
+          <Card className="shadow-none! new-border flex flex-col items-start col-span-2 lg:col-span-1 gap-3">
+            <p className="text-xs font-medium text-text-secondary">
+              Unverified
+            </p>
+
+            <div className="flex flex-col gap-1 items-start">
+              {isLoading ? (
+                <p className="md:text-2xl font-bold text-text-primary text-base">
+                  0
+                </p>
+              ) : isError ? (
+                <p className="font-bold text-text-primary text-sm">
+                  Data not available
+                </p>
+              ) : (
+                <p className="md:text-2xl font-bold text-text-primary text-base">
+                  {unverifiedCount ?? 0}
+                </p>
+              )}
+              <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+                <ExclamationCircleIcon className="w-3 stroke-accent" />
+                <p className="text-accent font-medium">
+                  No completed transactions yet
+                </p>
+              </div>
             </div>
           </Card>
         </section>

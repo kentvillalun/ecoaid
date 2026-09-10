@@ -202,7 +202,7 @@ export const RedemptionRewardsSection = ({ dateRange, setDateRange, programId, s
         noButton
       />
 
-      <div className="flex flex-row flex-wrap items-center justify-between gap-2">
+      <div className="flex flex-row flex-wrap items-end md:items-center justify-between gap-2">
         <DateRangePicker
           startDate={dateRange.startDate}
           endDate={dateRange.endDate}

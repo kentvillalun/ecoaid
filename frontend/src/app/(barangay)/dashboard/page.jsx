@@ -109,90 +109,64 @@ export default function BarangayDashboardPage() {
               </div>
             </Card>
 
-            <Card className="shadow-none! new-border flex flex-col items-start">
-              <div className="flex flex-row items-start justify-between w-full">
-                <p className="text-xs font-medium text-text-secondary flex-1">
-                  Pending requests
-                </p>
-                <IconContainer
-                  icon={
-                    <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
-                  }
-                  className="rounded-full! p-2!"
-                  containerColor={"var(--color-icon-bg)"}
-                />
-              </div>
-              <p className="md:text-2xl font-bold text-text-primary text-lg">
-                0
+            <Card className="shadow-none! new-border flex flex-col items-start gap-3">
+              <p className="text-xs font-medium text-text-secondary flex-1">
+                Pending requests
               </p>
-              <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
-                <ClockIcon className="w-3 stroke-accent" />
-                <p className="text-accent font-medium">Awaiting approval</p>
+              <div className="flex flex-col items-start gap-1">
+                <p className="md:text-2xl font-bold text-text-primary text-lg">
+                  0
+                </p>
+                <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+                  <ClockIcon className="w-3 stroke-accent" />
+                  <p className="text-accent font-medium">To approve</p>
+                </div>
               </div>
             </Card>
 
-            <Card className="shadow-none! new-border flex flex-col items-start">
-              <div className="flex flex-row items-start justify-between w-full">
-                <p className="text-xs font-medium text-text-secondary">
-                  Intake transactions
-                </p>
-                <IconContainer
-                  icon={
-                    <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
-                  }
-                  className="rounded-full! p-2!"
-                  containerColor={"var(--color-icon-bg)"}
-                />
-              </div>
-              <p className="md:text-2xl font-bold text-text-primary text-lg">
-                0
+            <Card className="shadow-none! new-border flex flex-col items-start gap-3">
+              <p className="text-xs font-medium text-text-secondary">
+                Intake transactions
               </p>
-              <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
-                <ClipboardDocumentCheckIconOutline className="w-3 stroke-accent" />
-                <p className="text-accent font-medium">Recorded entries</p>
+
+              <div className="flex flex-col items-start gap-1">
+                <p className="md:text-2xl font-bold text-text-primary text-lg">
+                  0
+                </p>
+                <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+                  <ClipboardDocumentCheckIconOutline className="w-3 stroke-accent" />
+                  <p className="text-accent font-medium md:hidden flex">Entries</p>
+                  <p className="text-accent font-medium md:flex hidden">Recorded entries</p>
+                </div>
               </div>
             </Card>
 
-            <Card className="shadow-none! new-border flex flex-col items-start">
-              <div className="flex flex-row items-start justify-between w-full">
-                <p className="text-xs font-medium text-text-secondary">
-                  Unverified residents
-                </p>
-                <IconContainer
-                  icon={
-                    <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
-                  }
-                  className="rounded-full! p-2!"
-                  containerColor={"var(--color-icon-bg)"}
-                />
-              </div>
-              <p className="md:text-2xl font-bold text-text-primary text-lg">
-                0
+            <Card className="shadow-none! new-border flex flex-col items-start gap-3">
+              <p className="text-xs font-medium text-text-secondary ">
+                Unverified residents
               </p>
-              <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
-                <ExclamationCircleIcon className="w-3 stroke-accent" />
-                <p className="text-accent font-medium">Pending verification</p>
+              <div className="flex flex-col items-start gap-1">
+                <p className="md:text-2xl font-bold text-text-primary text-lg">
+                  0
+                </p>
+                <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+                  <ExclamationCircleIcon className="w-3 stroke-accent" />
+                  <p className="text-accent font-medium">For verification</p>
+                </div>
               </div>
             </Card>
-            <Card className="shadow-none! new-border flex flex-col items-start">
-              <div className="flex flex-row items-start justify-between w-full">
-                <p className="text-xs font-medium text-text-secondary">
-                  Program expenses
-                </p>
-                <IconContainer
-                  icon={
-                    <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
-                  }
-                  className="rounded-full! p-2!"
-                  containerColor={"var(--color-icon-bg)"}
-                />
-              </div>
-              <p className="md:text-2xl font-bold text-text-primary text-lg">
-                ₱0.00
+            <Card className="shadow-none! new-border flex flex-col items-start gap-3">
+              <p className="text-xs font-medium text-text-secondary">
+                Program expenses
               </p>
-              <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
-                <ReceiptPercentIcon className="w-3 stroke-accent" />
-                <p className="text-accent font-medium">Cumulative total</p>
+              <div className="flex flex-col items-start gap-1">
+                <p className="md:text-2xl font-bold text-text-primary text-lg">
+                  ₱0.00
+                </p>
+                <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+                  <ReceiptPercentIcon className="w-3 stroke-accent" />
+                  <p className="text-accent font-medium">Cumulative total</p>
+                </div>
               </div>
             </Card>
           </section>
@@ -255,90 +229,64 @@ export default function BarangayDashboardPage() {
               </div>
             </Card>
 
-            <Card className="shadow-none! new-border flex flex-col items-start">
-              <div className="flex flex-row items-start justify-between w-full">
-                <p className="text-xs font-medium text-text-secondary flex-1">
-                  Pending requests
-                </p>
-                <IconContainer
-                  icon={
-                    <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
-                  }
-                  className="rounded-full! p-2!"
-                  containerColor={"var(--color-icon-bg)"}
-                />
-              </div>
-              <p className="md:text-2xl font-bold text-text-primary text-lg">
-                {data?.requestedCount ?? 0}
+            <Card className="shadow-none! new-border flex flex-col items-start gap-3">
+              <p className="text-xs font-medium text-text-secondary flex-1">
+                Pending requests
               </p>
-              <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
-                <ClockIcon className="w-3 stroke-accent" />
-                <p className="text-accent font-medium">To approve</p>
+              <div className="flex flex-col items-start gap-1">
+                <p className="md:text-2xl font-bold text-text-primary text-lg">
+                  {data?.requestedCount ?? 0}
+                </p>
+                <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+                  <ClockIcon className="w-3 stroke-accent" />
+                  <p className="text-accent font-medium">To approve</p>
+                </div>
               </div>
             </Card>
 
-            <Card className="shadow-none! new-border flex flex-col items-start">
-              <div className="flex flex-row items-start justify-between w-full">
-                <p className="text-xs font-medium text-text-secondary">
-                  Intake transactions
-                </p>
-                <IconContainer
-                  icon={
-                    <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
-                  }
-                  className="rounded-full! p-2!"
-                  containerColor={"var(--color-icon-bg)"}
-                />
-              </div>
-              <p className="md:text-2xl font-bold text-text-primary text-lg">
-                {data?.totalRecords ?? 0}
+            <Card className="shadow-none! new-border flex flex-col items-start gap-3">
+              <p className="text-xs font-medium text-text-secondary">
+                Intake transactions
               </p>
-              <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
-                <ClipboardDocumentCheckIconOutline className="w-3 stroke-accent" />
-                <p className="text-accent font-medium">Recorded entries</p>
+
+              <div className="flex flex-col items-start gap-1">
+                <p className="md:text-2xl font-bold text-text-primary text-lg">
+                  {data?.totalRecords ?? 0}
+                </p>
+                <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+                  <ClipboardDocumentCheckIconOutline className="w-3 stroke-accent" />
+                   <p className="text-accent font-medium md:hidden flex">Entries</p>
+                  <p className="text-accent font-medium md:flex hidden">Recorded entries</p>
+                </div>
               </div>
             </Card>
 
-            <Card className="shadow-none! new-border flex flex-col items-start">
-              <div className="flex flex-row items-start justify-between w-full">
-                <p className="text-xs font-medium text-text-secondary ">
-                  Unverified residents
-                </p>
-                <IconContainer
-                  icon={
-                    <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
-                  }
-                  className="rounded-full! p-2!"
-                  containerColor={"var(--color-icon-bg)"}
-                />
-              </div>
-              <p className="md:text-2xl font-bold text-text-primary text-lg">
-                {data?.unverified ?? 0}
+            <Card className="shadow-none! new-border flex flex-col items-start gap-3">
+              <p className="text-xs font-medium text-text-secondary ">
+                Unverified residents
               </p>
-              <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
-                <ExclamationCircleIcon className="w-3 stroke-accent" />
-                <p className="text-accent font-medium">For verification</p>
+              <div className="flex flex-col items-start gap-1">
+                <p className="md:text-2xl font-bold text-text-primary text-lg">
+                  {data?.unverified ?? 0}
+                </p>
+                <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+                  <ExclamationCircleIcon className="w-3 stroke-accent" />
+                  <p className="text-accent font-medium">For verification</p>
+                </div>
               </div>
             </Card>
-            <Card className="shadow-none! new-border flex flex-col items-start">
-              <div className="flex flex-row items-start justify-between w-full">
-                <p className="text-xs font-medium text-text-secondary">
-                  Program expenses
-                </p>
-                <IconContainer
-                  icon={
-                    <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
-                  }
-                  className="rounded-full! p-2!"
-                  containerColor={"var(--color-icon-bg)"}
-                />
-              </div>
-              <p className="md:text-2xl font-bold text-text-primary text-lg">
-                {formatCurrency(data?.programExpenses ?? 0)}
+            <Card className="shadow-none! new-border flex flex-col items-start gap-3">
+              <p className="text-xs font-medium text-text-secondary">
+                Program expenses
               </p>
-              <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
-                <ReceiptPercentIcon className="w-3 stroke-accent" />
-                <p className="text-accent font-medium">Cumulative total</p>
+              <div className="flex flex-col items-start gap-1">
+                <p className="md:text-2xl font-bold text-text-primary text-lg">
+                  {formatCurrency(data?.programExpenses ?? 0)}
+                </p>
+                <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+                  <ReceiptPercentIcon className="w-3 stroke-accent" />
+                  <p className="text-accent font-medium">Cumulative total</p>
+                </div>
               </div>
             </Card>
           </section>
@@ -349,7 +297,7 @@ export default function BarangayDashboardPage() {
             title={"Recent Intake Transactions"}
             subtitle={"Latest recorded material intake entries"}
             buttonIcon={""}
-            buttonLabel={"View all ->"}
+            buttonLabel={"View all"}
             onAction={() => router.push("/collection-requests")}
           />
 

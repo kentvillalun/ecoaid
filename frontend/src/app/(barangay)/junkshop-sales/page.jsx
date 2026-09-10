@@ -162,20 +162,24 @@ export default function JunkshopSalesPage() {
     );
   });
 
+  const hasJunkshops = (pricesData?.junkshops?.length ?? 0) > 0;
+
   // Sourced from all junkshops on file (pricesData), not just ones with
   // sales, so a junkshop with zero transactions still shows up as "(0)".
-  const salesJunkshopFilterOptions = [
-    {
-      value: "ALL",
-      label: "All",
-      count: salesData?.enrichedSales?.length ?? 0,
-    },
-    ...(pricesData?.junkshops?.map((shop) => ({
-      value: shop.id,
-      label: shop.name,
-      count: salesCountByJunkshopId.get(shop.id) ?? 0,
-    })) ?? []),
-  ];
+  const salesJunkshopFilterOptions = hasJunkshops
+    ? [
+        {
+          value: "ALL",
+          label: "All",
+          count: salesData?.enrichedSales?.length ?? 0,
+        },
+        ...(pricesData?.junkshops?.map((shop) => ({
+          value: shop.id,
+          label: shop.name,
+          count: salesCountByJunkshopId.get(shop.id) ?? 0,
+        })) ?? []),
+      ]
+    : [{ value: "ALL", label: "No sales yet", disabled: true }];
 
   const selectedSalesJunkshopName = pricesData?.junkshops?.find(
     (shop) => shop.id === salesJunkshopFilter,
@@ -196,7 +200,7 @@ export default function JunkshopSalesPage() {
       ? "No sales yet. You can press the record sale button above to add sale transaction."
       : `No sales recorded for ${selectedSalesJunkshopName ?? "this junkshop"} yet.`;
 
-      console.log(highestPrices)
+  console.log(highestPrices);
   return (
     <Page className="bg-bg! ">
       <BarangayTopBar title="Junkshop Sales" />
@@ -209,102 +213,81 @@ export default function JunkshopSalesPage() {
 
         {/* Summary Cards */}
         <section className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-          <Card className="shadow-none! new-border flex flex-col items-start">
-            <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-text-secondary">
-                Junkshops Tracked
-              </p>
-              <IconContainer
-                icon={
-                  <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
-                }
-                className="rounded-full! p-2!"
-                containerColor="var(--color-icon-bg)"
-              />
-            </div>
-            {isPricesLoading ? (
-              <p className="md:text-2xl font-bold text-text-primary text-base">
-                0
-              </p>
-            ) : isPricesError ? (
-              <p className="md:text-2xl font-bold text-text-primary text-sm">
-                Data not available
-              </p>
-            ) : (
-              <p className="md:text-2xl font-bold text-text-primary text-base">
-                {pricesData?.junkshops?.length ?? 0}
-              </p>
-            )}
-            <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
-              <BuildingStorefrontIcon className="w-3 stroke-accent" />
-              <p className="text-accent font-medium">Active partners</p>
+          <Card className="shadow-none! new-border flex flex-col items-start gap-3">
+            <p className="text-xs font-medium text-text-secondary">
+              Junkshops Tracked
+            </p>
+            <div className="flex flex-col items-start gap-1">
+              {isPricesLoading ? (
+                <p className="md:text-2xl font-bold text-text-primary text-base">
+                  0
+                </p>
+              ) : isPricesError ? (
+                <p className="md:text-2xl font-bold text-text-primary text-sm">
+                  Data not available
+                </p>
+              ) : (
+                <p className="md:text-2xl font-bold text-text-primary text-base">
+                  {pricesData?.junkshops?.length ?? 0}
+                </p>
+              )}
+              <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+                <BuildingStorefrontIcon className="w-3 stroke-accent" />
+                <p className="text-accent font-medium">Active partners</p>
+              </div>
             </div>
           </Card>
 
-          <Card className="shadow-none! new-border flex flex-col items-start">
-            <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-text-secondary">
-                Best Overall
-              </p>
-              <IconContainer
-                icon={
-                  <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
-                }
-                className="rounded-full! p-2!"
-                containerColor="var(--color-icon-bg)"
-              />
-            </div>
+          <Card className="shadow-none! new-border flex flex-col items-start gap-3">
+            <p className="text-xs font-medium text-text-secondary">
+              Best Overall
+            </p>
 
-            {isPricesLoading ? (
-              <p className="md:text-2xl font-bold text-text-primary text-base">
-                -
-              </p>
-            ) : isPricesError ? (
-              <p className="md:text-2xl font-bold text-text-primary text-sm">
-                Data not available
-              </p>
-            ) : (
-              <p className="md:text-2xl font-bold text-text-primary text-base">
-                {bestJunkshop ?? "-"}
-              </p>
-            )}
+            <div className="flex flex-col items-start gap-1">
+              {isPricesLoading ? (
+                <p className="md:text-2xl font-bold text-text-primary text-base">
+                  -
+                </p>
+              ) : isPricesError ? (
+                <p className="md:text-2xl font-bold text-text-primary text-sm">
+                  Data not available
+                </p>
+              ) : (
+                <p className="md:text-2xl font-bold text-text-primary text-base">
+                  {bestJunkshop ?? "-"}
+                </p>
+              )}
 
-            <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
-              <TrophyIcon className="w-3 stroke-accent" />
-              <p className="text-accent font-medium">Top performer</p>
+              <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+                <TrophyIcon className="w-3 stroke-accent" />
+                <p className="text-accent font-medium">Top performer</p>
+              </div>
             </div>
           </Card>
 
-          <Card className="shadow-none! new-border flex flex-col items-start col-span-2 lg:col-span-1">
-            <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-text-secondary">
-                Stat TBD
-              </p>
-              <IconContainer
-                icon={
-                  <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
-                }
-                className="rounded-full! p-2!"
-                containerColor="var(--color-icon-bg)"
-              />
-            </div>
-            {isPricesLoading ? (
-              <p className="md:text-2xl font-bold text-text-primary text-base">
-                ₱0
-              </p>
-            ) : isPricesError ? (
-              <p className="md:text-2xl font-bold text-text-primary text-sm">
-                Data not available
-              </p>
-            ) : (
-              <p className="md:text-2xl font-bold text-lg select-none">
-                {highestPrices === "Infinity" ? formatCurrency(highestPrices) : "₱0"}
-              </p>
-            )}
+          <Card className="shadow-none! new-border flex flex-col items-start col-span-2 lg:col-span-1 gap-3">
+            <p className="text-xs font-medium text-text-secondary">Stat TBD</p>
+            <div className="flex flex-col items-start gap-1">
+              {isPricesLoading ? (
+                <p className="md:text-2xl font-bold text-text-primary text-base">
+                  ₱0
+                </p>
+              ) : isPricesError ? (
+                <p className="md:text-2xl font-bold text-text-primary text-sm">
+                  Data not available
+                </p>
+              ) : (
+                <p className="md:text-2xl font-bold text-lg select-none">
+                  {highestPrices === "Infinity"
+                    ? formatCurrency(highestPrices)
+                    : "₱0"}
+                </p>
+              )}
 
-            <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
-              <QuestionMarkCircleIcon className="w-3 stroke-accent" />
-              <p className="text-accent font-medium">Placeholder</p>
+              <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+                <QuestionMarkCircleIcon className="w-3 stroke-accent" />
+                <p className="text-accent font-medium">Placeholder</p>
+              </div>
             </div>
           </Card>
         </section>

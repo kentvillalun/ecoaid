@@ -121,89 +121,70 @@ export default function ProgramFundsPage() {
 
         {/* Summary Cards */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <Card className="shadow-none! new-border flex flex-col items-start">
-            <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-text-secondary">
-                Total Income
-              </p>
-              <IconContainer
-                icon={
-                  <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
-                }
-                className="rounded-full! p-2!"
-                containerColor="var(--color-icon-bg)"
-              />
-            </div>
-            <p className="md:text-2xl font-bold text-green-600 text-lg flex flex-row items-center gap-1.5">
-              {isSummaryLoading
-                ? "₱0.00"
-                : formatCurrency(summaryData?.totalIncome ?? 0)}
-
-              <ArrowTrendingUpIcon className="w-5 stroke-green-600" />
+          <Card className="shadow-none! new-border flex flex-col items-start gap-3">
+            <p className="text-xs font-medium text-text-secondary">
+              Total Income
             </p>
-            <div className="flex flex-row items-center w-auto bg-green-50 px-3 py-1 rounded-xl text-xs gap-2">
-              <BanknotesIcon className="w-3 stroke-green-700" />
-              <p className="text-green-700 font-medium">From junkshop sales</p>
+            <div className="flex flex-col items-start gap-1">
+              <p className="md:text-2xl font-bold text-green-600 text-lg flex flex-row items-center gap-1.5">
+                {isSummaryLoading
+                  ? "₱0.00"
+                  : formatCurrency(summaryData?.totalIncome ?? 0)}
+
+                <ArrowTrendingUpIcon className="w-5 stroke-green-600" />
+              </p>
+              <div className="flex flex-row items-center w-auto bg-green-50 px-3 py-1 rounded-xl text-xs gap-2">
+                <BanknotesIcon className="w-3 stroke-green-700" />
+                <p className="text-green-700 font-medium">
+                  From junkshop sales
+                </p>
+              </div>
             </div>
           </Card>
 
-          <Card className="shadow-none! new-border flex flex-col items-start">
-            <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-text-secondary">
-                Total Expenses
-              </p>
-              <IconContainer
-                icon={
-                  <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
-                }
-                className="rounded-full! p-2!"
-                containerColor="var(--color-icon-bg)"
-              />
-            </div>
-            <p className="md:text-2xl font-bold text-red-600 text-lg flex flex-row items-center gap-1.5">
-              {isSummaryLoading
-                ? "₱0.00"
-                : formatCurrency(summaryData?.totalExpenses ?? 0)}
-              <ArrowTrendingDownIcon className="w-5 stroke-red-600" />
+          <Card className="shadow-none! new-border flex flex-col items-start gap-3">
+            <p className="text-xs font-medium text-text-secondary">
+              Total Expenses
             </p>
-            <div className="flex flex-row items-center w-auto bg-red-50 px-3 py-1 rounded-xl text-xs gap-2">
-              <BanknotesIcon className="w-3 stroke-red-700" />
-              <p className="text-red-700 font-medium">Program expenses</p>
+            <div className="flex flex-col items-start gap-1">
+              <p className="md:text-2xl font-bold text-red-600 text-lg flex flex-row items-center gap-1.5">
+                {isSummaryLoading
+                  ? "₱0.00"
+                  : formatCurrency(summaryData?.totalExpenses ?? 0)}
+                <ArrowTrendingDownIcon className="w-5 stroke-red-600" />
+              </p>
+              <div className="flex flex-row items-center w-auto bg-red-50 px-3 py-1 rounded-xl text-xs gap-2">
+                <BanknotesIcon className="w-3 stroke-red-700" />
+                <p className="text-red-700 font-medium">Program expenses</p>
+              </div>
             </div>
           </Card>
 
-          <Card className="shadow-none! new-border flex flex-col items-start">
-            <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-text-secondary">
-                Net Balance
-              </p>
-              <IconContainer
-                icon={
-                  <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
-                }
-                className="rounded-full! p-2!"
-                containerColor="var(--color-icon-bg)"
-              />
-            </div>
-            <p
-              className={`md:text-2xl font-bold text-lg flex flex-row items-center gap-1.5 ${netBalance >= 0 ? "text-green-600" : "text-red-600"}`}
-            >
-              {isSummaryLoading ? "₱0.00" : formatCurrency(netBalance)}
-              <ScaleIcon
-                className={`w-5 ${netBalance >= 0 ? "stroke-green-600" : "stroke-red-600"}`}
-              />
+          <Card className="shadow-none! new-border flex flex-col items-start gap-3">
+            <p className="text-xs font-medium text-text-secondary">
+              Net Balance
             </p>
-            <div
-              className={`flex flex-row items-center w-auto px-3 py-1 rounded-xl text-xs gap-2 ${netBalance >= 0 ? "bg-green-50" : "bg-red-50"}`}
-            >
-              <ScaleIcon
-                className={`w-3 ${netBalance >= 0 ? "stroke-green-700" : "stroke-red-700"}`}
-              />
+            <div className="flex flex-col items-start gap-1">
               <p
-                className={`font-medium ${netBalance >= 0 ? "text-green-700" : "text-red-700"}`}
+                className={`md:text-2xl font-bold text-lg flex flex-row items-center gap-1.5 ${netBalance >= 0 ? "text-green-600" : "text-red-600"}`}
               >
-                Current balance
+                {isSummaryLoading ? "₱0.00" : formatCurrency(netBalance)}
+                <ScaleIcon
+                  className={`w-5 ${netBalance >= 0 ? "stroke-green-600" : "stroke-red-600"}`}
+                />
               </p>
+              <div
+                className={`flex flex-row items-center w-auto px-3 py-1 rounded-xl text-xs gap-2 ${netBalance >= 0 ? "bg-green-50" : "bg-red-50"}`}
+              >
+                <ScaleIcon
+                  className={`w-3 ${netBalance >= 0 ? "stroke-green-700" : "stroke-red-700"}`}
+                />
+                <p
+                  className={`font-medium ${netBalance >= 0 ? "text-green-700" : "text-red-700"}`}
+                >
+                  Current balance
+                </p>
+              </div>
             </div>
           </Card>
         </section>

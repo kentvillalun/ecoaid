@@ -6,6 +6,7 @@ import { Error } from "../ui/Error";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { useRouter } from "next/navigation";
+import { Empty } from "../ui/Empty";
 
 export const TransactionCard = ({
   data,
@@ -48,14 +49,10 @@ export const TransactionCard = ({
           <Error handleRefetchCount={handleRefetchCount} />
         </div>
       ) : data?.transactions?.length === 0 ? (
-        <div className="flex flex-col items-center justify-center min-h-full p-10 gap-1 md:hidden">
-          <h1 className="text-3xl font-semibold text-text-primary text-center">
-            No transactions yet
-          </h1>
-          <p className="text-sm text-text-secondary text-center">
-            There are no redemption trasaction yet.
-          </p>
-        </div>
+        <Empty
+          text={"No transactions yet"}
+          subtext={"There are no redemption transaction yet."}
+        />
       ) : (
         data?.transactions?.map((d) => (
           <Card

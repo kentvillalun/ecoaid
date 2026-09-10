@@ -32,11 +32,10 @@ const inter = Inter({
 
 const TYPES = ["By Kilogram", "By Piece"];
 const PERIODS = [
-  { key: "all", label: "All Time" }, 
-  { key: "weekly", label: "This Week"},
-  { key: "monthly", label: "This Month"}
+  { key: "all", label: "All Time" },
+  { key: "weekly", label: "This Week" },
+  { key: "monthly", label: "This Month" },
 ];
-
 
 const TABLE_HEADERS = ["Rank", "Resident", "Sitio", "Contribution"];
 
@@ -114,63 +113,53 @@ export default function LeaderboardPage() {
 
         {/* Summary Cards */}
         <section className="grid grid-rows-2 lg:grid-cols-2 lg:grid-rows-1 gap-3">
-          <Card className="shadow-none! new-border flex flex-col items-start">
-            <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-text-secondary">
-                Total Participants
-              </p>
-              <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
-                className="rounded-full! p-2!"
-                containerColor="var(--color-icon-bg)"
-              />
-            </div>
-            {isLoading ? (
-              <Skeleton width={40} />
-            ) : isError ? (
-              <p className="font-bold text-text-primary text-sm">
-                Data not available
-              </p>
-            ) : (
-              <p className="md:text-2xl font-bold text-text-primary text-lg">
-                {leaderboard?.length ?? 0}
-              </p>
-            )}
-            <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
-              <UserGroupIcon className="w-3 stroke-accent" />
-              <p className="text-accent font-medium">Active residents</p>
+          <Card className="shadow-none! new-border flex flex-col items-start gap-3">
+            <p className="text-xs font-medium text-text-secondary">
+              Total Participants
+            </p>
+            <div className="flex flex-col items-start gap-1">
+              {isLoading ? (
+                <Skeleton width={40} />
+              ) : isError ? (
+                <p className="font-bold text-text-primary text-sm">
+                  Data not available
+                </p>
+              ) : (
+                <p className="md:text-2xl font-bold text-text-primary text-lg">
+                  {leaderboard?.length ?? 0}
+                </p>
+              )}
+              <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+                <UserGroupIcon className="w-3 stroke-accent" />
+                <p className="text-accent font-medium">Active residents</p>
+              </div>
             </div>
           </Card>
 
-          <Card className="shadow-none! new-border flex flex-col items-start">
-            <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-text-secondary">
-                Top Contribution
-              </p>
-              <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
-                className="rounded-full! p-2!"
-                containerColor="var(--color-icon-bg)"
-              />
-            </div>
-            {isLoading ? (
-              <Skeleton width={40} />
-            ) : isError ? (
-              <p className="font-bold text-text-primary text-sm">
-                Data not available
-              </p>
-            ) : (
-              <p className="md:text-2xl font-bold text-text-primary text-lg">
-                {topThree?.[0] ? `${topThree[0].total} ${unitLabel}` : "—"}
-              </p>
-            )}
-            <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
-              <ScaleIcon className="w-3 stroke-accent" />
-              <p className="text-accent font-medium">
-                {isLoading || isError
-                  ? "—"
-                  : (topThree?.[0]?.name?.split(" ")[0] ?? "—")}
-              </p>
+          <Card className="shadow-none! new-border flex flex-col items-start gap-3">
+            <p className="text-xs font-medium text-text-secondary">
+              Top Contribution
+            </p>
+            <div className="flex flex-col items-start gap-1">
+              {isLoading ? (
+                <Skeleton width={40} />
+              ) : isError ? (
+                <p className="font-bold text-text-primary text-sm">
+                  Data not available
+                </p>
+              ) : (
+                <p className="md:text-2xl font-bold text-text-primary text-lg">
+                  {topThree?.[0] ? `${topThree[0].total} ${unitLabel}` : "—"}
+                </p>
+              )}
+              <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+                <ScaleIcon className="w-3 stroke-accent" />
+                <p className="text-accent font-medium">
+                  {isLoading || isError
+                    ? "—"
+                    : (topThree?.[0]?.name?.split(" ")[0] ?? "No top contributor yet")}
+                </p>
+              </div>
             </div>
           </Card>
         </section>
@@ -321,7 +310,9 @@ export default function LeaderboardPage() {
           />
 
           {/* Desktop Table */}
-          <Card className={`${inter.className} hidden md:flex md:flex-col px-6 overflow-x-auto md:gap-3 md:items-start shadow-none! new-border`}>
+          <Card
+            className={`${inter.className} hidden md:flex md:flex-col px-6 overflow-x-auto md:gap-3 md:items-start shadow-none! new-border`}
+          >
             <table className="w-full text-sm border-collapse">
               <thead className="border-b border-border">
                 <tr>

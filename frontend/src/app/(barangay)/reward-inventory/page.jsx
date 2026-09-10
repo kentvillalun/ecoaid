@@ -110,97 +110,81 @@ export default function RewardInventoryPage() {
 
         {/* Summary Cards */}
         <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <Card className="shadow-none! new-border flex flex-col items-start">
-            <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-text-secondary">Total Items</p>
-              <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
-                className="rounded-full! p-2!"
-                containerColor="var(--color-icon-bg)"
-              />
-            </div>
-            <p className="md:text-2xl font-bold text-text-primary text-base">
-              {isSummaryLoading ? (
-                <Skeleton width={110} />
-              ) : (
-                (summaryData?.totalItems ?? 0)
-              )}
+          <Card className="shadow-none! new-border flex flex-col items-start gap-3">
+            <p className="text-xs font-medium text-text-secondary">
+              Total Items
             </p>
-            <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
-              <ArchiveBoxIcon className="w-3 stroke-accent" />
-              <p className="text-accent font-medium">Reward items tracked</p>
+
+            <div className="flex flex-col gap-1 items-start">
+              <p className="md:text-2xl font-bold text-text-primary text-base">
+                {isSummaryLoading ? (
+                  <Skeleton width={110} />
+                ) : (
+                  (summaryData?.totalItems ?? 0)
+                )}
+              </p>
+              <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+                <ArchiveBoxIcon className="w-3 stroke-accent" />
+                <p className="text-accent font-medium">Reward items tracked</p>
+              </div>
             </div>
           </Card>
 
-          <Card className="shadow-none! new-border flex flex-col items-start">
-            <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-text-secondary">
-                Total Available
-              </p>
-              <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
-                className="rounded-full! p-2!"
-                containerColor="var(--color-icon-bg)"
-              />
-            </div>
-            <p className="md:text-2xl font-bold text-text-primary text-base">
-              {isSummaryLoading ? (
-                <Skeleton width={120} />
-              ) : (
-                (summaryData?.totalAvailable ?? 0)
-              )}
+          <Card className="shadow-none! new-border flex flex-col items-start gap-3">
+            <p className="text-xs font-medium text-text-secondary">
+              Total Available
             </p>
-            <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
-              <CheckCircleIcon className="w-3 stroke-accent" />
-              <p className="text-accent font-medium">Ready to distribute</p>
+            <div className="flex flex-col items-start gap-1">
+              <p className="md:text-2xl font-bold text-text-primary text-base">
+                {isSummaryLoading ? (
+                  <Skeleton width={120} />
+                ) : (
+                  (summaryData?.totalAvailable ?? 0)
+                )}
+              </p>
+              <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+                <CheckCircleIcon className="w-3 stroke-accent" />
+                <p className="text-accent font-medium">Ready to distribute</p>
+              </div>
             </div>
           </Card>
 
-          <Card className="shadow-none! new-border flex flex-col items-start">
-            <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-text-secondary">
-                Total Released
-              </p>
-              <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
-                className="rounded-full! p-2!"
-                containerColor="var(--color-icon-bg)"
-              />
-            </div>
-            <p className="md:text-2xl font-bold text-text-primary text-base">
-              {isSummaryLoading ? (
-                <Skeleton width={120} />
-              ) : (
-                (summaryData?.totalReleased ?? 0)
-              )}
+          <Card className="shadow-none! new-border flex flex-col items-start gap-3">
+            <p className="text-xs font-medium text-text-secondary">
+              Total Released
             </p>
-            <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
-              <TruckIcon className="w-3 stroke-accent" />
-              <p className="text-accent font-medium">Distributed items</p>
+            <div className="flex flex-col items-start gap-1">
+              <p className="md:text-2xl font-bold text-text-primary text-base">
+                {isSummaryLoading ? (
+                  <Skeleton width={120} />
+                ) : (
+                  (summaryData?.totalReleased ?? 0)
+                )}
+              </p>
+              <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+                <TruckIcon className="w-3 stroke-accent" />
+                <p className="text-accent font-medium">Distributed items</p>
+              </div>
             </div>
           </Card>
 
-          <Card className="shadow-none! new-border flex flex-col items-start">
-            <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-text-secondary">
-                Total Beneficiaries
-              </p>
-              <IconContainer
-                icon={<ArrowUpRightIcon className="w-3 stroke-text-secondary" />}
-                className="rounded-full! p-2!"
-                containerColor="var(--color-icon-bg)"
-              />
-            </div>
-            <p className="md:text-2xl font-bold text-text-primary text-base">
-              {isSummaryLoading ? (
-                <Skeleton width={120} />
-              ) : (
-                (summaryData?.distinctBeneficiaries ?? 0)
-              )}
+          <Card className="shadow-none! new-border flex flex-col items-start gap-3">
+            <p className="text-xs font-medium text-text-secondary">
+              Total Beneficiaries
             </p>
-            <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
-              <UserGroupIcon className="w-3 stroke-accent" />
-              <p className="text-accent font-medium">Unique recipients</p>
+
+            <div className="flex flex-col items-start gap-1">
+              <p className="md:text-2xl font-bold text-text-primary text-base">
+                {isSummaryLoading ? (
+                  <Skeleton width={120} />
+                ) : (
+                  (summaryData?.distinctBeneficiaries ?? 0)
+                )}
+              </p>
+              <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+                <UserGroupIcon className="w-3 stroke-accent" />
+                <p className="text-accent font-medium">Unique recipients</p>
+              </div>
             </div>
           </Card>
           {isSummaryError && (
@@ -355,7 +339,7 @@ export default function RewardInventoryPage() {
                     <p className="text-sm font-medium text-text-primary">
                       {item.programName}
                     </p>
-                    <Badge 
+                    <Badge
                       label={CATEGORY_LABELS[item.category]}
                       color={CATEGORY_COLORS[item.category]}
                     />
@@ -386,9 +370,7 @@ export default function RewardInventoryPage() {
           <SectionHeader
             title="Release History"
             subtitle="Record of all reward distributions"
-            icon={
-              <ClipboardDocumentListIcon className="w-6 stroke-accent" />
-            }
+            icon={<ClipboardDocumentListIcon className="w-6 stroke-accent" />}
             buttonLabel="Release Reward"
             onAction={() => setIsReleaseModalOpen(true)}
           />

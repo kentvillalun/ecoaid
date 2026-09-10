@@ -21,11 +21,14 @@ export const DropdownFilter = ({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className="outline-none"
+          disabled={options?.length === 1 && options[0]?.disabled}
         >
           {options?.map((opt) => (
-            <option value={opt.value} key={opt.value}>
+            <option value={opt.value} key={opt.value} disabled={opt.disabled}>
               {opt.label}
-              {typeof opt.count === "number" ? ` (${opt.count})` : ""}
+              {typeof opt.count === "number" && !opt.disabled
+                ? ` (${opt.count})`
+                : ""}
             </option>
           ))}
         </select>

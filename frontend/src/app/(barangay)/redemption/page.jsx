@@ -55,20 +55,25 @@ export default function RedemptionProgramPage() {
           (t) => t?.program?.id === programFilter,
         );
 
-  const programFilterOptions = [
-    {
-      value: "ALL",
-      label: "All Programs",
-      count: transactionData?.transactions?.length ?? 0,
-    },
-    ...activePrograms.map((p) => ({
-      value: p.id,
-      label: p.name,
-      count:
-        transactionData?.transactions?.filter((t) => t?.program?.id === p.id)
-          .length ?? 0,
-    })),
-  ];
+  const hasPrograms = (data?.programs?.length ?? 0) > 0;
+
+  const programFilterOptions = hasPrograms
+    ? [
+        {
+          value: "ALL",
+          label: "All Programs",
+          count: transactionData?.transactions?.length ?? 0,
+        },
+        ...activePrograms.map((p) => ({
+          value: p.id,
+          label: p.name,
+          count:
+            transactionData?.transactions?.filter(
+              (t) => t?.program?.id === p.id,
+            ).length ?? 0,
+        })),
+      ]
+    : [{ value: "ALL", label: "No programs yet", disabled: true }];
 
   const handleTransactionRefetch = () =>
     setTransactionRefetchCount((prev) => prev + 1);

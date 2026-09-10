@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/Card";
 import { IconContainer } from "@/components/ui/IconContainer";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { MaterialTag } from "@/components/ui/MaterialTag";
+import { DropdownFilter } from "@/components/ui/DropdownFilter";
 import {
   ArchiveBoxIcon,
   Bars3BottomLeftIcon,
@@ -18,7 +19,6 @@ import {
   CubeIcon,
   ArrowUpRightIcon,
   ArrowDownTrayIcon,
-  FunnelIcon,
 } from "@heroicons/react/24/outline";
 import { useFetch } from "@/hooks/useFetch";
 import Skeleton from "react-loading-skeleton";
@@ -152,33 +152,6 @@ function ViewToggle({ value, onChange }) {
   );
 }
 
-function MaterialFilter({ value, onChange, categorizedMaterials }) {
-  return (
-    <div className="flex flex-row items-center gap-2">
-      <div className="flex flex-row text-gray-600 text-sm items-center justify-center gap-1">
-        <FunnelIcon className="w-4" />
-        <p>Filter:</p>
-      </div>
-      <div className="bg-surface new-border rounded-xl px-3 py-1.5 text-sm text-gray-600 outline-none hover:cursor-pointer max-w-50">
-        <select value={value} onChange={(e) => onChange(e.target.value)} className="outline-none">
-          <option value="ALL">All materials</option>
-          {categorizedMaterials.map((cat) => (
-            <optgroup label={cat.name} key={cat.name}>
-              {[...new Map(cat.materials.map((m) => [m.materialId, m])).values()].map(
-                (m) => (
-                  <option key={m.materialId} value={m.materialId}>
-                    {m.materialName}
-                  </option>
-                ),
-              )}
-            </optgroup>
-          ))}
-        </select>
-      </div>
-    </div>
-  );
-}
-
 function CategoryCard({ cat, displayUnit }) {
   const styles = CATEGORY_STYLES[cat.name] ?? CATEGORY_STYLES.default;
 
@@ -270,6 +243,7 @@ export default function MaterialStockPage() {
     url: "/api/mrf-inventory/transaction-logs",
     refetchCount: transactionRefetchCount,
   });
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedMaterialId, setSelectedMaterialId] = useState("");
   const [quantity, setQuantity] = useState(0);
@@ -299,6 +273,29 @@ export default function MaterialStockPage() {
   }, {});
 
   const results = Object.values(categorizedMaterials ?? {});
+
+  const hasStock = (data?.enrichedResults?.length ?? 0) > 0;
+
+  // Flat list of materials currently tracked in stock, mirroring the
+  // "All Programs" / "All" filter pattern used in Redemption Management and
+  // Junkshop Sales, rather than the nested category/subcategory structure.
+  const materialFilterOptions = hasStock
+    ? [
+        {
+          value: "ALL",
+          label: "All materials",
+          count: transactionLogsData?.transactionLogs?.length ?? 0,
+        },
+        ...data.enrichedResults.map((m) => ({
+          value: m.materialId,
+          label: m.materialName,
+          count:
+            transactionLogsData?.transactionLogs?.filter(
+              (r) => r.materialId === m.materialId,
+            ).length ?? 0,
+        })),
+      ]
+    : [{ value: "ALL", label: "No materials in stock yet", disabled: true }];
 
   const filteredTransactionLogs = transactionLogsData?.transactionLogs?.filter(
     (row) => materialFilter === "ALL" || row.materialId === materialFilter,
@@ -455,59 +452,47 @@ export default function MaterialStockPage() {
           )}
 
         <section className="grid grid-cols-2 gap-3">
-          <Card className="shadow-none! new-border flex flex-col items-start">
-            <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-text-secondary">
-                Total Weight
-              </p>
-              <IconContainer
-                icon={
-                  <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
-                }
-                className="rounded-full! p-2!"
-                containerColor="var(--color-icon-bg)"
-              />
-            </div>
-            <p className="md:text-2xl font-bold text-text-primary text-lg">
-              {isLoading ? (
-                <Skeleton width={150} />
-              ) : isError ? (
-                <span className="text-gray-400 ">Unable to load</span>
-              ) : (
-                <span className="">{totalWeightDisplay}</span>
-              )}
+          <Card className="shadow-none! new-border flex flex-col items-start gap-3">
+            <p className="text-xs font-medium text-text-secondary">
+              Total Weight
             </p>
-            <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-2">
-              <ScaleIcon className="w-3 stroke-accent" />
-              <p className="text-accent font-medium">All categories</p>
+
+            <div className="flex flex-col items-start gap-1">
+              <p className="md:text-2xl font-bold text-text-primary text-lg">
+                {isLoading ? (
+                  <Skeleton width={150} />
+                ) : isError ? (
+                  <span className="text-gray-400 ">Unable to load</span>
+                ) : (
+                  <span className="">{totalWeightDisplay}</span>
+                )}
+              </p>
+              <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-2">
+                <ScaleIcon className="w-3 stroke-accent" />
+                <p className="text-accent font-medium">All categories</p>
+              </div>
             </div>
           </Card>
 
-          <Card className="shadow-none! new-border flex flex-col items-start">
-            <div className="flex flex-row items-start justify-between w-full">
-              <p className="text-xs font-medium text-text-secondary">
-                Total Pieces
-              </p>
-              <IconContainer
-                icon={
-                  <ArrowUpRightIcon className="w-3 stroke-text-secondary" />
-                }
-                className="rounded-full! p-2!"
-                containerColor="var(--color-icon-bg)"
-              />
-            </div>
-            <p className="md:text-2xl font-bold text-text-primary text-lg">
-              {isLoading ? (
-                <Skeleton width={150} />
-              ) : isError ? (
-                <span className="text-gray-400">Unable to load</span>
-              ) : (
-                <span className="">{TOTAL_PCS} pcs</span>
-              )}
+          <Card className="shadow-none! new-border flex flex-col items-start gap-3">
+            <p className="text-xs font-medium text-text-secondary">
+              Total Pieces
             </p>
-            <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-2">
-              <CubeIcon className="w-3 stroke-accent" />
-              <p className="text-accent font-medium">Piece-based</p>
+
+            <div className="flex flex-col items-start gap-1">
+              <p className="md:text-2xl font-bold text-text-primary text-lg">
+                {isLoading ? (
+                  <Skeleton width={150} />
+                ) : isError ? (
+                  <span className="text-gray-400">Unable to load</span>
+                ) : (
+                  <span className="">{TOTAL_PCS} pcs</span>
+                )}
+              </p>
+              <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-2">
+                <CubeIcon className="w-3 stroke-accent" />
+                <p className="text-accent font-medium">Piece-based</p>
+              </div>
             </div>
           </Card>
         </section>
@@ -567,10 +552,11 @@ export default function MaterialStockPage() {
                 onAction={() => setIsModalOpen((prev) => !prev)}
               />
 
-              <MaterialFilter
+              <DropdownFilter
+                id="materialFilter"
+                options={materialFilterOptions}
                 value={materialFilter}
                 onChange={setMaterialFilter}
-                categorizedMaterials={results}
               />
 
               {/* Desktop table */}
