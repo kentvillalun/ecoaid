@@ -80,7 +80,7 @@ export const Sidebar = () => {
     },
     {
       icon: CollectionSortingIcon,
-      label: "Manual Intake",
+      label: "Manual Pickup",
       href: "/manual-intake",
       solidIcon: ArrowsRightLeftIcon,
     },

@@ -11,6 +11,8 @@ import { Page } from "@/components/layout/Page";
 import { API_BASE_URL } from "@/lib/config";
 import { useRouter } from "next/navigation";
 import { useFetch } from "@/hooks/useFetch";
+import { ButtonSpinner } from "@/components/ui/buttonSpinner";
+import imageCompression from "browser-image-compression";
 
 const schema = yup.object().shape({
   estimatedValue: yup
@@ -30,6 +32,15 @@ const schema = yup.object().shape({
   }),
 });
 
+const fileToBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
+
 export default function CapturePage() {
   const fileInputRef = useRef(null);
   const [capturedImageUrl, setCapturedImageUrl] = useState(null);
@@ -44,13 +55,13 @@ export default function CapturePage() {
   const [error, setError] = useState("");
   const router = useRouter();
   const [category, setCategory] = useState("");
+  const [categoryError, setCategoryError] = useState(null);
   const categoriesUrl = `/api/material/categories`;
   const [categoriesRefetchCount, setCategoriesRefetchCount] = useState(0);
-  const {
-    isLoading: isCategoriesLoading,
-    isError: isCategoriesError,
-    data: categoriesData,
-  } = useFetch({ url: categoriesUrl, refetchCount: categoriesRefetchCount });
+  const { data: categoriesData } = useFetch({
+    url: categoriesUrl,
+    refetchCount: categoriesRefetchCount,
+  });
 
   const materialUrl = category ? `/api/material?categoryId=${category}` : null;
   const [materialRefetchCount, setMaterialRefetchCount] = useState(0);
@@ -59,6 +70,10 @@ export default function CapturePage() {
     refetchCount: materialRefetchCount,
   });
   const [isAssortedCheck, setIsAssortedCheck] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [pendingMaterialName, setPendingMaterialName] = useState(null);
+  const [isUnitLocked, setIsUnitLocked] = useState(false);
+  const [isClassificationError, setIsClassificationError] = useState(false);
 
   const openCamera = () => {
     fileInputRef.current.click();
@@ -134,6 +149,14 @@ export default function CapturePage() {
     },
   });
 
+  const checkCategory = () => {
+    if (!category || category === "") {
+      setCategoryError("Material category is required");
+    } else {
+      setCategoryError(null);
+    }
+  };
+
   const onSubmit = async (data) => {
     try {
       setIsSubmitting(true);
@@ -195,6 +218,86 @@ export default function CapturePage() {
     fetchdata();
   }, []);
 
+  const analyzePhoto = async () => {
+    try {
+      setIsAnalyzing(true);
+      toast.loading("Analyzing photo");
+      const compressedImageFile = await imageCompression(imageFile, {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1024
+      })
+      const file = await fileToBase64(compressedImageFile);
+      const [header, base64Data] = file.split(",");
+      const mimeType = header.split(":")[1].split(";")[0];
+
+      const response = await fetch(`/api/pickup-requests/classify`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          image: base64Data,
+          mimeType,
+        }),
+      });
+
+      if (!response.ok) {
+        toast.dismiss();
+        toast.error("There is a problem analyzing image");
+        setIsClassificationError(true);
+        return false;
+      }
+      const result = await response.json();
+
+      setValue("isAssorted", result?.classification?.isAssorted);
+      setIsAssortedCheck(result?.classification?.isAssorted);
+
+      if (!result?.classification?.isAssorted) {
+        const matchedCategory = categoriesData?.categories?.find(
+          (c) => c.name === result?.classification?.materialCategory,
+        );
+
+        if (matchedCategory) {
+          setCategory(matchedCategory?.id);
+        }
+
+        setPendingMaterialName(result?.classification?.material ?? null);
+      }
+
+      setValue("estimatedValue", result?.classification?.estimatedValue);
+      return true;
+    } catch (error) {
+      toast.dismiss();
+      toast.error("There is a problem analyzing image");
+      setIsClassificationError(true);
+      return false;
+    } finally {
+      toast.dismiss();
+      setIsAnalyzing(false);
+    }
+  };
+
+  useEffect(() => {
+    if (materialData && pendingMaterialName) {
+      const matchedMaterial = materialData?.materials?.find(
+        (m) => m.name === pendingMaterialName,
+      );
+
+      if (matchedMaterial) {
+        setValue("materialId", matchedMaterial?.id);
+        setValue("estimatedUnit", matchedMaterial.defaultUnit);
+        setIsUnitLocked(matchedMaterial.defaultUnit === "PIECE");
+      } else {
+        toast.error(
+          "Couldn't match the detected material, please select manually",
+        );
+        setIsUnitLocked(false);
+      }
+      setPendingMaterialName(null);
+    }
+  }, [materialData]);
+
   return (
     <Page className="bg-bg!">
       <Toaster position="top-center" />
@@ -240,11 +343,18 @@ export default function CapturePage() {
               className={`flex flex-col items-center justify-center ${capturedImageUrl ? "h-auto" : "min-h-70"}`}
             >
               {capturedImageUrl ? (
-                <img
-                  src={capturedImageUrl}
-                  alt="Captured recyclables"
-                  className=""
-                />
+                <div className="relative">
+                  <img
+                    src={capturedImageUrl}
+                    alt="Captured recyclables"
+                    className=""
+                  />
+                  {isAnalyzing && (
+                    <div className="absolute inset-0 bg-black/65 flex items-center justify-center">
+                      <ButtonSpinner />
+                    </div>
+                  )}
+                </div>
               ) : (
                 <div className="mx-6 my-8 flex flex-col items-center">
                   <CameraIcon className="h-25 fill-gray-200" />
@@ -261,33 +371,53 @@ export default function CapturePage() {
 
           {/* The open camera button */}
           {capturedImageUrl ? (
-            <div className="grid w-full gap-3 grid-cols-2 items-center justify-center">
-              <button
-                className="text-gray-600 p-3 rounded-xl text-sm new-border min-w-27 bg-white"
-                onClick={() => {
-                  setCloudinaryUrl(null);
-                  openCamera();
-                }}
-              >
-                Retake
-              </button>
-              <button
-                className="gradient-button text-white p-3 rounded-xl text-sm new-border min-w-27 disabled:opacity-50"
-                disabled={isLoading}
-                onClick={async () => {
-                  const url = await uploadToCloudinary();
-                  if (url) {
-                    setIsFormVisible(true);
-                    setTimeout(() => {
-                      document
-                        .getElementById("form")
-                        ?.scrollIntoView({ behavior: "smooth" });
-                    });
-                  }
-                }}
-              >
-                Next
-              </button>
+            <div className="w-full flex flex-col gap-3">
+              <div className="grid w-full gap-3 grid-cols-2 items-center justify-center">
+                <button
+                  className="text-gray-600 p-3 rounded-xl text-sm new-border min-w-27 bg-white"
+                  onClick={() => {
+                    setCloudinaryUrl(null);
+                    openCamera();
+                  }}
+                >
+                  Retake
+                </button>
+                <button
+                  className="gradient-button text-white p-3 rounded-xl text-sm new-border min-w-27 disabled:opacity-50"
+                  disabled={isAnalyzing}
+                  onClick={async () => {
+                    const finish = await analyzePhoto();
+                    if (finish) {
+                      setIsFormVisible(true);
+                      setTimeout(() => {
+                        document
+                          .getElementById("form")
+                          ?.scrollIntoView({ behavior: "smooth" });
+                      });
+                    }
+                  }}
+                >
+                  Analyze Photo
+                </button>
+              </div>
+
+              {(imageFile && !isFormVisible) && (
+                <div className="text-sm flex flex-row items-center gap-1 justify-center">
+                  <p className=" text-text-secondary text-center">
+                    {isClassificationError
+                      ? "Couldn't analyze this photo."
+                      : "Prefer not to scan?"}
+                  </p>
+                  <button
+                    className="text-accent font-medium"
+                    onClick={() => setIsFormVisible(true)}
+                  >
+                    {isClassificationError
+                      ? "Fill in manually instead"
+                      : "Fill in manually"}
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <div className="grid w-full max-w-md gap-3 grid-cols-1 items-center justify-center">
@@ -308,38 +438,44 @@ export default function CapturePage() {
             onSubmit={handleSubmit(onSubmit)}
           >
             <div className="flex flex-col gap-3">
-              <div className="flex flex-col gap-1">
-                <div className="input flex flex-row items-center gap-1 mb-0">
-                  <input
-                    type="checkbox"
-                    onChange={(e) => {
-                      setIsAssortedCheck(e.target.checked);
-                      setValue("isAssorted", e.target.checked);
-                      if (e.target.checked) {
-                        setCategory("");
-                        setValue("materialId", null);
-                      }
+              <div className="flex flex-col gap-2">
+                <div className="flex flex-row gap-1 items-center justify-start text-sm flex-wrap">
+                  <button
+                    className={`py-1.5 px-3 rounded-full new-border ${!isAssortedCheck ? "gradient-button text-white" : "bg-surface text-gray-600"} transition-all ease-in-out duration-200`}
+                    type="button"
+                    onClick={() => {
+                      setIsAssortedCheck(false);
+                      setValue("isAssorted", false);
                     }}
-                    id="mixed"
-                  />
-                  <label
-                    className="font-medium text-base text-gray-600 px-2 flex-1"
-                    htmlFor="mixed"
                   >
-                    Mixed/ Assorted materials
-                  </label>
+                    Single material
+                  </button>
+                  <button
+                    className={`py-1.5 px-3 rounded-full new-border ${isAssortedCheck ? "gradient-button text-white" : "bg-surface text-gray-600"} transition-all ease-in-out duration-200`}
+                    type="button"
+                    onClick={() => {
+                      setIsAssortedCheck(true);
+                      setValue("isAssorted", true);
+                      setCategory("");
+                      setValue("materialId", null);
+                    }}
+                  >
+                    Mixed or assorted material
+                  </button>
                 </div>
+
                 {isAssortedCheck && (
-                  <p className="text-xs text-gray-600 text-start italic ">
-                    Collector will identify materials during pickup
+                  <p className="text-xs text-text-secondary text-start ">
+                    <span className="font-medium">Note: </span>Collector will
+                    identify materials during pickup
                   </p>
                 )}
               </div>
 
               {!isAssortedCheck && (
                 <>
-                  <div className="flex flex-col gap-1">
-                    <label className="font-medium text-sm text-[#727272] ">
+                  <div className="flex flex-col gap-2">
+                    <label className="text-base text-text-primary font-medium">
                       Material category
                     </label>
                     <div className="input text-base mb-0">
@@ -358,10 +494,15 @@ export default function CapturePage() {
                         ))}
                       </select>
                     </div>
+                    {categoryError && (
+                      <p className="text-xs text-red-500 text-start">
+                        {categoryError}
+                      </p>
+                    )}
                   </div>
 
-                  <div className="flex flex-col gap-1">
-                    <label className="font-medium text-sm text-[#727272]">
+                  <div className="flex flex-col gap-2">
+                    <label className="font-medium text-base text-text-primary">
                       Material
                     </label>
                     <div className="input text-base mb-0">
@@ -389,8 +530,8 @@ export default function CapturePage() {
               )}
 
               <div className="grid grid-cols-2 gap-3 w-full">
-                <div className="flex flex-col gap-1">
-                  <label className="font-medium text-sm text-[#727272] ">
+                <div className="flex flex-col gap-2">
+                  <label className="font-medium text-case text-text-primary ">
                     Estimated value
                   </label>
                   <input
@@ -407,17 +548,18 @@ export default function CapturePage() {
                   )}
                 </div>
 
-                <div className="flex flex-col gap-1">
-                  <label className="font-medium text-sm text-[#727272] ">
+                <div className="flex flex-col gap-2">
+                  <label className="font-medium text-base text-text-primary ">
                     Unit
                   </label>
-                  <div className="input text-base mb-0">
+                  <div className={`input text-base mb-0 ${isUnitLocked && "bg-gray-100"}`}>
                     <select
-                      className="w-full outline-none"
+                      className="w-full outline-none "
                       {...register("estimatedUnit")}
+                      disabled={isUnitLocked}
                     >
                       <option value="" hidden disabled>
-                        e.g. kg
+                        Choose unit
                       </option>
                       <option value="KG">kg</option>
                       <option value="GRAMS">grams</option>
@@ -433,9 +575,9 @@ export default function CapturePage() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-1">
-                <label className="font-medium text-sm text-[#727272] ">
-                  Purok / Sitio
+              <div className="flex flex-col gap-2">
+                <label className="font-medium text-base text-text-primary ">
+                  Purok
                 </label>
                 <input
                   value={sitio ?? "Loading..."}
@@ -446,8 +588,8 @@ export default function CapturePage() {
                 />
               </div>
 
-              <div className="flex flex-col gap-1">
-                <label className="font-medium text-sm text-[#727272]">
+              <div className="flex flex-col gap-2">
+                <label className="font-medium text-base text-text-primary">
                   Notes (Optional)
                 </label>
                 <input
@@ -467,6 +609,7 @@ export default function CapturePage() {
             <button
               className="gradient-button text-white py-2.5 rounded-xl mb-10"
               type="submit"
+              onClick={() => checkCategory()}
             >
               Submit Request
             </button>
