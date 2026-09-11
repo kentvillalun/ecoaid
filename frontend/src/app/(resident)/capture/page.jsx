@@ -74,6 +74,7 @@ export default function CapturePage() {
   const [pendingMaterialName, setPendingMaterialName] = useState(null);
   const [isUnitLocked, setIsUnitLocked] = useState(false);
   const [isClassificationError, setIsClassificationError] = useState(false);
+  const [compressedFile, setCompressedFile] = useState(null);
 
   const openCamera = () => {
     fileInputRef.current.click();
@@ -90,7 +91,7 @@ export default function CapturePage() {
     event.target.value = "";
   };
 
-  const uploadToCloudinary = async () => {
+  const uploadToCloudinary = async (fileToUpload) => {
     if (cloudinaryUrl) return true;
 
     try {
@@ -98,7 +99,7 @@ export default function CapturePage() {
       toast.loading("Uploading photo...");
       const formData = new FormData();
 
-      formData.append("file", imageFile);
+      formData.append("file", fileToUpload);
       formData.append(
         "upload_preset",
         process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET,
@@ -122,7 +123,7 @@ export default function CapturePage() {
       toast.dismiss();
       toast.success("Photo uploaded!");
       setCloudinaryUrl(data.secure_url);
-      return true;
+      return data.secure_url;
     } catch (error) {
       setCloudinaryUrl(null);
       toast.dismiss();
@@ -161,6 +162,12 @@ export default function CapturePage() {
     try {
       setIsSubmitting(true);
 
+      const finalFile = compressedFile ?? (await compressImage());
+      const uploadUrl = await uploadToCloudinary(finalFile);
+      if (!uploadUrl) {
+        return 
+      }
+
       const response = await fetch(`${API_BASE_URL}/pickup-requests`, {
         method: "POST",
         headers: {
@@ -168,7 +175,7 @@ export default function CapturePage() {
         },
         body: JSON.stringify({
           ...data,
-          photoUrl: cloudinaryUrl,
+          photoUrl: uploadUrl,
           materialId: data.isAssorted ? null : data.materialId,
         }),
         credentials: "include",
@@ -184,7 +191,8 @@ export default function CapturePage() {
         setCloudinaryUrl(null);
         setImageFile(null);
         setIsFormVisible(false);
-        setIsSubmit(true);
+        toast.success("Request sent! Your barangay will review your request soon.")
+        router.push('/home')
       }
     } catch (error) {
       toast.error("There is a problem submitting request");
@@ -218,14 +226,21 @@ export default function CapturePage() {
     fetchdata();
   }, []);
 
+  const compressImage = async () => {
+    const compressed = await imageCompression(imageFile, {
+      maxSizeMB: 1,
+      maxWidthOrHeight: 1024,
+    });
+    setCompressedFile(compressed);
+    return compressed;
+  };
+
   const analyzePhoto = async () => {
     try {
       setIsAnalyzing(true);
       toast.loading("Analyzing photo");
-      const compressedImageFile = await imageCompression(imageFile, {
-        maxSizeMB: 1,
-        maxWidthOrHeight: 1024
-      })
+      const compressedImageFile = await compressImage();
+
       const file = await fileToBase64(compressedImageFile);
       const [header, base64Data] = file.split(",");
       const mimeType = header.split(":")[1].split(";")[0];
@@ -303,25 +318,7 @@ export default function CapturePage() {
       <Toaster position="top-center" />
       <ResidentHeader title={"Capture Recyclables"} />
 
-      {isSubmit && (
-        <section
-          className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-100"
-          onClick={() => {
-            setIsSubmit(false);
-            router.push("/home");
-          }}
-        >
-          <div className="bg-white shadow-lg p-4 rounded-lg flex flex-col gap-4 items-center justify-center">
-            <div className="flex flex-col items-center justify-center py-4">
-              <CheckCircleIcon className="fill-accent h-10 w-10" />
-              <p className="text-md font-medium">Request Sent!</p>
-              <p className="text-sm text-[#727272] max-w-55 text-center">
-                Your barangay will review your collection soon.
-              </p>
-            </div>
-          </div>
-        </section>
-      )}
+     
       <section className="absolute left-0 right-0 top-18 h-[calc(100dvh-72px)] p-3 flex flex-col gap-6 overflow-y-auto  ">
         <div className="flex flex-col items-center gap-3">
           {/* The hidden file input will go here */}
@@ -401,7 +398,7 @@ export default function CapturePage() {
                 </button>
               </div>
 
-              {(imageFile && !isFormVisible) && (
+              {imageFile && !isFormVisible && (
                 <div className="text-sm flex flex-row items-center gap-1 justify-center">
                   <p className=" text-text-secondary text-center">
                     {isClassificationError
@@ -552,7 +549,9 @@ export default function CapturePage() {
                   <label className="font-medium text-base text-text-primary ">
                     Unit
                   </label>
-                  <div className={`input text-base mb-0 ${isUnitLocked && "bg-gray-100"}`}>
+                  <div
+                    className={`input text-base mb-0 ${isUnitLocked && "bg-gray-100"}`}
+                  >
                     <select
                       className="w-full outline-none "
                       {...register("estimatedUnit")}
