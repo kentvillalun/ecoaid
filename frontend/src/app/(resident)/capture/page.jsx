@@ -594,12 +594,13 @@ export default function CapturePage() {
                 <label className="font-medium text-base text-text-primary">
                   Notes (Optional)
                 </label>
-                <input
+                <textarea
                   type="text"
                   className="input mb-0 max-h-none"
                   placeholder="Enter your notes here"
                   {...register("notes")}
-                />
+                  rows={4}
+                ></textarea>
                 {errors.notes && (
                   <p className="text-xs text-red-500 text-start">
                     {errors.notes?.message}
