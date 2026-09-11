@@ -241,7 +241,7 @@ export default function CapturePage() {
       setIsAnalyzing(true);
       toast.loading("Analyzing photo");
       const compressedImageFile = await compressImage();
-
+      alert("compression done");
       const file = await fileToBase64(compressedImageFile);
       const [header, base64Data] = file.split(",");
       const mimeType = header.split(":")[1].split(";")[0];
