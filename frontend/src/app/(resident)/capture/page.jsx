@@ -235,16 +235,21 @@ export default function CapturePage() {
     return compressed;
   };
 
-  const analyzePhoto = async () => {
+const analyzePhoto = async () => {
     try {
-      alert("analyzePhoto Started")
+      alert("1: analyzePhoto Started");
       setIsAnalyzing(true);
       toast.loading("Analyzing photo");
+
       const compressedImageFile = await compressImage();
-      alert("compression done");
+      alert("2: compression done");
+
       const file = await fileToBase64(compressedImageFile);
+      alert("3: base64 done, length: " + file.length);
+
       const [header, base64Data] = file.split(",");
       const mimeType = header.split(":")[1].split(";")[0];
+      alert("4: mimeType = " + mimeType);
 
       const response = await fetch(`/api/pickup-requests/classify`, {
         method: "POST",
@@ -257,6 +262,7 @@ export default function CapturePage() {
           mimeType,
         }),
       });
+      alert("5: fetch responded, status = " + response.status);
 
       if (!response.ok) {
         toast.dismiss();
@@ -265,6 +271,7 @@ export default function CapturePage() {
         return false;
       }
       const result = await response.json();
+      alert("6: json parsed");
 
       setValue("isAssorted", result?.classification?.isAssorted);
       setIsAssortedCheck(result?.classification?.isAssorted);
@@ -282,10 +289,10 @@ export default function CapturePage() {
       }
 
       setValue("estimatedValue", result?.classification?.estimatedValue);
-      setValue("notes", result?.classification?.notes)
+      setValue("notes", result?.classification?.notes);
       return true;
     } catch (error) {
-      alert("Error: " + error.message)
+      alert("Error: " + error.message);
       toast.dismiss();
       toast.error("There is a problem analyzing image");
       setIsClassificationError(true);
@@ -295,7 +302,6 @@ export default function CapturePage() {
       setIsAnalyzing(false);
     }
   };
-
   useEffect(() => {
     if (materialData && pendingMaterialName) {
       const matchedMaterial = materialData?.materials?.find(
