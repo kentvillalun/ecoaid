@@ -243,6 +243,7 @@ const analyzePhoto = async () => {
 
       const compressedImageFile = await compressImage();
       alert("2: compression done");
+      alert("compressed size: " + compressedImageFile.size + " bytes");
 
       const file = await fileToBase64(compressedImageFile);
       alert("3: base64 done, length: " + file.length);
