@@ -53,7 +53,7 @@ ASSORTED MATERIALS:
 UNCERTAIN OR UNRECOGNIZABLE PHOTOS:
 - If you cannot confidently identify any material from the list in the photo, or the photo is unclear/doesn't show recyclable waste, return "material": null, "materialCategory": null, "isAssorted": false, and "estimatedValue": 0, with a brief note explaining why in "notes".
 
-Respond with ONLY a valid JSON object in exactly this shape, no other text:
+Respond with ONLY a valid JSON object in exactly this shape, Do not wrap it in markdown code fences (no triple backsticks, no "json" label) and do not add any other text before or after it:
 
 {
   "isAssorted": boolean,
