@@ -281,6 +281,7 @@ export default function CapturePage() {
       }
 
       setValue("estimatedValue", result?.classification?.estimatedValue);
+      setValue("notes", result?.classification?.notes)
       return true;
     } catch (error) {
       toast.dismiss();

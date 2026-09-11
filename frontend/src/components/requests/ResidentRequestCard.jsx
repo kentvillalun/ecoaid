@@ -37,7 +37,7 @@ export const ResidentRequestCard = ({ request: r, variant = "compact" }) => {
                 {r.isAssorted === true ? "Assorted Request" : r.material?.name}
               </h3>
               <p className="text-xs text-gray-500">
-                {r.notes ? r.notes : "No notes available"}
+                {r.notes ? r.notes.slice(0, 45) + "..." : "No notes available"}
               </p>
               <p className="text-xs text-gray-400">
                 Est. {r.estimatedValue}{" "}
