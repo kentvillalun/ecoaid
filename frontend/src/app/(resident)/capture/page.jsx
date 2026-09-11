@@ -237,6 +237,7 @@ export default function CapturePage() {
 
   const analyzePhoto = async () => {
     try {
+      alert("analyzePhoto Started")
       setIsAnalyzing(true);
       toast.loading("Analyzing photo");
       const compressedImageFile = await compressImage();
@@ -284,6 +285,7 @@ export default function CapturePage() {
       setValue("notes", result?.classification?.notes)
       return true;
     } catch (error) {
+      alert("Error: " + error.message)
       toast.dismiss();
       toast.error("There is a problem analyzing image");
       setIsClassificationError(true);
