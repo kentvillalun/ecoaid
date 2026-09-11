@@ -165,7 +165,7 @@ export default function CapturePage() {
       const finalFile = compressedFile ?? (await compressImage());
       const uploadUrl = await uploadToCloudinary(finalFile);
       if (!uploadUrl) {
-        return 
+        return;
       }
 
       const response = await fetch(`${API_BASE_URL}/pickup-requests`, {
@@ -191,8 +191,10 @@ export default function CapturePage() {
         setCloudinaryUrl(null);
         setImageFile(null);
         setIsFormVisible(false);
-        toast.success("Request sent! Your barangay will review your request soon.")
-        router.push('/home')
+        toast.success(
+          "Request sent! Your barangay will review your request soon.",
+        );
+        router.push("/home");
       }
     } catch (error) {
       toast.error("There is a problem submitting request");
@@ -235,22 +237,17 @@ export default function CapturePage() {
     return compressed;
   };
 
-const analyzePhoto = async () => {
+  const analyzePhoto = async () => {
     try {
-      alert("1: analyzePhoto Started");
       setIsAnalyzing(true);
       toast.loading("Analyzing photo");
 
       const compressedImageFile = await compressImage();
-      alert("2: compression done");
-      alert("compressed size: " + compressedImageFile.size + " bytes");
 
       const file = await fileToBase64(compressedImageFile);
-      alert("3: base64 done, length: " + file.length);
 
       const [header, base64Data] = file.split(",");
       const mimeType = header.split(":")[1].split(";")[0];
-      alert("4: mimeType = " + mimeType);
 
       const response = await fetch(`/api/pickup-requests/classify`, {
         method: "POST",
@@ -263,7 +260,6 @@ const analyzePhoto = async () => {
           mimeType,
         }),
       });
-      alert("5: fetch responded, status = " + response.status);
 
       if (!response.ok) {
         toast.dismiss();
@@ -272,7 +268,6 @@ const analyzePhoto = async () => {
         return false;
       }
       const result = await response.json();
-      alert("6: json parsed");
 
       setValue("isAssorted", result?.classification?.isAssorted);
       setIsAssortedCheck(result?.classification?.isAssorted);
@@ -293,7 +288,6 @@ const analyzePhoto = async () => {
       setValue("notes", result?.classification?.notes);
       return true;
     } catch (error) {
-      alert("Error: " + error.message);
       toast.dismiss();
       toast.error("There is a problem analyzing image");
       setIsClassificationError(true);
@@ -328,7 +322,6 @@ const analyzePhoto = async () => {
       <Toaster position="top-center" />
       <ResidentHeader title={"Capture Recyclables"} />
 
-     
       <section className="absolute left-0 right-0 top-18 h-[calc(100dvh-72px)] p-3 flex flex-col gap-6 overflow-y-auto  ">
         <div className="flex flex-col items-center gap-3">
           {/* The hidden file input will go here */}
