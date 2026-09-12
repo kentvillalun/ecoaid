@@ -458,6 +458,7 @@ export default function CapturePage() {
                       setValue("isAssorted", true);
                       setCategory("");
                       setValue("materialId", null);
+                      setIsUnitLocked(false)
                     }}
                   >
                     Mixed or assorted material
@@ -539,6 +540,7 @@ export default function CapturePage() {
                     className="input mb-0"
                     placeholder="e.g. 1"
                     min={0}
+                    step="0.01"
                     {...register("estimatedValue")}
                   />
                   {errors.estimatedValue && (

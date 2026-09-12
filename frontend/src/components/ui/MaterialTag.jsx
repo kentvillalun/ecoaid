@@ -12,6 +12,7 @@ export const MaterialTag = ({
   textOnly = false,
   className = "",
   materialName = null,
+  noDot = false,
 }) => {
   const styles = {
     Plastics: { bg: "bg-blue-50", dot: "bg-blue-400", text: "text-blue-700" },
@@ -39,7 +40,7 @@ export const MaterialTag = ({
         styles[type]?.bg ? "" : `${styles[type]?.bg} py-1 px-2 rounded-3xl`
       }`}
     >
-      {(!materialName || textOnly) && <div className={`w-1.5 h-1.5 rounded-full ${styles[type]?.dot}`} />} 
+      {(!materialName || textOnly) && <div className={`w-1.5 h-1.5 rounded-full ${styles[type]?.dot} ${noDot && "hidden"}`} />} 
       {materialName ? materialName : type}
       {points != null ? ` ${points} ` : ""}
     </div>

@@ -58,7 +58,7 @@ export default function RequestsPage() {
             </button>
           </div>
 
-          <PageContent className="md:pl-3! md:top-18! ">
+          <PageContent className="md:pl-3! md:top-18! mb-20">
             <div className="flex flex-col gap-2">
               {isLoading ? (
                 Array.from({ length: 1 }).map((_, index) => (

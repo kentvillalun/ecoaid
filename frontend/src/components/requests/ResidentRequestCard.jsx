@@ -80,6 +80,7 @@ export const ResidentRequestCard = ({ request: r, variant = "compact" }) => {
             materialName={r?.material?.name ?? "Assorted"}
             textOnly={true}
             className="text-sm"
+            noDot={true}
           />
 
           <div className="flex flex-col items-end gap-2">
