@@ -13,6 +13,8 @@ import { useRouter } from "next/navigation";
 import { useFetch } from "@/hooks/useFetch";
 import { ButtonSpinner } from "@/components/ui/buttonSpinner";
 import imageCompression from "browser-image-compression";
+import { Modal } from "@/components/ui/Modal";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 
 const schema = yup.object().shape({
   estimatedValue: yup
@@ -75,6 +77,7 @@ export default function CapturePage() {
   const [isUnitLocked, setIsUnitLocked] = useState(false);
   const [isClassificationError, setIsClassificationError] = useState(false);
   const [compressedFile, setCompressedFile] = useState(null);
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
 
   const openCamera = () => {
     fileInputRef.current.click();
@@ -320,7 +323,16 @@ export default function CapturePage() {
   return (
     <Page className="bg-bg!">
       <Toaster position="top-center" />
-      <ResidentHeader title={"Capture Recyclables"} />
+      <ResidentHeader
+        title={"Capture Recyclables"}
+        handleClick={() => {
+          if (imageFile) {
+            setShowLeaveConfirm(true);
+          } else {
+            history.back();
+          }
+        }}
+      />
 
       <section className="absolute left-0 right-0 top-18 h-[calc(100dvh-72px)] p-3 flex flex-col gap-6 overflow-y-auto  ">
         <div className="flex flex-col items-center gap-3">
@@ -368,6 +380,23 @@ export default function CapturePage() {
               )}
             </div>
           </button>
+
+          {showLeaveConfirm && (
+            <Modal
+              isOpen={showLeaveConfirm}
+              onClose={() => setShowLeaveConfirm(false)}
+              onConfirm={() => {
+                setShowLeaveConfirm(false);
+                history.back()
+              }}
+              title={"Discard this request?"}
+              subtitle={"Any entered photo or details will be lost."}
+              icon={<ExclamationTriangleIcon className="w-6 stroke-accent"/>}
+              confirmLabel={"Discard"}
+              confirmClassName={"gradient-button-red"}
+              cancelLabel="Keep editing"
+            />
+          )}
 
           {/* The open camera button */}
           {capturedImageUrl ? (
@@ -458,7 +487,7 @@ export default function CapturePage() {
                       setValue("isAssorted", true);
                       setCategory("");
                       setValue("materialId", null);
-                      setIsUnitLocked(false)
+                      setIsUnitLocked(false);
                     }}
                   >
                     Mixed or assorted material
