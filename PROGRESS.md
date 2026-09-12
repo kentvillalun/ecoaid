@@ -6,6 +6,33 @@ This file tracks completed work, known technical debt, and open items across ses
 
 ---
 
+## 2026-09-12
+
+### Context
+
+This entry is a docs-sync audit, not a coding session: `docs/current-progress.md` and `docs/project-overview.md` hadn't been updated since an "Aug 27, 2026" entry, and a large stretch of real commits (2026-09-05 through 2026-09-12) had landed with no corresponding doc update. Both files have now been brought current — see them for full detail. This entry reconciles this file's own "Still open" / "known technical debt" lists against what actually shipped in that window.
+
+### Completed since the last entry (superseding items below)
+
+- **Super Admin Dashboard is no longer a placeholder.** `GET /admin/onboarding-status` (`admin-dashboard.controller.js`) now returns every barangay with a computed `isIncomplete` flag (missing CAPTAIN/SECRETARY/TREASURER staff, or zero sitios); `/admin-dashboard` shows onboarded-vs-needs-attention counts plus an `IncompleteSetupTable`/`IncompleteSetupCard`. The "Coming soon" placeholder mentioned in the 2026-09-06 entry below is gone.
+- **Claude-powered recyclable image classification shipped** on the resident capture flow — this resolves the "Image recognition approach" item parked below. Landed as a general-purpose vision LLM call (`claude-sonnet-5` via `@anthropic-ai/sdk`), not Teachable Machine: `POST /pickup-requests/classify` (`image-recognition.controller.js`), constrained to a fixed material catalog (`backend/src/utils/coreMaterials.js`'s `CORE_MATERIALS`), rate-limited (5 req/min, `express-rate-limit`). Frontend compresses the photo client-side (`browser-image-compression`) before sending it, then auto-fills the capture form from the response, with a manual-entry fallback. No formal accuracy evaluation against the 5 target material classes was recorded anywhere in the commits — if the adviser wants that number, it still doesn't exist.
+- **A real cross-tenant IDOR was found and fixed** (not in the 2026-09-06 list, found later): `updateStatus`/`getRequest` (pickup requests) and `updateProgram` (redemption) resolved records by `id` alone, so a barangay admin could view/mutate another barangay's rows by id. Fixed by scoping every `where` to the caller's own `barangayId`.
+- **Deployment moved off the stale-Neon-schema path**: backend now runs on Render (`ecoaid-ydrs.onrender.com`), not the Railway URL referenced in older docs; `@prisma/adapter-pg` moved to real `dependencies` since it's required at runtime there. The Hostinger VPS/PM2/Nginx plan mentioned under "Parked" below does not appear to have been used — Render was the path actually taken.
+
+### Re-checked: items below, current status
+
+- **`BarangayTable.jsx` row-click TODO — still not fixed.** The commented-out `onClick` is still there; the row itself is still not clickable. (The "View details" button in the same row does work, so it's a UX gap, not a broken feature.)
+- **Stray `console.log`s — partially cleaned up.** The one in `barangay-accounts/[id]/page.jsx` (`staffData`) is gone. The ones in resident `home/page.jsx` (`requestData`) and `program-funds/page.jsx` (`modules`) are both still present.
+- **Duplicate `paga.jsx` file — deleted.** Only `page.jsx` exists under `admin-dashboard/` now.
+- **Schema debt (`Barangay.redemptionMode` dead field, `hasCollectionRequests` default-`true`) — both still present, unchanged.**
+- **Super Admin's own Settings page — still doesn't exist.** Still open.
+
+### New gap found during this audit (not previously flagged anywhere)
+
+- **Barangay `has___` feature flags are enforced client-side only, not at the `proxy.js` middleware level.** Role-based access (`ROLE_MATRIX`) *is* enforced server-side in `proxy.js` — a role without access to a route is redirected to `/403` even on direct URL access. But `proxy.js` never fetches a barangay's `has___` flags at all; that check only happens in `Sidebar.jsx` (hides the nav link) and in the handful of pages that call `getBarangayModules` themselves (`program-funds`, resident `home`/`standings`). A staff member whose *role* is allowed into a route but whose *barangay* has that module disabled can still reach the page directly by URL. Tracked as the top item in `docs/current-progress.md`'s Next Steps.
+
+---
+
 ## 2026-09-06
 
 ### Completed this session

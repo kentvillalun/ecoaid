@@ -42,9 +42,15 @@ All resident data-driven pages work end-to-end (home, community, requests list, 
 
 **Role-based authorization with automatic role-scoped interfaces is in place.** A single `ROLE_MATRIX` (`frontend/src/lib/roles.js`) maps every barangay route to the staff roles allowed to access it. The Next.js middleware (`proxy.js`) verifies the `barangay_token` JWT at the edge and redirects to `/403` when the logged-in role can't access the requested route; the Sidebar filters navigation items against the same matrix so a role only ever sees the modules it's permitted to use; barangay login redirects each role to the first route it can access rather than a hardcoded `/dashboard`. Dev seed data now includes one staff account per role (CAPTAIN, SECRETARY, TREASURER, SK, COLLECTOR) for testing.
 
-The system is deployed. Backend runs on Railway. Frontend proxies via next.config.mjs rewrites.
+**Super Admin module is built end-to-end**, as a separate platform-level portal from barangay staff (its own `SUPER_ADMIN` role, `admin_token` cookie, `authenticateSuperAdmin` middleware, `(admin)` frontend route group, mounted at `/admin` on the backend). Super Admin can register/edit barangays (name, address, contact, theme preset, and the four `has___` feature flags), manage each barangay's sitios and staff accounts, and see a dashboard of which barangays are missing a required staff role (CAPTAIN/SECRETARY/TREASURER) or have zero sitios. The `has___` feature flags this module manages are now actually consumed on the barangay-facing side (`frontend/src/lib/getBarangayModules.js`), filtering Sidebar navigation (combined with `ROLE_MATRIX`) and gating a few pages directly — though this enforcement hasn't yet been audited across every module for direct-URL access the way `ROLE_MATRIX` is.
 
-Active development focus: Super Admin module — a full UI (not yet started) for toggling each barangay's `has___` feature flags, plus conditional rendering on the barangay-facing side so a barangay without a given flag doesn't see that module.
+**AI-assisted recyclable classification is live on the resident capture flow.** After taking a photo, a resident can tap "Analyze Photo" to have Claude (`claude-sonnet-5`) identify the material against a fixed, hand-maintained catalog (`CORE_MATERIALS`) and estimate its quantity; the result auto-fills the material, category, estimated value/unit, and notes fields, with a manual fallback if classification fails or is skipped. The image is compressed client-side before both classification and the Cloudinary upload. The classification endpoint is rate-limited (5 requests/min per caller) since each call is a paid API request — the only endpoint in the system with rate limiting so far.
+
+A real cross-tenant IDOR was found and fixed in this period: pickup-request and redemption-program lookups by id alone let a barangay admin view/mutate another barangay's records; queries are now scoped to the caller's own `barangayId`.
+
+The system is deployed. Backend runs on Render (moved off Railway). Frontend proxies via next.config.mjs rewrites.
+
+Active development focus: auditing barangay feature-flag enforcement beyond Sidebar filtering, and the technical-debt backlog (points-scoping bug, rate limiting/hardening on the rest of the API, pagination, stock-ledger gaps) — see `docs/current-progress.md` for the current priority order.
 
 ---
 
