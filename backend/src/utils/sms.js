@@ -23,6 +23,7 @@ const sendOtp = async (phoneNumber) => {
 
   if (!response.ok) {
     const error = await response.json();
+    console.log(error)
     throw new Error(error?.message ?? "Failed to send OTP");
   }
 

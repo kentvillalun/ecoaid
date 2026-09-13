@@ -41,7 +41,7 @@ export default function HomePage() {
     url: "/api/settings/theme/resident",
   });
 
-  console.log(requestData)
+
 
   const handleRefetchCount = () => setRequestsRefetchCount((prev) => prev + 1);
 

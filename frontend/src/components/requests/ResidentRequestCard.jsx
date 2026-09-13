@@ -34,21 +34,21 @@ export const ResidentRequestCard = ({ request: r, variant = "compact" }) => {
             </div>
             <div className="flex flex-col gap-0.5">
               <h3 className="text-sm font-semibold text-text-primary capitalize">
-                {r.isAssorted === true ? "Assorted Request" : r.material?.name}
+                {r?.isAssorted === true ? "Assorted Request" : r.material?.name}
               </h3>
               <p className="text-xs text-gray-500">
-                {r.notes ? r.notes.slice(0, 45) + "..." : "No notes available"}
+                {r?.notes ? r.notes.slice(0, 45) + "..." : "No notes available"}
               </p>
               <p className="text-xs text-gray-400">
-                Est. {r.estimatedValue}{" "}
+                Est. {r?.estimatedValue}{" "}
                 <span className="lowercase">
-                  {r.estimatedUnit === "PIECE" ? "pcs" : r.estimatedUnit}
+                  {r?.estimatedUnit === "PIECE" ? "pcs" : r?.estimatedUnit}
                 </span>
               </p>
             </div>
           </div>
           <div className="flex flex-col gap-1 items-end">
-            <StatusBadge type={r.status} />
+            <StatusBadge type={r?.status} />
             <MaterialTag
               type={
                 r?.isAssorted === true
@@ -61,7 +61,7 @@ export const ResidentRequestCard = ({ request: r, variant = "compact" }) => {
 
         {/* Footer row */}
         <div className="flex flex-row items-center justify-between w-full pt-2 border-t border-gray-100">
-          <p className="text-xs text-gray-400">{formatDate(r.createdAt)}</p>
+          <p className="text-xs text-gray-400">{formatDate(r?.createdAt)}</p>
         </div>
       </Card>
     );
@@ -84,18 +84,18 @@ export const ResidentRequestCard = ({ request: r, variant = "compact" }) => {
           />
 
           <div className="flex flex-col items-end gap-2">
-            <StatusBadge type={r.status} />
+            <StatusBadge type={r?.status} />
           </div>
         </div>
-        <p className="text-xs text-text-secondary">{formatDate(r.createdAt)}</p>
+        <p className="text-xs text-text-secondary">{formatDate(r?.createdAt)}</p>
       </div>
 
       {/* Footer row */}
       <div className="flex flex-row items-end justify-end w-full pt-2 border-t border-gray-100">
         <p className="text-xs text-text-secondary">
-          Est. {r.estimatedValue}{" "}
+          Est. {r?.estimatedValue}{" "}
           <span className="lowercase">
-            {r.estimatedUnit === "PIECE" ? "pcs" : r.estimatedUnit}
+            {r?.estimatedUnit === "PIECE" ? "pcs" : r?.estimatedUnit}
           </span>
         </p>
       </div>
