@@ -37,13 +37,10 @@ export default function RequestsPage() {
         className="shadow-none bg-bg!"
       />
 
-      <PageContent
-        className="overflow-hidden! md:top-18 md:pl-3!"
-        padding="py-4 px-3"
-      >
+      <PageContent className="md:pl-3! md:top-18!">
         {/* Tab section */}
         <div className="flex flex-col gap-6 mt-2">
-          <div className="grid grid-cols-2 gap-2 z-50 bg-bg pb-3">
+          <div className="grid grid-cols-2 gap-2 fixed w-full z-40 bg-bg pb-3 top-21.5 p-2 py-3 left-0 ">
             <button
               className={`rounded-2xl py-3 font-medium text-gray-600 new-border ${currentTab === "ongoing" ? "text-white gradient-button" : "bg-white"} transition-all duration-250 ease-out`}
               onClick={() => setCurrectTab("ongoing")}
@@ -58,58 +55,56 @@ export default function RequestsPage() {
             </button>
           </div>
 
-          <PageContent className="md:pl-3! md:top-18! mb-30!">
-            <div className="flex flex-col gap-2">
-              {isLoading ? (
-                Array.from({ length: 1 }).map((_, index) => (
-                  <Card
-                    className="flex-col! items-start! gap-3 transition-all hover:cursor-pointer hover:-translate-y-0.5 duration-200 ease-in-out shadow-none! new-border"
-                    key={index}
-                  >
-                    {/* Top row */}
-                    <div className="flex flex-row justify-between w-full">
-                      <div className="flex flex-row gap-3">
-                        <div className="flex flex-col items-start h-16 w-16 rounded-md overflow-hidden shrink-0">
-                          <Skeleton width={64} height={64} />
-                        </div>
-                        <div className="flex flex-col gap-0.5">
-                          <Skeleton width={55} />
-                          <Skeleton width={100} />
-                          <Skeleton width={150} />
-                        </div>
+          <div className="flex flex-col gap-2">
+            {isLoading ? (
+              Array.from({ length: 1 }).map((_, index) => (
+                <Card
+                  className="flex-col! items-start! gap-3 transition-all hover:cursor-pointer hover:-translate-y-0.5 duration-200 ease-in-out shadow-none! new-border"
+                  key={index}
+                >
+                  {/* Top row */}
+                  <div className="flex flex-row justify-between w-full">
+                    <div className="flex flex-row gap-3">
+                      <div className="flex flex-col items-start h-16 w-16 rounded-md overflow-hidden shrink-0">
+                        <Skeleton width={64} height={64} />
                       </div>
-                      <div className="flex flex-col gap-1 items-end">
-                        <Skeleton width={120} />
-                        <Skeleton width={120} />
+                      <div className="flex flex-col gap-0.5">
+                        <Skeleton width={55} />
+                        <Skeleton width={100} />
+                        <Skeleton width={150} />
                       </div>
                     </div>
+                    <div className="flex flex-col gap-1 items-end">
+                      <Skeleton width={120} />
+                      <Skeleton width={120} />
+                    </div>
+                  </div>
 
-                    {/* Footer row */}
-                    <div className="flex flex-row items-center justify-between w-full pt-2 border-t border-gray-100">
-                      <Skeleton width={100} />
-                    </div>
-                  </Card>
-                ))
-              ) : isError ? (
-                <Error
-                  buttonLabel={"Try again"}
-                  buttonClassName="py-2! px-6! text-sm!"
-                  subtext={"We coudn't load your requests"}
-                  handleRefetchCount={handleRefetchCount}
-                  className="pt-30!"
-                />
-              ) : filteredRequests?.length === 0 ? (
-                <Empty
-                  text={"No request yet"}
-                  subtext={"Tap the camera button to submit your first request"}
-                />
-              ) : (
-                filteredRequests?.map((r) => (
-                  <ResidentRequestCard key={r.id} request={r} variant="list" />
-                ))
-              )}
-            </div>
-          </PageContent>
+                  {/* Footer row */}
+                  <div className="flex flex-row items-center justify-between w-full pt-2 border-t border-gray-100">
+                    <Skeleton width={100} />
+                  </div>
+                </Card>
+              ))
+            ) : isError ? (
+              <Error
+                buttonLabel={"Try again"}
+                buttonClassName="py-2! px-6! text-sm!"
+                subtext={"We coudn't load your requests"}
+                handleRefetchCount={handleRefetchCount}
+                className="pt-30!"
+              />
+            ) : filteredRequests?.length === 0 ? (
+              <Empty
+                text={"No request yet"}
+                subtext={"Tap the camera button to submit your first request"}
+              />
+            ) : (
+              filteredRequests?.map((r) => (
+                <ResidentRequestCard key={r.id} request={r} variant="list" />
+              ))
+            )}
+          </div>
         </div>
       </PageContent>
     </Page>
