@@ -40,7 +40,7 @@ export default function RequestsPage() {
       <PageContent className="md:pl-3! md:top-18! [-webkit-overflow-scrolling:touch] [touch-action:pan-y]">
         {/* Tab section */}
         <div className="flex flex-col gap-6 mt-2 ">
-          <div className="grid grid-cols-2 gap-2 fixed w-full z-40 bg-bg pb-3 top-21.5 p-2 py-3 left-0 ">
+          <div className="grid grid-cols-2 gap-2 fixed w-full z-40 bg-bg pb-3 top-21 p-2 py-3 left-0 ">
             <button
               className={`rounded-2xl py-3 font-medium text-gray-600 new-border ${currentTab === "ongoing" ? "text-white gradient-button" : "bg-white"} transition-all duration-250 ease-out`}
               onClick={() => setCurrectTab("ongoing")}
