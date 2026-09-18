@@ -51,6 +51,7 @@ export const TransactionCard = ({
       ) : data?.transactions?.length === 0 ? (
         <Empty
           text={"No transactions yet"}
+          className="md:hidden"
           subtext={"There are no redemption transaction yet."}
         />
       ) : (

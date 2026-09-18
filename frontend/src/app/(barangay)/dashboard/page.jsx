@@ -59,11 +59,11 @@ export default function BarangayDashboardPage() {
           <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <Card
               customBorder="0.5px solid #e5e7eb"
-              className="shadow-none! gradient-card relative flex flex-col gap-2 items-start p-4! overflow-clip col-span-2 lg:col-span-4 lg:justify-start justify-between lg:gap-25 "
+              className="shadow-none! gradient-card relative flex flex-col gap-2 items-start p-4! overflow-clip col-span-2 lg:col-span-4 lg:justify-start justify-between"
             >
               <div className="absolute w-30 md:w-35 md:h-35 bg-accent/60 rounded-full h-30 -right-8 -top-8 md:-top-10 md:-right-10"></div>
               <div className="absolute w-25 md:w-35 md:h-35 bg-accent/50 rounded-full h-25 right-18 -bottom-12 md:right-45 md:-bottom-16"></div>
-              <div className="flex flex-row w-full items-center justify-between">
+              <div className="flex flex-row w-full items-center justify-between lg:justify-start lg:gap-20">
                 <div className="flex flex-col items-start justify-between gap-2 z-40 h-full">
                   <div className="flex flex-col gap-1 items-start justify-start w-full">
                     <p className="text-xs text-[rgba(255,255,255,0.6)] font-medium uppercase">
@@ -91,7 +91,7 @@ export default function BarangayDashboardPage() {
                   </div>
                 </div>
               </div>
-              <div className="flex flex-row items-center justify-between w-full">
+              <div className="flex flex-row items-center justify-between w-full lg:justify-start lg:gap-43">
                 <div
                   className="text-xs flex flex-row gap-1 items-center justify-start bg-accent/20 px-3 py-1 rounded-xl"
                   style={{ border: "0.5px solid var(--color-accent)" }}
