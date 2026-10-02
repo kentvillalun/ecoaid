@@ -16,7 +16,7 @@ const sendOtp = async (phoneNumber) => {
       apikey: process.env.SEMAPHORE_API_KEY,
       number: phoneNumber,
       message:
-        "Your EcoProfit verification code is: {otp}. Valid for 10 minutes. Do not share this with anyone.",
+        "Your EcoAid verification code is: {otp}. Valid for 10 minutes. Do not share this with anyone.",
       sendername: process.env.SEMAPHORE_SENDER_NAME,
     }),
   });
