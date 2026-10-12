@@ -30,8 +30,8 @@ export default function LoginPage() {
   const [submitError, setSubmitError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const router = useRouter();
-  const [isChecking, setIsChecking] = useState(true);
-  const [isFading, setIsFading] = useState(false);
+  // false until we know whether this device has seen onboarding
+  const [isReady, setIsReady] = useState(false);
 
   const {
     register,
@@ -83,68 +83,32 @@ export default function LoginPage() {
       return;
     }
 
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem(
-        "ecoaidResidentSession",
-        JSON.stringify(result.data),
-      );
-    }
-
+    // The httpOnly cookie set by the backend is the session now.
+    // proxy.js checks it before /home renders.
     router.push("/home");
   };
 
+  // Login state is decided by proxy.js on the server: a logged-in resident
+  // never reaches this page. This effect only handles first-time onboarding.
   useEffect(() => {
-    const isAndroid = /android/i.test(navigator.userAgent);
+    // Remove the old auth flag from devices that logged in before this change
+    localStorage.removeItem("ecoaidResidentSession");
+    sessionStorage.removeItem("skipSplash");
 
-    if (isAndroid || sessionStorage.getItem("skipSplash")) {
-      sessionStorage.removeItem("skipSplash");
-
-      if (localStorage.getItem("ecoaidResidentSession")) {
-        router.push("/home");
-        return;
-      }
-
-      // Checks if the user have seen the onboarding screen
-      if (!localStorage.getItem("hasSeenOnboarding")) {
-        router.push("/onboarding");
-        return;
-      }
-
-      setIsChecking(false);
+    if (!localStorage.getItem("hasSeenOnboarding")) {
+      router.push("/onboarding");
       return;
     }
 
-    setTimeout(() => {
-      setIsFading(true);
-
-      setTimeout(() => {
-        const checking = () => {
-          // Checks if the user has already logged in, if yes redirect to home
-          if (localStorage.getItem("ecoaidResidentSession")) {
-            router.push("/home");
-            return;
-          }
-
-          // Checks if the user have seen the onboarding screen
-          if (!localStorage.getItem("hasSeenOnboarding")) {
-            router.push("/onboarding");
-            return;
-          }
-
-          setIsChecking(false);
-        };
-
-        checking();
-      }, 500);
-    }, 1000);
+    setIsReady(true);
   }, []);
 
-  if (isChecking)
+  if (!isReady)
     return (
       <>
         <DesktopGuard />
         <main
-          className={`min-h-svh overflow-x-hidden flex items-center justify-center bg-dark ${inter.className} ${isFading ? "opacity-0" : "opacity-100"} transition-opacity duration-500 lg:hidden`}
+          className={`min-h-svh overflow-x-hidden flex items-center justify-center bg-dark ${inter.className} lg:hidden`}
         >
           <div
             className={`flex flex-col items-center w-full max-w-md gap-25 p-2 justify-center`}
@@ -166,7 +130,7 @@ export default function LoginPage() {
   return (
     <>
       <DesktopGuard />
-      {!isChecking && (
+      {isReady && (
         <Page className="lg:hidden bg-bg!">
           <div className={`min-w-full flex flex-col justify-end`}>
             <form

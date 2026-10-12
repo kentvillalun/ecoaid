@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { handleUnauthorized } from "@/lib/handleUnauthorized"
 
 
 export const useMutation = () => {
@@ -25,6 +26,7 @@ export const useMutation = () => {
                 setIsError(true)
                 setError("There is a problem making request")
                 setIsLoading(false)
+                if (result.status === 401) handleUnauthorized()
                 return
             }
 

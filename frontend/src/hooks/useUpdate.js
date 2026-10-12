@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { handleUnauthorized } from "@/lib/handleUnauthorized"
 
 export const useUpdate = () => {
     const [isLoading, setIsLoading] = useState(false)
@@ -25,6 +26,7 @@ export const useUpdate = () => {
             if (!response.ok) {
                 setIsError(true)
                 setError("There is a problem fetching data")
+                if (response.status === 401) handleUnauthorized()
                 return
             }
             

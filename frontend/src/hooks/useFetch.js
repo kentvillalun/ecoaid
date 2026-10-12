@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { handleUnauthorized } from "@/lib/handleUnauthorized";
 
 export const useFetch = ({ url, refetchCount }) => {
     const [isLoading, setIsLoading] = useState(false)
@@ -28,6 +29,7 @@ export const useFetch = ({ url, refetchCount }) => {
                 if (!response.ok) {
                     setError("There is an error fetching data")
                     setIsError(true)
+                    if (response.status === 401) handleUnauthorized()
                     return;
                 }
 

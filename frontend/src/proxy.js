@@ -1,8 +1,27 @@
 import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 import { ROLE_MATRIX } from "./lib/roles";
+import { isResidentPath } from "./lib/residentRoutes";
 
 const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+
+// Returns the token payload if the resident cookie is valid, otherwise null.
+// jwtVerify checks the signature AND the expiry (exp) for us.
+async function getResidentPayload(token) {
+  if (!token) return null;
+
+  try {
+    const { payload } = await jwtVerify(token.value, secret, {
+      algorithms: ["HS256"],
+    });
+
+    if (payload.role !== "RESIDENT") return null;
+
+    return payload;
+  } catch (error) {
+    return null;
+  }
+}
 
 export async function proxy(request) {
   console.log("proxy running", request.nextUrl.pathname);
@@ -23,17 +42,6 @@ export async function proxy(request) {
     "/residents",
     "/reports",
   ];
-  const residentRoutes = [
-    "/updates",
-    "/capture",
-    "/community",
-    "/home",
-    "/profile",
-    "/requests",
-    "/standings",
-    "/notifications",
-    "/",
-  ];
 
   const superAdminRoutes = ["/admin-dashboard", "/barangay-accounts"];
 
@@ -45,10 +53,7 @@ export async function proxy(request) {
     pathname.startsWith(barangayRoutes),
   );
 
-  const isResidentRoute = residentRoutes.some(
-    (residentRoutes) =>
-      pathname === residentRoutes || pathname.startsWith(residentRoutes + "/"),
-  );
+  const isResidentRoute = isResidentPath(pathname);
 
   if (isSuperAdminRoute && !superAdminToken) {
     return NextResponse.redirect(new URL("/admin/login", request.url))
@@ -58,8 +63,25 @@ export async function proxy(request) {
     return NextResponse.redirect(new URL("/barangay/login", request.url));
   }
 
-  if (isResidentRoute && !residentToken) {
-    return NextResponse.redirect(new URL("/login", request.url));
+  const residentPayload = await getResidentPayload(residentToken);
+
+  // Already logged in -> skip the login page
+  if (pathname === "/login") {
+    if (residentPayload) {
+      return NextResponse.redirect(new URL("/home", request.url));
+    }
+
+    // Not logged in: show the form, and throw away a bad cookie if there is one
+    const response = NextResponse.next();
+    if (residentToken) response.cookies.delete("resident_token");
+    return response;
+  }
+
+  // Protected resident page without a valid token -> back to login, cookie removed
+  if (isResidentRoute && !residentPayload) {
+    const response = NextResponse.redirect(new URL("/login", request.url));
+    if (residentToken) response.cookies.delete("resident_token");
+    return response;
   }
 
   if (isSuperAdminRoute && superAdminToken) {
@@ -100,6 +122,7 @@ export async function proxy(request) {
 export const config = {
   matcher: [
     "/",
+    "/login",
     "/dashboard/:path*",
     "/collection-requests/:path*",
     "/redemption/:path*",

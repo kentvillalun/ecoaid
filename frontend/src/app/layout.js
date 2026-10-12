@@ -34,7 +34,7 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className="simulator-touch">
+    <html lang="en" className="simulator-touch" translate="no">
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${baloo.variable} antialiased overflow-auto`}
       >

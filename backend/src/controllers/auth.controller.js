@@ -440,8 +440,8 @@ const login = async (req, res) => {
 
     res.cookie("resident_token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production" ? "none" : "lax",
-      sameSite: "none",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 604800000,
     });
 
@@ -697,8 +697,8 @@ const barangayLogin = async (req, res) => {
 
     res.cookie("barangay_token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production" ? "none" : "lax",
-      sameSite: "none",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 604800000,
     });
 
@@ -797,25 +797,30 @@ const barangayMe = async (req, res) => {
 };
 
 const logoutResident = async (req, res) => {
+  const token = req.cookies.resident_token;
+
+  // Clear the cookie first, so logout still works if the steps below fail
+  res.clearCookie("resident_token");
+
+  if (!token) {
+    return res.status(200).json({ message: "User already logged out" });
+  }
+
   try {
-    const token = req.cookies.resident_token;
-
-    if (!token) {
-      res.clearCookie("resident_token");
-      return res.status(200).json({ message: "User already logged out" });
-    }
-
     const decode = jwt.decode(token);
-    const expiresAt = new Date(decode.exp * 1000);
 
-    await prisma.blackListedToken.create({
-      data: {
-        token,
-        expiresAt,
-      },
-    });
-
-    res.clearCookie("resident_token");
+    // Garbage tokens have no exp; there is nothing to blacklist
+    if (decode?.exp) {
+      // upsert: a token that is already blacklisted is not an error
+      await prisma.blackListedToken.upsert({
+        where: { token },
+        update: {},
+        create: {
+          token,
+          expiresAt: new Date(decode.exp * 1000),
+        },
+      });
+    }
 
     return res.status(200).json({
       message: "Logout successful",
@@ -880,8 +885,8 @@ const superAdminLogin = async (req, res) => {
 
     res.cookie("admin_token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production" ? "none" : "lax",
-      sameSite: "none",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 604800000,
     });
 
