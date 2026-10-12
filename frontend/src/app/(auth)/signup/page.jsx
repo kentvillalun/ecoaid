@@ -47,8 +47,15 @@ const schema = yup.object().shape({
   password: yup
     .string()
     .required("Password is required")
-    .min(4, "Password must be at least 4 characters")
-    .max(16, "Password must not exceed 16 characters"),
+    .min(8, "Password must be at least 8 characters")
+    .max(16, "Password must not exceed 16 characters")
+    .matches(/[0-9]/, "Password must contain at least one number")
+    .matches(/[a-z]/, "Password must contain at least one lowercase letter")
+    .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .matches(
+      /[^a-zA-Z0-9]/,
+      "Password must contain at least one special character",
+    ),
 
   confirmPassword: yup
     .string()
@@ -164,6 +171,7 @@ export default function SignupPage() {
     };
   }, [barangayQuery, selectedBarangay]);
 
+  
   useEffect(() => {
     if (!selectedBarangay?.id) {
       setSitioOptions([]);
@@ -226,12 +234,12 @@ export default function SignupPage() {
 
   const handleBarangaySelect = (barangay) => {
     setSelectedBarangay(barangay);
-    setBarangayQuery(barangay.name);
+    setBarangayQuery(`${barangay.name}, ${barangay.municipality}, ${barangay.province}`);
     setBarangayOptions([]);
     setShowSuggestions(false);
     setBarangayError("");
 
-    setValue("barangayName", barangay.name, { shouldValidate: true });
+    setValue("barangayName", `${barangay.name}`, { shouldValidate: true });
     setValue("barangayId", barangay.id, { shouldValidate: true });
     clearErrors(["barangayName", "barangayId"]);
 
@@ -239,6 +247,7 @@ export default function SignupPage() {
     setValue("sitioId", "");
     clearErrors("sitioId");
   };
+      console.log(selectedBarangay)
 
   const onSubmit = async (data) => {
     setSubmitError("");
@@ -433,6 +442,7 @@ export default function SignupPage() {
                     type="text"
                     placeholder="09xxxxxxxxx"
                     className="input text-base mb-0"
+                    maxLength={11}
                     {...register("phoneNumber")}
                   />
                   {errors.phoneNumber?.message && (
@@ -512,9 +522,9 @@ export default function SignupPage() {
                             onMouseDown={() => handleBarangaySelect(barangay)}
                           >
                             <span>{barangay.name}</span>
-                            {barangay.city && (
-                              <span className="text-[#A3A3A3] ml-1 text-xs">
-                                — {barangay.city}
+                            {barangay.municipality && (
+                              <span className="text-[#A3A3A3] text-xs">
+                                , {barangay.municipality}, {barangay.province}
                               </span>
                             )}
                           </button>
@@ -621,7 +631,7 @@ export default function SignupPage() {
                     </button>
                   </div>
                   {errors.confirmPassword?.message && (
-                    <p className="text-[14px] text-red-500">
+                    <p className="text-xs text-red-500">
                       {errors.confirmPassword?.message}
                     </p>
                   )}

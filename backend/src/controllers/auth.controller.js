@@ -31,6 +31,7 @@ const listBarangays = async (req, res) => {
         id: true,
         name: true,
         municipality: true, // needed by frontend dropdown to distinguish same-name barangays
+        province: true,
       },
       orderBy: { name: "asc" },
       take: 10,

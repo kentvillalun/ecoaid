@@ -374,7 +374,6 @@ export default function OtpPage() {
                   {isResending ? (
                     <div className="flex flex-row gap-2 items-center justify-center">
                       <p>Resend code</p>
-                      <ButtonSpinner />
                     </div>
                   ) : countdown > 0 ? (
                     // Shows "Resend code in 60s" counting down to 0
