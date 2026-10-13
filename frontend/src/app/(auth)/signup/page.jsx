@@ -631,8 +631,7 @@ export default function SignupPage() {
                     </button>
                   </div>
                   {errors.confirmPassword?.message && (
-                    <p className="text-xs text-red-500">
-                      {errors.confirmPassword?.message}
+                    <p className="text-xs text-red-500">                      {errors.confirmPassword?.message}
                     </p>
                   )}
                 </div>
