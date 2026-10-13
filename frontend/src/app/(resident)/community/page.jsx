@@ -18,6 +18,7 @@ import {
 import Link from "next/link";
 import { Empty } from "@/components/ui/Empty";
 import { Error } from "@/components/ui/Error";
+import { ResidentProgramsSection } from "@/components/redemption/ResidentProgramsSection";
 
 const TRUNCATE_THRESHOLD = 150;
 
@@ -173,6 +174,11 @@ export default function CommunityPage() {
               </div>
             </Card>
           </div>
+
+          {/* Redemption Programs - hidden entirely when the barangay has it disabled */}
+          {data?.barangay?.hasRedemptionManagement && (
+            <ResidentProgramsSection isVerified={userData?.user?.isVerified} />
+          )}
 
           <div className="flex flex-col gap-3 ">
             <div className="text-base flex flex-row justify-between">

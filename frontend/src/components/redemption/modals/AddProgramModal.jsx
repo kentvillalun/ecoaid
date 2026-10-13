@@ -7,8 +7,14 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation } from "@/hooks/useMutation";
 import { toast } from "sonner";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useFetch } from "@/hooks/useFetch";
+import { DrawerContext } from "@/app/(barangay)/BarangayLayoutClient.jsx";
+import { ROLE_MATRIX } from "@/lib/roles";
+
+// same roles that can post announcements manually
+const ANNOUNCE_ROLES =
+  ROLE_MATRIX.find((entry) => entry.route === "/announcements")?.roles ?? [];
 
 const schema = yup.object().shape({
   name: yup.string().required("Program name is required"),
@@ -32,6 +38,7 @@ const schema = yup.object().shape({
     ),
   description: yup.string().required("Decription is required"),
   isCashMode: yup.boolean().required(),
+  announce: yup.boolean(),
 });
 
 export const AddProgramModal = ({
@@ -42,6 +49,10 @@ export const AddProgramModal = ({
   id,
 }) => {
   const { makeRequest } = useMutation();
+  const { role } = useContext(DrawerContext);
+  // announcing is only offered when creating, and only to roles that can
+  // post announcements (TREASURER can create programs but not announce)
+  const canAnnounce = !program && ANNOUNCE_ROLES.includes(role);
   const url = program
     ? `/api/redemption/programs/${id}`
     : "/api/redemption/programs";
@@ -86,10 +97,12 @@ export const AddProgramModal = ({
       materials: {} ?? "",
       description: program?.description ?? "",
       isCashMode: program?.isCashMode ?? false,
+      announce: false,
     },
   });
 
   const isCashMode = watch("isCashMode");
+  const announce = watch("announce");
 
   const onSubmit = async (formData) => {
     const programMaterial = Object.entries(materialState)
@@ -122,13 +135,21 @@ export const AddProgramModal = ({
         description: formData.description,
         isCashMode:
           formData.isCashMode === true || formData.isCashMode === "true",
-        ...(program ? { materials } : { programMaterial }),
+        ...(program
+          ? { materials }
+          : { programMaterial, announce: canAnnounce && !!formData.announce }),
       },
     });
 
     if (success) {
       toast.dismiss();
-      toast.success(program ? "Program updated" : "Program created");
+      toast.success(
+        program
+          ? "Program updated"
+          : canAnnounce && formData.announce
+            ? "Program created and announced to residents"
+            : "Program created",
+      );
       setIsProgramModalOpen(false);
       setRefetchCount((prev) => prev + 1);
       reset();
@@ -415,6 +436,35 @@ export const AddProgramModal = ({
               : "Materials left unselected won't be included in your program."}
           </p>
         </div>
+
+        {/* same switch style as the module toggles in the super admin
+            barangay form, using the barangay accent instead */}
+        {canAnnounce && (
+          <button
+            type="button"
+            role="switch"
+            aria-checked={!!announce}
+            onClick={() => setValue("announce", !announce)}
+            className="flex flex-row items-center justify-between gap-3 rounded-lg border border-border bg-white p-3 w-full text-left hover:cursor-pointer"
+          >
+            <div className="flex flex-col gap-0.5">
+              <p className="text-sm font-medium text-text-primary">
+                Announce to residents
+              </p>
+              <p className="text-xs text-text-secondary">
+                Posts an Event announcement with the program description and
+                accepted materials.
+              </p>
+            </div>
+            <div
+              className={`w-11 h-6 rounded-full relative shrink-0 transition-colors ${announce ? "gradient-button" : "bg-gray-200"}`}
+            >
+              <div
+                className={`w-5 h-5 rounded-full bg-white absolute top-0.5 shadow-sm transition-all ${announce ? "left-5" : "left-0.5"}`}
+              />
+            </div>
+          </button>
+        )}
 
         {program && (
           <div className="w-full flex flex-col gap-2 mt-5">

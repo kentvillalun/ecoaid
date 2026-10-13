@@ -62,6 +62,7 @@ const getBarangayInfo = async (req, res) => {
         contactNumber: true,
         municipality: true,
         province: true,
+        hasRedemptionManagement: true,
       },
     });
 

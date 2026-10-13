@@ -97,7 +97,7 @@ export function AnnouncementDetailModal({
             <label className="label">Posted By</label>
             <input
               type="text"
-              className="input mb-0 bg-gray-50 cursor-default"
+              className="input mb-0 bg-gray-50 cursor-default "
               readOnly
               value={announcement?.performedBy || ""}
             />
@@ -106,7 +106,7 @@ export function AnnouncementDetailModal({
             <label className="label">Role</label>
             <input
               type="text"
-              className="input mb-0 bg-gray-50 cursor-default"
+              className="input mb-0 bg-gray-50 cursor-default capitalize"
               readOnly
               value={announcement?.performedByRole.toLowerCase() || ""}
             />

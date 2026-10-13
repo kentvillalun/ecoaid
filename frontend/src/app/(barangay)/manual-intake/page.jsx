@@ -207,10 +207,10 @@ export default function ManualIntakePage() {
 
   return (
     <Page className="bg-bg!">
-      <BarangayTopBar title="Manual Collection Intake" />
+      <BarangayTopBar title="Manual Pickup" />
       <PageContent className="md:pl-70! md:p-6 md:gap-7">
         <BarangayHeaderCard
-          title="Manual Collection Intake"
+          title="Manual Pickup"
           subtitle="Record recyclable material contributions from all sources"
         />
 

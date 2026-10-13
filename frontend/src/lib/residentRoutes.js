@@ -9,6 +9,7 @@ export const RESIDENT_ROUTES = [
   "/requests",
   "/standings",
   "/notifications",
+  "/programs",
   "/",
 ];
 

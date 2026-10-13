@@ -4,31 +4,98 @@ import { getBeneficiaryProgramBalance } from "../utils/beneficiaryPoints.js";
 
 const createProgram = async (req, res) => {
   try {
-    const { name, allotedBudget, programMaterial, description, isCashMode } =
-      req.body ?? {};
+    const {
+      name,
+      allotedBudget,
+      programMaterial,
+      description,
+      isCashMode,
+      announce,
+    } = req.body ?? {};
 
-    const barangayId = req.user.barangayId;
+    const { barangayId, id: userId, role } = req.user;
 
     if (!name || !allotedBudget || !programMaterial || !description) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    const record = await prisma.program.create({
-      data: {
+    // only roles allowed to post announcements manually may auto-announce;
+    // TREASURER can create programs but announcing is silently skipped
+    const shouldAnnounce =
+      announce === true && ["CAPTAIN", "SECRETARY", "SK"].includes(role);
+
+    let announcementData = null;
+
+    if (shouldAnnounce) {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          firstName: true,
+          lastName: true,
+        },
+      });
+
+      const materials = await prisma.material.findMany({
+        where: {
+          barangayId,
+          id: { in: programMaterial.map((pm) => pm.materialId) },
+        },
+        select: {
+          id: true,
+          name: true,
+          defaultUnit: true,
+        },
+      });
+
+      const materialLines = programMaterial
+        .map((pm) => {
+          const material = materials.find((m) => m.id === pm.materialId);
+          if (!material) return null;
+
+          const unit = material.defaultUnit.toLowerCase();
+          return isCashMode
+            ? `• ${material.name} - ₱${pm.cashValue}/${unit}`
+            : `• ${material.name} - ${pm.pointValue} pts/${unit}`;
+        })
+        .filter(Boolean);
+
+      announcementData = {
         barangayId,
-        name,
-        allotedBudget,
-        description,
-        isCashMode,
-        programMaterial: {
-          createMany: {
-            data: programMaterial,
+        userId,
+        title: `${name}`,
+        content: `${description}\n\nAccepted materials:\n${materialLines.join("\n")}`,
+        category: "EVENT",
+        performedBy: `${user.firstName} ${user.lastName}`,
+        performedByRole: role,
+      };
+    }
+
+    const record = await prisma.$transaction(async (tx) => {
+      const program = await tx.program.create({
+        data: {
+          barangayId,
+          name,
+          allotedBudget,
+          description,
+          isCashMode,
+          programMaterial: {
+            createMany: {
+              data: programMaterial,
+            },
           },
         },
-      },
+      });
+
+      if (announcementData) {
+        await tx.announcement.create({ data: announcementData });
+      }
+
+      return program;
     });
 
-    return res.status(201).json({ message: "Program created", record });
+    return res
+      .status(201)
+      .json({ message: "Program created", record, announced: shouldAnnounce });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -472,8 +539,77 @@ const searchBeneficiary = async (req, res) => {
   }
 };
 
+const getResidentPrograms = async (req, res) => {
+  try {
+    const { barangayId } = req.user;
+
+    const barangay = await prisma.barangay.findUnique({
+      where: { id: barangayId },
+      select: {
+        hasRedemptionManagement: true,
+      },
+    });
+
+    if (!barangay?.hasRedemptionManagement) {
+      return res.status(200).json({
+        message: "Redemption management is disabled",
+        enabled: false,
+        programs: [],
+      });
+    }
+
+    const programs = await prisma.program.findMany({
+      where: { barangayId, isActive: true },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        isCashMode: true,
+        createdAt: true,
+        programMaterial: {
+          select: {
+            id: true,
+            pointValue: true,
+            cashValue: true,
+            material: {
+              select: {
+                name: true,
+                defaultUnit: true,
+                category: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        rewardItems: {
+          where: { quantity: { gt: 0 } },
+          select: {
+            id: true,
+            name: true,
+            category: true,
+            pointCost: true,
+          },
+        },
+      },
+    });
+
+    return res.status(200).json({
+      message: "Fetching programs successful",
+      enabled: true,
+      programs,
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 export {
   createProgram,
+  getResidentPrograms,
   getPrograms,
   getProgram,
   createTransaction,
