@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { prisma } from "../config/db.js";
 import { BARANGAY_ROLES } from "./auth.controller.js";
+import { createCoreMaterials } from "../utils/coreMaterials.js";
 
 const getBarangays = async (req, res) => {
   try {
@@ -72,19 +73,23 @@ const registerBarangay = async (req, res) => {
       });
     }
 
-    await prisma.barangay.create({
-      data: {
-        name,
-        municipality,
-        province,
-        zipCode,
-        contactNumber,
-        themeAccent,
-        hasCollectionRequests,
-        hasRedemptionManagement,
-        hasRewardInventory,
-        hasLeaderboard,
-      },
+    await prisma.$transaction(async (tx) => {
+      const barangay = await tx.barangay.create({
+        data: {
+          name,
+          municipality,
+          province,
+          zipCode,
+          contactNumber,
+          themeAccent,
+          hasCollectionRequests,
+          hasRedemptionManagement,
+          hasRewardInventory,
+          hasLeaderboard,
+        },
+      });
+
+      await createCoreMaterials(tx, barangay.id);
     });
 
     return res.status(201).json({ message: "Barangay registered successful" });

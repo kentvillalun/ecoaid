@@ -2,6 +2,11 @@ import "dotenv/config";
 import bcrypt from "bcryptjs";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient, Role } from "../src/generated/prisma/index.js";
+import {
+  CORE_MATERIALS,
+  createCoreMaterials,
+  ensureCoreCategories,
+} from "../src/utils/coreMaterials.js";
 
 // To seed, just run this command after migrate reset
 // node prisma/seed.js
@@ -58,8 +63,6 @@ const DEV_STAFF = [
   },
 ];
 
-const DEV_CATEGORIES = ["Metals", "Papers", "Plastics", "Glass"];
-
 async function seedSampleResident() {
   const DEV_SAMPLE_RESIDENT = {
     username: "kentvillalun",
@@ -101,7 +104,7 @@ async function seedSampleResident() {
 async function seedSuperAdmin() {
   const DEV_SUPER_ADMIN = {
     username: "superadmin",
-    phoneNumber: "00000000000",
+    phoneNumber: "09943304495",
     passwordHash: "SuperAdmin@123",
     role: Role.SUPER_ADMIN,
     barangayId: null,
@@ -148,7 +151,7 @@ async function seedSuperAdmin() {
   });
 }
 
-async function main() {
+async function seedBarangayTestingAccounts() {
   const passwordHash = await bcrypt.hash(DEV_BARANGAY.adminPassword, 10);
 
   const barangay = await prisma.barangay.upsert({
@@ -262,129 +265,30 @@ async function main() {
     sitios: DEV_BARANGAY.sitios,
   });
 
-  for (const categoryName of DEV_CATEGORIES) {
-    const category = await prisma.category.upsert({
-      where: { name: categoryName },
-      update: {},
-      create: {
-        name: categoryName,
-      },
-    });
+  return barangay;
+}
+
+// Core categories + materials every barangay needs.
+// New barangays get these automatically on registration; this backfills any existing ones.
+async function seedCoreMaterials() {
+  await ensureCoreCategories(prisma);
+  console.log("Seeded categories:", Object.keys(CORE_MATERIALS));
+
+  const barangays = await prisma.barangay.findMany({ select: { id: true, name: true } });
+  for (const barangay of barangays) {
+    await createCoreMaterials(prisma, barangay.id);
+    console.log(`Seeded core materials for ${barangay.name}`);
   }
+}
 
-  const categories = await prisma.category.findMany();
+async function main() {
+  await seedSuperAdmin();
+  await seedCoreMaterials();
 
-  const metals = categories.find((c) => c.name === "Metals");
-  const papers = categories.find((c) => c.name === "Papers");
-  const plastics = categories.find((c) => c.name === "Plastics");
-  const glass = categories.find((c) => c.name === "Glass");
-
-  const DEV_METALS = [
-    { name: "Aluminum Cans", defaultUnit: "KG" },
-    { name: "Tin Cans", defaultUnit: "PIECE" },
-    { name: "Steel Scraps", defaultUnit: "KG" },
-    { name: "Iron Scraps", defaultUnit: "KG" },
-  ];
-  const DEV_PAPERS = [
-    { name: "Newspaper", defaultUnit: "KG" },
-    { name: "Cardboard", defaultUnit: "KG" },
-  ];
-  const DEV_PLASTICS = [
-    { name: "Plastic Bottles (PET)", defaultUnit: "PIECE" },
-    { name: "Plastic Bags", defaultUnit: "KG" },
-    { name: "Hard Plastics", defaultUnit: "KG" },
-  ];
-  const DEV_GLASS = [
-    { name: "Alak Bottles", defaultUnit: "PIECE" },
-    { name: "Beer Bottles", defaultUnit: "PIECE" },
-  ];
-
-  for (const { name, defaultUnit } of DEV_METALS) {
-    await prisma.material.upsert({
-      where: {
-        name_barangayId: {
-          name,
-          barangayId: barangay.id,
-        },
-      },
-      update: {
-        categoryId: metals.id,
-        defaultUnit,
-      },
-      create: {
-        name,
-        barangayId: barangay.id,
-        categoryId: metals.id,
-        defaultUnit,
-      },
-    });
-  }
-
-  for (const { name, defaultUnit } of DEV_PAPERS) {
-    await prisma.material.upsert({
-      where: {
-        name_barangayId: {
-          name,
-          barangayId: barangay.id,
-        },
-      },
-      update: {
-        categoryId: papers.id,
-        defaultUnit,
-      },
-      create: {
-        name,
-        barangayId: barangay.id,
-        categoryId: papers.id,
-        defaultUnit,
-      },
-    });
-  }
-
-  for (const { name, defaultUnit } of DEV_PLASTICS) {
-    await prisma.material.upsert({
-      where: {
-        name_barangayId: {
-          name,
-          barangayId: barangay.id,
-        },
-      },
-      update: {
-        categoryId: plastics.id,
-        defaultUnit,
-      },
-      create: {
-        name,
-        barangayId: barangay.id,
-        categoryId: plastics.id,
-        defaultUnit,
-      },
-    });
-  }
-
-  for (const { name, defaultUnit } of DEV_GLASS) {
-    await prisma.material.upsert({
-      where: {
-        name_barangayId: {
-          name,
-          barangayId: barangay.id,
-        },
-      },
-      update: {
-        categoryId: glass.id,
-        defaultUnit,
-      },
-      create: {
-        name,
-        barangayId: barangay.id,
-        categoryId: glass.id,
-        defaultUnit,
-      },
-    });
-  }
-
-  seedSuperAdmin();
-  seedSampleResident()
+  // Dev/training data — not needed for pilot testing
+  // await seedBarangayTestingAccounts();
+  // await seedCoreMaterials();
+  // await seedSampleResident();
 }
 
 main()

@@ -20,6 +20,39 @@ export const CORE_MATERIALS = {
   ],
 };
 
+// Upserts the shared categories. Accepts a Prisma client or transaction client.
+export const ensureCoreCategories = async (db) => {
+  const categories = {};
+  for (const categoryName of Object.keys(CORE_MATERIALS)) {
+    categories[categoryName] = await db.category.upsert({
+      where: { name: categoryName },
+      update: {},
+      create: { name: categoryName },
+    });
+  }
+  return categories;
+};
+
+// Gives a barangay the core materials. Safe to re-run; existing materials are left untouched.
+export const createCoreMaterials = async (db, barangayId) => {
+  const categories = await ensureCoreCategories(db);
+
+  for (const [categoryName, materials] of Object.entries(CORE_MATERIALS)) {
+    for (const { name, defaultUnit } of materials) {
+      await db.material.upsert({
+        where: { name_barangayId: { name, barangayId } },
+        update: {},
+        create: {
+          name,
+          barangayId,
+          categoryId: categories[categoryName].id,
+          defaultUnit,
+        },
+      });
+    }
+  }
+};
+
 export const buildClassificationPrompt = () => {
   const materialList = Object.entries(CORE_MATERIALS)
     .map(
