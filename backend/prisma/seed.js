@@ -64,14 +64,19 @@ const DEV_STAFF = [
 ];
 
 async function seedSampleResident() {
+  // Look up by zip code — IDs change after every migrate reset
+  const barangay = await prisma.barangay.findUniqueOrThrow({
+    where: { zipCode: DEV_BARANGAY.zipCode },
+  });
+
   const DEV_SAMPLE_RESIDENT = {
-    username: "kentvillalun",
+    username: "testResident",
     phoneNumber: "09265065614",
-    passwordHash: "kent123",
+    passwordHash: "Resident@123",
     role: Role.RESIDENT,
-    barangayId: "c354a84f-e168-45c8-a54c-c1fb28d5495d",
-    firstName: "Kent",
-    lastName: "Villalun",
+    barangayId: barangay.id,
+    firstName: "Test",
+    lastName: "Resident",
   };
 
   const passwordHash = await bcrypt.hash(DEV_SAMPLE_RESIDENT.passwordHash, 10);
@@ -282,8 +287,10 @@ async function seedCoreMaterials() {
 }
 
 async function main() {
-  await seedSuperAdmin();
-  await seedCoreMaterials();
+  // await seedSuperAdmin();
+  // await seedCoreMaterials();
+  await seedSampleResident();
+  console.log("Seeded sample resident: testResident");
 
   // Dev/training data — not needed for pilot testing
   // await seedBarangayTestingAccounts();
