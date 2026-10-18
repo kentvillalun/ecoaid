@@ -5,6 +5,7 @@ import { ScaleIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useUpdate } from "@/hooks/useUpdate";
 import { toast } from "sonner";
 import { useFetch } from "@/hooks/useFetch";
+import { handleUnauthorized } from "@/lib/handleUnauthorized";
 
 export const InProgressActions = ({
   id,
@@ -94,6 +95,8 @@ export const InProgressActions = ({
       },
       credentials: "include",
     });
+
+    if (response.status === 401) return handleUnauthorized();
 
     const result = await response.json();
 

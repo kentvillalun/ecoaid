@@ -11,6 +11,7 @@ import { Spinner } from "@/components/ui/Spinner";
 import { Error } from "@/components/ui/Error";
 import { BarangayForm } from "@/components/admin/barangay-accounts/BarangayForm";
 import { useMutation } from "@/hooks/useMutation";
+import { handleUnauthorized } from "@/lib/handleUnauthorized";
 import { toast } from "sonner";
 import { ArrowLeftIcon, BuildingOffice2Icon } from "@heroicons/react/24/outline";
 
@@ -51,6 +52,7 @@ export default function EditBarangayAccountPage() {
 
         if (!response.ok) {
           setIsError(true);
+          if (response.status === 401) handleUnauthorized();
           return;
         }
 

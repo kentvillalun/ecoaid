@@ -13,6 +13,7 @@ import { useMutation } from "@/hooks/useMutation";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import { formatCurrency } from "@/lib/formatCurrency";
+import { handleUnauthorized } from "@/lib/handleUnauthorized";
 
 const schema = yup.object().shape({
   programId: yup.string().required("Program is required"),
@@ -160,6 +161,8 @@ export const RecordTransactionModal = ({
           credentials: "include",
         },
       );
+
+      if (res.status === 401) return handleUnauthorized();
 
       const data = await res.json();
       setSearchResults(data.beneficiaries);

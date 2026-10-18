@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 import { ROLE_MATRIX } from "./lib/roles";
 import { isResidentPath } from "./lib/residentRoutes";
+import { BARANGAY_ROUTES, SUPER_ADMIN_ROUTES } from "./lib/staffRoutes";
 
 const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 
@@ -30,20 +31,9 @@ export async function proxy(request) {
   const superAdminToken = request.cookies.get("admin_token");
   const pathname = request.nextUrl.pathname;
 
-  const barangayRoutes = [
-    "/dashboard",
-    "/collection-requests",
-    "/redemption",
-    "/manual-intake",
-    "/mrf-inventory",
-    "/junkshop-sales",
-    "/settings",
-    "/announcements",
-    "/residents",
-    "/reports",
-  ];
+  const barangayRoutes = BARANGAY_ROUTES;
 
-  const superAdminRoutes = ["/admin-dashboard", "/barangay-accounts"];
+  const superAdminRoutes = SUPER_ADMIN_ROUTES;
 
   const isSuperAdminRoute = superAdminRoutes.some((superAdminRoutes) =>
     pathname.startsWith(superAdminRoutes),

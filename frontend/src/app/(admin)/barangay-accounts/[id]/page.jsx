@@ -11,6 +11,7 @@ import { LabelValue } from "@/components/ui/LabelValue";
 import { Spinner } from "@/components/ui/Spinner";
 import { Error } from "@/components/ui/Error";
 import { formatDate } from "@/lib/formatDate";
+import { handleUnauthorized } from "@/lib/handleUnauthorized";
 import { THEMES } from "@/lib/themes";
 import { useFetch } from "@/hooks/useFetch";
 import { StaffTable } from "@/components/admin/barangay-accounts/StaffTable";
@@ -118,6 +119,7 @@ export default function BarangayAccountDetailsPage() {
 
         if (!response.ok) {
           setIsError(true);
+          if (response.status === 401) handleUnauthorized();
           return;
         }
 

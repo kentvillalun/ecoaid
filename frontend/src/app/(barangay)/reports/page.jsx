@@ -13,6 +13,7 @@ import { ProgramFundsSection } from "@/components/reports/ProgramFundsSection";
 import { useRef, useState } from "react";
 import { getDefaultDateRange } from "@/components/reports/DateRangePicker";
 import Link from "next/link";
+import { handleUnauthorized } from "@/lib/handleUnauthorized";
 
 export default function ReportsPage() {
   const [mrfDateRange, setMrfDateRange] = useState(getDefaultDateRange())
@@ -37,6 +38,8 @@ export default function ReportsPage() {
         programFunds: { startDate: fundsDateRange.startDate, endDate: fundsDateRange.endDate },
       })
     })
+
+    if (response.status === 401) return handleUnauthorized()
 
     const blob = await response.blob()
     const file = document.createElement("a")

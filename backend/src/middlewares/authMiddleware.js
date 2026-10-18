@@ -1,6 +1,23 @@
 import jwt from "jsonwebtoken";
 import { prisma } from "../config/db.js";
 
+// The token can outlive the account: make sure the user still exists and is active.
+// Sends the 401 itself and returns null when the session must be rejected.
+const loadActiveUser = async (id, cookieName, res) => {
+  const user = await prisma.user.findUnique({
+    where: { id },
+    select: { id: true, role: true, barangayId: true, isActive: true },
+  });
+
+  if (!user || !user.isActive) {
+    res.clearCookie(cookieName);
+    res.status(401).json({ error: "Account not found", code: "ACCOUNT_NOT_FOUND" });
+    return null;
+  }
+
+  return user;
+};
+
 const authenticateBarangay = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -12,11 +29,6 @@ const authenticateBarangay = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = {
-      id: decoded.id,
-      role: decoded.role,
-      barangayId: decoded.barangayId,
-    };
 
     const blackListed = await prisma.blackListedToken.findUnique({
       where: { token },
@@ -25,6 +37,15 @@ const authenticateBarangay = async (req, res, next) => {
     if (blackListed) {
       return res.status(401).json({ error: "Invalid token" });
     }
+
+    const user = await loadActiveUser(decoded.id, "barangay_token", res);
+    if (!user) return;
+
+    req.user = {
+      id: user.id,
+      role: user.role,
+      barangayId: user.barangayId,
+    };
 
     next();
   } catch (error) {
@@ -47,12 +68,6 @@ const authenticateResident = async (req, res, next) => {
 
     const decode = jwt.verify(token, process.env.JWT_SECRET);
 
-    req.user = {
-      id: decode.id,
-      role: decode.role,
-      barangayId: decode.barangayId,
-    };
-
     const blackListed = await prisma.blackListedToken.findUnique({
       where: { token },
     });
@@ -60,6 +75,15 @@ const authenticateResident = async (req, res, next) => {
     if (blackListed) {
       return res.status(401).json({ error: "Invalid token" });
     }
+
+    const user = await loadActiveUser(decode.id, "resident_token", res);
+    if (!user) return;
+
+    req.user = {
+      id: user.id,
+      role: user.role,
+      barangayId: user.barangayId,
+    };
 
     next();
   } catch (error) {
@@ -103,10 +127,13 @@ const authenticateSuperAdmin = async (req, res, next) => {
       return res.status(401).json({ error: "Invalid token" });
     }
 
+    const user = await loadActiveUser(decode.id, "admin_token", res);
+    if (!user) return;
+
     req.user = {
-      id: decode.id,
-      role: decode.role,
-      barangayId: decode.barangayId,
+      id: user.id,
+      role: user.role,
+      barangayId: user.barangayId,
     };
 
     next();

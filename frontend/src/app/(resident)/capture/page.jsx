@@ -9,6 +9,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { Page } from "@/components/layout/Page";
 import { API_BASE_URL } from "@/lib/config";
+import { handleUnauthorized } from "@/lib/handleUnauthorized";
 import { useRouter } from "next/navigation";
 import { useFetch } from "@/hooks/useFetch";
 import { ButtonSpinner } from "@/components/ui/buttonSpinner";
@@ -186,6 +187,7 @@ export default function CapturePage() {
 
       if (!response.ok) {
         toast.error("There is a problem submitting request");
+        if (response.status === 401) handleUnauthorized();
       }
 
       if (response.ok) {
@@ -218,6 +220,7 @@ export default function CapturePage() {
           credentials: "include",
         });
 
+        if (response.status === 401) handleUnauthorized();
         if (!response.ok) throw new Error("Network response was not ok");
         const result = await response.json();
         setSitio(result.user.sitio?.name);
@@ -268,6 +271,7 @@ export default function CapturePage() {
         toast.dismiss();
         toast.error("There is a problem analyzing image");
         setIsClassificationError(true);
+        if (response.status === 401) handleUnauthorized();
         return false;
       }
       const result = await response.json();

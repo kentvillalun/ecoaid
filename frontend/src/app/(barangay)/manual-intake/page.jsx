@@ -20,6 +20,7 @@ import { Inter } from "next/font/google";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useMutation } from "@/hooks/useMutation";
+import { handleUnauthorized } from "@/lib/handleUnauthorized";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/Spinner";
 import { Error } from "@/components/ui/Error";
@@ -172,6 +173,7 @@ export default function ManualIntakePage() {
       if (!response.ok) {
         setSearchError("There is a problem searching residents");
         setIsSearchError(true);
+        if (response.status === 401) handleUnauthorized();
         return;
       }
 

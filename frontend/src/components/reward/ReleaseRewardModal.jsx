@@ -8,6 +8,7 @@ import { useFetch } from "@/hooks/useFetch";
 import { useMutation } from "@/hooks/useMutation";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/formatCurrency";
+import { handleUnauthorized } from "@/lib/handleUnauthorized";
 
 export const ReleaseRewardModal = ({
   isOpen,
@@ -58,6 +59,8 @@ export const ReleaseRewardModal = ({
           credentials: "include",
         },
       );
+
+      if (res.status === 401) return handleUnauthorized();
 
       const data = await res.json();
       setSearchResults(data.beneficiaries);

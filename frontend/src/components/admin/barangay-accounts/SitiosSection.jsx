@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Card } from "@/components/ui/Card";
+import { handleUnauthorized } from "@/lib/handleUnauthorized";
 import { CheckIcon, MapPinIcon, PlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 // Neutral gray — sitios aren't an on/off state like Modules, so they don't
@@ -76,6 +77,7 @@ export const SitiosSection = ({
             (isEditMode ? "Failed to update sitio" : "Failed to add sitio"),
         );
         setIsSubmitting(false);
+        if (response.status === 401) handleUnauthorized();
         return;
       }
 
