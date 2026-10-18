@@ -58,7 +58,14 @@ const getDashboardStats = async (req, res) => {
 
 const getRecentTransactions = async (req, res) => {
   try {
+    const { barangayId } = req.user;
+
     const recentTransactions = await prisma.collectionItem.findMany({
+      where: {
+        request: {
+          barangayId,
+        },
+      },
       take: 3,
       include: {
         request: {
@@ -77,24 +84,24 @@ const getRecentTransactions = async (req, res) => {
                 category: {
                   select: {
                     name: true,
-                  }
-                }
-              }
-            }
+                  },
+                },
+              },
+            },
           },
         },
       },
       orderBy: {
-       request: {
-        createdAt: "desc"
-       }
+        request: {
+          createdAt: "desc",
+        },
       },
     });
 
     return res.status(200).json({
       message: "Fetch successful",
-      recentTransactions
-    })
+      recentTransactions,
+    });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
