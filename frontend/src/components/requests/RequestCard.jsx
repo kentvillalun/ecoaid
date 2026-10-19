@@ -103,12 +103,12 @@ export const RequestCard = ({
                       </div>
                       <div className="flex flex-col gap-0.5">
                         <h3 className="font-semibold text-text-primary ">
-                          {d.user.firstName
-                            ? `${d.user.firstName} ${d.user.lastName}`
-                            : d?.user.phoneNumber}
+                          {d?.user?.firstName
+                            ? `${d?.user?.firstName} ${d?.user?.lastName}`
+                            : d?.user?.phoneNumber}
                         </h3>
                         <p className="text-xs text-gray-500">
-                          {d.user.sitio.name}
+                          {d?.user?.sitio?.name}
                         </p>
                         <p className="text-xs text-gray-500">
                           {d?.isAssorted === true
@@ -118,16 +118,16 @@ export const RequestCard = ({
                         <p className="text-xs text-gray-400 text-nowrap">
                           Estimated value:{" "}
                           <span className="font-medium text-gray-600 lowercase">
-                            {d.estimatedValue}{" "}
-                            {d.estimatedUnit === "PIECE"
+                            {d?.estimatedValue}{" "}
+                            {d?.estimatedUnit === "PIECE"
                               ? "pcs"
-                              : d.estimatedUnit}
+                              : d?.estimatedUnit}
                           </span>
                         </p>
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-2">
-                      {status === "ALL" && <StatusBadge type={d.status} />}
+                      {status === "ALL" && <StatusBadge type={d?.status} />}
                       <MaterialTag
                         type={d.material?.category?.name ?? "Assorted"}
                       />
@@ -137,13 +137,13 @@ export const RequestCard = ({
                   {/* Footer row */}
                   <div className="flex flex-row items-center justify-between w-full pt-2 border-t border-gray-100">
                     <p className="text-xs text-gray-400">
-                      {formatDate(d.createdAt)}
+                      {formatDate(d?.createdAt)}
                     </p>
                     <button
                       className="text-xs text-gray-600 font-medium new-border px-3 py-1.5 rounded-xl"
                       onClick={(e) => {
                         e.stopPropagation();
-                        router.push(`/collection-requests/${d.id}`);
+                        router.push(`/collection-requests/${d?.id}`);
                       }}
                     >
                       View Details
@@ -156,7 +156,7 @@ export const RequestCard = ({
                     isSelected ? "bg-[#F0FAF0] ring-1 ring-accent" : ""
                   }`}
                   handleClick={() =>
-                    router.push(`/collection-requests/${d.id}`)
+                    router.push(`/collection-requests/${d?.id}`)
                   }
                 >
                   {/* Top row */}
@@ -173,12 +173,12 @@ export const RequestCard = ({
                       </div>
                       <div className="flex flex-col gap-0.5">
                         <h3 className="font-semibold text-text-primary ">
-                          {d.user.firstName
-                            ? `${d.user.firstName} ${d.user.lastName}`
-                            : d?.user.phoneNumber}
+                          {d?.user?.firstName
+                            ? `${d?.user?.firstName} ${d?.user?.lastName}`
+                            : d?.user?.phoneNumber}
                         </h3>
                         <p className="text-xs text-gray-500">
-                          {d.user.sitio.name}
+                          {d?.user?.sitio?.name}
                         </p>
                         <p className="text-xs text-gray-500">
                           {d?.isAssorted === true
@@ -188,19 +188,19 @@ export const RequestCard = ({
                         <p className="text-xs text-gray-400 text-nowrap">
                           Estimated value:{" "}
                           <span className="font-medium text-gray-600 lowercase">
-                            {d.estimatedValue}{" "}
-                            {d.estimatedUnit === "PIECE"
+                            {d?.estimatedValue}{" "}
+                            {d?.estimatedUnit === "PIECE"
                               ? "pcs"
-                              : d.estimatedUnit}
+                              : d?.estimatedUnit}
                           </span>
                         </p>
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-2">
-                      {status === "ALL" && <StatusBadge type={d.status} />}
+                      {status === "ALL" && <StatusBadge type={d?.status} />}
                       <MaterialTag
                         type={
-                          d.isAssorted === true
+                          d?.isAssorted === true
                             ? "Assorted"
                             : d.material?.category?.name
                         }
@@ -211,7 +211,7 @@ export const RequestCard = ({
                   {/* Footer row */}
                   <div className="flex flex-row items-center justify-between w-full pt-2 border-t border-gray-100">
                     <p className="text-xs text-gray-400">
-                      {formatDate(d.createdAt)}
+                      {formatDate(d?.createdAt)}
                     </p>
                   </div>
                 </Card>

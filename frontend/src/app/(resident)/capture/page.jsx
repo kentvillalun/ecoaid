@@ -172,6 +172,11 @@ export default function CapturePage() {
         return;
       }
 
+      if (sitio === "" || !sitio) {
+        toast.error("Sitio is loading, please wait")
+        return;
+      }
+
       const response = await fetch(`${API_BASE_URL}/pickup-requests`, {
         method: "POST",
         headers: {
@@ -223,7 +228,8 @@ export default function CapturePage() {
         if (response.status === 401) handleUnauthorized();
         if (!response.ok) throw new Error("Network response was not ok");
         const result = await response.json();
-        setSitio(result.user.sitio?.name);
+        console.log(result)
+        setSitio(result?.user?.sitio?.name);
       } catch (error) {
         setError(error.message);
       } finally {
@@ -231,8 +237,12 @@ export default function CapturePage() {
       }
     };
 
+
     fetchdata();
   }, []);
+
+  console.log(sitio)
+  console.log(sitio)
 
   const compressImage = async () => {
     const compressed = await imageCompression(imageFile, {

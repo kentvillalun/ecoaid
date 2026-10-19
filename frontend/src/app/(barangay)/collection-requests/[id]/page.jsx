@@ -155,26 +155,27 @@ export default function RequestDetails() {
                       <p className="text-xs text-gray-600 font-medium col-span-2">
                         Material
                       </p>
-                      <p className="text-xs text-gray-600 font-medium">
-                        Value
-                      </p>
-                      <p className="text-xs text-gray-600 font-medium">
-                        Unit
-                      </p>
+                      <p className="text-xs text-gray-600 font-medium">Value</p>
+                      <p className="text-xs text-gray-600 font-medium">Unit</p>
                     </div>
                     {req?.collectionItems.map((item, index) => (
                       <div
                         className="grid grid-cols-4 gap-2 w-full pt-2 border-t border-gray-100"
                         key={index}
                       >
-                        <MaterialTag materialName={item?.material?.name} textOnly={true} type={item?.material?.category?.name} className="col-span-2"/>
+                        <MaterialTag
+                          materialName={item?.material?.name}
+                          textOnly={true}
+                          type={item?.material?.category?.name}
+                          className="col-span-2"
+                        />
                         <p className="text-sm text-text-primary">
-                          {item.actualValue}
+                          {item?.actualValue}
                         </p>
                         <p className="text-sm text-test-primary">
                           {item.actualUnit === "PIECE"
                             ? "pcs"
-                            : (item.actualUnit).toLowerCase()}
+                            : (item?.actualUnit).toLowerCase()}
                         </p>
                       </div>
                     ))}
@@ -210,23 +211,25 @@ export default function RequestDetails() {
                 Timeline
               </h3>
               <div className="flex flex-col w-full">
-                {timelineEvents.map((event, i) => (
-                  <div
-                    key={event.label}
-                    className={`flex flex-row gap-3 ${i < timelineEvents.length - 1 ? "pb-4" : ""}`}
-                  >
-                    <div className="flex flex-col items-center">
-                      <div className="w-2 h-2 rounded-full bg-accent mt-1.5" />
-                      {i < timelineEvents.length - 1 && (
-                        <div className="w-px flex-1 bg-gray-200 mt-1" />
-                      )}
+                {timelineEvents.map((event, i) => {
+                  return (
+                    <div
+                      key={event?.label}
+                      className={`flex flex-row gap-3 ${i < timelineEvents?.length - 1 ? "pb-4" : ""}`}
+                    >
+                      <div className="flex flex-col items-center">
+                        <div className="w-2 h-2 rounded-full bg-accent mt-1.5" />
+                        {i < timelineEvents?.length - 1 && (
+                          <div className="w-px flex-1 bg-gray-200 mt-1" />
+                        )}
+                      </div>
+                      <LabelValue
+                        name={event?.label}
+                        value={formatDate(event?.value)}
+                      />
                     </div>
-                    <LabelValue
-                      name={event.label}
-                      value={formatDate(event.value)}
-                    />
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </Card>
 
