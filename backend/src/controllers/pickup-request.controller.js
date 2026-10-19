@@ -326,6 +326,7 @@ const getRequest = async (req, res) => {
         createdAt: true,
         approvedAt: true,
         rejectedAt: true,
+        closedAt: true,
         collectedAt: true,
         status: true,
         rejectionReason: true,

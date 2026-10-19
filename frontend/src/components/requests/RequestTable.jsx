@@ -38,16 +38,16 @@ export const RequestTable = ({
         header: "Household",
         render: (data) => (
           <p className="font-semibold text-text-primary">
-            {data.user.firstName
-              ? `${data.user.firstName} ${data.user.lastName}`
-              : data.user.phoneNumber}
+            {data?.user?.firstName
+              ? `${data?.user?.firstName} ${data?.user?.lastName}`
+              : data?.user?.phoneNumber}
           </p>
         ),
       },
       {
         header: "Sitio",
         render: (data) => (
-          <p className="text-gray-600">{data.user.sitio.name}</p>
+          <p className="text-gray-600">{data?.user?.sitio?.name}</p>
         ),
       },
       {
@@ -87,18 +87,18 @@ export const RequestTable = ({
         header: "Value",
         render: (data) => (
           <p className="text-gray-600">
-            {`${data.estimatedValue} ${data.estimatedUnit === "PIECE" ? "pcs" : data.estimatedUnit.toLowerCase()}`}
+            {`${data?.estimatedValue} ${data?.estimatedUnit === "PIECE" ? "pcs" : data?.estimatedUnit?.toLowerCase()}`}
           </p>
         ),
       },
       {
         header: "Status",
-        render: (data) => <StatusBadge type={data.status} />,
+        render: (data) => <StatusBadge type={data?.status} />,
       },
       {
         header: "Date Requested",
         render: (data) => (
-          <p className="text-gray-600">{formatDate(data.createdAt)}</p>
+          <p className="text-gray-600">{formatDate(data?.createdAt)}</p>
         ),
       },
       {
@@ -108,7 +108,7 @@ export const RequestTable = ({
             <button
               className="text-accent hover:underline"
               onClick={() => {
-                router.push(`/collection-requests/${data.id}`);
+                router.push(`/collection-requests/${data?.id}`);
               }}
             >
               {data?.status !== "REQUESTED" &&
@@ -117,20 +117,20 @@ export const RequestTable = ({
                 ? "View Details"
                 : "View"}
             </button>
-            {data.status === "REQUESTED" ? (
+            {data?.status === "REQUESTED" ? (
               <PendingActions
-                id={data.id}
+                id={data?.id}
                 onSuccess={() => handleRefetchCount()}
               />
-            ) : data.status === "APPROVED" ? (
+            ) : data?.status === "APPROVED" ? (
               <ApprovedActions
-                id={data.id}
+                id={data?.id}
                 onSuccess={() => handleRefetchCount()}
               />
-            ) : data.status === "IN_PROGRESS" ? (
+            ) : data?.status === "IN_PROGRESS" ? (
               <InProgressActions
-                id={data.id}
-                isAssorted={data.isAssorted}
+                id={data?.id}
+                isAssorted={data?.isAssorted}
                 material={data?.material}
                 onSuccess={() => handleRefetchCount()}
                 categories={categories}
@@ -147,16 +147,16 @@ export const RequestTable = ({
         header: "Household",
         render: (data) => (
           <p className="font-semibold text-text-primary">
-            {data.user.firstName
-              ? `${data.user.firstName} ${data.user.lastName}`
-              : data.user.phoneNumber}
+            {data?.user?.firstName
+              ? `${data?.user?.firstName} ${data?.user?.lastName}`
+              : data?.user?.phoneNumber}
           </p>
         ),
       },
       {
         header: "Sitio",
         render: (data) => (
-          <p className="text-gray-600">{data.user.sitio.name}</p>
+          <p className="text-gray-600">{data?.user?.sitio?.name}</p>
         ),
       },
       {
@@ -196,14 +196,14 @@ export const RequestTable = ({
         header: "Estimated Value",
         render: (data) => (
           <p className="text-gray-600">
-            {`${data.estimatedValue} ${data.estimatedUnit === "PIECE" ? "pcs" : data.estimatedUnit.toLowerCase()}`}
+            {`${data?.estimatedValue} ${data?.estimatedUnit === "PIECE" ? "pcs" : data?.estimatedUnit?.toLowerCase()}`}
           </p>
         ),
       },
       {
         header: "Date Requested",
         render: (data) => (
-          <p className="text-gray-600">{formatDate(data.createdAt)}</p>
+          <p className="text-gray-600">{formatDate(data?.createdAt)}</p>
         ),
       },
       {
@@ -213,13 +213,13 @@ export const RequestTable = ({
             <button
               className="text-accent hover:underline"
               onClick={() => {
-                router.push(`/collection-requests/${data.id}`);
+                router.push(`/collection-requests/${data?.id}`);
               }}
             >
               View
             </button>
             <PendingActions
-              id={data.id}
+              id={data?.id}
               onSuccess={() => handleRefetchCount()}
             />
           </div>
@@ -232,8 +232,8 @@ export const RequestTable = ({
         render: (data) => (
           <input
             type="checkbox"
-            checked={selectedIds.includes(data.id)}
-            onChange={() => onToggleSelect?.(data.id)}
+            checked={selectedIds.includes(data?.id)}
+            onChange={() => onToggleSelect?.(data?.id)}
           />
         ),
       },
@@ -242,16 +242,16 @@ export const RequestTable = ({
         header: "Household",
         render: (data) => (
           <p className="font-semibold text-text-primary">
-            {data.user.firstName
-              ? `${data.user.firstName} ${data.user.lastName}`
-              : data.user.phoneNumber}
+            {data?.user?.firstName
+              ? `${data?.user?.firstName} ${data?.user?.lastName}`
+              : data?.user?.phoneNumber}
           </p>
         ),
       },
       {
         header: "Sitio",
         render: (data) => (
-          <p className="text-gray-600">{data.user.sitio.name}</p>
+          <p className="text-gray-600">{data?.user?.sitio?.name}</p>
         ),
       },
       {
@@ -291,7 +291,7 @@ export const RequestTable = ({
         header: "Estimated Value",
         render: (data) => (
           <p className="text-gray-600">
-            {`${data.estimatedValue} ${data.estimatedUnit === "PIECE" ? "pcs" : data.estimatedUnit.toLowerCase()}`}
+            {`${data?.estimatedValue} ${data?.estimatedUnit === "PIECE" ? "pcs" : data?.estimatedUnit?.toLowerCase()}`}
           </p>
         ),
       },
@@ -299,14 +299,14 @@ export const RequestTable = ({
         header: "Pickup Schedule",
         render: (data) => (
           <StatusBadge
-            type={data.isScheduled ? "SCHEDULED" : "NOT_SCHEDULED"}
+            type={data?.isScheduled ? "SCHEDULED" : "NOT_SCHEDULED"}
           />
         ),
       },
       {
         header: "Date Approved",
         render: (data) => (
-          <p className="text-gray-600">{formatDate(data.approvedAt)}</p>
+          <p className="text-gray-600">{formatDate(data?.approvedAt)}</p>
         ),
       },
       {
@@ -315,12 +315,12 @@ export const RequestTable = ({
           <div className="flex items-center justify-start flex-row gap-3">
             <button
               className="text-accent hover:underline"
-              onClick={() => router.push(`/collection-requests/${data.id}`)}
+              onClick={() => router.push(`/collection-requests/${data?.id}`)}
             >
               View
             </button>
             <ApprovedActions
-              id={data.id}
+              id={data?.id}
               onSuccess={() => handleRefetchCount()}
             />
           </div>
@@ -332,16 +332,16 @@ export const RequestTable = ({
         header: "Household",
         render: (data) => (
           <p className="font-semibold text-text-primary">
-            {data.user.firstName
-              ? `${data.user.firstName} ${data.user.lastName}`
-              : data.user.phoneNumber}
+            {data?.user?.firstName
+              ? `${data?.user?.firstName} ${data?.user?.lastName}`
+              : data?.user?.phoneNumber}
           </p>
         ),
       },
       {
         header: "Sitio",
         render: (data) => (
-          <p className="text-gray-600">{data.user.sitio.name}</p>
+          <p className="text-gray-600">{data?.user?.sitio?.name}</p>
         ),
       },
       {
@@ -382,7 +382,7 @@ export const RequestTable = ({
         header: "Estimated Value",
         render: (data) => (
           <p className="text-gray-600">
-            {`${data.estimatedValue} ${data.estimatedUnit === "PIECE" ? "pcs" : data.estimatedUnit.toLowerCase()}`}
+            {`${data?.estimatedValue} ${data?.estimatedUnit === "PIECE" ? "pcs" : data?.estimatedUnit?.toLowerCase()}`}
           </p>
         ),
       },
@@ -390,14 +390,14 @@ export const RequestTable = ({
         header: "Pickup Schedule",
         render: (data) => (
           <StatusBadge
-            type={data.isScheduled ? "SCHEDULED" : "NOT_SCHEDULED"}
+            type={data?.isScheduled ? "SCHEDULED" : "NOT_SCHEDULED"}
           />
         ),
       },
       {
         header: "Date Approved",
         render: (data) => (
-          <p className="text-gray-600">{formatDate(data.approvedAt)}</p>
+          <p className="text-gray-600">{formatDate(data?.approvedAt)}</p>
         ),
       },
       {
@@ -406,13 +406,13 @@ export const RequestTable = ({
           <div className="flex items-center justify-start flex-row gap-3">
             <button
               className="text-accent hover:underline"
-              onClick={() => router.push(`/collection-requests/${data.id}`)}
+              onClick={() => router.push(`/collection-requests/${data?.id}`)}
             >
               View
             </button>
             <InProgressActions
-              id={data.id}
-              isAssorted={data.isAssorted}
+              id={data?.id}
+              isAssorted={data?.isAssorted}
               material={data?.material}
               onSuccess={() => handleRefetchCount()}
               categories={categories}
@@ -426,16 +426,16 @@ export const RequestTable = ({
         header: "Household",
         render: (data) => (
           <p className="font-semibold text-text-primary">
-            {data.user.firstName
-              ? `${data.user.firstName} ${data.user.lastName}`
-              : data.user.phoneNumber}
+            {data?.user?.firstName
+              ? `${data?.user?.firstName} ${data?.user?.lastName}`
+              : data?.user?.phoneNumber}
           </p>
         ),
       },
       {
         header: "Sitio",
         render: (data) => (
-          <p className="text-gray-600">{data.user.sitio.name}</p>
+          <p className="text-gray-600">{data?.user?.sitio?.name}</p>
         ),
       },
       {
@@ -476,14 +476,14 @@ export const RequestTable = ({
         header: "Estimated Value",
         render: (data) => (
           <p className="text-gray-600">
-            {`${data.estimatedValue} ${data.estimatedUnit === "PIECE" ? "pcs" : data.estimatedUnit.toLowerCase()}`}
+            {`${data?.estimatedValue} ${data?.estimatedUnit === "PIECE" ? "pcs" : data?.estimatedUnit?.toLowerCase()}`}
           </p>
         ),
       },
       {
         header: "Date Collected",
         render: (data) => (
-          <p className="text-gray-600">{formatDate(data.collectedAt)}</p>
+          <p className="text-gray-600">{formatDate(data?.collectedAt)}</p>
         ),
       },
       {
@@ -492,7 +492,7 @@ export const RequestTable = ({
           <div className="flex items-center justify-start">
             <button
               className="text-accent hover:underline"
-              onClick={() => router.push(`/collection-requests/${data.id}`)}
+              onClick={() => router.push(`/collection-requests/${data?.id}`)}
             >
               View Details
             </button>
@@ -505,16 +505,16 @@ export const RequestTable = ({
         header: "Household",
         render: (data) => (
           <p className="font-semibold text-text-primary">
-            {data.user.firstName
-              ? `${data.user.firstName} ${data.user.lastName}`
-              : data.user.phoneNumber}
+            {data?.user?.firstName
+              ? `${data?.user?.firstName} ${data?.user?.lastName}`
+              : data?.user?.phoneNumber}
           </p>
         ),
       },
       {
         header: "Sitio",
         render: (data) => (
-          <p className="text-gray-600">{data.user.sitio.name}</p>
+          <p className="text-gray-600">{data?.user?.sitio?.name}</p>
         ),
       },
       {
@@ -555,20 +555,20 @@ export const RequestTable = ({
         header: "Estimated Value",
         render: (data) => (
           <p className="text-gray-600">
-            {`${data.estimatedValue} ${data.estimatedUnit === "PIECE" ? "pcs" : data.estimatedUnit.toLowerCase()}`}{" "}
+            {`${data?.estimatedValue} ${data?.estimatedUnit === "PIECE" ? "pcs" : data?.estimatedUnit?.toLowerCase()}`}{" "}
           </p>
         ),
       },
       {
         header: "Rejection Reason",
         render: (data) => (
-          <p className="text-gray-600">{data.rejectionReason}</p>
+          <p className="text-gray-600">{data?.rejectionReason}</p>
         ),
       },
       {
         header: "Date Rejected",
         render: (data) => (
-          <p className="text-gray-600">{formatDate(data.rejectedAt)}</p>
+          <p className="text-gray-600">{formatDate(data?.rejectedAt)}</p>
         ),
       },
       {
@@ -577,7 +577,7 @@ export const RequestTable = ({
           <div className="flex items-center justify-start">
             <button
               className="text-accent hover:underline"
-              onClick={() => router.push(`/collection-requests/${data.id}`)}
+              onClick={() => router.push(`/collection-requests/${data?.id}`)}
             >
               View Details
             </button>
@@ -590,16 +590,16 @@ export const RequestTable = ({
         header: "Household",
         render: (data) => (
           <p className="font-semibold text-text-primary">
-            {data.user.firstName
-              ? `${data.user.firstName} ${data.user.lastName}`
-              : data.user.phoneNumber}
+            {data?.user?.firstName
+              ? `${data?.user?.firstName} ${data?.user?.lastName}`
+              : data?.user?.phoneNumber}
           </p>
         ),
       },
       {
         header: "Sitio",
         render: (data) => (
-          <p className="text-gray-600">{data.user.sitio.name}</p>
+          <p className="text-gray-600">{data?.user?.sitio?.name}</p>
         ),
       },
       {
@@ -640,18 +640,18 @@ export const RequestTable = ({
         header: "Estimated Value",
         render: (data) => (
           <p className="text-gray-600">
-            {`${data.estimatedValue} ${data.estimatedUnit === "PIECE" ? "pcs" : data.estimatedUnit.toLowerCase()}`}{" "}
+            {`${data?.estimatedValue} ${data?.estimatedUnit === "PIECE" ? "pcs" : data?.estimatedUnit?.toLowerCase()}`}{" "}
           </p>
         ),
       },
       {
         header: "Status",
-        render: (data) => <StatusBadge type={data.status} />,
+        render: (data) => <StatusBadge type={data?.status} />,
       },
       {
         header: "Date Closed",
         render: (data) => (
-          <p className="text-gray-600">{formatDate(data.closedAt)}</p>
+          <p className="text-gray-600">{formatDate(data?.closedAt)}</p>
         ),
       },
       {
@@ -660,7 +660,7 @@ export const RequestTable = ({
           <div className="flex items-center justify-start">
             <button
               className="text-accent hover:underline"
-              onClick={() => router.push(`/collection-requests/${data.id}`)}
+              onClick={() => router.push(`/collection-requests/${data?.id}`)}
             >
               View Details
             </button>
