@@ -1,5 +1,5 @@
 import express from 'express'
-import { createProgram, createTransaction, getBeneficiaries, getProgram, getPrograms, getResidentPrograms, getTransaction, getTransactions, searchBeneficiary, updateProgram } from '../controllers/redemption.controller.js';
+import { createProgram, createTransaction, getProgram, getPrograms, getResidentPrograms, getTransaction, getTransactions, searchResident, updateProgram } from '../controllers/redemption.controller.js';
 import { authenticateBarangay, authenticateResident, requireRoles } from '../middlewares/authMiddleware.js';
 
 const router = express.Router()
@@ -12,7 +12,6 @@ router.post("/transactions", authenticateBarangay, requireRoles(["CAPTAIN", "SEC
 router.get("/transactions", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY", "SK", "TREASURER"]), getTransactions)
 router.patch("/programs/:id", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY", "SK", "TREASURER"]), updateProgram)
 router.get("/transactions/:id", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY", "SK", "TREASURER"]), getTransaction)
-router.get("/beneficiaries", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY", "SK", "TREASURER"]), getBeneficiaries)
-router.get("/beneficiaries/search", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY", "SK", "TREASURER"]), searchBeneficiary)
+router.get("/residents/search", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY", "SK", "TREASURER"]), searchResident)
 
 export default router;

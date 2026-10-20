@@ -1,11 +1,7 @@
 "use client";
 
 import { Modal } from "@/components/ui/Modal";
-import {
-  Bars3BottomLeftIcon,
-  XMarkIcon,
-  PlusIcon,
-} from "@heroicons/react/24/outline";
+import { Bars3BottomLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -17,7 +13,6 @@ import { handleUnauthorized } from "@/lib/handleUnauthorized";
 
 const schema = yup.object().shape({
   programId: yup.string().required("Program is required"),
-  educationalLevel: yup.string().nullable().optional(),
 });
 
 export const RecordTransactionModal = ({
@@ -28,7 +23,8 @@ export const RecordTransactionModal = ({
   preselectedProgram,
   currentBarangayData,
 }) => {
-  const { makeRequest, isLoading, error, isError } = useMutation();
+  const { makeRequest, isLoading, error, isError, errorMessageRef } =
+    useMutation();
   const url = "/api/redemption/transactions";
 
   const filteredData = data?.filter((d) => d.isActive === true);
@@ -39,9 +35,7 @@ export const RecordTransactionModal = ({
 
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
-  const [selectedBeneficiary, setSelectedBeneficiary] = useState(null);
-  const [isCreatingBeneficiary, setIsCreatingBeneficiary] = useState(false);
-  const [newBeneficiaryName, setNewBeneficiaryName] = useState("");
+  const [selectedResident, setSelectedResident] = useState(null);
 
   const {
     register,
@@ -53,7 +47,6 @@ export const RecordTransactionModal = ({
     resolver: yupResolver(schema),
     defaultValues: {
       programId: "",
-      educationalLevel: null,
     },
   });
 
@@ -69,6 +62,16 @@ export const RecordTransactionModal = ({
   const activeProgramId = selectedProgram?.id ?? "";
 
   const onSubmit = async (formData) => {
+    // no resident picked from the results: either nothing was typed, or what
+    // was typed doesn't match a registered resident
+    if (!selectedResident) {
+      return toast.error(
+        searchQuery.trim()
+          ? "Resident not found. Please select a registered resident from the search results"
+          : "Please select a resident",
+      );
+    }
+
     if (
       materialRows.length === 0 ||
       materialRows.some((row) => !row.programMaterialId || !row.amount)
@@ -78,24 +81,13 @@ export const RecordTransactionModal = ({
       );
     }
 
-    if (isCreatingBeneficiary) {
-      if (!newBeneficiaryName.trim()) {
-        return toast.error("Please input a beneficiary name");
-      }
-    } else if (!selectedBeneficiary) {
-      return toast.error("Please select or create a beneficiary");
-    }
-
     toast.loading("Creating transaction");
 
     const success = await makeRequest({
       url,
       body: {
         programId: formData.programId,
-        ...(isCreatingBeneficiary
-          ? { beneficiaryName: newBeneficiaryName }
-          : { beneficiaryId: selectedBeneficiary.id }),
-        educationalLevel: formData.educationalLevel,
+        residentId: selectedResident.id,
         items: materialRows.map((row) => ({
           ...row,
           amount: parseFloat(row.amount),
@@ -108,14 +100,12 @@ export const RecordTransactionModal = ({
       toast.success("Transaction created");
       setTransactionRefetchCount((prev) => prev + 1);
       setMaterialRows([{ programMaterialId: "", amount: "" }]);
-      setSelectedBeneficiary(null);
+      setSelectedResident(null);
       setSearchQuery("");
-      setIsCreatingBeneficiary(false);
-      setNewBeneficiaryName("");
       setIsTransactionModalOpen(false);
     } else {
       toast.dismiss();
-      toast.error("Creating transaction failed");
+      toast.error(errorMessageRef.current ?? "Creating transaction failed");
     }
   };
 
@@ -146,7 +136,7 @@ export const RecordTransactionModal = ({
     );
   }, 0);
 
-  // beneficiary points are scoped to a program, so search can only run once
+  // resident points are scoped to a program, so search can only run once
   // a program is selected, and results are re-fetched whenever it changes
   useEffect(() => {
     if (!searchQuery || !activeProgramId) {
@@ -156,7 +146,7 @@ export const RecordTransactionModal = ({
 
     const timeout = setTimeout(async () => {
       const res = await fetch(
-        `/api/redemption/beneficiaries/search?name=${searchQuery}&programId=${activeProgramId}`,
+        `/api/redemption/residents/search?name=${encodeURIComponent(searchQuery)}&programId=${activeProgramId}`,
         {
           credentials: "include",
         },
@@ -165,16 +155,16 @@ export const RecordTransactionModal = ({
       if (res.status === 401) return handleUnauthorized();
 
       const data = await res.json();
-      setSearchResults(data.beneficiaries);
+      setSearchResults(data.residents ?? []);
     }, 300);
 
     return () => clearTimeout(timeout);
   }, [searchQuery, activeProgramId]);
 
-  // a beneficiary's points are only valid for the program they were looked
+  // a resident's points are only valid for the program they were looked
   // up under, so clear the selection whenever the program changes
   const handleProgramChange = () => {
-    setSelectedBeneficiary(null);
+    setSelectedResident(null);
     setSearchQuery("");
   };
 
@@ -229,153 +219,73 @@ export const RecordTransactionModal = ({
         </div>
 
         <div className="flex flex-col gap-1">
-          {isCreatingBeneficiary ? (
-            <>
-              <div className="flex flex-row items-center justify-between">
-                <label className="text-text-primary font-medium">
-                  Beneficiary Name
-                </label>
-                <button
-                  type="button"
-                  className="text-xs text-accent hover:cursor-pointer"
-                  onClick={() => {
-                    setIsCreatingBeneficiary(false);
-                    setNewBeneficiaryName("");
-                  }}
-                >
-                  Back to search
-                </button>
-              </div>
-              <div className="input flex flex-row items-center mb-0 justify-between">
-                <input
-                  type="text"
-                  className="w-full outline-none"
-                  placeholder="Input beneficiary name"
-                  value={newBeneficiaryName}
-                  onChange={(e) => setNewBeneficiaryName(e.target.value)}
-                />
-                <button
-                  className="hover:cursor-pointer"
-                  type="button"
-                  onClick={() => {
-                    setIsCreatingBeneficiary(false);
-                    setNewBeneficiaryName("");
-                  }}
-                >
-                  <XMarkIcon className="w-5 stroke-gray-400" />
-                </button>
-              </div>
-            </>
-          ) : (
-            <>
-              <label className="text-text-primary font-medium">
-                Beneficiary
-              </label>
+          <label className="text-text-primary font-medium">Resident</label>
 
-              <div className="input flex flex-row items-center relative mb-0 gap-2">
-                <input
-                  type="text"
-                  className="w-full outline-none"
-                  placeholder={
-                    activeProgramId
-                      ? "Search Beneficiary"
-                      : "Select program first"
-                  }
-                  disabled={!activeProgramId}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-
-                {selectedBeneficiary && (
-                  <span className="text-xs font-medium text-accent bg-accent-light rounded-3xl py-1 px-2 text-nowrap">
-                    {selectedProgram?.isCashMode
-                      ? formatCurrency(selectedBeneficiary.points)
-                      : `${selectedBeneficiary.points} pts`}
-                  </span>
-                )}
-                {selectedBeneficiary && (
-                  <button
-                    className=" hover:cursor-pointer"
-                    type="button"
-                    onClick={() => {
-                      setSelectedBeneficiary(null);
-                      setSearchQuery("");
-                    }}
-                  >
-                    <XMarkIcon className="w-5 stroke-gray-400" />
-                  </button>
-                )}
-                {searchQuery && !selectedBeneficiary && (
-                  <div className="absolute bg-surface flex flex-col w-full items-start z-40 rounded-lg new-border text-sm py-2.5 top-11.5 left-0">
-                    {searchResults.length > 0 ? (
-                      searchResults.map((r) => (
-                        <div
-                          key={r.id}
-                          className="px-3.5 hover:cursor-pointer hover:bg-gray-50 w-full py-1 flex flex-row items-center justify-between"
-                          onClick={() => {
-                            setSelectedBeneficiary(r);
-                            setSearchQuery(r.name);
-                          }}
-                        >
-                          <p className="text-text-primary">{r.name}</p>
-                          <p className="text-xs text-gray-500">
-                            {selectedProgram?.isCashMode
-                              ? formatCurrency(r.points)
-                              : `${r.points} pts`}
-                          </p>
-                        </div>
-                      ))
-                    ) : (
-                      <>
-                        <p className="px-3.5 py-1 text-gray-500">
-                          No beneficiaries found
-                        </p>
-                        <button
-                          type="button"
-                          className="px-3.5 hover:cursor-pointer hover:bg-gray-50 w-full py-1.5 flex flex-row items-center gap-1.5 text-accent font-medium"
-                          onClick={() => {
-                            setIsCreatingBeneficiary(true);
-                            setSearchQuery("");
-                            setSearchResults([]);
-                          }}
-                        >
-                          <PlusIcon className="w-4" />
-                          Create new beneficiary
-                        </button>
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-1 col-span-2">
-          <label className="text-text-primary font-medium">
-            Educational level
-          </label>
-          <div className="input flex items-center mb-0">
-            <select
+          <div className="input flex flex-row items-center relative mb-0 gap-2">
+            <input
+              type="text"
               className="w-full outline-none"
-              defaultValue=""
-              {...register("educationalLevel")}
-            >
-              <option value="" disabled hidden>
-                Select educational level
-              </option>
-              <option value="PRIMARY" className="">
-                Primary
-              </option>
-              <option value="SECONDARY">Secondary</option>
-              <option value="TERTIARY">Tertiary</option>
-            </select>
+              placeholder={
+                activeProgramId
+                  ? "Search registered resident"
+                  : "Select program first"
+              }
+              disabled={!activeProgramId}
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                // editing the text means the earlier pick no longer matches it
+                setSelectedResident(null);
+              }}
+            />
+
+            {selectedResident && (
+              <span className="text-xs font-medium text-accent bg-accent-light rounded-3xl py-1 px-2 text-nowrap">
+                {selectedProgram?.isCashMode
+                  ? formatCurrency(selectedResident.points)
+                  : `${selectedResident.points} pts`}
+              </span>
+            )}
+            {selectedResident && (
+              <button
+                className=" hover:cursor-pointer"
+                type="button"
+                onClick={() => {
+                  setSelectedResident(null);
+                  setSearchQuery("");
+                }}
+              >
+                <XMarkIcon className="w-5 stroke-gray-400" />
+              </button>
+            )}
+            {searchQuery && !selectedResident && (
+              <div className="absolute bg-surface flex flex-col w-full items-start z-40 rounded-lg new-border text-sm py-2.5 top-11.5 left-0">
+                {searchResults.length > 0 ? (
+                  searchResults.map((r) => (
+                    <div
+                      key={r.id}
+                      className="px-3.5 hover:cursor-pointer hover:bg-gray-50 w-full py-1 flex flex-row items-center justify-between"
+                      onClick={() => {
+                        setSelectedResident(r);
+                        setSearchQuery(r.name);
+                      }}
+                    >
+                      <p className="text-text-primary">{r.name}</p>
+                      <p className="text-xs text-gray-500">
+                        {selectedProgram?.isCashMode
+                          ? formatCurrency(r.points)
+                          : `${r.points} pts`}
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="px-3.5 py-1 text-gray-500">
+                    No registered resident found
+                  </p>
+                )}
+              </div>
+            )}
           </div>
-          {errors.educationalLevel && (
-            <p className="text-xs text-red-500 text-start">
-              {errors.educationalLevel?.message}
-            </p>
-          )}
         </div>
 
         <div className="flex flex-col gap-1">

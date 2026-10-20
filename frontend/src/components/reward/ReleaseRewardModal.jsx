@@ -20,17 +20,22 @@ export const ReleaseRewardModal = ({
   const [programId, setProgramId] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
-  const [selectedBeneficiary, setSelectedBeneficiary] = useState(null);
+  const [selectedResident, setSelectedResident] = useState(null);
 
   const [items, setItems] = useState([{ rewardItemId: "", quantity: "" }]);
 
   const [programError, setProgramError] = useState(null);
-  const [beneficiaryError, setBeneficiaryError] = useState(null);
+  const [residentError, setResidentError] = useState(null);
   const [itemsError, setItemsError] = useState(null);
 
   const { data: programsData } = useFetch({ url: "/api/redemption/programs" });
-  const { data: rewardItemsData } = useFetch({ url: "/api/rewards/" });
-  const { makeRequest } = useMutation();
+  // reward items are fetched for the picked program only, and again every
+  // time a program is picked, so the items and their available stock are
+  // never older than the moment the program was chosen
+  const { data: rewardItemsData, isLoading: isRewardItemsLoading } = useFetch({
+    url: programId ? `/api/rewards?programId=${programId}` : null,
+  });
+  const { makeRequest, errorMessageRef } = useMutation();
 
   const activePrograms =
     programsData?.programs?.filter((p) => p.isActive) ?? [];
@@ -46,15 +51,15 @@ export const ReleaseRewardModal = ({
     (item) => item.programId === programId,
   );
 
-  // beneficiary points are scoped per program, so search can only run once
-  // a program is selected, and rewards can only be released to beneficiaries
+  // resident points are scoped per program, so search can only run once
+  // a program is selected, and rewards can only be released to residents
   // who have earned points under that same program
   useEffect(() => {
     if (!searchQuery || !programId) return;
 
     const timeout = setTimeout(async () => {
       const res = await fetch(
-        `/api/rewards/beneficiaries/search?name=${searchQuery}&programId=${programId}`,
+        `/api/rewards/residents/search?name=${encodeURIComponent(searchQuery)}&programId=${programId}`,
         {
           credentials: "include",
         },
@@ -63,17 +68,17 @@ export const ReleaseRewardModal = ({
       if (res.status === 401) return handleUnauthorized();
 
       const data = await res.json();
-      setSearchResults(data.beneficiaries);
+      setSearchResults(data.residents ?? []);
     }, 300);
 
     return () => clearTimeout(timeout);
   }, [searchQuery, programId]);
 
-  // a previously selected beneficiary/points and reward item picks no
+  // a previously selected resident/points and reward item picks no
   // longer apply once the program changes
   const handleProgramChange = (e) => {
     setProgramId(e.target.value);
-    setSelectedBeneficiary(null);
+    setSelectedResident(null);
     setSearchQuery("");
     setSearchResults([]);
     setItems([{ rewardItemId: "", quantity: "" }]);
@@ -82,6 +87,8 @@ export const ReleaseRewardModal = ({
   const handleSearchChange = (e) => {
     const value = e.target.value;
     setSearchQuery(value);
+    // editing the text means the earlier pick no longer matches it
+    setSelectedResident(null);
     if (!value) setSearchResults([]);
   };
 
@@ -89,10 +96,10 @@ export const ReleaseRewardModal = ({
     setProgramId("");
     setSearchQuery("");
     setSearchResults([]);
-    setSelectedBeneficiary(null);
+    setSelectedResident(null);
     setItems([{ rewardItemId: "", quantity: "" }]);
     setProgramError(null);
-    setBeneficiaryError(null);
+    setResidentError(null);
     setItemsError(null);
   };
 
@@ -116,24 +123,50 @@ export const ReleaseRewardModal = ({
     let hasError = false;
 
     if (!programId) {
-      setProgramError("Please select a program");
+      setProgramError("Select a program");
       hasError = true;
     } else {
       setProgramError(null);
     }
 
-    if (!selectedBeneficiary) {
-      setBeneficiaryError("Please select a beneficiary");
+    if (!selectedResident) {
+      setResidentError(
+        searchQuery.trim() ? "Resident not found" : "Select a resident",
+      );
       hasError = true;
     } else {
-      setBeneficiaryError(null);
+      setResidentError(null);
     }
+
+    // the first row asking for more than what is left in stock
+    const overStockedRow = items.find((row) => {
+      const item = rewardItems.find((r) => r.id === row.rewardItemId);
+      return item && row.quantity > item.available;
+    });
+    const overStockedItem = rewardItems.find(
+      (r) => r.id === overStockedRow?.rewardItemId,
+    );
 
     if (
       items.length === 0 ||
       items.some((row) => !row.rewardItemId || !(row.quantity > 0))
     ) {
-      setItemsError("Please add at least one item");
+      setItemsError("Add at least one item");
+      hasError = true;
+    } else if (overStockedItem) {
+      setItemsError(
+        overStockedItem.available > 0
+          ? `Only ${overStockedItem.available} ${overStockedItem.name} left`
+          : `${overStockedItem.name} is out of stock`,
+      );
+      hasError = true;
+    } else if (selectedResident && totalPointCost > selectedResident.points) {
+      // the server checks this too; saying it here tells staff why
+      const format = (value) =>
+        isCashMode ? formatCurrency(value) : `${value} pts`;
+      setItemsError(
+        `Not enough points. Needs ${format(totalPointCost)}, has ${format(selectedResident.points)}`,
+      );
       hasError = true;
     } else {
       setItemsError(null);
@@ -146,7 +179,7 @@ export const ReleaseRewardModal = ({
     const success = await makeRequest({
       url: "/api/rewards/release",
       body: {
-        beneficiaryId: selectedBeneficiary.id,
+        residentId: selectedResident.id,
         programId,
         items: items.map((row) => ({
           rewardItemId: row.rewardItemId,
@@ -165,7 +198,7 @@ export const ReleaseRewardModal = ({
       onClose();
     } else {
       toast.dismiss();
-      toast.error("Releasing reward failed");
+      toast.error(errorMessageRef.current ?? "Releasing reward failed");
     }
   };
 
@@ -180,7 +213,7 @@ export const ReleaseRewardModal = ({
       }}
       icon={<TruckIcon className="w-6 stroke-accent" />}
       title="Release Reward"
-      subtitle="Search for a beneficiary and release reward items"
+      subtitle="Search for a resident and release reward items"
       confirmLabel="Release Reward"
       confirmClassName="gradient-button"
       onConfirm={onSubmit}
@@ -210,39 +243,39 @@ export const ReleaseRewardModal = ({
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="label">Beneficiary</label>
+          <label className="label">Resident</label>
           <div className="input flex flex-row items-center relative mb-0 gap-2">
             <input
               type="text"
               className="w-full outline-none "
               placeholder={
-                programId ? "Search Beneficiary" : "Select program first"
+                programId ? "Search registered resident" : "Select program first"
               }
               disabled={!programId}
               value={searchQuery}
               onChange={handleSearchChange}
             />
 
-            {selectedBeneficiary && (
+            {selectedResident && (
               <span className="text-xs font-medium text-accent bg-accent-light rounded-3xl py-1 px-2 text-nowrap ">
                 {isCashMode
-                  ? formatCurrency(selectedBeneficiary.points)
-                  : `${selectedBeneficiary.points} pts`}
+                  ? formatCurrency(selectedResident.points)
+                  : `${selectedResident.points} pts`}
               </span>
             )}
-            {selectedBeneficiary && (
+            {selectedResident && (
               <button
                 className=" hover:cursor-pointer"
                 type="button"
                 onClick={() => {
-                  setSelectedBeneficiary(null);
+                  setSelectedResident(null);
                   setSearchQuery("");
                 }}
               >
                 <XMarkIcon className="w-5 stroke-gray-400" />
               </button>
             )}
-            {searchQuery && !selectedBeneficiary && (
+            {searchQuery && !selectedResident && (
               <div className="absolute bg-surface flex flex-col w-full items-start z-40 rounded-lg new-border text-sm py-2.5 top-11.5 left-0">
                 {searchResults.length > 0 ? (
                   searchResults.map((r) => (
@@ -250,7 +283,7 @@ export const ReleaseRewardModal = ({
                       key={r.id}
                       className="px-3.5 hover:cursor-pointer hover:bg-gray-50 w-full py-1 flex flex-row items-center justify-between"
                       onClick={() => {
-                        setSelectedBeneficiary(r);
+                        setSelectedResident(r);
                         setSearchQuery(r.name);
                       }}
                     >
@@ -262,15 +295,15 @@ export const ReleaseRewardModal = ({
                   ))
                 ) : (
                   <p className="px-3.5 py-1 text-gray-500">
-                    No beneficiary found
+                    No registered resident found
                   </p>
                 )}
               </div>
             )}
           </div>
-          {beneficiaryError && (
+          {residentError && (
             <p className="text-xs text-red-500 text-start">
-              {beneficiaryError}
+              {residentError}
             </p>
           )}
         </div>
@@ -313,11 +346,19 @@ export const ReleaseRewardModal = ({
                       value={row.rewardItemId}
                     >
                       <option value="" disabled hidden>
-                        {programId ? "Select reward item" : "Select program first"}
+                        {!programId
+                          ? "Select program first"
+                          : isRewardItemsLoading
+                            ? "Loading reward items"
+                            : rewardItems.length === 0
+                              ? "No reward items in this program"
+                              : "Select reward item"}
                       </option>
                       {rewardItems.map((r) => (
-                        <option value={r.id} key={r.id}>
-                          {r.name} ({r.available} available)
+                        <option value={r.id} key={r.id} disabled={r.available <= 0}>
+                          {r.available > 0
+                            ? `${r.name} (${r.available} available)`
+                            : `${r.name} (out of stock)`}
                         </option>
                       ))}
                     </select>

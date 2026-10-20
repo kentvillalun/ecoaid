@@ -1,5 +1,7 @@
 # Current Progress
 
+> This file is a chronological log. Later sections supersede earlier ones: for example, the early redemption entries below describe beneficiaries, a maximum-points field and educational level, all of which were replaced (see "Oct 2026 update"). For the current state read the last "Completed" section, "In Progress", "Next Steps" and "Notes".
+
 ## Completed
 - Resident-side authentication frontend is fixed and now stable
 - Stable auth flows:
@@ -203,8 +205,8 @@
 - **Program filter added to the live Redemption & Rewards report section** — dropdown alongside the existing date filter, defaults to "All Programs"; matches backend `programId` support that already existed on `filterReports` and now also on `exportReports`.
 
 **Known technical debt / flagged limitations, not yet fixed:**
-- **Redemption-to-release matching is still by `beneficiaryName` only** — no direct schema link between `RedemptionTransaction` and `RewardRelease`. Correctly handles the standard one-visit-per-event flow (SK's one-day program model), but if a beneficiary has multiple redemption transactions *and* multiple reward releases within the same report period, all of that beneficiary's releases in the period appear duplicated across every one of their redemption rows. Confirmed as a testing artifact, not an expected real-world scenario — revisit only if stakeholders confirm multi-visit scenarios actually occur in real operations.
-- Points-scoping bug (`Beneficiary.points` as a global balance, not per-program) — carried over, still open, see Next Steps.
+- **(Resolved Oct 2026: reports now match by `residentId`; names are only a fallback for rows from before the migration. One quirk remains: all of a resident's releases in the period still appear on each of their transaction rows.)** **Redemption-to-release matching was by `beneficiaryName` only** — no direct schema link between `RedemptionTransaction` and `RewardRelease`. Correctly handles the standard one-visit-per-event flow (SK's one-day program model), but if a beneficiary has multiple redemption transactions *and* multiple reward releases within the same report period, all of that beneficiary's releases in the period appear duplicated across every one of their redemption rows. Confirmed as a testing artifact, not an expected real-world scenario — revisit only if stakeholders confirm multi-visit scenarios actually occur in real operations.
+- Points-scoping bug (`Beneficiary.points` as a global balance, not per-program) — **resolved**: the field no longer exists; balances are computed per resident per program (`utils/residentPoints.js`).
 - `JunkshopSale.performedByRole` display, UI polish ("N/a" → em dash), non-functional global search bar — all carried over from prior sessions, still open where not already covered above.
 
 ---
@@ -250,25 +252,54 @@
 
 ---
 
+## Completed (continued — Oct 2026 update)
+
+- **Resident Programs page** (Oct 13) — `/programs` plus a "Redemption Programs" preview on the Barangay (community) tab, both reading `GET /redemption/programs/residents` (`getResidentPrograms`): active programs of the resident's barangay with accepted materials, values and available rewards (points programs only). Returns `enabled: false` when the barangay has `hasRedemptionManagement` off; locked for unverified residents the same way announcements are. `components/redemption/ResidentProgramsSection.jsx` holds the list and the preview. `/programs` added to `residentRoutes.js` and the resident layout.
+- **"Announce this program" toggle** — `createProgram` accepts `announce`; for CAPTAIN/SECRETARY/SK it creates an `EVENT` announcement (title = program name, content = description + accepted materials with values) in the same transaction as the program. TREASURER can create programs but announcing is skipped. The announcement is a snapshot and does not follow later edits.
+- **Redemption overhaul: the resident is the beneficiary.** Migration `20261020095552_resident_as_beneficiary` (hand-edited so existing names are kept):
+  - `Beneficiary` table and its `points` running total removed; `EducationalLevel` enum and `RedemptionTransaction.educationalLevel` removed
+  - `RedemptionTransaction.residentId` (nullable FK to `User`, `ON DELETE SET NULL`) replaces `beneficiaryId`; `beneficiaryName` renamed `residentName` (kept as a snapshot)
+  - `RewardRelease.residentId` replaces `beneficiaryId` (and the old `userId`, which meant the releasing staff member, is dropped; `performedBy`/`performedByRole` remain); `beneficiaryName` renamed `residentName`
+  - New index `(residentId, programId)` on both tables; the `User` model gained the back-relations
+  - `utils/beneficiaryPoints.js` became `utils/residentPoints.js`, `getResidentProgramBalance(residentId, programId)` = points earned in the program minus points spent on its rewards
+  - `createTransaction` takes `residentId` (required, `role: RESIDENT`, same barangay), validates the program (same barangay, active) and that every item belongs to that program, snapshots the names itself, writes the stock ledger with the resident's `userId` (so redemption counts on the leaderboard) and marks the resident verified. The "create a new beneficiary" path is gone.
+  - `searchBeneficiary`/`getBeneficiaries` replaced by `GET /redemption/residents/search` (and `GET /rewards/residents/search`): word-by-word first/last name match, max 10, returns `{ id, name, points }`. The reward version now lists every resident, including those with 0 points, so staff can see why a release is not possible.
+  - `releaseReward` rewritten: requires `residentId`, rejects non-positive quantities, rejects reward items outside the program/barangay (this used to crash with a 500), merges duplicate rows of the same item before checking stock and cost.
+- **Program editing fixed** — `updateProgram` previously only upserted materials, so a deselected material was never removed ("success" with no change), and cash-mode programs could not be edited at all. It now loads the program, rejects an empty material list, deletes materials missing from the new list unless they already appear in a transaction, writes `cashValue`/`pointValue` according to the program's mode, can change the mode only while the program has no transactions (clearing the other mode's value), and runs everything in one `$transaction`. `createProgram` and `updateProgram` verify every material belongs to the caller's barangay. The Add/Edit Program modal shows a toast and stops before sending when a mode change is not allowed.
+- **Frontend for the new model** — Record Transaction and Release Reward modals search registered residents (toast/inline errors for blank or unknown resident), the "Beneficiary" labels became "Resident", educational level removed everywhere, the Reports Redemption & Rewards section and Excel sheet (now 9 columns) use `residentName`, and reports match releases to transactions by `residentId` (name fallback only for rows from before the migration). The program details transaction table gained a hover breakdown of materials. The Reward Inventory page gained a program filter on both the items and the release history (`DropdownFilter`); the Release Reward modal fetches reward items per picked program (`GET /rewards?programId=`) and shows out-of-stock items disabled with simple error messages.
+- **`useMutation` exposes the server's message** — `errorMessageRef` carries the server's message for 4xx responses (never 5xx, never 401), used by the program, transaction and release modals for their failure toasts. `updateProgram`'s catch-all now returns 500 instead of 400.
+- **Manual intake can record staff** — the intake search (`GET /resident/search`) no longer filters to residents and returns each person's role (shown as a label), so staff attendance contributions are linked to their own account and appear in reports and the leaderboard.
+- **Core materials changed** — `Alak Bottles` and `Beer Bottles` replaced by `Gin Bottle (2x2)`, `Round Bottle (Bilog)`, `Ketchup Bottle`, `Liquor Bottle (Long Neck)`; `Cans (Lata)` and `Scrap Metal (Landok)` added; `Tin Cans` default unit changed to KG. Existing barangays need `seedCoreMaterials()` (adds rows only; it never updates or deletes), and unit/old-row changes are made by hand.
+- **Auth and robustness** — sessions of deleted or inactive users are rejected (`loadActiveUser` in `authMiddleware.js`, `handleUnauthorized.js`, `staffRoutes.js`); dashboard recent transactions scoped to the staff's barangay; `error.jsx`/`global-error.jsx` and safer redirects after an intermittent white screen; stricter signup password validation, municipality shown in the barangay dropdown; the Semaphore OTP call was switched to the priority route and then switched back, and the OTP message text was fixed.
+- **Seed refactor** (Oct 17–18) — `prisma/seed.js` split into `seedSuperAdmin`, `seedBarangayTestingAccounts`, `seedCoreMaterials` and `seedSampleResident`, toggled in `main()`; `createCoreMaterials` is called when a barangay is registered by the Super Admin; the dev database was reset as part of the refactor.
+- **Collection request fixes** — the staff request detail page and the request table/card were repaired after a broken page, and the resident capture form received the sitio fix.
+
+---
+
 ## In Progress
 
-- Nothing currently tracked as in-progress as of this update — see Next Steps below for what's queued next.
+- **Resident-side redemption points** — the data exists (`getResidentProgramBalance`), but residents cannot see their own balance yet. Planned: return `myPoints` per program from `getResidentPrograms` and show it on each program card of `/programs` (points programs only).
+- **Field evaluation / pilot** (planned Nov 8, 2026, real barangay, one or more days): real operations (recycling activity, scheduled Sunday pickup, MRF sorting, 5–10 residents submitting photo requests) plus scripted scenarios for junkshop sales/beautification and reports; the logbook is run in parallel and compared with the app.
 
 ---
 
 ## Next Steps (priority order)
 
+0. Show each resident their own points per program on the resident Programs page, then run the field evaluation (planned Nov 8, 2026). Before the pilot: take a database snapshot, apply the `resident_as_beneficiary` migration to production with `prisma migrate deploy`, deploy the code in the same window, and run `seedCoreMaterials()` (if not already done) so existing barangays get the new materials.
 1. Audit barangay `has___` feature-flag enforcement beyond Sidebar filtering — add middleware-level (or at least page-level) gating so a disabled module can't be reached by direct URL, matching how `ROLE_MATRIX` is already enforced in `proxy.js`
 2. Technical debt batch:
-   - Points-scoping bug — `Beneficiary.points` is a single global running balance, not scoped per-program, so a beneficiary can earn points under one program and spend them under an unrelated one, undermining each program's own collection incentive. Planned fix: compute points per-program on the fly (`sum(RedemptionTransactionItem.amount * currentValue)` minus `sum(RewardRelease.quantity * RewardItem.pointCost)`, both scoped to the same `programId`) instead of trusting the stored global field. Affects the Redemption "Record Transaction" modal and the Reward Release modal.
-   - Redemption-to-release matching by `beneficiaryName` only (no schema-level link) — revisit if stakeholders confirm multi-visit-per-period scenarios occur in real operations
    - Archive pattern (soft delete) — panel forbids hard deletion
    - Rate limiting and other backend security/hardening — still only exists on the `/pickup-requests/classify` endpoint (5 req/min, added because it's a paid Claude API call); every other endpoint remains unlimited
    - Pagination / load more pattern
-   - Backend hardening (input validation, consistent error format)
+   - Backend hardening (input validation, consistent error format; the `useMutation` hook only surfaces 4xx messages)
    - Dashboard rewiring (3 hardcoded stat cards — should now be unblocked since Program Funds is done)
-   - `StockTransactionLog` not written by pickup-request `COLLECTED` transitions or redemption transactions
-   - `performedBy` not set in Manual Intake, Redemption, or Collection Request
+   - The Reports redemption section repeats a resident's releases on each of their transaction rows
+   - A "who has not submitted in a period" view does not exist; non-submitters have to be found by comparing the Residents list with the Collection & Intake report (only registered residents with account-linked entries are traceable)
+   - No formal accuracy evaluation of the AI classification exists
+   - `docs`: `fr-process-documentation.md` is a verification snapshot; re-verify the redemption, reward and report sections against the running app after the pilot
+   - `performedBy` not set in Manual Intake, Redemption, or Collection Request (redemption and releases store collector/staff names as text)
+
+   Resolved since the last update: the points-scoping bug, release matching by name, and the stock ledger not receiving pickup collections and redemption transactions.
 
 ---
 
@@ -286,9 +317,13 @@
 - Batch collection moves approved requests into IN_PROGRESS
 - Redemption is separate from intake
 - MRF Inventory (renamed from Material Stock) is read-only and derived from intake transactions
-- MRF Inventory currently nets only Manual Intake (`IN`) and manual stock-out adjustments (`OUT`); it does not yet include pickup-request collections or redemption transactions
+- MRF Inventory nets every ledger source: manual intake, pickup-request collections and redemption transactions add stock (`IN`); junkshop sales and manual stock-out adjustments remove it (`OUT`)
+- Redemption points are never stored: the balance of a resident in a program is computed by `getResidentProgramBalance` (earned in that program minus spent on its rewards). Do not add a stored points column
+- A redemption beneficiary is always a registered resident (`residentId`); recording a redemption transaction also marks the resident verified
+- The core material list (`coreMaterials.js`) is what every barangay is seeded with and what the AI recognizes; changing it needs a backfill (`seedCoreMaterials()` only adds rows, it never renames, re-units or deletes existing ones)
+- A program's redemption mode is locked once it has transactions, and a material with transactions cannot be removed from its program
 - Notifications are created server-side only, as a side effect of pickup-request status transitions (APPROVED/IN_PROGRESS/COLLECTED/REJECTED/EXPIRED) — there is no endpoint for a client to create one directly
-- Redemption report rows carry `rewardReceived` as an array (one entry per release, each with its own date), not a single nullable object — both the live report UI and the Excel export must handle multiple releases per beneficiary per period
+- Redemption report rows carry `rewardReceived` as an array (one entry per release, each with its own date), not a single nullable object — both the live report UI and the Excel export must handle multiple releases per resident per period
 - Reports export (`POST /reports/export`) and the live filter (`GET /reports`) share the same query logic via `backend/src/utils/reportHelpers.js` — any future report-shape change should go in the helper, not be duplicated in both places
 - Route-to-role mapping now lives in one place on the frontend (`ROLE_MATRIX` in `frontend/src/lib/roles.js`), consumed by both the edge middleware (`proxy.js`) and the Sidebar — a new barangay route needs an entry here or it's unreachable (`proxy.js` redirects to `/403` when no matching entry exists) and invisible in navigation
 - Super Admin (`SUPER_ADMIN` role) is a separate portal from barangay staff — its own login page/cookie (`admin_token`)/middleware (`authenticateSuperAdmin`), mounted under `/admin` on the backend and the `(admin)` route group on the frontend; it is not part of `ROLE_MATRIX` (that matrix is barangay-staff-only)

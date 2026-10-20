@@ -8,6 +8,7 @@ import { BarangayTopBar } from "@/components/navigation/BarangayTopBar";
 import { BarangayHeaderCard } from "@/components/ui/BarangayHeaderCard";
 import { Card } from "@/components/ui/Card";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import { DropdownFilter } from "@/components/ui/DropdownFilter";
 import { Badge } from "@/components/ui/Badge";
 import { IconContainer } from "@/components/ui/IconContainer";
 import { formatDate } from "@/lib/formatDate";
@@ -55,7 +56,7 @@ const HISTORY_HEADERS = [
   "Item",
   "Program",
   "Quantity",
-  "Beneficiary",
+  "Resident",
   "Released By",
   "Date",
 ];
@@ -98,6 +99,53 @@ export default function RewardInventoryPage() {
 
   const handleReleaseRefetchCount = () =>
     setReleaseRefetchCount((prev) => prev + 1);
+
+  // program filters, one for the items and one for the release history
+  const [itemProgramFilter, setItemProgramFilter] = useState("ALL");
+  const [releaseProgramFilter, setReleaseProgramFilter] = useState("ALL");
+  const { data: programsData } = useFetch({ url: "/api/redemption/programs" });
+
+  const rewardItems = rewardItemsData?.rewardItems;
+  const rewardReleases = releaseData?.rewardReleases;
+
+  const filteredRewardItems =
+    itemProgramFilter === "ALL"
+      ? rewardItems
+      : rewardItems?.filter((item) => item.programId === itemProgramFilter);
+
+  const filteredRewardReleases =
+    releaseProgramFilter === "ALL"
+      ? rewardReleases
+      : rewardReleases?.filter(
+          (entry) => entry.programId === releaseProgramFilter,
+        );
+
+  // all programs are listed (not just active ones), because items and
+  // releases of an inactive program are still in the tables
+  const hasPrograms = (programsData?.programs?.length ?? 0) > 0;
+
+  const itemFilterOptions = hasPrograms
+    ? [
+        { value: "ALL", label: "All Programs", count: rewardItems?.length ?? 0 },
+        ...programsData.programs.map((p) => ({
+          value: p.id,
+          label: p.name,
+          count: rewardItems?.filter((item) => item.programId === p.id).length ?? 0,
+        })),
+      ]
+    : [{ value: "ALL", label: "No programs yet", disabled: true }];
+
+  const releaseFilterOptions = hasPrograms
+    ? [
+        { value: "ALL", label: "All Programs", count: rewardReleases?.length ?? 0 },
+        ...programsData.programs.map((p) => ({
+          value: p.id,
+          label: p.name,
+          count: rewardReleases?.filter((entry) => entry.programId === p.id).length ?? 0,
+        })),
+      ]
+    : [{ value: "ALL", label: "No programs yet", disabled: true }];
+
   return (
     <Page className="bg-bg!">
       <BarangayTopBar title="Reward Inventory" />
@@ -170,7 +218,7 @@ export default function RewardInventoryPage() {
 
           <Card className="shadow-none! new-border flex flex-col items-start gap-3">
             <p className="text-xs font-medium text-text-secondary">
-              Total Beneficiaries
+              Total Residents
             </p>
 
             <div className="flex flex-col items-start gap-1">
@@ -178,7 +226,7 @@ export default function RewardInventoryPage() {
                 {isSummaryLoading ? (
                   <Skeleton width={120} />
                 ) : (
-                  (summaryData?.distinctBeneficiaries ?? 0)
+                  (summaryData?.distinctResidents ?? 0)
                 )}
               </p>
               <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
@@ -208,6 +256,13 @@ export default function RewardInventoryPage() {
             icon={<GiftIcon className="w-6 stroke-accent" />}
             buttonLabel="Add Item"
             onAction={() => setIsAddModalOpen(true)}
+          />
+
+          <DropdownFilter
+            id="rewardItemProgramFilter"
+            options={itemFilterOptions}
+            value={itemProgramFilter}
+            onChange={setItemProgramFilter}
           />
 
           {/* Desktop table */}
@@ -247,7 +302,7 @@ export default function RewardInventoryPage() {
                         />
                       </td>
                     </tr>
-                  ) : rewardItemsData?.rewardItems?.length === 0 ? (
+                  ) : filteredRewardItems?.length === 0 ? (
                     <tr>
                       <td colSpan={REWARD_HEADERS.length}>
                         <Empty
@@ -259,7 +314,7 @@ export default function RewardInventoryPage() {
                       </td>
                     </tr>
                   ) : (
-                    rewardItemsData?.rewardItems?.map((item) => (
+                    filteredRewardItems?.map((item) => (
                       <tr
                         key={item.id}
                         className="hover:bg-bg transition-all duration-150"
@@ -321,7 +376,7 @@ export default function RewardInventoryPage() {
                 subtext={"Unable to get reward inventory. Please try again."}
                 handleRefetchCount={handleRewardItemsRefetchCount}
               />
-            ) : rewardItemsData?.rewardItems?.length === 0 ? (
+            ) : filteredRewardItems?.length === 0 ? (
               <Empty
                 className="p-5!"
                 text={"No reward items yet"}
@@ -330,7 +385,7 @@ export default function RewardInventoryPage() {
                 }
               />
             ) : (
-              rewardItemsData?.rewardItems?.map((item) => (
+              filteredRewardItems?.map((item) => (
                 <Card
                   key={item.id}
                   className="flex flex-col items-start gap-2 shadow-none! new-border"
@@ -375,6 +430,13 @@ export default function RewardInventoryPage() {
             onAction={() => setIsReleaseModalOpen(true)}
           />
 
+          <DropdownFilter
+            id="releaseProgramFilter"
+            options={releaseFilterOptions}
+            value={releaseProgramFilter}
+            onChange={setReleaseProgramFilter}
+          />
+
           {/* Desktop table */}
           <Card
             className={`${inter.className} hidden md:flex md:flex-col px-8 md:gap-3 md:items-start shadow-none! new-border`}
@@ -412,7 +474,7 @@ export default function RewardInventoryPage() {
                         />
                       </td>
                     </tr>
-                  ) : releaseData?.rewardReleases?.length === 0 ? (
+                  ) : filteredRewardReleases?.length === 0 ? (
                     <tr>
                       <td colSpan={HISTORY_HEADERS.length}>
                         <Empty
@@ -422,7 +484,7 @@ export default function RewardInventoryPage() {
                       </td>
                     </tr>
                   ) : (
-                    releaseData?.rewardReleases?.map((entry) => (
+                    filteredRewardReleases?.map((entry) => (
                       <tr
                         key={entry?.id}
                         className="hover:bg-bg transition-all duration-150"
@@ -437,7 +499,7 @@ export default function RewardInventoryPage() {
                           {entry.quantity}
                         </td>
                         <td className="p-4 text-nowrap">
-                          {entry.beneficiaryName}
+                          {entry.residentName}
                         </td>
                         <td className="p-4 text-nowrap">
                           <p className="font-semibold text-text-primary">
@@ -488,13 +550,13 @@ export default function RewardInventoryPage() {
                 }
                 handleRefetchCount={handleReleaseRefetchCount}
               />
-            ) : releaseData?.rewardReleases?.length === 0 ? (
+            ) : filteredRewardReleases?.length === 0 ? (
               <Empty
                 text={"No releases yet"}
                 subtext={"No rewards have been distributed yet."}
               />
             ) : (
-              releaseData?.rewardReleases?.map((entry) => (
+              filteredRewardReleases?.map((entry) => (
                 <Card
                   key={entry.id}
                   className="flex flex-col items-start gap-2 shadow-none! new-border"
@@ -508,7 +570,7 @@ export default function RewardInventoryPage() {
                     </p>
                   </div>
                   <p className="text-sm text-gray-600">
-                    {entry.beneficiaryName}
+                    {entry.residentName}
                   </p>
                   <div className="flex flex-row items-center justify-between w-full pt-2 border-t border-gray-100">
                     <div>

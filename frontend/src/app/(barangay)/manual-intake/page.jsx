@@ -243,7 +243,7 @@ export default function ManualIntakePage() {
                       type="text"
                       className="w-full outline-none"
                       id="searchResident"
-                      placeholder="Search and select resident name"
+                      placeholder="Search and select resident or staff name"
                       onChange={(e) => {
                         setSearchTerm(e.target.value);
                         if (!e.target.value) {
@@ -285,8 +285,8 @@ export default function ManualIntakePage() {
                       >
                         {residentsList.length === 0 ? (
                           <div className="px-3.5 w-full py-1">
-                            No residents found. You may enter a household name
-                            below.
+                            No residents or staff found. You may enter a
+                            household name below.
                           </div>
                         ) : (
                           residentsList.map((r) => (
@@ -304,6 +304,11 @@ export default function ManualIntakePage() {
                             >
                               <p className="">
                                 {r.firstName} {r.lastName}
+                                {r.role !== "RESIDENT" && (
+                                  <span className="ml-2 text-xs text-gray-400 uppercase">
+                                    {r.role.toLowerCase()}
+                                  </span>
+                                )}
                               </p>
                             </div>
                           ))

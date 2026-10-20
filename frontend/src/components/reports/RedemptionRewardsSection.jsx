@@ -18,8 +18,7 @@ import { formatCurrency } from "@/lib/formatCurrency";
 import { useFetch } from "@/hooks/useFetch";
 
 const REDEMPTION_HEADERS = [
-  "Beneficiary",
-  "Educational Level",
+  "Resident",
   "Date Submitted",
   "Materials Collected",
   "Quantity",
@@ -79,7 +78,7 @@ const MobileMaterialsList = ({ materials }) => (
 
 // Dash for an unreleased cash-mode row, "Not yet released" for points-mode
 // (unchanged prior behavior) — shared by both the reward and date columns
-// so a beneficiary with zero releases shows the same empty state in each.
+// so a resident with zero releases shows the same empty state in each.
 const emptyReleaseLabel = (isCashMode) =>
   isCashMode ? (
     <span className="text-gray-400">-</span>
@@ -197,7 +196,7 @@ export const RedemptionRewardsSection = ({ dateRange, setDateRange, programId, s
     <section className="flex flex-col gap-3">
       <SectionHeader
         title="Redemption & Rewards"
-        subtitle="Beneficiary redemptions and the rewards released for them"
+        subtitle="Resident redemptions and the rewards released for them"
         icon={<GiftIcon className="w-6 stroke-accent" />}
         noButton
       />
@@ -254,12 +253,7 @@ export const RedemptionRewardsSection = ({ dateRange, setDateRange, programId, s
                 records.map((row, i) => (
                   <tr key={i} className="hover:bg-bg transition-all duration-150">
                     <td className="p-4 font-medium text-text-primary text-nowrap">
-                      {row.beneficiaryName}
-                    </td>
-                    <td className="p-4 text-nowrap text-gray-500 capitalize">
-                      {row.educationalLevel
-                        ? `${row.educationalLevel.toLowerCase()} level`
-                        : "-"}
+                      {row.residentName}
                     </td>
                     <td className="p-4 text-nowrap text-gray-400 text-xs">
                       {formatReportDate(row.dateSubmitted)}
@@ -324,13 +318,8 @@ export const RedemptionRewardsSection = ({ dateRange, setDateRange, programId, s
               <div className="flex flex-row items-center justify-between w-full">
                 <div className="flex flex-col">
                   <p className="text-sm font-semibold text-text-primary">
-                    {row.beneficiaryName}
+                    {row.residentName}
                   </p>
-                  {row.educationalLevel && (
-                    <p className="text-xs text-gray-400 capitalize">
-                      {row.educationalLevel.toLowerCase()} level
-                    </p>
-                  )}
                 </div>
                 <p className="text-xs text-gray-400">
                   {formatReportDate(row.dateSubmitted)}

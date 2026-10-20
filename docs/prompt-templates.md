@@ -4,8 +4,9 @@ Read AGENTS.md and relevant docs first.
 
 Current project guidance:
 - Resident auth frontend pages are already fixed and stable unless the task explicitly says otherwise
-- Current active feature focus is resident signup address selection using backend/database-driven barangay and sitio data
+- Current active feature focus is showing each resident their own redemption points per program (resident Programs page), then the field evaluation; see `docs/current-progress.md` for the current order
 - Do not treat auth UI bug fixing as the default task anymore
+- Scope every query to the caller's barangay, and keep the code simple and in the existing style
 
 Task:
 [exact task]

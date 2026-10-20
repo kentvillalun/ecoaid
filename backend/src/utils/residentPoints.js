@@ -1,17 +1,16 @@
 import { prisma } from "../config/db.js";
 
-// A beneficiary's points are scoped to a single program, not global. This
-// computes that scoped balance instead of relying on Beneficiary.points,
-// which is a single running total shared across every program a beneficiary
-// has ever participated in.
+// A resident's points are scoped to a single program, not global. Nothing
+// stores the number; it is computed from the resident's own history, so the
+// balance and the records can never disagree.
 //
 // Balance = points earned from redemption transactions under this program
 //           minus points already spent on reward releases under this program.
-export const getBeneficiaryProgramBalance = async (beneficiaryId, programId) => {
+export const getResidentProgramBalance = async (residentId, programId) => {
   const redemptionItems = await prisma.redemptionTransactionItem.findMany({
     where: {
       redemptionTransaction: {
-        beneficiaryId,
+        residentId,
         programId,
       },
     },
@@ -27,7 +26,7 @@ export const getBeneficiaryProgramBalance = async (beneficiaryId, programId) => 
 
   const rewardReleases = await prisma.rewardRelease.findMany({
     where: {
-      beneficiaryId,
+      residentId,
       programId,
     },
     select: {

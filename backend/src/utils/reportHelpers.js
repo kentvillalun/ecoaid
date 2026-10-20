@@ -197,7 +197,8 @@ export const getRedemptionReports = async (
       ...(programId && { programId }),
     },
     select: {
-      beneficiaryName: true,
+      residentId: true,
+      residentName: true,
       createdAt: true,
       // joined per-row (not filtered to a single program) so a report spanning
       // multiple programs can label/format each row by its own program's mode
@@ -227,7 +228,6 @@ export const getRedemptionReports = async (
           currentValue: true,
         },
       },
-      educationalLevel: true,
     },
   });
 
@@ -241,7 +241,8 @@ export const getRedemptionReports = async (
       ...(programId && { programId }),
     },
     select: {
-      beneficiaryName: true,
+      residentId: true,
+      residentName: true,
       createdAt: true,
       quantity: true,
       rewardItem: {
@@ -255,18 +256,21 @@ export const getRedemptionReports = async (
   });
 
   const merged = transactions.map((t) => {
-    const matchedRelease = rewardReleases.filter(
-      (r) => r.beneficiaryName === t.beneficiaryName,
+    // releases belong to a resident by id; rows from before residents were
+    // linked have no id, so those fall back to matching on the saved name
+    const matchedRelease = rewardReleases.filter((r) =>
+      t.residentId
+        ? r.residentId === t.residentId
+        : !r.residentId && r.residentName === t.residentName,
     );
 
     const pointsEarned = t.redemptionTransactionItem.reduce((acc, item) => {
       return acc + item.amount * item.currentValue;
     }, 0);
     return {
-      beneficiaryName: t.beneficiaryName,
+      residentName: t.residentName,
       dateSubmitted: t.createdAt,
       isCashMode: t.program.isCashMode,
-      educationalLevel: t.educationalLevel,
       materialsCollected: t.redemptionTransactionItem.map((item) => ({
         name: item.programMaterial.material.name,
         category: item.programMaterial.material.category.name,
