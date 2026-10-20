@@ -34,7 +34,7 @@ All resident data-driven pages work end-to-end (home, community, requests list, 
 
 **Manual Collection Intake is built end-to-end.** Barangay staff record Sunday EcoAid (or any direct) intake by searching for a resident or falling back to a household name, then adding material/quantity/unit rows. Each submission creates a `ManualIntakeTransaction` + `ManualIntakeItems` and writes `IN` rows to a new `StockTransactionLog` ledger.
 
-**Material Stock (MRF) is built end-to-end.** `/material-stock` nets `StockTransactionLog` rows per material into a live balance, lists the full transaction log, and supports manual stock-out adjustments via a modal. The ledger currently only receives entries from Manual Intake and manual adjustments — pickup-request collections and redemption transactions don't write to it yet, even though the `Source` enum already reserves values for both.
+**MRF Inventory is built end-to-end** (renamed from Material Stock; mounted at `/mrf-inventory`). It nets `StockTransactionLog` rows per material into a live balance, lists the full transaction log with a running balance, and supports manual stock-out adjustments via a modal. The ledger is now written by all five sources: manual intake, pickup-request collection, redemption transactions, manual adjustments and junkshop sales.
 
 **Junkshop Sales, Announcements, Leaderboard, Program Funds, and Reward Inventory modules are all built end-to-end**, alongside Settings (theme picker, add material/junkshop), Notifications, the barangay-side Residents module, and Resident Standings. The barangay dashboard's stat cards are now fully wired to real data (previously three were hardcoded pending Program Funds).
 
@@ -50,7 +50,13 @@ A real cross-tenant IDOR was found and fixed in this period: pickup-request and 
 
 The system is deployed. Backend runs on Render (moved off Railway). Frontend proxies via next.config.mjs rewrites.
 
-Active development focus: auditing barangay feature-flag enforcement beyond Sidebar filtering, and the technical-debt backlog (points-scoping bug, rate limiting/hardening on the rest of the API, pagination, stock-ledger gaps) — see `docs/current-progress.md` for the current priority order.
+**October 2026: redemption made visible to residents, then overhauled around the resident.** In response to adviser feedback, residents now have a Programs page (`/programs`, also previewed on the Barangay tab) showing active programs, their accepted materials and available rewards. Staff can tick "Announce this program" when creating a program to post an announcement automatically. Field feedback from the barangay then changed the model: the separate `Beneficiary` table was removed and the **resident is now the beneficiary** of redemption transactions and reward releases (`residentId`). Points are no longer stored anywhere; the balance is computed per resident per program from their own history (`backend/src/utils/residentPoints.js`). The unused educational-level field was removed, the redemption mode is locked once a program has transactions, and a material that already has transactions can no longer be removed from its program. Reports, the reward release flow and the program filters on the Reward Inventory page follow the new model, and staff can now be recorded in manual intake so their attendance contributions are traceable.
+
+The core material list changed to match what the pilot barangay collects: `Alak Bottles` and `Beer Bottles` were replaced by `Gin Bottle (2x2)`, `Round Bottle (Bilog)`, `Ketchup Bottle` and `Liquor Bottle (Long Neck)`, and `Cans (Lata)` and `Scrap Metal (Landok)` were added; `Tin Cans` is now counted by kilogram. Because the AI classification only recognizes the core list, this is also a documented delimitation of the study.
+
+Several robustness fixes landed in the same period: sessions of deleted users are rejected, dashboard queries are scoped to the staff's barangay, error boundaries (`error.jsx`, `global-error.jsx`) and shared unauthorized-session handling were added after an intermittent white screen, and the seed file was refactored (separate functions for super admin, barangay test accounts, core materials and a sample resident).
+
+Active development focus: showing each resident their own points per program, then the field evaluation in a real barangay (planned for Nov 8, 2026) using real operations plus scripted scenarios for the modules the barangay does not use daily. After that, the technical-debt backlog (feature-flag enforcement beyond the Sidebar, rate limiting/hardening on the rest of the API, pagination) — see `docs/current-progress.md` for the current priority order.
 
 ---
 

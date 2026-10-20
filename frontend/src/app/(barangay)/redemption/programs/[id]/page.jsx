@@ -23,6 +23,8 @@ import { Spinner } from "@/components/ui/Spinner";
 import { Error } from "@/components/ui/Error";
 import { Empty } from "@/components/ui/Empty";
 import { TransactionCard } from "@/components/redemption/TransactionCard";
+import { TransactionMaterialsBreakdown } from "@/components/redemption/TransactionTable";
+import { HoverPortal } from "@/components/ui/HoverReveal";
 import { createPortal } from "react-dom";
 import { RecordTransactionModal } from "@/components/redemption/modals/RecordTransactionModal";
 import { AddProgramModal } from "@/components/redemption/modals/AddProgramModal";
@@ -32,13 +34,10 @@ import { useRouter } from "next/navigation";
 
 const TABLE_COLUMNS = [
   {
-    header: "Beneficiary",
+    header: "Resident",
     render: (t) => (
       <div className="flex flex-col items-start">
-        <p className="font-semibold">{t?.beneficiaryName}</p>
-        <p className="text-gray-500 capitalize">
-          {t?.educationalLevel.toLowerCase()} level
-        </p>
+        <p className="font-semibold">{t?.residentName}</p>
         <p className="text-gray-500 capitalize">
           Collected By: {t?.collectorName}
         </p>
@@ -47,13 +46,37 @@ const TABLE_COLUMNS = [
   },
   {
     header: "Material",
-    render: (t) => (
-      <div className="flex justify-center">
-        {t?.redemptionTransactionItem?.length > 1
-          ? `${t?.redemptionTransactionItem?.length} materials`
-          : `${t?.redemptionTransactionItem?.length} material`}
-      </div>
-    ),
+    render: (t, isCashMode) => {
+      const items = t?.redemptionTransactionItem ?? [];
+      const visible = items.slice(0, 2);
+      const hidden = items.slice(2);
+
+      return (
+        <div className="flex justify-center">
+          <HoverPortal
+            content={
+              <TransactionMaterialsBreakdown
+                items={items}
+                isCashMode={isCashMode}
+              />
+            }
+          >
+            {visible.map((item, i) => (
+              <MaterialTag
+                key={item.id ?? i}
+                type={item?.programMaterial?.material?.category?.name}
+                materialName={item?.programMaterial?.material?.name}
+              />
+            ))}
+            {hidden.length > 0 && (
+              <span className="text-xs text-gray-500 font-medium px-2 py-0.5 rounded-full bg-gray-100 select-none">
+                +{hidden.length} more
+              </span>
+            )}
+          </HoverPortal>
+        </div>
+      );
+    },
   },
   {
     header: "Values",

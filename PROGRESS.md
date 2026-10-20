@@ -2,7 +2,40 @@
 
 This file tracks completed work, known technical debt, and open items across sessions. Newest entry on top.
 
-> Note: this file didn't exist before 2026-09-06. `CLAUDE.md` also references `docs/project-overview.md`, `docs/business-rules.md`, `docs/module-boundaries.md`, `docs/current-progress.md`, and `AGENTS.md` — none of those exist in the repo either. Worth reconciling at some point, but out of scope for this entry.
+> Note: this file didn't exist before 2026-09-06. The docs that `CLAUDE.md` references (`docs/project-overview.md`, `docs/business-rules.md`, `docs/module-boundaries.md`, `docs/current-progress.md`, `AGENTS.md`) do exist and were brought up to date on 2026-10-20.
+
+---
+
+## 2026-10-20
+
+### Context
+
+Docs-sync plus the end of the redemption overhaul. Every doc was compared against the code and the commit history since 2026-09-12; `CLAUDE.md` and `AGENTS.md` had not been touched since April, `README.md` since June. This entry records what changed in the code and what the audit found.
+
+### Completed
+
+- **The resident is now the beneficiary** (migration `20261020095552_resident_as_beneficiary`): `Beneficiary` table, `EducationalLevel` and the stored `points` total are gone; `residentId` on `RedemptionTransaction` and `RewardRelease`; `residentName` snapshots; balances computed per resident per program. Details are in `docs/current-progress.md` (Oct 2026 update).
+- **Program editing** now removes deselected materials (unless used), supports cash programs, and locks the points/cash mode once a program has transactions; materials must belong to the caller's barangay.
+- **Reward release / reports / program filters** converted to the new model; `useMutation` surfaces the server's 4xx message.
+- **Manual intake can record staff** (attendance contributions) and staff appear on the leaderboard.
+- **Core materials changed** to match the pilot barangay (glass bottle types, `Cans (Lata)`, `Scrap Metal (Landok)`, `Tin Cans` by kg).
+
+### Audit findings (all fixed unless listed under open items)
+
+- A resident who only took part in redemption stayed unverified and was locked out of the resident Programs page. Recording a redemption transaction now marks the resident verified.
+- `createProgram`/`updateProgram` accepted material ids from other barangays. Now rejected.
+- A reward release listing the same item twice was checked row by row against stock. Rows are merged first.
+- `updateProgram` returned 400 for unexpected errors; it now returns 500 so internal messages are not shown to users.
+
+### Open items
+
+- Resident-side points display (next feature).
+- Production rollout of the migration: snapshot, `prisma migrate deploy`, deploy in one window, `seedCoreMaterials()` for the new materials.
+- No "who has not submitted" view; non-submitters are found by comparing lists. Unregistered households are not traceable.
+- Reports repeat a resident's releases on each of their transaction rows.
+- Lint: 18 errors exist in older frontend files outside the redemption work (e.g. hooks called conditionally, setState in effects); not fixed.
+- `junkshop-sales /prices` still allows `SK` on the backend while `ROLE_MATRIX` blocks `/junkshop-sales` for `SK`.
+- `fr-process-documentation.md` was updated from code, not re-verified in the running app.
 
 ---
 

@@ -1,8 +1,10 @@
 # EcoAid — Functional Requirement Verification & Process Documentation
 
-Verified against the running app (barangay dashboard at `/dashboard` login `barangayadmin`/`barangay123`, resident PWA) and the backend source (`backend/src/controllers/*`, `backend/src/routes/*`, `backend/prisma/schema.prisma`) on 2026-08-24.
+Verified against the running app (barangay dashboard at `/dashboard` logged in as the seeded Captain account, resident PWA) and the backend source (`backend/src/controllers/*`, `backend/src/routes/*`, `backend/prisma/schema.prisma`) on 2026-08-24.
 
-**Roles** (`Role` enum): `RESIDENT`, `CAPTAIN`, `SECRETARY`, `TREASURER`, `SK`, `COLLECTOR`, `SUPER_ADMIN`. The dev seed only creates one `CAPTAIN` account — no `SECRETARY`/`TREASURER`/`SK`/`COLLECTOR`/`SUPER_ADMIN` account exists anywhere in the system today (see FR4), so role-gates below for those roles are verified from route-file code (`requireRoles([...])`), not from a live login as that role.
+> **Update 2026-10-20:** FR3, FR4, FR10, FR13–FR17, FR26, FR28 and FR30 were revised, and FR31 added, **from the code and commit history, not re-verified in the running app**, after the redemption overhaul (the resident is now the beneficiary, educational level removed, `Beneficiary` table removed) and the core-material change. All other sections still describe the 2026-08-24 verification. Re-verify the revised sections live before using them as evidence.
+
+**Roles** (`Role` enum): `RESIDENT`, `CAPTAIN`, `SECRETARY`, `TREASURER`, `SK`, `COLLECTOR`, `SUPER_ADMIN`. The dev seed now creates a barangay with one account per staff role plus a Super Admin and a sample resident (see `backend/prisma/seed.js`), so every role can be logged into locally. The role-gates below were originally verified from route-file code (`requireRoles([...])`) rather than from a live login as each role.
 
 **Pickup request `Status` enum** (also reused, oddly, by `Notifications.type`): `REQUESTED, APPROVED, IN_PROGRESS, COLLECTED, REJECTED, CANCELLED, EXPIRED`. `docs/request-lifecycle.md` and `docs/business-rules.md` only document `REQUESTED → APPROVED → IN_PROGRESS → COLLECTED` and `REQUESTED → REJECTED` — `CANCELLED` and `EXPIRED` exist in code and in the live UI but are undocumented in `/docs`.
 
@@ -68,29 +70,43 @@ Verified against the running app (barangay dashboard at `/dashboard` login `bara
 
 ### 3. Register Barangay Account
 
-**Roles allowed:** N/A — **not implemented anywhere in the codebase.**
+> *Revised 2026-10-20 from the code (not re-verified live). On 2026-08-24 this was recorded as "not implemented anywhere"; the Super Admin module was built 2026-09-05 to 2026-09-12.*
 
-**Process steps:** None to document. A repo-wide search for `registerBarangay`, `createStaff`/`addStaff`, and any route gated with `requireRoles(["SUPER_ADMIN"])` returns zero hits. `SUPER_ADMIN` exists only as a schema enum value and in old migration SQL; no controller, route, or UI screen references it. The only place a `Barangay` row is created is `backend/prisma/seed.js`, a one-off dev seed script (`node prisma/seed.js`) that hardcodes a single barangay ("Beddeng Laud") and its `CAPTAIN` admin account — it is not an API endpoint and is not reachable from the app.
+**Roles allowed:** `SUPER_ADMIN` — `POST /admin/barangay/register`, `PATCH /admin/barangay/:id`, `GET /admin/barangays`, `GET /admin/barangays/:id` (`authenticateSuperAdmin`; Super Admin has its own login page, its own `admin_token` cookie and the `(admin)` route group).
 
-**Fields involved:** None (nothing to input against).
+**Process steps:**
+1. Super Admin logs in at the Super Admin portal and opens `/barangay-accounts` (list), then **Register** (`/barangay-accounts/register`).
+2. The form collects name, municipality, province, zip code, contact number, a theme preset and the four module flags (`hasCollectionRequests`, `hasRedemptionManagement`, `hasRewardInventory`, `hasLeaderboard`).
+3. The server rejects a duplicate zip code or contact number, creates the `Barangay` and gives it the **core material list** (`createCoreMaterials`).
+4. A detail page (`/barangay-accounts/[id]`) and an edit page (partial update, the same uniqueness checks excluding itself) complete the module. `/admin-dashboard` lists barangays that still lack a required staff role (CAPTAIN, SECRETARY, TREASURER) or have no sitios.
 
-**Discrepancies found:** Matches the FR table's own footnote — "Register Barangay Account" is explicitly listed as "committed scope pending implementation ahead of final defense." Confirmed accurate: 0% built, not even a stub route or an unlinked UI page.
+**Fields involved:** name, municipality, province, zip code (unique), contact number (unique), theme, four module flags.
 
-**Open questions:** What module enables per-barangay feature flags at registration time (the FR description mentions "configure which system modules are enabled for that barangay")? The `Barangay` model does have boolean feature-flag columns (`hasCollectionRequests`, `hasRedemptionManagement`, `hasRewardInventory`, `hasLeaderboard`) already in the schema, but nothing reads or writes them anywhere in the current controllers — they're unused columns today.
+**Discrepancies found:**
+- The module flags are now read by the barangay side (`lib/getBarangayModules.js` hides sidebar items and gates a few pages), but only **client-side**: `proxy.js` enforces the staff *role* per route, not the barangay's flags, so a role allowed into a route can still reach a disabled module by typing its URL.
+- `Barangay.redemptionMode` remains an unused column.
+
+**Open questions:** Should module flags also be enforced at the edge middleware or on the backend routes?
 
 ---
 
 ### 4. Set Up Staff Accounts and Roles
 
-**Roles allowed:** N/A — **not implemented anywhere in the codebase.**
+> *Revised 2026-10-20 from the code (not re-verified live). Previously recorded as "not implemented anywhere".*
 
-**Process steps:** None to document. Same search as FR3 turns up no staff-account-creation endpoint or UI. The only way any `User` row gets a barangay staff `Role` (`CAPTAIN`/`SECRETARY`/`TREASURER`/`SK`/`COLLECTOR`) today is a direct database write — the seed script hardcodes one `CAPTAIN`. There is no "Add Staff" button, modal, or route anywhere in `frontend/src/app/(barangay)/`.
+**Roles allowed:** `SUPER_ADMIN` — `POST /admin/barangays/:id/staff`, `GET /admin/barangays/:id/staff`.
 
-**Fields involved:** None.
+**Process steps:**
+1. On a barangay's detail page, the staff table lists every account (each as its own row) and shows placeholders for any missing required role. **Add staff** opens a modal.
+2. The server creates a `User` scoped to that barangay with a role from `CAPTAIN, SECRETARY, TREASURER, SK, COLLECTOR`, after checking that the username and the phone number are unused.
+3. Sitios are managed on the same page (`POST/GET /admin/barangays/:id/sitios`, `PATCH /admin/sitios/:id`), unique per barangay.
+4. A staff member then logs in at the barangay login and lands on the first page their role may open (`ROLE_MATRIX`).
 
-**Discrepancies found:** Matches the FR table's footnote (also listed as "committed scope pending implementation"). Confirmed accurate — genuinely 0% built. Every role-gate documented in this file below (e.g. "CAPTAIN, SECRETARY, SK") is therefore currently un-testable for any role except CAPTAIN, since no other role's account can be created through the product.
+**Fields involved:** username, password, first name, last name, phone number, role.
 
-**Open questions:** Until this exists, every "authorized barangay staff" access-control decision in the other 29 FRs is unverifiable end-to-end by an actual person logging in as that role — only code-level `requireRoles()` review (done throughout this document) is possible right now.
+**Discrepancies found:** Because accounts of every role can now be created, every role-gate in this document can be tested by logging in as that role (the dev seed also creates one account per role).
+
+**Open questions:** None.
 
 ---
 
@@ -242,8 +258,8 @@ Verified against the running app (barangay dashboard at `/dashboard` login `bara
 1. Staff opens `/manual-intake`. A history table lists past entries: Resident Name (or "No Account" for household-fallback rows with Sitio shown as "—"), Sitio, Materials (chips), Intake Date.
 2. Tapping **Record Intake** opens a modal: **Resident** search field, **Materials** section (repeatable rows: Material dropdown, Amount number input, Unit dropdown), **Add material** button, Cancel / **Record Intake** buttons.
 3. Typing into **Resident** debounce-searches (`GET /resident/search?name=`) and shows matching residents by name.
-   - Branch — no match: "No residents found. You may enter a household name below." plus an **Input resident name** free-text fallback field appears. Confirmed live (typed "Nonexistent Resident XYZ").
-   - Branch — match found: selecting a suggestion links the intake to that resident's account (their `isVerified` gets set to `true` server-side as a side effect).
+   - Branch — no match: "No residents or staff found. You may enter a household name below." plus an **Input resident name** free-text fallback field appears. Confirmed live (typed "Nonexistent Resident XYZ") with the earlier wording "No residents found".
+   - Branch — match found: selecting a suggestion links the intake to that person's account (their `isVerified` gets set to `true` server-side as a side effect). *(Updated 2026-10-20)* The search now also returns **barangay staff**, shown with a small role label, because staff bring recyclables as their attendance and that has to be recorded against their own account; before, a staff member could only be entered as a free-text household name.
 4. Staff fills one or more material rows (Material, Amount, Unit) and submits.
 5. `POST /manual-intake` with `{ items, userId (nullable), householdName (nullable) }`. For each item, one `ManualIntakeItems` row and one matching `StockTransactionLog` row (`source: MANUAL_INTAKE`, `transactionType: IN`, quantity normalized to KG via `convertToKg` except for PIECE-unit materials) are written.
 
@@ -302,7 +318,7 @@ Verified against the running app (barangay dashboard at `/dashboard` login `bara
 
 ### 13. Manage Redemption Programs
 
-**Roles allowed:** `CAPTAIN, SECRETARY, SK` for create/update/get-one; adds `TREASURER` for list (`GET /redemption/programs`). *(FR draft says "Captain, Secretary, or SK Staff" — matches for create/edit; the list endpoint is actually broader.)*
+**Roles allowed:** `CAPTAIN, SECRETARY, SK, TREASURER` for create, update, list and get-one. *(FR draft says "Captain, Secretary, or SK Staff"; the code also allows `TREASURER`. Updated 2026-10-20; it was `CAPTAIN, SECRETARY, SK` with `TREASURER` only on the list endpoint.)*
 
 **Process steps:**
 1. Staff opens `/redemption`. Program cards show Budget, Redemption Mode (Points/Cash), and a chip list of materials with their point/cash values.
@@ -310,6 +326,7 @@ Verified against the running app (barangay dashboard at `/dashboard` login `bara
    - Branch: clicking a material chip expands it in place into a per-material value input, unit-aware (e.g. "pts/piece" for a piece-tracked material, "pts/kg" for a weight-tracked one), with an "×" to remove it. Confirmed live. Note under the grid: "Materials left unselected won't be included in your program."
 3. Submitting calls `POST /redemption/programs` — required: name, allotedBudget, programMaterial (array), description (all falsy-checked, so a budget of literally `0` would incorrectly be rejected as "missing"). `isCashMode` is optional (defaults false).
 4. Existing programs can be edited (same modal, pre-filled) via `PATCH /redemption/programs/:id`, including a Deactivate/Reactivate toggle (`isActive`).
+5. *(Added 2026-10-20)* When **creating** a program, CAPTAIN, SECRETARY and SK see an **Announce this program** toggle. With it on, the server creates an `EVENT` announcement (title = program name; content = description plus the accepted materials and their values) in the same transaction as the program. A TREASURER can create programs but the announcement is skipped. The announcement is a snapshot and does not follow later edits.
 
 **Fields involved:**
 - Program name — text — required
@@ -318,68 +335,81 @@ Verified against the running app (barangay dashboard at `/dashboard` login `bara
 - Allotted budget — number — required (falsy-check bug: `0` incorrectly rejected)
 - Materials and point/cash values — one or more `{ materialId, pointValue or cashValue }` — optional to select any, but each selected material needs its value typed in
 
-**Discrepancies found:**
-- `updateProgram` still destructures a `maxPoints` field that no longer exists on the `Program` model (removed in an earlier schema pass) — dead code, harmless unless a client actually sends it (would cause a Prisma error → 400).
-- **`updateProgram` cannot change the Points/Cash mode after creation** — `isCashMode` is only settable at `createProgram` time; the edit endpoint never writes it. Similarly the edit path's material-value upsert only ever writes `pointValue` (never `cashValue`), so editing material values on an existing cash-mode program's materials looks unsupported via this endpoint — worth a focused re-test of the Edit modal specifically on a Cash program.
+**Discrepancies found (2026-08-24):**
+- `updateProgram` still destructures a `maxPoints` field that no longer exists on the `Program` model (removed in an earlier schema pass) — dead code, harmless unless a client actually sends it (would cause a Prisma error).
 - Falsy-check bug on `allotedBudget` (and see FR16/FR18 for the same pattern elsewhere) means a legitimately-zero value is rejected as "missing."
+- *(Fixed 2026-10-20)* `updateProgram` could not change the Points/Cash mode, only ever wrote `pointValue` (so cash programs could not be edited), and **never removed a material the staff deselected**: the request reported success but nothing changed.
 
-**Open questions:** Is editing a cash-mode program's per-material cash values expected to work today, or is that genuinely out of scope until a later pass?
+**Behavior after the 2026-10-20 fix (from code):**
+- Deselected materials are deleted, unless the material already appears in a transaction; then the request is rejected with a message naming it and nothing changes.
+- An empty material list is rejected.
+- Values are written to `cashValue` or `pointValue` according to the program's mode.
+- The mode can be changed only while the program has **no transactions** (existing records are valued in the old mode); the modal shows a toast and does not send the request, and the server enforces the same rule. Changing the mode requires new material values, and the other mode's value is cleared.
+- Every material id (on create and on edit) must belong to the caller's barangay.
+- The edit runs in one database transaction, so it either fully applies or not at all.
+
+**Open questions:** None.
 
 ---
 
 ### 14. Record Redemption Transaction
 
-**Roles allowed:** `CAPTAIN, SECRETARY, SK` — `POST /redemption/transactions`.
+> *Revised 2026-10-20 from the code (not re-verified live). The 2026-08-24 version described a free-text "Beneficiary" and an "Educational level" field; both are gone.*
+
+**Roles allowed:** `CAPTAIN, SECRETARY, SK, TREASURER` — `POST /redemption/transactions`. *(FR draft says "Captain, Secretary, or SK Staff"; the code also allows `TREASURER`.)*
 
 **Process steps:**
-1. From `/redemption`, staff clicks **Record transaction**. Modal: **Program** (dropdown), **Beneficiary** (disabled, "Select program first" until a program is chosen), **Educational level** (dropdown), **Material items** (repeatable rows: Material select, value input, "pts/unit" suffix), Cancel / **Record Transaction**.
-2. Selecting a Program enables **Beneficiary**, a live search field.
-   - Branch — match found: shows the beneficiary's name plus their **current program-scoped point/cash balance** live in the dropdown (confirmed live: "Kent Villalun — 60 pts" appeared when searching within the "Tulong Iskwelahan" program). This is a computed, per-program balance — not the beneficiary's stored global `points` total (see FR15).
-   - Branch — no match: "No beneficiaries found" + "**+ Create new beneficiary**" inline option. Confirmed live. Beneficiary is a free-text name at this point, not tied to any registered resident account.
-3. Staff adds one or more material rows and submits. `POST /redemption/transactions` with `{ programId, beneficiaryId or beneficiaryName, educationalLevel, items: [{ programMaterialId, amount }] }`.
-4. Server looks up each `programMaterial` (404 "Program material not found" if any id doesn't resolve), snapshots `currentValue` from the program's `cashValue` or `pointValue` at that instant (frozen historical record, unaffected by later edits to the program), writes `RedemptionTransactionItem` rows, and (only in Points mode) increments the beneficiary's stored global `points`. Also writes a `StockTransactionLog` IN row per item (`source: REDEMPTION`) — with no `userId`, since a Beneficiary isn't a `User`.
+1. From `/redemption` (or from a program's detail page, where the program is pre-selected), staff clicks **Record transaction**. Modal: **Program** (dropdown of active programs), **Resident** (search; disabled with "Select program first" until a program is chosen), **Material items** (repeatable rows: Material select, amount, "pts/unit" or "₱/unit" suffix), a live **Estimated total**, Cancel / **Record Transaction**.
+2. Selecting a Program enables **Resident**, a debounced search (`GET /redemption/residents/search?name=&programId=`).
+   - Every typed word must match the resident's first or last name (any order); up to 10 registered residents of the staff member's barangay are returned, each with their **balance in that program** (computed, not stored; see FR15).
+   - Branch — no match: "No registered resident found". There is no longer an option to create a person: only registered residents can take part.
+   - Editing the text after picking a resident clears the pick, so what is shown is what is submitted.
+3. Staff adds one or more material rows and submits. Client-side checks come first, with toasts: "Please select a resident" (nothing typed), "Resident not found" (text typed but no resident picked), and the add-at-least-one-material message.
+4. `POST /redemption/transactions` with `{ programId, residentId, items: [{ programMaterialId, amount }] }`. The client never sends a name.
+5. Server: all three fields required (400). The program must belong to the caller's barangay (404 "Program not found") and be active (400 "Program is inactive"). The resident must be a `RESIDENT` of the same barangay (404 "Resident not found"). Every `programMaterial` must belong to that program and barangay (404 "Program material not found"). Then, in one database transaction: the `RedemptionTransaction` is written with the resident's id and the **collector's and resident's names taken from their accounts** (snapshots), each line item stores a frozen `currentValue` (the program's `cashValue` or `pointValue` at that instant), the resident is marked verified, and one `StockTransactionLog` `IN` row per item is written (`source: REDEMPTION`) **with the resident's `userId`**, so redemption contributions count on the leaderboard.
 
 **Fields involved:**
-- Program — dropdown — required
-- Beneficiary — search-select or new-name entry — required (`beneficiaryId` or `beneficiaryName`)
-- Educational level — dropdown (`PRIMARY`/`SECONDARY`/`TERTIARY`) — required per schema, not blocked from empty in the modal visually but the model field is non-nullable
-- Material items — one or more `{ programMaterialId, amount }` — required (`!items` check only — an empty array would still pass)
+- Program — dropdown — required, must be active
+- Resident — search-select — required (`residentId`)
+- Material items — one or more `{ programMaterialId, amount }` — required (the server checks only that `items` exists, so an empty array would pass; the modal blocks it)
 
-**Discrepancies found:**
-- **No check against the program's `allotedBudget`.** A transaction can be recorded for any point/cash amount regardless of how much budget remains on the program — the budget figure shown on Program Funds and the program cards is purely informational, not an enforced spending cap.
-- `Beneficiary` has **no relationship to the `User`/resident model at all** — confirmed both in code and live (the "+ Create new beneficiary" flow takes a free-text name, no link to a registered account). This matters for FR17's discrepancy below.
+**Discrepancies / notes:**
+- **No check against the program's `allotedBudget`** (unchanged since 2026-08-24). The budget is informational, not an enforced cap.
+- The `Beneficiary` table, its stored `points` total and `educationalLevel` were removed; the resident is the beneficiary. A household without an account cannot earn points until a resident registers (decision taken with the barangay, which wants rewards tied to the household's own effort).
+- Recording a transaction marks the resident verified (as intake and a completed pickup already do), so they can see the resident Programs page.
 
-**Open questions:** Should redemption transactions be blocked (or at least warned) once a program's spending would exceed its allotted budget?
+**Open questions:** Should transactions be blocked, or at least warned, once a program's spending would exceed its allotted budget?
 
 ---
 
-### 15. Look Up Beneficiary Records
+### 15. Look Up Resident Records for Redemption
 
-**Roles allowed:** `CAPTAIN, SECRETARY, SK, TREASURER` — `GET /redemption/beneficiaries`, `GET /redemption/beneficiaries/search`. *(Matches the FR draft's role list exactly.)*
+> *Renamed and revised 2026-10-20 (was "Look Up Beneficiary Records").*
+
+**Roles allowed:** `CAPTAIN, SECRETARY, SK, TREASURER` — `GET /redemption/residents/search` and `GET /rewards/residents/search`.
 
 **Process steps:**
-1. Used inline inside the Record Transaction modal (FR14) and the Release Reward modal (FR22/FR17) — typing a name triggers a debounced search.
-2. There are, in code, **three different beneficiary-lookup behaviors reachable through what looks like "the same" search box** across different screens:
-   - `GET /redemption/beneficiaries` — returns each beneficiary's **stored global `points` field**, summed across every program they've ever redeemed in.
-   - `GET /redemption/beneficiaries/search?programId=` (used by Record Transaction, FR14) — returns a **live-computed balance scoped to that one program** (earnings in that program minus reward releases against that program) — confirmed live, the search dropdown showed "Kent Villalun — 60 pts" specific to the selected program, not his lifetime total.
-   - `reward-inventory.controller.js`'s own separate `searchBeneficiary` (used by Release Reward, FR17) additionally filters to only beneficiaries who have **actually earned in that specific program** (`redemptionTransaction: { some: { programId } }`) — a third, stricter variant.
+1. Used inline inside the Record Transaction modal (FR14) and the Release Reward modal (FR17); typing a name triggers a debounced search.
+2. Both endpoints take `name` and `programId` and return `{ id, name, points }` per resident, where `points` is the resident's **live-computed balance in that one program** (points earned from that program's transactions minus points spent on that program's rewards, `getResidentProgramBalance`). Words are matched against first and last name in any order; at most 10 results.
+3. One difference: the Release Reward search lists **every registered resident, including those with 0 points**, so staff can see why a release is not possible. (Before 2026-10-20 it listed only beneficiaries with a transaction in the program.)
 
-**Fields involved:** Search input — text — free-typed name; results are read-only cards/rows.
+**Fields involved:** Search input — text; results are read-only rows.
 
-**Discrepancies found:**
-- The FR draft's single line item ("search and retrieve existing beneficiary records") undersells that there are effectively three different lookup semantics living behind similarly-named endpoints in two different controllers, each returning a different number for "how many points does this beneficiary have." This is worth calling out explicitly in any activity diagram, since which screen a diagram is modeling determines which balance number is actually shown.
+**Discrepancies / notes:**
+- The three different lookups described on 2026-08-24 (a stored global `points` field, a program-scoped balance, and a stricter reward variant) no longer exist. `GET /redemption/beneficiaries` and the stored `points` field were removed, so there is now one meaning of "points": the balance in one program.
+- Points earned in one program cannot be spent in another.
 
-**Open questions:** Should the stored global `points` field (`getBeneficiaries`) and the live program-scoped computed balance (`searchBeneficiary`) ever meaningfully diverge in practice, or should one of the two be treated as the source of truth and the other deprecated?
+**Open questions:** None.
 
 ---
 
 ### 16. Record Reward Inventory
 
-**Roles allowed:** `CAPTAIN, SECRETARY, TREASURER, SK` — `GET/POST /reward-inventory`. *(Matches the FR draft's role list exactly.)*
+**Roles allowed:** `CAPTAIN, SECRETARY, TREASURER, SK` — `GET/POST /rewards` (the route is mounted at `/rewards`; the page is `/reward-inventory`). *(Matches the FR draft's role list exactly.)*
 
 **Process steps:**
-1. Staff opens `/reward-inventory`. Header stats: Total Items, Total Available, Total Released, Total Beneficiaries.
-2. "Reward Items" table: Program, Category, Name, Available, Added On.
+1. Staff opens `/reward-inventory`. Header stats: Total Items, Total Available, Total Released, Total Residents (distinct residents who received a reward; releases from before the resident link have none and are not counted). *(Label updated 2026-10-20; was "Total Beneficiaries".)*
+2. "Reward Items" table: Program, Category, Name, Available, Added On. *(2026-10-20)* A **program filter** (All Programs plus each program, with counts) sits above both this table and the Release History table, each filtering independently.
 3. **Add Item** opens a modal: **Program** (dropdown), **Reward Item Name** (text), **Category** (dropdown — `MEDICINE`/`GOODS`/`SCHOOL_SUPPLIES`/`SERVICES`/`OTHERS`), **Quantity** (number), **Point Cost** (number). Cancel / **Add Item**.
 4. `POST /reward-inventory` requires name, category, programId, quantity, pointCost (all falsy-checked).
 
@@ -395,20 +425,24 @@ Verified against the running app (barangay dashboard at `/dashboard` login `bara
 
 ### 17. Release Reward to Resident
 
-**Roles allowed:** `CAPTAIN, SECRETARY, TREASURER, SK` — `POST /reward-inventory/release`.
+> *Revised 2026-10-20 from the code (not re-verified live).*
+
+**Roles allowed:** `CAPTAIN, SECRETARY, TREASURER, SK` — `POST /rewards/release`.
 
 **Process steps:**
-1. From `/reward-inventory`, staff clicks **Release Reward**. Modal: "Release Reward — Search for a beneficiary and release reward items." Fields: **Program**, **Beneficiary** (search, same free-text/no-User-link pattern as FR14/15), **Reward items** (repeatable rows: item select, quantity, "pts/item" shown), a live **Total Point Cost** total, **Add row**, Cancel / **Release Reward**.
-2. On submit, backend checks (a) requested quantity per item ≤ that item's current available stock (`quantity - sum(prior releases)`), and (b) the beneficiary's program-scoped point balance ≥ the transaction's total point cost.
-3. On success: writes `RewardRelease` rows and effectively decrements available inventory (computed from releases, same "derived balance" pattern as material stock).
+1. From `/reward-inventory`, staff clicks **Release Reward**. Modal: **Program** (active programs), **Resident** (search; shows the resident's balance in the program), **Reward items** (repeatable rows: item select, quantity, "pts/item"), a live **Total Point Cost**, **Add row**, Cancel / **Release Reward**.
+2. Choosing a program loads that program's reward items (`GET /rewards?programId=`), each labelled with how many are available; an item with none left is shown disabled as "out of stock".
+3. On submit the modal checks, in this order, and shows a short message for the first problem: "Select a program"; "Select a resident" or "Resident not found"; "Add at least one item"; "{item} is out of stock" or "Only N {item} left"; "Not enough points. Needs X, has Y".
+4. `POST /rewards/release` with `{ residentId, programId, items: [{ rewardItemId, quantity }] }`. The server rejects non-positive quantities (400), merges rows that list the same item, requires every item to belong to the program and barangay (404), requires the resident to be a registered `RESIDENT` of the barangay (404), checks stock (400 "Not enough stock") and the resident's balance in that program (400 "Not enough points"), then writes one `RewardRelease` row per item with the resident's id, the resident's name as a snapshot, and the releasing staff member's name and role.
 
-**Fields involved:** Program — required. Beneficiary — search-select or free-text — required. Reward items — one or more `{ rewardItemId, quantity }` — required (validated against stock and point balance).
+**Fields involved:** Program — required. Resident — search-select — required. Reward items — one or more `{ rewardItemId, quantity }` — required, validated against stock and balance.
 
-**Discrepancies found:**
-- **Direct contradiction of the FR draft's wording.** The FR description says rewards are released "to a resident with verified recyclable contributions." **Confirmed in both code and the live modal: there is no reference anywhere to `User.isVerified`, and no link at all between a `Beneficiary` and a registered `User`/resident account.** Eligibility is purely: (a) does the reward item have enough remaining stock, and (b) does the beneficiary's computed point balance in that program cover the cost. A resident's app-verification status plays no role in whether they (or a household member entered under a free-text name) can receive a reward. Confirmed visually — the Release Reward modal's Beneficiary field behaves identically to Record Transaction's, with the same "+ Create new beneficiary" free-text fallback, not a picker restricted to verified residents.
-- If a submitted `rewardItemId` doesn't match any item returned by the program's own reward-item list (e.g., stale client-side data, wrong program), the lookup falls through to `undefined` and the next line throws — surfaced as a generic 500 rather than a clean validation error.
+**Discrepancies / notes:**
+- The 2026-08-24 finding that a beneficiary had no link to a registered account is resolved: the beneficiary is now a registered resident. Release does not read `isVerified` directly, but a resident can only hold a balance after a redemption transaction, and recording one marks them verified.
+- Fixed 2026-10-20: a reward item from another program used to crash the request with a 500, and a negative quantity could add points. Both are rejected with clean messages.
+- Release is not blocked for an inactive program, so residents can still spend points after a program ends.
 
-**Open questions:** Should reward release actually require the beneficiary to correspond to a verified `User`/resident, per the FR wording — or is "beneficiary" intentionally a broader, unlinked concept (covering e.g. household members without their own EcoAid account) and the FR description should be corrected instead?
+**Open questions:** Should reward release be blocked for an inactive program, or is spending leftover points after a program ends intended?
 
 ---
 
@@ -571,6 +605,8 @@ Verified against the running app (barangay dashboard at `/dashboard` login `bara
 
 ### 26. View Leaderboard Rankings
 
+> *Note added 2026-10-20 (from the code): redemption transactions now write their stock rows with the resident's `userId`, and manual intake can be recorded against staff accounts, so both now count on the leaderboard (staff included). The statements below about `REDEMPTION` rows having no `userId` describe the 2026-08-24 behavior.*
+
 **Roles allowed:** Staff view `CAPTAIN, SECRETARY, SK, TREASURER` (`GET /leaderboard`); resident view `RESIDENT` (`GET /leaderboard/residents`).
 
 **Process steps:**
@@ -623,7 +659,7 @@ Verified against the running app (barangay dashboard at `/dashboard` login `bara
 **Roles allowed:** `CAPTAIN, SECRETARY, TREASURER, SK, COLLECTOR` — `GET /reports` (filter/preview), `POST /reports/export`. *(This is the broadest role set of any barangay-staff feature in the app — all five staff roles.)*
 
 **Process steps:**
-1. Staff opens `/reports`. Four independent report sections are shown simultaneously, each with its **own** Filter control (This week / This month / Custom range / Custom date — confirmed live via the dropdown): **MRF Inventory** (material movement in/out), **Collection & Intake** (merges `PickupRequests` rows tagged "App Request" with `ManualIntakeTransaction` rows tagged "Manual Intake" into one feed — this is the reporting module's own version of the FR9/FR10 disambiguation, treating them as two channels of one list), **Redemption & Rewards** (with its own program filter), and **Program Funds** (Total Income/Expense/Net for the selected range).
+1. Staff opens `/reports`. Four independent report sections are shown simultaneously, each with its **own** Filter control (This week / This month / Custom range / Custom date — confirmed live via the dropdown): **MRF Inventory** (material movement in/out), **Collection & Intake** (merges `PickupRequests` rows tagged "App Request" with `ManualIntakeTransaction` rows tagged "Manual Intake" into one feed — this is the reporting module's own version of the FR9/FR10 disambiguation, treating them as two channels of one list), **Redemption & Rewards** (with its own program filter; since 2026-10-20 each row shows the **Resident**, date, materials, earned, rewards received, date released and spent — the Educational Level column was removed — and a transaction's rewards are matched by resident id, falling back to the saved name only for rows from before residents were linked; the Excel sheet has the same 9 columns), and **Program Funds** (Total Income/Expense/Net for the selected range).
 2. A single **Export all** button sits at the top of the page (not exercised in this walkthrough — downloading a file requires explicit user permission per this session's operating rules, so its output wasn't inspected directly; behavior below is from code).
 3. `POST /reports/export` does **not** take a "which report type" selector — it always builds all four sheets into one workbook in a single call, requiring four separate `{startDate, endDate}` pairs in the request body (one per section, plus an optional `programId` for the redemption sheet) — matching the four independently-filterable sections seen live. Uses `exceljs`, streams a real `.xlsx` file (`reports-export.xlsx`).
 
@@ -673,6 +709,33 @@ Verified against the running app (barangay dashboard at `/dashboard` login `bara
 
 **Discrepancies found:** None significant against the FR draft — "add new recyclable material types... organized under existing material categories" matches the implementation exactly (materials require an existing category; the feature does not create new categories).
 
+**Update 2026-10-20 (from the code):**
+- Every barangay is created with the same **core material list** (`backend/src/utils/coreMaterials.js`); Settings only adds to it. Barangays cannot remove or deactivate a material; an unused one is ignored.
+- The core list now matches the pilot barangay's collection: glass is `Gin Bottle (2x2)`, `Round Bottle (Bilog)`, `Ketchup Bottle`, `Liquor Bottle (Long Neck)` (replacing `Alak Bottles` and `Beer Bottles`); metals gained `Cans (Lata)` and `Scrap Metal (Landok)`; `Tin Cans` is counted by kilogram.
+- The AI photo classification only recognizes the core list. A material added in Settings works everywhere else but is never suggested by the AI. This is a stated delimitation of the study.
+- Changing the core list needs a backfill for existing barangays (`seedCoreMaterials()` adds rows only; renames, unit changes and hiding old rows are done by hand).
+
+**Open questions:** None.
+
+---
+
+### 31. View Redemption Programs (Resident)
+
+> *Added 2026-10-20 after adviser feedback that residents could only learn about programs through announcements. Written from the code, not verified live. It is not in the original FR table, so the numbering here is new.*
+
+**Roles allowed:** `RESIDENT` — `GET /redemption/programs/residents`.
+
+**Process steps:**
+1. On the Barangay (community) tab, a "Redemption Programs" section previews up to two active programs with a **View more** link. It appears only when the barangay has redemption management enabled (`hasRedemptionManagement`, returned by `GET /resident/barangay-info`).
+2. `/programs` lists every active program of the resident's barangay: name, a Points/Cash badge, description, the accepted materials with their value per unit, and (points programs only) the available reward items with their point cost. Rewards with no stock left are not listed.
+3. As with announcements, the section is **locked until the resident is verified** ("Redemption programs are locked — complete your first pickup..."). A resident becomes verified through a completed pickup, a manual intake recorded for them, or a redemption transaction recorded for them.
+4. If the barangay has redemption disabled, the endpoint answers `enabled: false` and nothing is shown.
+5. Staff can make a new program known immediately by ticking **Announce this program** when creating it (FR13).
+
+**Fields involved:** Read-only; no inputs.
+
+**Discrepancies / notes:** Not in the FR table. The resident's **own points per program** are not shown yet; the balance already exists (computed per resident per program) and displaying it on each program card is the next planned step.
+
 **Open questions:** None.
 
 ---
@@ -685,9 +748,10 @@ Verified against the running app (barangay dashboard at `/dashboard` login `bara
 | Manage Pickup Request Lifecycle | "authorized barangay staff" | `CAPTAIN, SECRETARY, COLLECTOR` |
 | Record Scheduled Recyclable Collection | "barangay staff" | `CAPTAIN, SECRETARY, SK, COLLECTOR` |
 | View MRF Inventory / Record Manual Stock Adjustment | "authorized barangay staff" | `CAPTAIN, SK, COLLECTOR, SECRETARY` (no `TREASURER`) |
-| Manage Redemption Programs (create/edit) | "Captain, Secretary, or SK Staff" | matches; **list** endpoint additionally allows `TREASURER` |
-| Record Redemption Transaction | "Captain, Secretary, or SK Staff" | matches exactly |
-| Look Up Beneficiary Records | "Captain, Secretary, SK Staff, or Treasurer" | matches exactly |
+| Manage Redemption Programs (create/edit) | "Captain, Secretary, or SK Staff" | `CAPTAIN, SECRETARY, SK, TREASURER` on every endpoint (the code also allows `TREASURER`) |
+| Record Redemption Transaction | "Captain, Secretary, or SK Staff" | `CAPTAIN, SECRETARY, SK, TREASURER` (the code also allows `TREASURER`) |
+| Look Up Resident Records for Redemption (was "Look Up Beneficiary Records") | "Captain, Secretary, SK Staff, or Treasurer" | matches exactly |
+| View Redemption Programs (Resident), new | (not in the FR table) | `RESIDENT` |
 | Record/Release Reward Inventory | "Captain, Secretary, Treasurer, or SK Staff" | matches exactly |
 | Record Program Expenses | "authorized staff" | `CAPTAIN, SECRETARY, TREASURER, SK` |
 | Record Junkshop Sale / Compare Prices | "authorized barangay staff" | `CAPTAIN, SECRETARY, SK, TREASURER` |

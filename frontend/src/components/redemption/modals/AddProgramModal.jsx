@@ -48,7 +48,7 @@ export const AddProgramModal = ({
   program,
   id,
 }) => {
-  const { makeRequest } = useMutation();
+  const { makeRequest, errorMessageRef } = useMutation();
   const { role } = useContext(DrawerContext);
   // announcing is only offered when creating, and only to roles that can
   // post announcements (TREASURER can create programs but not announce)
@@ -104,7 +104,20 @@ export const AddProgramModal = ({
   const isCashMode = watch("isCashMode");
   const announce = watch("announce");
 
+  // a program with transactions can't switch between points and cash: its
+  // records are valued in the old mode (the server enforces this too)
+  const hasTransactions = (program?.redemptionTransaction?.length ?? 0) > 0;
+  const isChangingMode =
+    hasTransactions &&
+    (isCashMode === true || isCashMode === "true") !== program.isCashMode;
+
   const onSubmit = async (formData) => {
+    if (isChangingMode) {
+      return toast.error(
+        "Can't change the redemption mode: this program already has transactions. Create a new program instead.",
+      );
+    }
+
     const programMaterial = Object.entries(materialState)
       .filter((f) => {
         return f[1]?.isChecked === true;
@@ -156,7 +169,8 @@ export const AddProgramModal = ({
     } else {
       toast.dismiss();
       toast.error(
-        program ? "Updating program failed" : "Creating program failed",
+        errorMessageRef.current ??
+          (program ? "Updating program failed" : "Creating program failed"),
       );
     }
   };

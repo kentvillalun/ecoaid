@@ -32,7 +32,6 @@ export const TransactionCard = ({
                   <Skeleton width={180} />
                 </div>
                 <Skeleton width={105} />
-                <Skeleton width={100} />
               </div>
               <div className="flex flex-col items-end gap-2">
                 <Skeleton width={120} />
@@ -66,7 +65,7 @@ export const TransactionCard = ({
             <div className="flex flex-row justify-between w-full">
               <div className="flex flex-col w-full">
                 <div className="flex flex-row items-center justify-between mb-1">
-                  <h3 className="font-semibold">{d?.beneficiaryName}</h3>
+                  <h3 className="font-semibold">{d?.residentName}</h3>
                 </div>
                 <div className="flex flex-row gap-1 items-center">
                   {!program && (
@@ -83,9 +82,6 @@ export const TransactionCard = ({
                   )}
                 </div>
                 <p className="text-sm text-gray-400">By: {d?.collectorName}</p>
-                <p className="text-sm text-gray-400 capitalize">
-                  {(d?.educationalLevel).toLowerCase()} level
-                </p>
               </div>
             </div>
             <div className="flex flex-row items-center justify-between w-full pt-2 border-t border-gray-100">

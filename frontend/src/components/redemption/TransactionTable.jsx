@@ -17,7 +17,7 @@ const inter = Inter({
   weight: ["400", "500", "600", "700"],
 });
 
-function TransactionMaterialsBreakdown({ items, isCashMode }) {
+export function TransactionMaterialsBreakdown({ items, isCashMode }) {
   const total = items?.reduce(
     (sum, item) => sum + item.amount * item.currentValue,
     0,
@@ -89,15 +89,11 @@ export const TransactionTable = ({
 
   const tableConfig = [
     {
-      header: "Beneficiary",
+      header: "Resident",
       render: (data) => (
         <div className="flex flex-col items-start justify-center">
           <p className="font-semibold text-text-primary">
-            {data.beneficiaryName}
-          </p>
-          <p className="capitalize text-gray-400">
-            {" "}
-            {data.educationalLevel.toLowerCase()} level
+            {data.residentName}
           </p>
           <p className="capitalize text-gray-400 text-sm">
             Collected by: {data.collectorName}{" "}

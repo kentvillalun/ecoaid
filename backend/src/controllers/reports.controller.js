@@ -6,7 +6,7 @@ import {
   getProgramFundsReport,
   getRedemptionReports,
 } from "../utils/reportHelpers.js";
-import { EducationalLevel } from "../generated/prisma/index.js";
+
 
 const filterReports = async (req, res) => {
   try {
@@ -65,7 +65,7 @@ const filterReports = async (req, res) => {
         );
 
         return res.status(200).json({
-          message: "Fetch beneficiary redemption records successful",
+          message: "Fetch resident redemption records successful",
           merged,
         });
       }
@@ -286,13 +286,12 @@ const exportReports = async (req, res) => {
       "Redemption & Rewards Report",
       redemptionStart,
       redemptionEnd,
-      "J",
+      "I",
     );
 
     redemptionRewardsSheet.addRow([]);
     redemptionRewardsSheet.getRow(3).values = [
-      "Beneficiary",
-      "Educational Level",
+      "Resident",
       "Date Submitted",
       "Materials Collected",
       "Quantity",
@@ -312,32 +311,31 @@ const exportReports = async (req, res) => {
       }
     })
     redemptionRewardsSheet.getRow(3).font = { bold: true, size: 11 };
-    redemptionRewardsSheet.getColumn(1).width = 22; // Beneficiary
-    redemptionRewardsSheet.getColumn(2).width = 20; // Educational Level
-    redemptionRewardsSheet.getColumn(3).width = 18; // Date Submitted
-    redemptionRewardsSheet.getColumn(4).width = 25; // Materials Collected
-    redemptionRewardsSheet.getColumn(5).width = 12; // Quantity
-    redemptionRewardsSheet.getColumn(6).width = 18; // Category
-    redemptionRewardsSheet.getColumn(7).width = 12; // Earned
-    redemptionRewardsSheet.getColumn(8).width = 20; // Reward Received
-    redemptionRewardsSheet.getColumn(9).width = 18; // Date Released
-    redemptionRewardsSheet.getColumn(10).width = 12; // Spent
+    redemptionRewardsSheet.getColumn(1).width = 22; // Resident
+    redemptionRewardsSheet.getColumn(2).width = 18; // Date Submitted
+    redemptionRewardsSheet.getColumn(3).width = 25; // Materials Collected
+    redemptionRewardsSheet.getColumn(4).width = 12; // Quantity
+    redemptionRewardsSheet.getColumn(5).width = 18; // Category
+    redemptionRewardsSheet.getColumn(6).width = 12; // Earned
+    redemptionRewardsSheet.getColumn(7).width = 20; // Reward Received
+    redemptionRewardsSheet.getColumn(8).width = 18; // Date Released
+    redemptionRewardsSheet.getColumn(9).width = 12; // Spent
     redemptionRewardsSheet.pageSetup.fitToPage = true
     redemptionRewardsSheet.pageSetup.orientation = "landscape"
 
+    redemptionRewardsSheet.getColumn(3).alignment = {
+      wrapText: true,
+      vertical: "top",
+    };
     redemptionRewardsSheet.getColumn(4).alignment = {
       wrapText: true,
       vertical: "top",
     };
-    redemptionRewardsSheet.getColumn(5).alignment = {
+    redemptionRewardsSheet.getColumn(7).alignment = {
       wrapText: true,
       vertical: "top",
     };
     redemptionRewardsSheet.getColumn(8).alignment = {
-      wrapText: true,
-      vertical: "top",
-    };
-    redemptionRewardsSheet.getColumn(9).alignment = {
       wrapText: true,
       vertical: "top",
     };
@@ -346,8 +344,7 @@ const exportReports = async (req, res) => {
       const hasReleases = row.rewardReceived.length > 0;
 
       const newRow = redemptionRewardsSheet.addRow([
-        row.beneficiaryName,
-        row.educationalLevel,
+        row.residentName,
         row.dateSubmitted,
         row.materialsCollected.map((item) => item.name).join("\n"),
         row.materialsCollected

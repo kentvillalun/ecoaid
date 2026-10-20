@@ -117,10 +117,12 @@ const searchResident = async (req, res) => {
     const barangayId = req.user.barangayId;
     const { name } = req.query;
 
+    // staff are included too: barangay staff bring recyclables as their
+    // attendance, and those have to be recorded against their own account
     const users = await prisma.$queryRaw`
-      SELECT id, "firstName", "lastName"
+      SELECT id, "firstName", "lastName", "role"
       FROM "User"
-      WHERE "barangayId" = ${barangayId} AND "role" = 'RESIDENT' AND CONCAT("firstName", ' ', "lastName") ILIKE ${"%" + name + "%"}
+      WHERE "barangayId" = ${barangayId} AND CONCAT("firstName", ' ', "lastName") ILIKE ${"%" + name + "%"}
     `;
 
     return res.status(200).json({

@@ -1,5 +1,5 @@
 import { prisma } from "../config/db.js";
-import { getBeneficiaryProgramBalance } from "../utils/beneficiaryPoints.js";
+import { getResidentProgramBalance } from "../utils/residentPoints.js";
 
 const addRewardItem = async (req, res) => {
   try {
@@ -32,11 +32,14 @@ const addRewardItem = async (req, res) => {
 const getRewardItems = async (req, res) => {
   try {
     const { barangayId } = req.user;
+    const { programId } = req.query;
+
+    // the release modal only needs the items of the program it picked
+    const where = { barangayId };
+    if (programId) where.programId = programId;
 
     const items = await prisma.rewardItem.findMany({
-      where: {
-        barangayId,
-      },
+      where,
       select: {
         id: true,
         programId: true,
@@ -85,12 +88,30 @@ const getRewardItems = async (req, res) => {
 
 const releaseReward = async (req, res) => {
   try {
-    const { beneficiaryId, programId, items } = req.body ?? {};
+    const { residentId, programId, items: requestedItems } = req.body ?? {};
     const { barangayId, id, role } = req.user;
 
-    if (!beneficiaryId || !programId || !items) {
+    if (!residentId || !programId || !requestedItems) {
       return res.status(400).json({ error: "Required fields are missing" });
     }
+
+    // a zero or negative quantity would make the point cost zero or negative
+    if (requestedItems.some((item) => !(item.quantity > 0))) {
+      return res.status(400).json({ error: "Invalid reward quantity" });
+    }
+
+    // the same item picked in two rows counts as one line, so the stock and
+    // point checks below run against the total, not each row on its own
+    const items = Object.values(
+      requestedItems.reduce((merged, item) => {
+        const existing = merged[item.rewardItemId];
+        merged[item.rewardItemId] = {
+          rewardItemId: item.rewardItemId,
+          quantity: (existing?.quantity ?? 0) + Number(item.quantity),
+        };
+        return merged;
+      }, {}),
+    );
 
     const rewardItems = await prisma.rewardItem.findMany({
       where: {
@@ -110,15 +131,27 @@ const releaseReward = async (req, res) => {
       },
     });
 
-    const beneficiary = await prisma.beneficiary.findUnique({
-      where: { barangayId, id: beneficiaryId },
+    // every requested item has to belong to this program and this barangay
+    const allItemsFound = items.every((item) =>
+      rewardItems.some((r) => r.id === item.rewardItemId),
+    );
+
+    if (!allItemsFound) {
+      return res
+        .status(404)
+        .json({ error: "Reward item not found in this program" });
+    }
+
+    const resident = await prisma.user.findUnique({
+      where: { barangayId, id: residentId, role: "RESIDENT" },
       select: {
-        name: true,
+        firstName: true,
+        lastName: true,
       },
     });
 
-    if (!beneficiary) {
-      return res.status(404).json({ error: "Beneficiary not found " });
+    if (!resident) {
+      return res.status(404).json({ error: "Resident not found" });
     }
 
     const user = await prisma.user.findUnique({
@@ -146,7 +179,7 @@ const releaseReward = async (req, res) => {
     if (!availabilityCheck) {
       return res
         .status(400)
-        .json({ error: "Insufficient stock for one or mroe items " });
+        .json({ error: "Not enough stock" });
     }
 
     const totalPointCost = items.reduce((total, item) => {
@@ -155,24 +188,23 @@ const releaseReward = async (req, res) => {
     }, 0);
 
     // points are scoped per program, so eligibility must be checked against
-    // this program's balance, not the beneficiary's global running total
-    const programBalance = await getBeneficiaryProgramBalance(
-      beneficiaryId,
+    // the resident's balance in this program
+    const programBalance = await getResidentProgramBalance(
+      residentId,
       programId,
     );
 
     if (programBalance < totalPointCost) {
-      return res.status(400).json({ error: "Insufficient points" });
+      return res.status(400).json({ error: "Not enough points" });
     }
 
     await prisma.rewardRelease.createMany({
       data: items.map((item) => ({
         rewardItemId: item.rewardItemId,
-        userId: id,
-        beneficiaryId,
+        residentId,
         programId,
         barangayId,
-        beneficiaryName: beneficiary.name,
+        residentName: `${resident.firstName} ${resident.lastName}`,
         performedBy: `${user.firstName} ${user.lastName}`,
         performedByRole: role,
         quantity: item.quantity,
@@ -185,7 +217,7 @@ const releaseReward = async (req, res) => {
   }
 };
 
-const searchBeneficiary = async (req, res) => {
+const searchResident = async (req, res) => {
   try {
     const { barangayId } = req.user;
     const { name, programId } = req.query;
@@ -194,33 +226,42 @@ const searchBeneficiary = async (req, res) => {
       return res.status(400).json({ error: "Program is required" });
     }
 
-    // a beneficiary can only spend points in a program they've actually
-    // earned points in, so only surface beneficiaries with a redemption
-    // transaction under this program
-    const beneficiaries = await prisma.beneficiary.findMany({
+    // "juan dela" should match first name "Juan" + last name "Dela Cruz",
+    // so every typed word must match either the first or the last name
+    const words = (name ?? "").trim().split(/\s+/).filter(Boolean);
+
+    // every resident shows up, even with 0 points, so staff can see why a
+    // release isn't possible (the release itself checks the balance)
+    const residents = await prisma.user.findMany({
       where: {
         barangayId,
-        name: { contains: name, mode: "insensitive" },
-        redemptionTransaction: {
-          some: { programId },
-        },
+        role: "RESIDENT",
+        AND: words.map((word) => ({
+          OR: [
+            { firstName: { contains: word, mode: "insensitive" } },
+            { lastName: { contains: word, mode: "insensitive" } },
+          ],
+        })),
       },
       select: {
         id: true,
-        name: true,
+        firstName: true,
+        lastName: true,
       },
+      take: 10,
     });
 
-    const beneficiariesWithPoints = await Promise.all(
-      beneficiaries.map(async (beneficiary) => ({
-        ...beneficiary,
-        points: await getBeneficiaryProgramBalance(beneficiary.id, programId),
+    const residentsWithPoints = await Promise.all(
+      residents.map(async (resident) => ({
+        id: resident.id,
+        name: `${resident.firstName} ${resident.lastName}`,
+        points: await getResidentProgramBalance(resident.id, programId),
       })),
     );
 
     return res.status(200).json({
-      message: "Searching beneficiaries successful",
-      beneficiaries: beneficiariesWithPoints,
+      message: "Searching residents successful",
+      residents: residentsWithPoints,
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -233,6 +274,9 @@ const getRewardReleases = async (req, res) => {
 
     const rewardReleases = await prisma.rewardRelease.findMany({
       where: { barangayId },
+      orderBy: {
+        createdAt: "desc"
+      },
       select: {
         id: true,
         rewardItem: {
@@ -240,13 +284,14 @@ const getRewardReleases = async (req, res) => {
             name: true,
           },
         },
+        programId: true,
         program: {
           select: {
             name: true,
           },
         },
         quantity: true,
-        beneficiaryName: true,
+        residentName: true,
         performedBy: true,
         performedByRole: true,
         createdAt: true,
@@ -269,7 +314,7 @@ const getRewardSummary = async (req, res) => {
       totalItems,
       totalReleasedResult,
       totalAddedResult,
-      totalBeneficiaries,
+      totalResidents,
     ] = await Promise.all([
       prisma.rewardItem.count({
         where: { barangayId },
@@ -283,9 +328,9 @@ const getRewardSummary = async (req, res) => {
         _sum: { quantity: true },
       }),
       prisma.rewardRelease.groupBy({
-        by: ["beneficiaryId"],
-        where: { barangayId, beneficiaryId: { not: null } },
-        _count: { beneficiaryId: true },
+        by: ["residentId"],
+        where: { barangayId, residentId: { not: null } },
+        _count: { residentId: true },
       }),
     ]);
 
@@ -295,7 +340,7 @@ const getRewardSummary = async (req, res) => {
 
     const totalAvailable = totalAdded - totalReleased;
 
-    const distinctBeneficiaries = totalBeneficiaries.length;
+    const distinctResidents = totalResidents.length;
 
     return res.status(200).json({
       message: "Fetch reward summary successful",
@@ -303,7 +348,7 @@ const getRewardSummary = async (req, res) => {
       totalReleased,
       totalAdded,
       totalAvailable,
-      distinctBeneficiaries,
+      distinctResidents,
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -316,5 +361,5 @@ export {
   releaseReward,
   getRewardReleases,
   getRewardSummary,
-  searchBeneficiary,
+  searchResident,
 };

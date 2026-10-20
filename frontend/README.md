@@ -1,65 +1,62 @@
 # ECOPROFIT Frontend
 
-This frontend is the resident and barangay web interface for the ECOPROFIT system.
+This frontend is the resident, barangay staff and Super Admin web interface for the ECOPROFIT (EcoAid) system.
 
 ## Current Status
 
-The frontend is feature-complete for all currently implemented modules. Both resident and barangay sides are connected to the backend end-to-end.
+The frontend is feature-complete for all currently implemented modules. All three sides are connected to the backend end-to-end.
 
-### Resident side
+### Resident side (mobile only)
 
-- Onboarding flow (redesigned v2.0 — new illustrations, horizontal slide animation, haptic feedback)
-- Login with animated bottom-sheet card design and splash screen (Android skips splash)
-- Signup with barangay autocomplete and sitio dependent dropdown
-- OTP verification (6-digit input, resend cooldown)
-- Forgot password full flow: phone → OTP → reset password
-- Home page (live profile data + recent requests, cards navigate to detail)
-- Community page (live barangay info — schedule, accepted materials, contact)
-- Capture page (DB-driven material selector, Cloudinary photo upload, pickup request submission)
-- Requests list (Ongoing / History tabs, live data, skeleton loading, error/empty states)
-- Request detail (photo banner, timeline, collection items breakdown)
-- Profile page (live name + barangay, logout)
-- Personal Information (edit mode, PATCH /resident/me, discard-changes modal)
-- Notification Settings, Settings, Help & Support (UI shells — not yet wired to backend)
+- Onboarding flow (illustrations, slide animation, haptic feedback)
+- Login with bottom-sheet card design and splash screen, signup with barangay autocomplete and sitio dropdown, OTP, forgot/reset password
+- Home (profile, recent requests, standings shortcut), Community / Barangay tab (barangay info, accepted materials, latest announcements, redemption programs preview, contact)
+- Capture (photo, client-side compression, "Analyze Photo" AI suggestion with manual fallback, Cloudinary upload, leave-page guard)
+- Requests list (Ongoing / History), request detail (photo, timeline, collection breakdown, cancel)
+- Programs (`/programs`): active redemption programs with accepted materials and available rewards (shown when the barangay enables redemption; locked until the resident is verified)
+- Standings (leaderboard by kg / by piece, period filter), Updates (announcements), Notifications
+- Profile, personal information (edit mode), settings, terms, help and support
 
-### Barangay side
+### Barangay side (role-scoped)
 
-- Dashboard (3 stat cards live, 3 hardcoded pending Program Funds module + dashboard rewiring)
-- Collection Requests (full lifecycle: list, approve, decline, schedule, collect, detail)
-- Manual Intake (debounced resident search, household-name fallback, dynamic material/quantity/unit rows; writes to the stock ledger)
-- Material Stock (live per-material balance, transaction log, stock-out modal)
-- Redemption Management (programs list, program detail, transaction detail)
-- Junkshop Sales, Leaderboard, Reports — static UI scaffolds with hardcoded mock data; not linked in the sidebar, no backend yet
+- Dashboard, Collection Requests (full lifecycle, batch collection), Manual Intake (search residents and staff, household-name fallback, material rows)
+- MRF Inventory (balances, ledger log, stock-out), Redemption (programs, program and transaction detail, record transaction for a registered resident), Reward Inventory (items and release history with program filters, release reward)
+- Junkshop Sales, Program Funds, Announcements, Leaderboard, Residents, Reports (four sections, Excel export), Settings (theme, add material)
+
+### Super Admin side
+
+- Admin dashboard (barangays that still need setup), barangay accounts (list, register, detail, edit, staff, sitios)
 
 ### Shared infrastructure
 
-- `useFetch`, `useUpdate`, `useMutation` custom hooks
-- `PageTransition` component — `motion/react` fade-in/out wrapper
-- `haptics.js` — named haptic presets via `bzzz`
-- `DesktopGuard` — blocks resident pages on non-mobile viewports (CSS `lg:hidden`)
-- `SkeletonCard`, `Spinner`, `Error`, `Empty`, `Badge`, `SitioPill`, `Modal`, `LabelValue` UI components
-- PWA manifest and splash screen
+- `proxy.js` — edge middleware: verifies the login cookies with `jose`, redirects unauthenticated users, and sends a staff role to `/403` when `ROLE_MATRIX` does not allow the route
+- `lib/roles.js` — `ROLE_MATRIX` (route → allowed staff roles); a new barangay route needs an entry here
+- `lib/getBarangayModules.js` — hides modules a barangay has switched off
+- Hooks: `useFetch` (GET; does nothing while `url` is empty, so a dependent fetch can be paused), `useMutation` (returns `true` on success; `errorMessageRef` holds the server's message for 4xx errors), `useUpdate`
+- UI: `Modal`, `DropdownFilter`, `StatusChip`, `DateRangePicker`, `HoverPortal` (hover breakdown popovers), `Badge`, `MaterialTag`, `SkeletonCard`, `Spinner`, `Error`, `Empty`, `DesktopGuard`, `PageTransition`
+- `error.jsx` and `global-error.jsx` error boundaries; `haptics.js`; PWA manifests and splash screen
 
 ## Getting Started
 
-Run the development server from this directory:
+Create `.env.local` (see the root `README.md` for the variables), then run the development server from this directory:
 
 ```bash
 npm run dev
 ```
 
-Open `http://localhost:3000` in the browser. The backend must also be running at `http://localhost:5001`.
+Open `http://localhost:3000` in the browser. The backend must also be running at `http://localhost:5001`; the app rewrites `/api/*` to it.
 
 The main app code is under `src/app`. Route groups:
 
 - `(intro)` — Onboarding
-- `(auth)` — Login, signup, OTP, forgot password, reset password, barangay login
-- `(resident)` — Resident dashboard pages (mobile-only, guarded by `DesktopGuard`)
-- `(barangay)` — Barangay admin pages
+- `(auth)` — Login, signup, OTP, forgot password, reset password, barangay login, admin login
+- `(resident)` — Resident pages (mobile-only, guarded by `DesktopGuard`)
+- `(barangay)` — Barangay staff pages
+- `(admin)` — Super Admin portal
 
 ## References
 
-- Root project instructions: `../AGENTS.md`
+- Root project instructions: `../AGENTS.md`, `../CLAUDE.md`
 - Project docs: `../docs`
 - Progress tracking: `../PROGRESS.md`
 - Next.js docs: https://nextjs.org/docs

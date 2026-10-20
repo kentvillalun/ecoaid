@@ -75,10 +75,6 @@ export default function TransactionDetailPage() {
                     <Skeleton width={75} />
                     <Skeleton width={150} />
                   </div>
-                  <div className="flex flex-col">
-                    <Skeleton width={120} />
-                    <Skeleton width={150} />
-                  </div>
                 </div>
               </Card>
 
@@ -124,8 +120,8 @@ export default function TransactionDetailPage() {
 
                 <div className="grid grid-cols-2 gap-4 w-full md:grid-cols-4">
                   <LabelValue
-                    name={"Beneficiary"}
-                    value={data?.transaction?.beneficiaryName}
+                    name={"Resident"}
+                    value={data?.transaction?.residentName}
                   />
 
                   <LabelValue
@@ -137,14 +133,6 @@ export default function TransactionDetailPage() {
                     name={"Program"}
                     value={data?.transaction?.program?.name}
                   />
-
-                  {data?.transaction?.educationalLevel && (
-                    <LabelValue
-                      name={"Educational Level"}
-                      value={data?.transaction?.educationalLevel.toLowerCase()}
-                      className="capitalize"
-                    />
-                  )}
                 </div>
               </Card>
 

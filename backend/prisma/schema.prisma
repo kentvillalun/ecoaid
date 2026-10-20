@@ -86,7 +86,6 @@ model Barangay {
   programExpense ProgramExpense[]
   rewardItems RewardItem[]
   rewardReleases RewardRelease[]
-  beneficiaries Beneficiary[]
   pickupRequests PickupRequests[]
 }
 
@@ -161,6 +160,7 @@ model User {
   programExpense ProgramExpense[]
   rewardReleases RewardRelease[]
   notification Notifications[]
+  redemptionTransaction RedemptionTransaction[]
   
   @@index([barangayId])
   @@index([sitioId])
@@ -311,17 +311,17 @@ model RedemptionTransaction {
   programId String @db.Uuid
   program Program @relation(fields: [programId], references: [id])
 
-  beneficiaryId String? @db.Uuid()
-  beneficiary Beneficiary? @relation(fields: [beneficiaryId], references: [id])
+  residentId String? @db.Uuid()
+  resident User? @relation(fields: [residentId], references: [id])
 
   collectorName String
-  beneficiaryName String
+  residentName String
   createdAt DateTime @default(now())
-
-  educationalLevel EducationalLevel?
 
   redemptionTransactionItem RedemptionTransactionItem[]
   stockTransactionLog StockTransactionLog[]
+
+  @@index([residentId, programId])
 }
 
 model RedemptionTransactionItem {
@@ -336,12 +336,6 @@ model RedemptionTransactionItem {
   amount Float
   currentValue Float
   createdAt DateTime @default(now())
-}
-
-enum EducationalLevel {
-  PRIMARY
-  SECONDARY
-  TERTIARY
 }
 
 model ManualIntakeTransaction {
@@ -569,11 +563,8 @@ model RewardRelease {
   rewardItemId String @db.Uuid()
   rewardItem RewardItem @relation(fields: [rewardItemId], references: [id])
 
-  userId String? @db.Uuid()
-  user User? @relation(fields: [userId], references: [id])
-
-  beneficiaryId String? @db.Uuid()
-  beneficiary Beneficiary? @relation(fields: [beneficiaryId], references: [id])
+  residentId String? @db.Uuid()
+  resident User? @relation(fields: [residentId], references: [id])
 
   programId String @db.Uuid()
   program Program @relation(fields: [programId], references: [id])
@@ -582,25 +573,13 @@ model RewardRelease {
   barangay Barangay @relation(fields: [barangayId], references: [id])
 
   quantity Float
-  beneficiaryName String
+  residentName String
   performedBy String
   performedByRole String
 
   createdAt DateTime @default(now())
-}
 
-model Beneficiary {
-  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
-
-  barangayId String @db.Uuid()
-  barangay Barangay @relation(fields: [barangayId], references: [id])
-
-  name String
-  points Float 
-  createdAt DateTime @default(now())
-
-  redemptionTransaction RedemptionTransaction[]
-  rewardReleases RewardRelease[]
+  @@index([residentId, programId])
 }
 
 model Notifications {

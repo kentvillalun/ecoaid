@@ -1,6 +1,18 @@
 import { prisma } from "../config/db.js";
 import { convertToKg } from "../utils/covertToKg.js";
-import { getBeneficiaryProgramBalance } from "../utils/beneficiaryPoints.js";
+import { getResidentProgramBalance } from "../utils/residentPoints.js";
+
+// every material in a request has to belong to the requesting barangay,
+// otherwise a program could be built from another barangay's materials
+const materialsBelongToBarangay = async (materialIds, barangayId) => {
+  const uniqueIds = [...new Set(materialIds)];
+
+  const count = await prisma.material.count({
+    where: { id: { in: uniqueIds }, barangayId },
+  });
+
+  return count === uniqueIds.length;
+};
 
 const createProgram = async (req, res) => {
   try {
@@ -17,6 +29,21 @@ const createProgram = async (req, res) => {
 
     if (!name || !allotedBudget || !programMaterial || !description) {
       return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    if (!Array.isArray(programMaterial) || programMaterial.length === 0) {
+      return res
+        .status(400)
+        .json({ error: "A program needs at least one material" });
+    }
+
+    const ownsMaterials = await materialsBelongToBarangay(
+      programMaterial.map((pm) => pm.materialId),
+      barangayId,
+    );
+
+    if (!ownsMaterials) {
+      return res.status(404).json({ error: "Material not found" });
     }
 
     // only roles allowed to post announcements manually may auto-announce;
@@ -199,9 +226,21 @@ const getProgram = async (req, res) => {
 const updateProgram = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, allotedBudget, description, maxPoints, isActive, materials } =
+    const { name, allotedBudget, description, maxPoints, isActive, materials, isCashMode } =
       req.body ?? {};
-    const { barangayId } = req.user
+    const { barangayId } = req.user;
+
+    const program = await prisma.program.findUnique({
+      where: { id, barangayId },
+      select: {
+        isCashMode: true,
+        _count: { select: { redemptionTransaction: true } },
+      },
+    });
+
+    if (!program) {
+      return res.status(404).json({ error: "Program not found" });
+    }
 
     const data = {};
     if (name !== undefined) data.name = name;
@@ -210,14 +249,89 @@ const updateProgram = async (req, res) => {
     if (maxPoints !== undefined) data.maxPoints = maxPoints;
     if (isActive !== undefined) data.isActive = isActive;
 
-    await prisma.program.update({
-      where: { id, barangayId},
-      data,
-    });
+    // existing transactions store their values as points or as pesos, so the
+    // mode can only change while the program has no transactions
+    const isModeChanging =
+      typeof isCashMode === "boolean" && isCashMode !== program.isCashMode;
+
+    if (isModeChanging) {
+      if (program._count.redemptionTransaction > 0) {
+        return res.status(400).json({
+          error: "Cannot change the redemption mode: the program already has transactions",
+        });
+      }
+
+      // the old values are for the other mode, so new ones are required
+      if (!materials) {
+        return res.status(400).json({
+          error: "Material values are required when changing the redemption mode",
+        });
+      }
+
+      data.isCashMode = isCashMode;
+    }
+
+    const effectiveIsCashMode = isModeChanging ? isCashMode : program.isCashMode;
+
+    const operations = [
+      prisma.program.update({
+        where: { id, barangayId },
+        data,
+      }),
+    ];
 
     if (materials) {
-      await Promise.all(
-        materials.map(({ materialId, pointValue }) =>
+      if (!Array.isArray(materials) || materials.length === 0) {
+        return res
+          .status(400)
+          .json({ error: "A program needs at least one material" });
+      }
+
+  
+      const values = materials.map((m) => parseFloat(m.pointValue ?? m.cashValue));
+      if (values.some((v) => !Number.isFinite(v))) {
+        return res.status(400).json({ error: "Invalid material value" });
+      }
+
+      const ownsMaterials = await materialsBelongToBarangay(
+        materials.map((m) => m.materialId),
+        barangayId,
+      );
+
+      if (!ownsMaterials) {
+        return res.status(404).json({ error: "Material not found" });
+      }
+
+      
+      const removed = await prisma.programMaterial.findMany({
+        where: {
+          programId: id,
+          materialId: { notIn: materials.map((m) => m.materialId) },
+        },
+        select: {
+          id: true,
+          material: { select: { name: true } },
+          _count: { select: { redemptionTransactionItem: true } },
+        },
+      });
+
+      const inUse = removed.filter((r) => r._count.redemptionTransactionItem > 0);
+      if (inUse.length > 0) {
+        return res.status(400).json({
+          error: `Cannot remove ${inUse
+            .map((r) => r.material.name)
+            .join(", ")}: already used in transactions`,
+        });
+      }
+
+      const valueField = effectiveIsCashMode ? "cashValue" : "pointValue";
+      const otherField = effectiveIsCashMode ? "pointValue" : "cashValue";
+
+      operations.push(
+        prisma.programMaterial.deleteMany({
+          where: { id: { in: removed.map((r) => r.id) } },
+        }),
+        ...materials.map(({ materialId }, index) =>
           prisma.programMaterial.upsert({
             where: {
               programId_materialId: {
@@ -225,48 +339,77 @@ const updateProgram = async (req, res) => {
                 materialId,
               },
             },
-            update: {
-              pointValue: parseFloat(pointValue),
-            },
-            create: {
-              programId: id,
-              materialId,
-              pointValue: parseFloat(pointValue),
-            },
+            update: { [valueField]: values[index], [otherField]: null },
+            create: { programId: id, materialId, [valueField]: values[index] },
           }),
         ),
       );
     }
 
+    // all-or-nothing: a failed removal can't leave the program half-updated
+    await prisma.$transaction(operations);
+
     return res.status(200).json({ message: "Update successful" });
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    // anything reaching here is unexpected, so it is a server error
+    return res.status(500).json({ error: error.message });
   }
 };
 
 const createTransaction = async (req, res) => {
   try {
-    const { programId, items, beneficiaryId, beneficiaryName, educationalLevel } =
-      req.body ?? {};
+    const { programId, items, residentId } = req.body ?? {};
 
     const { barangayId, id } = req.user;
 
-    if (!programId || !items) {
+    if (!programId || !items || !residentId) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    const user = await prisma.user.findUnique({
+    const program = await prisma.program.findUnique({
+      where: { id: programId, barangayId },
+      select: { isActive: true, isCashMode: true },
+    });
+
+    if (!program) {
+      return res.status(404).json({ error: "Program not found" });
+    }
+
+    if (!program.isActive) {
+      return res.status(400).json({ error: "Program is inactive" });
+    }
+
+    const collector = await prisma.user.findUnique({
       where: { barangayId, id },
       select: {
         firstName: true,
         lastName: true,
-      }
-    })
+      },
+    });
+
+    const resident = await prisma.user.findUnique({
+      where: { barangayId, id: residentId, role: "RESIDENT" },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+      },
+    });
+
+    if (!resident) {
+      return res.status(404).json({ error: "Resident not found" });
+    }
 
     const materials = await Promise.all(
       items.map((i) =>
         prisma.programMaterial.findUnique({
-          where: { id: i.programMaterialId },
+          where: {
+            id: i.programMaterialId,
+            programId,
+            program: {
+              barangayId,
+            },
+          },
           select: {
             pointValue: true,
             cashValue: true,
@@ -274,11 +417,6 @@ const createTransaction = async (req, res) => {
             material: {
               select: {
                 defaultUnit: true,
-              },
-            },
-            program: {
-              select: {
-                isCashMode: true,
               },
             },
           },
@@ -291,47 +429,18 @@ const createTransaction = async (req, res) => {
     }
 
     const transaction = await prisma.$transaction(async (tx) => {
-      let beneficiarySnapshot = null;
-      let resolvedBeneficiaryId = beneficiaryId ?? null;
-
-      if (beneficiaryId) {
-        const beneficiary = await tx.beneficiary.findUnique({
-          where: { barangayId, id: beneficiaryId },
-          select: {
-            id: true,
-            name: true,
-            points: true,
-          },
-        });
-
-        if (!beneficiary) {
-          throw new Error("Beneficiary not found")
-        }
-
-        beneficiarySnapshot = beneficiary.name;
-      }
-
-      if (!beneficiaryId && beneficiaryName) {
-        const newBeneficiary = await tx.beneficiary.create({
-          data: { name: beneficiaryName, barangayId, points: 0 },
-        });
-        resolvedBeneficiaryId = newBeneficiary.id;
-        beneficiarySnapshot = beneficiaryName;
-      }
-
       const transaction = await tx.redemptionTransaction.create({
         data: {
           programId,
-          beneficiaryId: resolvedBeneficiaryId,
-          collectorName: `${user.firstName} ${user.lastName}`,
-          beneficiaryName: beneficiarySnapshot,
-          educationalLevel,
+          residentId: resident.id,
+          collectorName: `${collector.firstName} ${collector.lastName}`,
+          residentName: `${resident.firstName} ${resident.lastName}`,
           redemptionTransactionItem: {
             createMany: {
               data: items.map((item, index) => ({
                 programMaterialId: item.programMaterialId,
                 amount: item.amount,
-                currentValue: materials[index].program.isCashMode
+                currentValue: program.isCashMode
                   ? materials[index].cashValue
                   : materials[index].pointValue,
               })),
@@ -340,27 +449,17 @@ const createTransaction = async (req, res) => {
         },
       });
 
-      const isCashMode = materials[0]?.program?.isCashMode;
-      const totalPoints = items.reduce((total, item, index) => {
-        return total + materials[index].pointValue * item.amount;
-      }, 0);
+      // taking part in a redemption counts as being active, just like a
+      // completed pickup or intake, so the resident can see programs and points
+      await tx.user.update({
+        where: { id: resident.id },
+        data: { isVerified: true },
+      });
 
-      if (resolvedBeneficiaryId && !isCashMode) {
-        await tx.beneficiary.update({
-          where: {
-            id: resolvedBeneficiaryId,
-          },
-          data: {
-            points: {
-              increment: totalPoints,
-            },
-          },
-        });
-      }
-
-      const transactionLog = await tx.stockTransactionLog.createMany({
+      await tx.stockTransactionLog.createMany({
         data: items.map((item, index) => ({
           barangayId,
+          userId: resident.id,
           redemptionTransactionId: transaction.id,
           source: "REDEMPTION",
           transactionType: "IN",
@@ -374,7 +473,7 @@ const createTransaction = async (req, res) => {
         })),
       });
 
-      return transaction
+      return transaction;
     });
 
     return res.status(201).json({
@@ -479,29 +578,7 @@ const getTransaction = async (req, res) => {
   }
 };
 
-const getBeneficiaries = async (req, res) => {
-  try {
-    const { barangayId } = req.user;
-
-    const beneficiaries = await prisma.beneficiary.findMany({
-      where: { barangayId },
-      select: {
-        id: true,
-        name: true,
-        points: true,
-        createdAt: true,
-      },
-    });
-
-    return res
-      .status(200)
-      .json({ message: "Fetch beneficiaries successful", beneficiaries });
-  } catch (error) {
-    return res.status(500).json({ error: error.message });
-  }
-};
-
-const searchBeneficiary = async (req, res) => {
+const searchResident = async (req, res) => {
   try {
     const { barangayId } = req.user;
     const { name, programId } = req.query;
@@ -510,29 +587,41 @@ const searchBeneficiary = async (req, res) => {
       return res.status(400).json({ error: "Program is required" });
     }
 
-    const beneficiaries = await prisma.beneficiary.findMany({
+    // "juan dela" should match first name "Juan" + last name "Dela Cruz",
+    // so every typed word must match either the first or the last name
+    const words = (name ?? "").trim().split(/\s+/).filter(Boolean);
+
+    const residents = await prisma.user.findMany({
       where: {
         barangayId,
-        name: { contains: name, mode: "insensitive" },
+        role: "RESIDENT",
+        AND: words.map((word) => ({
+          OR: [
+            { firstName: { contains: word, mode: "insensitive" } },
+            { lastName: { contains: word, mode: "insensitive" } },
+          ],
+        })),
       },
       select: {
         id: true,
-        name: true,
+        firstName: true,
+        lastName: true,
       },
+      take: 10,
     });
 
-    // points shown here are scoped to the selected program, not the
-    // beneficiary's global running total
-    const beneficiariesWithPoints = await Promise.all(
-      beneficiaries.map(async (beneficiary) => ({
-        ...beneficiary,
-        points: await getBeneficiaryProgramBalance(beneficiary.id, programId),
+    // points shown here are scoped to the selected program
+    const residentsWithPoints = await Promise.all(
+      residents.map(async (resident) => ({
+        id: resident.id,
+        name: `${resident.firstName} ${resident.lastName}`,
+        points: await getResidentProgramBalance(resident.id, programId),
       })),
     );
 
     return res.status(200).json({
-      message: "Searching beneficiaries successful",
-      beneficiaries: beneficiariesWithPoints,
+      message: "Searching residents successful",
+      residents: residentsWithPoints,
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -616,6 +705,5 @@ export {
   getTransactions,
   updateProgram,
   getTransaction,
-  getBeneficiaries,
-  searchBeneficiary,
+  searchResident,
 };
