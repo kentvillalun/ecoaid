@@ -32,7 +32,7 @@ Tracks goods, medicine, supplies, and service outputs per program (`RewardItem`,
 ---
 
 ## Resident Programs Page
-Read-only resident view of the barangay's active programs: accepted materials with their values and available rewards. Shown only when the barangay has `hasRedemptionManagement`, and only to verified residents. Showing the resident's own points here is the next step.
+Read-only resident view of the barangay's active programs: accepted materials with their values and available rewards. Shown only when the barangay has `hasRedemptionManagement`, and only to verified residents. The resident's own points are shown on each program card here (`myPoints`) and on the home screen (`GET /redemption/residents/me/points`; the resident picks which program to show, saved on the device). A history page (`/programs/history`) lists what the resident brought and what they claimed.
 
 ---
 

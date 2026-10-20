@@ -1,7 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { TrophyIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  ChevronUpDownIcon,
+  GiftIcon,
+  TrophyIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { PageContent } from "@/components/layout/PageContent.jsx";
 import { Page } from "@/components/layout/Page.jsx";
@@ -23,6 +28,13 @@ import { AnimatePresence, motion } from "motion/react";
 import { NotificationBell } from "@/components/navigation/NotificationBell";
 import { ResidentRequestCard } from "@/components/requests/ResidentRequestCard";
 import { LogoWithName } from "@/components/branding/LogoWithName";
+import {
+  ResidentPointsPicker,
+  formatProgramPoints,
+} from "@/components/redemption/ResidentPointsPicker";
+
+// remembers, on this device, which program's points the resident wants to see
+const PINNED_PROGRAM_KEY = "homePointsProgramId";
 
 export default function HomePage() {
   const [refetchCount, setRefetchCount] = useState(0);
@@ -56,6 +68,50 @@ export default function HomePage() {
   const myStanding = leaderboardData?.weightLeaderboard?.find(
     (r) => r.userId === leaderboardData?.currentUserId,
   );
+
+  // points only apply to a verified resident (the same lock as the Programs
+  // page) of a barangay that has redemption turned on; anyone else never sends
+  // the request and sees no points at all
+  const canSeePoints =
+    data?.user?.isVerified &&
+    barangayThemeData?.modules?.hasRedemptionManagement;
+
+  const { data: pointsData, isError: pointsError } = useFetch({
+    url: canSeePoints ? "/api/redemption/residents/me/points" : null,
+  });
+
+  // still waiting for the answer (also true on the first render, before the
+  // request has started), so the card can hold the space with a skeleton
+  const isPointsPending = canSeePoints && !pointsData && !pointsError;
+
+  const [pinnedProgramId, setPinnedProgramId] = useState(() => {
+    try {
+      return localStorage.getItem(PINNED_PROGRAM_KEY);
+    } catch {
+      return null;
+    }
+  });
+  const [isPointsPickerOpen, setIsPointsPickerOpen] = useState(false);
+
+  const myPrograms = pointsData?.enabled ? pointsData.programs : [];
+  // their pick if it still exists, otherwise the program used most recently
+  const shownProgram =
+    myPrograms.find((p) => p.id === pinnedProgramId) ?? myPrograms[0];
+
+  const handleSelectProgram = (programId) => {
+    setPinnedProgramId(programId);
+    try {
+      localStorage.setItem(PINNED_PROGRAM_KEY, programId);
+    } catch {}
+    setIsPointsPickerOpen(false);
+  };
+
+  // the points tile opens the picker; with a single program there is nothing
+  // to pick, so it goes straight to the programs page
+  const handlePointsTileClick = () => {
+    if (myPrograms.length > 1) setIsPointsPickerOpen(true);
+    else router.push("/programs");
+  };
 
   const [showBanner, setShowBanner] = useState(false);
 
@@ -166,61 +222,160 @@ export default function HomePage() {
         {/* Contribution card */}
         <Card
           customBorder="0.5px solid var(--color-border)"
-          className={`shadow-none! gradient-card relative flex flex-col gap-2 items-start p-4! overflow-clip ${barangayThemeData?.modules?.hasLeaderboard ? "min-h-42" : "min-h-30"}  hover:cursor-pointer`}
-          handleClick={
-            barangayThemeData?.modules?.hasLeaderboard
-              ? () => router.push("/standings")
-              : undefined
-          }
+          className={`shadow-none! gradient-card relative flex flex-col gap-2 items-start p-4! overflow-clip ${barangayThemeData?.modules?.hasLeaderboard ? "min-h-44" : "min-h-30"}`}
         >
           <div className="absolute w-30 md:w-35 md:h-35 bg-accent/60 rounded-full h-30 -right-8 -top-8 md:-top-10 md:-right-10"></div>
           <div className="absolute w-25 md:w-35 md:h-35 bg-accent/50 rounded-full h-25 right-18 -bottom-12 md:right-45 md:-bottom-16"></div>
-          <div className="flex flex-col gap-1 items-start justify-start w-full">
-            <p className="text-xs text-[rgba(255,255,255,0.6)] font-medium uppercase">
-              Your Contribution
-            </p>
-            <p className="text-white font-bold text-4xl md:text-5xl">
-              {!data?.user?.isVerified ? (
-                0
-              ) : leaderboardLoading ? (
+          {/* Left: contribution. Right: the chosen program's points, same
+              two-stat layout as the barangay dashboard's top card */}
+          <div className="flex flex-row w-full items-start justify-between gap-3 z-40">
+            <div className="flex flex-col gap-1 items-start justify-start">
+              <p className="text-xs text-[rgba(255,255,255,0.6)] font-medium uppercase">
+                Your Contribution
+              </p>
+              <p
+                className={`text-white font-bold md:text-5xl ${shownProgram || isPointsPending ? "text-3xl" : "text-4xl"}`}
+              >
+                {!data?.user?.isVerified ? (
+                  0
+                ) : leaderboardLoading ? (
+                  <Skeleton
+                    width={90}
+                    baseColor="#ffffff33"
+                    highlightColor="#ffffff55"
+                  />
+                ) : leaderboardError ? (
+                  "—"
+                ) : (
+                  `${(myStanding?.total ?? 0).toFixed(1)} kg`
+                )}
+              </p>
+              <p className="text-xs text-[rgba(255,255,255,0.6)]">
+                Community contribution
+              </p>
+            </div>
+
+            {isPointsPending && (
+              <div className="flex flex-col gap-1 items-end justify-start">
                 <Skeleton
-                  width={90}
+                  width={70}
+                  height={12}
                   baseColor="#ffffff33"
                   highlightColor="#ffffff55"
                 />
-              ) : leaderboardError ? (
-                "—"
-              ) : (
-                `${(myStanding?.total ?? 0).toFixed(1)} kg`
-              )}
-            </p>
-            <p className="text-xs text-[rgba(255,255,255,0.6)]">
-              Community contribution
-            </p>
-          </div>
-          {barangayThemeData?.modules?.hasLeaderboard && (
-            <>
-              <div
-                className="text-xs flex flex-row gap-1 items-center justify-start bg-accent/20 px-3 py-1 rounded-xl"
-                style={{ border: "0.5px solid var(--color-accent)" }}
-              >
-                <TrophyIcon className="w-3.5 stroke-accent" />
-                <p className="text-accent font-semibold ">
-                  {!data?.user?.isVerified
-                    ? "Unranked"
-                    : leaderboardLoading
-                      ? "Loading..."
-                      : leaderboardError || !myStanding
-                        ? "Unranked"
-                        : `Rank #${myStanding.rank} in your barangay`}
-                </p>
+                <Skeleton
+                  width={90}
+                  height={30}
+                  baseColor="#ffffff33"
+                  highlightColor="#ffffff55"
+                />
+                <Skeleton
+                  width={80}
+                  height={12}
+                  baseColor="#ffffff33"
+                  highlightColor="#ffffff55"
+                />
               </div>
-              <p className="text-xs text-[rgba(255,255,255,0.6)]">
-                View standings &gt;
-              </p>
-            </>
+            )}
+
+            {shownProgram && (
+              <button
+                type="button"
+                className="flex flex-col gap-1 items-end justify-start min-w-0 hover:cursor-pointer"
+                onClick={handlePointsTileClick}
+              >
+                <p className="text-xs text-[rgba(255,255,255,0.6)] font-medium uppercase text-end truncate max-w-32">
+                  {shownProgram.name}
+                </p>
+                <p className="text-white font-bold text-3xl md:text-5xl text-nowrap">
+                  {formatProgramPoints(shownProgram)}
+                </p>
+                <p className="text-xs text-[rgba(255,255,255,0.6)] text-end text-nowrap">
+                  {shownProgram.isCashMode
+                    ? "Earned in this program"
+                    : "Redemption points"}
+                </p>
+              </button>
+            )}
+          </div>
+
+          {(barangayThemeData?.modules?.hasLeaderboard || shownProgram) && (
+            <div className="flex flex-row items-center justify-between w-full gap-2 z-40">
+              {barangayThemeData?.modules?.hasLeaderboard ? (
+                <div
+                  className="text-xs flex flex-row gap-1 items-center justify-start bg-accent/20 px-3 py-1 rounded-xl"
+                  style={{ border: "0.5px solid var(--color-accent)" }}
+                >
+                  <TrophyIcon className="w-3.5 stroke-accent" />
+                  <p className="text-accent font-semibold ">
+                    {!data?.user?.isVerified
+                      ? "Unranked"
+                      : leaderboardLoading
+                        ? "Loading..."
+                        : leaderboardError || !myStanding
+                          ? "Unranked"
+                          : `Rank #${myStanding.rank} in your barangay`}
+                  </p>
+                </div>
+              ) : (
+                <span />
+              )}
+
+              {shownProgram && (
+                <button
+                  type="button"
+                  className="text-xs flex flex-row gap-1 items-center justify-start bg-accent/20 px-3 py-1 rounded-xl hover:cursor-pointer"
+                  style={{ border: "0.5px solid var(--color-accent)" }}
+                  onClick={handlePointsTileClick}
+                >
+                  {myPrograms.length > 1 ? (
+                    <ChevronUpDownIcon className="w-3.5 stroke-accent" />
+                  ) : (
+                    <GiftIcon className="w-3.5 stroke-accent" />
+                  )}
+                  <p className="text-accent font-semibold">
+                    {myPrograms.length > 1 ? "Switch program" : "View program"}
+                  </p>
+                </button>
+              )}
+            </div>
+          )}
+
+          {(barangayThemeData?.modules?.hasLeaderboard || shownProgram) && (
+            <div className="flex flex-row items-center justify-between w-full gap-2 z-40">
+              
+              {barangayThemeData?.modules?.hasLeaderboard ? (
+                <button
+                  type="button"
+                  className="text-xs text-[rgba(255,255,255,0.6)] hover:cursor-pointer"
+                  onClick={() => router.push("/standings")}
+                >
+                  View standings &gt;
+                </button>
+              ) : (
+                <span />
+              )}
+
+              {shownProgram && (
+                <button
+                  type="button"
+                  className="text-xs text-[rgba(255,255,255,0.6)] hover:cursor-pointer"
+                  onClick={() => router.push("/programs")}
+                >
+                  View redemption programs &gt;
+                </button>
+              )}
+            </div>
           )}
         </Card>
+
+        <ResidentPointsPicker
+          isOpen={isPointsPickerOpen}
+          onClose={() => setIsPointsPickerOpen(false)}
+          programs={myPrograms}
+          selectedId={shownProgram?.id}
+          onSelect={handleSelectProgram}
+        />
 
         <div className="grid grid-cols-1 gap-3">
           {/* Accepted materials card */}

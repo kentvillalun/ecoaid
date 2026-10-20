@@ -27,9 +27,13 @@ Docs-sync plus the end of the redemption overhaul. Every doc was compared agains
 - A reward release listing the same item twice was checked row by row against stock. Rows are merged first.
 - `updateProgram` returned 400 for unexpected errors; it now returns 500 so internal messages are not shown to users.
 
+### Added later the same day
+
+- Resident home screen points tile (with a program picker saved on the device), points on each Programs page card, a resident redemption history page (`/programs/history`), and `/programs` added to the `proxy.js` matcher (it had been missing, so the server-side login redirect never ran for it).
+
 ### Open items
 
-- Resident-side points display (next feature).
+- Resident redemption history has no pagination (latest 100 transactions and 100 releases).
 - Production rollout of the migration: snapshot, `prisma migrate deploy`, deploy in one window, `seedCoreMaterials()` for the new materials.
 - No "who has not submitted" view; non-submitters are found by comparing lists. Unregistered households are not traceable.
 - Reports repeat a resident's releases on each of their transaction rows.

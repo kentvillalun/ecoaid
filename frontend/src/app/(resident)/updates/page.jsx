@@ -57,9 +57,9 @@ export default function AnnouncementsPage() {
   const announcements = data?.announcements;
 
   return (
-    <Page className="bg-bg!">
+    <Page className="bg-bg! overflow-hidden">
       <ResidentHeader title={"Announcements"} className="shadow-none! bg-bg!" />
-      <PageContent className="md:pl-3! gap-3!">
+      <PageContent className="md:pl-3! gap-3! md:mt-16!">
         {!userData?.user?.isVerified ? (
           <div className="flex flex-col items-center text-center py-6 gap-1">
             <p className="text-sm text-dark font-medium">

@@ -734,7 +734,13 @@ Verified against the running app (barangay dashboard at `/dashboard` logged in a
 
 **Fields involved:** Read-only; no inputs.
 
-**Discrepancies / notes:** Not in the FR table. The resident's **own points per program** are not shown yet; the balance already exists (computed per resident per program) and displaying it on each program card is the next planned step.
+**Resident points on the home screen:** the home "Your Contribution" card shows the resident's points in one program on its right side (`GET /redemption/residents/me/points`, same verified lock). Tapping it opens a bottom sheet listing every program with its points, and the choice is remembered on the device; the default is the program used most recently. With one program the tap opens `/programs`. Points are never added together across programs; cash programs show pesos earned.
+
+**Points on each program card:** every card on `/programs` (and in the Barangay-tab preview) shows a "Your points" strip with the resident's balance in that program (`myPoints`, computed; "You've earned" in pesos for cash programs).
+
+**Redemption history:** a "My redemption history" link on `/programs` opens `/programs/history` (`GET /redemption/residents/me/history`). It lists, newest first and filterable by program, each time the resident **brought** materials to a program (materials and amounts, points or pesos earned) and each reward they **claimed** (quantity, points spent). It shows the latest 100 of each and has no pagination.
+
+**Discrepancies / notes:** Not in the FR table.
 
 **Open questions:** None.
 

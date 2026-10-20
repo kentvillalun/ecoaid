@@ -59,13 +59,13 @@ export default function HelpAndSupportPage() {
   };
 
   return (
-    <Page className="bg-bg!">
+    <Page className="bg-bg! overflow-hidden">
       <ResidentHeader
         title={"Help & Support"}
         className="bg-bg! shadow-none!"
       />
 
-      <PageContent>
+      <PageContent className="md:p-4! md:mt-16!">
         <div className="">
           <div className="font-medium py-3 text-sm flex flex-col gap-2 ">
             <h2 className="">Frequently Asked Questions (FAQs)</h2>

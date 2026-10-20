@@ -28,9 +28,9 @@ export default function NotificationsPage() {
   const notifications = data?.notifications;
 
   return (
-    <Page className="bg-bg!">
+    <Page className="bg-bg! overflow-hidden">
       <ResidentHeader title={"Notifications"} className="shadow-none! bg-bg!" />
-      <PageContent className="md:pl-3! gap-3!">
+      <PageContent className="md:pl-3! gap-3! md:mt-16!">
         {isLoading ? (
           <div className="flex flex-col gap-3">
             {Array.from({ length: 3 }).map((_, index) => (

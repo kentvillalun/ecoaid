@@ -54,7 +54,7 @@ export default function ProfilePage() {
   const handleRefetchCount = () => setRefetchCount((prev) => prev + 1);
 
   return (
-    <Page className="bg-bg!">
+    <Page className="bg-bg! overflow-hidden">
       <Toaster position="top-center" />
       <ResidentHeader
         title={"Profile"}

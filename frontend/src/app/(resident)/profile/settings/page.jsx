@@ -10,10 +10,10 @@ import { useRouter } from "next/navigation";
 export default function SettingsPage() {
   const router = useRouter()
   return (
-    <Page className="bg-bg!">
+    <Page className="bg-bg! overflow-hidden">
       <ResidentHeader title={"Settings"} className="shadow-none bg-bg!" handleClick={() => router.push("/profile")}/>
 
-      <PageContent>
+      <PageContent className="md:p-4! md:mt-16!">
         <div className="">
           <div className="font-medium py-3 border-b border-border text-sm">
             <h2 className="uppercase text-xs text-gray-400">General</h2>
