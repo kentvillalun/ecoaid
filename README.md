@@ -190,7 +190,9 @@ Abbreviations: **staff** = CAPTAIN, SECRETARY, TREASURER, SK, COLLECTOR. Routes 
 | POST   | `/redemption/programs`            | CAPTAIN, SECRETARY, SK, TREASURER      | Create a program; `announce: true` also posts an announcement (CAPTAIN, SECRETARY, SK) |
 | GET    | `/redemption/programs`, `/programs/:id` | same                              | List / detail with materials and transactions            |
 | PATCH  | `/redemption/programs/:id`        | same                                   | Edit; removes deselected materials not yet used, can change the mode only before any transaction |
-| GET    | `/redemption/programs/residents`  | RESIDENT                               | Active programs for residents (accepted materials, rewards) |
+| GET    | `/redemption/programs/residents`  | RESIDENT                               | Active programs for residents (accepted materials, rewards, and the resident's own `myPoints`) |
+| GET    | `/redemption/residents/me/points` | RESIDENT                               | The resident's own points per program (active programs plus ended ones with points left) |
+| GET    | `/redemption/residents/me/history`| RESIDENT                               | The resident's own history: what they brought (transactions) and what they claimed (reward releases), newest first |
 | POST   | `/redemption/transactions`        | CAPTAIN, SECRETARY, SK, TREASURER      | Record a transaction for a registered resident (`residentId`) |
 | GET    | `/redemption/transactions`, `/transactions/:id` | same                     | List / detail                                            |
 | GET    | `/redemption/residents/search?name=&programId=` | same                      | Residents with their points in that program              |
@@ -252,7 +254,7 @@ Barangay CRUD (`/admin/barangays`, `/admin/barangay/register`, `/admin/barangay/
 
 ## Current Status
 
-All modules above are built end-to-end and deployed (backend on Render, frontend proxying `/api/*`). The redemption module was reshaped in October 2026 around the resident as beneficiary, and residents can now see active programs and rewards; showing each resident their own points per program is the next feature, followed by the field evaluation in a real barangay.
+All modules above are built end-to-end and deployed (backend on Render, frontend proxying `/api/*`). The redemption module was reshaped in October 2026 around the resident as beneficiary, and residents can now see active programs and rewards; residents see their own points on the home screen (they choose which program to show) and on each Programs page card; the field evaluation in a real barangay is next.
 
 See `docs/current-progress.md` for the detailed log and `PROGRESS.md` for open items and technical debt.
 

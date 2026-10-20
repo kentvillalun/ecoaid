@@ -56,7 +56,7 @@ The core material list changed to match what the pilot barangay collects: `Alak 
 
 Several robustness fixes landed in the same period: sessions of deleted users are rejected, dashboard queries are scoped to the staff's barangay, error boundaries (`error.jsx`, `global-error.jsx`) and shared unauthorized-session handling were added after an intermittent white screen, and the seed file was refactored (separate functions for super admin, barangay test accounts, core materials and a sample resident).
 
-Active development focus: showing each resident their own points per program, then the field evaluation in a real barangay (planned for Nov 8, 2026) using real operations plus scripted scenarios for the modules the barangay does not use daily. After that, the technical-debt backlog (feature-flag enforcement beyond the Sidebar, rate limiting/hardening on the rest of the API, pagination) — see `docs/current-progress.md` for the current priority order.
+The resident home screen now shows each resident their own points in a program they can switch between, using the same two-stat card layout as the barangay dashboard. The same points are shown on every card of the Programs page. Active development focus: the field evaluation in a real barangay (planned for Nov 8, 2026) using real operations plus scripted scenarios for the modules the barangay does not use daily. After that, the technical-debt backlog (feature-flag enforcement beyond the Sidebar, rate limiting/hardening on the rest of the API, pagination) — see `docs/current-progress.md` for the current priority order.
 
 ---
 

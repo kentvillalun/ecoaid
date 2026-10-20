@@ -15,15 +15,15 @@ export default function TermsAndPrivacyPage() {
   const router = useRouter();
 
   return (
-    <Page className="bg-bg!">
+    <Page className="bg-bg! overflow-hidden">
       <ResidentHeader
         title={"Terms & Privacy"}
         handleClick={() => router.push("/profile/settings")}
         className="shadow-none bg-bg!"
       />
 
-      <PageContent>
-        <div className="flex flex-col gap-8 pb-6">
+      <PageContent className="md:p-4! md:mt-20! md:mb-10">
+        <div className="flex flex-col gap-8 pb-20">
           <div className="flex flex-col items-center text-center gap-1 pt-2">
             <h1 className="font-semibold text-lg text-text-primary">
               {TERMS_TITLE}

@@ -103,7 +103,7 @@ export default function CommunityPage() {
       <PageContent className="md:pl-3! top-18!">
         <div className="mt-4 flex flex-col gap-3">
           {/* Collection Schedule */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
             {/* Accepted Materials */}
             <Card className="flex gap-2 flex-col items-start new-border shadow-none!">
               <div className="flex flex-row gap-3 items-center ">
@@ -285,8 +285,8 @@ export default function CommunityPage() {
             </p>
             <Card className="flex-row gap-3 new-border shadow-none">
               <div className="">
-                <div className="gradient-button p-4 rounded-full">
-                  <BuildingLibraryIcon className="stroke-white w-5 stroke-2" />
+                <div className="gradient-button p-3 rounded-full flex items-center justify-center">
+                  <BuildingLibraryIcon className="stroke-white w-6 stroke-2" />
                 </div>
               </div>
               <div className="flex flex-col gap-2 text-sm flex-1">

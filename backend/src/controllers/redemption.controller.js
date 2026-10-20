@@ -628,9 +628,174 @@ const searchResident = async (req, res) => {
   }
 };
 
+// The resident's own points in each program they can still use
+const getMyPoints = async (req, res) => {
+  try {
+    const { barangayId, id } = req.user;
+
+    const barangay = await prisma.barangay.findUnique({
+      where: { id: barangayId },
+      select: { hasRedemptionManagement: true },
+    });
+
+    if (!barangay?.hasRedemptionManagement) {
+      return res.status(200).json({
+        message: "Redemption is not enabled for this barangay",
+        enabled: false,
+        programs: [],
+      });
+    }
+
+    // active programs, plus ended ones the resident has taken part in
+    // (they may still have points left to spend)
+    const programs = await prisma.program.findMany({
+      where: {
+        barangayId,
+        OR: [
+          { isActive: true },
+          { redemptionTransaction: { some: { residentId: id } } },
+        ],
+      },
+      select: {
+        id: true,
+        name: true,
+        isCashMode: true,
+        isActive: true,
+      },
+    });
+
+    const programsWithPoints = await Promise.all(
+      programs.map(async (program) => {
+        const lastTransaction = await prisma.redemptionTransaction.findFirst({
+          where: { residentId: id, programId: program.id },
+          orderBy: { createdAt: "desc" },
+          select: { createdAt: true },
+        });
+
+        return {
+          ...program,
+          points: await getResidentProgramBalance(id, program.id),
+          lastActivityAt: lastTransaction?.createdAt ?? null,
+        };
+      }),
+    );
+
+    // an ended program only matters while there are points left to spend;
+    // the program the resident used most recently comes first
+    const myPrograms = programsWithPoints
+      .filter((program) => program.isActive || program.points > 0)
+      .sort(
+        (a, b) =>
+          new Date(b.lastActivityAt ?? 0) - new Date(a.lastActivityAt ?? 0),
+      );
+
+    return res.status(200).json({
+      message: "Fetching points successful",
+      enabled: true,
+      programs: myPrograms,
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+// The resident's own redemption history: what they brought (transactions) and
+// what they claimed (reward releases), newest first, across all programs
+const getMyHistory = async (req, res) => {
+  try {
+    const { barangayId, id } = req.user;
+
+    const barangay = await prisma.barangay.findUnique({
+      where: { id: barangayId },
+      select: { hasRedemptionManagement: true },
+    });
+
+    if (!barangay?.hasRedemptionManagement) {
+      return res.status(200).json({
+        message: "Redemption is not enabled for this barangay",
+        enabled: false,
+        entries: [],
+      });
+    }
+
+    const transactions = await prisma.redemptionTransaction.findMany({
+      where: { residentId: id, program: { barangayId } },
+      orderBy: { createdAt: "desc" },
+      take: 100,
+      select: {
+        id: true,
+        createdAt: true,
+        program: { select: { id: true, name: true, isCashMode: true } },
+        redemptionTransactionItem: {
+          select: {
+            amount: true,
+            currentValue: true,
+            programMaterial: {
+              select: {
+                material: { select: { name: true, defaultUnit: true } },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const releases = await prisma.rewardRelease.findMany({
+      where: { residentId: id, barangayId },
+      orderBy: { createdAt: "desc" },
+      take: 100,
+      select: {
+        id: true,
+        createdAt: true,
+        quantity: true,
+        program: { select: { id: true, name: true, isCashMode: true } },
+        rewardItem: { select: { name: true, pointCost: true } },
+      },
+    });
+
+    const earned = transactions.map((t) => ({
+      id: t.id,
+      type: "EARNED",
+      date: t.createdAt,
+      program: t.program,
+      materials: t.redemptionTransactionItem.map((item) => ({
+        name: item.programMaterial.material.name,
+        unit: item.programMaterial.material.defaultUnit,
+        amount: item.amount,
+      })),
+      points: t.redemptionTransactionItem.reduce(
+        (total, item) => total + item.amount * item.currentValue,
+        0,
+      ),
+    }));
+
+    const claimed = releases.map((r) => ({
+      id: r.id,
+      type: "CLAIMED",
+      date: r.createdAt,
+      program: r.program,
+      reward: r.rewardItem.name,
+      quantity: r.quantity,
+      points: r.quantity * r.rewardItem.pointCost,
+    }));
+
+    const entries = [...earned, ...claimed].sort(
+      (a, b) => new Date(b.date) - new Date(a.date),
+    );
+
+    return res.status(200).json({
+      message: "Fetching history successful",
+      enabled: true,
+      entries,
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 const getResidentPrograms = async (req, res) => {
   try {
-    const { barangayId } = req.user;
+    const { barangayId, id } = req.user;
 
     const barangay = await prisma.barangay.findUnique({
       where: { id: barangayId },
@@ -686,10 +851,18 @@ const getResidentPrograms = async (req, res) => {
       },
     });
 
+    // the resident's own points in each program (computed, never stored)
+    const programsWithPoints = await Promise.all(
+      programs.map(async (program) => ({
+        ...program,
+        myPoints: await getResidentProgramBalance(id, program.id),
+      })),
+    );
+
     return res.status(200).json({
       message: "Fetching programs successful",
       enabled: true,
-      programs,
+      programs: programsWithPoints,
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -699,6 +872,8 @@ const getResidentPrograms = async (req, res) => {
 export {
   createProgram,
   getResidentPrograms,
+  getMyPoints,
+  getMyHistory,
   getPrograms,
   getProgram,
   createTransaction,

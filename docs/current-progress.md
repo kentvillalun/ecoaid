@@ -274,18 +274,23 @@
 - **Seed refactor** (Oct 17–18) — `prisma/seed.js` split into `seedSuperAdmin`, `seedBarangayTestingAccounts`, `seedCoreMaterials` and `seedSampleResident`, toggled in `main()`; `createCoreMaterials` is called when a barangay is registered by the Super Admin; the dev database was reset as part of the refactor.
 - **Collection request fixes** — the staff request detail page and the request table/card were repaired after a broken page, and the resident capture form received the sitio fix.
 
+- **Resident home screen shows redemption points** — new `GET /redemption/residents/me/points` (`getMyPoints`, RESIDENT): returns `enabled` and, for the resident's barangay, every active program plus ended programs the resident took part in that still have points to spend, each with `points` (computed by `getResidentProgramBalance`) and `lastActivityAt`, newest activity first; `enabled: false` when the barangay has redemption off. The home "Your Contribution" card follows the barangay dashboard's top-card layout: contribution on the left, the chosen program's name and points on the right, the rank pill on the left and a "Switch program"/"View program" pill on the right. Tapping the points opens `ResidentPointsPicker` (a bottom sheet listing every program with its points) when there is more than one program; with one program it opens `/programs`. The choice is saved on the device in `localStorage` (`homePointsProgramId`); the default is the program used most recently. Cash programs show pesos earned. Unverified residents see no points (same lock as the Programs page). Points are never added across programs.
+- **Resident points on each Programs page card** — `getResidentPrograms` (`GET /redemption/programs/residents`) now returns `myPoints` for each active program (computed by `getResidentProgramBalance`), and each card on `/programs` and in the Barangay-tab preview shows a "Your points" strip (pesos "You've earned" for cash programs). The home screen also links to the Programs page ("View redemption programs >") and its card is gated on the barangay's `hasRedemptionManagement` flag with a skeleton while loading.
+
+- **Resident redemption history** — new `GET /redemption/residents/me/history` (`getMyHistory`, RESIDENT; up to the latest 100 transactions and 100 releases): each entry is either `EARNED` (a transaction: date, program, the materials and amounts brought, points or pesos earned) or `CLAIMED` (a reward release: date, program, reward and quantity, points spent), merged newest first; `enabled: false` when the barangay has redemption off. New page `/programs/history` ("Redemption History") with a program filter (`DropdownFilter`), linked from the Programs page ("My redemption history >"). `/programs` was also added to the edge middleware matcher in `proxy.js`, which it had been missing from, so logged-out visitors are redirected server-side like every other resident page. There is no pagination yet.
+
 ---
 
 ## In Progress
 
-- **Resident-side redemption points** — the data exists (`getResidentProgramBalance`), but residents cannot see their own balance yet. Planned: return `myPoints` per program from `getResidentPrograms` and show it on each program card of `/programs` (points programs only).
+- Nothing else is in progress. The resident's points are now shown on the home screen and on each program card (below).
 - **Field evaluation / pilot** (planned Nov 8, 2026, real barangay, one or more days): real operations (recycling activity, scheduled Sunday pickup, MRF sorting, 5–10 residents submitting photo requests) plus scripted scenarios for junkshop sales/beautification and reports; the logbook is run in parallel and compared with the app.
 
 ---
 
 ## Next Steps (priority order)
 
-0. Show each resident their own points per program on the resident Programs page, then run the field evaluation (planned Nov 8, 2026). Before the pilot: take a database snapshot, apply the `resident_as_beneficiary` migration to production with `prisma migrate deploy`, deploy the code in the same window, and run `seedCoreMaterials()` (if not already done) so existing barangays get the new materials.
+0. Run the field evaluation (planned Nov 8, 2026); the resident's points are already shown on the home screen and on each Programs page card. Before the pilot: take a database snapshot, apply the `resident_as_beneficiary` migration to production with `prisma migrate deploy`, deploy the code in the same window, and run `seedCoreMaterials()` (if not already done) so existing barangays get the new materials.
 1. Audit barangay `has___` feature-flag enforcement beyond Sidebar filtering — add middleware-level (or at least page-level) gating so a disabled module can't be reached by direct URL, matching how `ROLE_MATRIX` is already enforced in `proxy.js`
 2. Technical debt batch:
    - Archive pattern (soft delete) — panel forbids hard deletion

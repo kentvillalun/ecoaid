@@ -124,6 +124,7 @@ export const config = {
     "/profile/:path*",
     "/requests/:path*",
     "/standings/:path*",
+    "/programs/:path*",
     "/notifications/:path*",
     "/manual-intake/:path*",
     "/mrf-inventory/:path*",

@@ -94,9 +94,9 @@ export default function StandingsPage() {
   const rest = leaderboard?.slice(3);
 
   return (
-    <Page className="bg-bg!">
+    <Page className="bg-bg! overflow-hidden">
       <ResidentHeader title={"Standings"} className="shadow-none! bg-bg!" />
-      <PageContent className="md:pl-3! gap-3!">
+      <PageContent className="md:pl-3! gap-3! md:mt-16!">
         {/* Helper message */}
         <Card className="shadow-none! new-border flex-row! items-center! gap-3">
           <IconContainer

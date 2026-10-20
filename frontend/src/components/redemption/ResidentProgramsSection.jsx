@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/Badge";
 import { MaterialTag } from "@/components/ui/MaterialTag";
 import { Empty } from "@/components/ui/Empty";
 import { Error } from "@/components/ui/Error";
+import { formatProgramPoints } from "@/components/redemption/ResidentPointsPicker";
 
 const REWARD_CATEGORY_COLORS = {
   MEDICINE: "bg-red-50 text-red-700",
@@ -123,6 +124,19 @@ export const ResidentProgramsList = ({ isVerified, limit }) => {
                       : "bg-blue-50 text-blue-700"
                   }
                 />
+              </div>
+
+              {/* the resident's own balance in this program */}
+              <div className="flex flex-row items-center justify-between w-full bg-accent/10 px-3 py-2 rounded-xl">
+                <p className="text-xs font-medium text-text-secondary">
+                  {program.isCashMode ? "You've earned" : "Your points"}
+                </p>
+                <p className="text-sm font-bold text-accent tabular-nums">
+                  {formatProgramPoints({
+                    isCashMode: program.isCashMode,
+                    points: program.myPoints ?? 0,
+                  })}
+                </p>
               </div>
 
               {program.description && (
