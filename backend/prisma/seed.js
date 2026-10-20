@@ -290,11 +290,11 @@ async function main() {
   // await seedSuperAdmin();
   // await seedCoreMaterials();
   await seedSampleResident();
-  console.log("Seeded sample resident: testResident");
+  // console.log("Seeded sample resident: testResident");
 
   // Dev/training data — not needed for pilot testing
   // await seedBarangayTestingAccounts();
-  // await seedCoreMaterials();
+  await seedCoreMaterials();
   // await seedSampleResident();
 }
 

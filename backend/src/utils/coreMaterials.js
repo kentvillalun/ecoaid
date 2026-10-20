@@ -1,9 +1,11 @@
 export const CORE_MATERIALS = {
   Metals: [
     { name: "Aluminum Cans", defaultUnit: "KG" },
-    { name: "Tin Cans", defaultUnit: "PIECE" },
+    { name: "Tin Cans", defaultUnit: "KG" },
     { name: "Steel Scraps", defaultUnit: "KG" },
     { name: "Iron Scraps", defaultUnit: "KG" },
+    { name: "Cans (Lata)", defaultUnit: "KG" },
+    { name: "Scrap Metal (Landok)", defaultUnit: "KG" },
   ],
   Papers: [
     { name: "Newspaper", defaultUnit: "KG" },
@@ -15,8 +17,10 @@ export const CORE_MATERIALS = {
     { name: "Hard Plastics", defaultUnit: "KG" },
   ],
   Glass: [
-    { name: "Alak Bottles", defaultUnit: "PIECE" },
-    { name: "Beer Bottles", defaultUnit: "PIECE" },
+    { name: "Gin Bottle (2x2)", defaultUnit: "PIECE" },
+    { name: "Round Bottle (Bilog)", defaultUnit: "PIECE" },
+    { name: "Ketchup Bottle", defaultUnit: "PIECE" },
+    { name: "Liquor Bottle (Long Neck)", defaultUnit: "PIECE" },
   ],
 };
 
