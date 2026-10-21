@@ -395,9 +395,10 @@ export default function ManualIntakePage() {
                               onChange={(e) => {
                                 updateRow(index, "unit", e.target.value);
                               }}
+                              defaultValue={""}
                             >
-                              <option value="" disabled hidden>
-                                Unit
+                              <option value="" disabled hidden >
+                                e.g. kg
                               </option>
                               <option value={"KG"}>kg</option>
                               <option value={"LBS"}>lbs</option>
