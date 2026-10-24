@@ -21,6 +21,7 @@ import { Error } from "@/components/ui/Error";
 import { Spinner } from "@/components/ui/Spinner";
 import { useRouter } from "next/navigation";
 import { Empty } from "@/components/ui/Empty";
+import { formatMaterialRate } from "@/lib/formatMaterialRate";
 
 export default function RedemptionProgramPage() {
   const [isProgramModalOpen, setIsProgramModalOpen] = useState(false);
@@ -172,11 +173,7 @@ export default function RedemptionProgramPage() {
                       <MaterialTag
                         type={m?.material?.category?.name}
                         materialName={m?.material?.name}
-                        points={
-                          p?.isCashMode
-                            ? `₱${m.cashValue}`
-                            : `${m.pointValue} pts`
-                        }
+                        points={formatMaterialRate(m, p?.isCashMode)}
                         key={m.id}
                       />
                     ))}
