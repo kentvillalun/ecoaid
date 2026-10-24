@@ -840,21 +840,45 @@ const getResidentPrograms = async (req, res) => {
           },
         },
         rewardItems: {
-          where: { quantity: { gt: 0 } },
           select: {
             id: true,
             name: true,
             category: true,
             pointCost: true,
+            quantity: true,
+            rewardReleases: {
+              select: {
+                quantity: true,
+              },
+            },
           },
         },
       },
     });
 
+    // quantity is the total ever stocked, so what is left is quantity minus
+    // everything already released (same as the reward inventory). Rewards
+    // that ran out stay in the list so residents see "0 left".
+    const withAvailableRewards = (rewardItems) =>
+      rewardItems.map((r) => {
+        const totalReleases = r.rewardReleases.reduce((total, current) => {
+          return total + current.quantity;
+        }, 0);
+
+        return {
+          id: r.id,
+          name: r.name,
+          category: r.category,
+          pointCost: r.pointCost,
+          available: r.quantity - totalReleases,
+        };
+      });
+
     // the resident's own points in each program (computed, never stored)
     const programsWithPoints = await Promise.all(
       programs.map(async (program) => ({
         ...program,
+        rewardItems: withAvailableRewards(program.rewardItems),
         myPoints: await getResidentProgramBalance(id, program.id),
       })),
     );

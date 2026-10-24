@@ -3,6 +3,8 @@
 const nextConfig = {
   /* config options here */
   allowedDevOrigins: ["192.168.1.30"],
+  // hides the Next.js "N" badge when capturing demo screenshots (DEMO_CAPTURE=1)
+  devIndicators: process.env.DEMO_CAPTURE === "1" ? false : undefined,
   images: {
     remotePatterns: [
       {

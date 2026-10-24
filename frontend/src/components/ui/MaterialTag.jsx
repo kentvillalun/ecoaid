@@ -42,7 +42,7 @@ export const MaterialTag = ({
     >
       {(!materialName || textOnly) && <div className={`w-1.5 h-1.5 rounded-full ${styles[type]?.dot} ${noDot && "hidden"}`} />} 
       {materialName ? materialName : type}
-      {points != null ? ` ${points} ` : ""}
+      {points != null ? ` – ${points} ` : ""}
     </div>
   );
 };

@@ -6,37 +6,17 @@ import { ChevronRightIcon, GiftIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useFetch } from "@/hooks/useFetch";
 import { Card } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
 import { MaterialTag } from "@/components/ui/MaterialTag";
 import { Empty } from "@/components/ui/Empty";
 import { Error } from "@/components/ui/Error";
 import { formatProgramPoints } from "@/components/redemption/ResidentPointsPicker";
-
-const REWARD_CATEGORY_COLORS = {
-  MEDICINE: "bg-red-50 text-red-700",
-  GOODS: "bg-blue-50 text-blue-700",
-  SCHOOL_SUPPLIES: "bg-yellow-50 text-yellow-700",
-  SERVICES: "bg-purple-50 text-purple-700",
-  OTHERS: "bg-gray-100 text-gray-600",
-};
-
-const REWARD_CATEGORY_LABELS = {
-  MEDICINE: "Medicine",
-  GOODS: "Goods",
-  SCHOOL_SUPPLIES: "School Supplies",
-  SERVICES: "Services",
-  OTHERS: "Others",
-};
-
-const formatValue = (programMaterial, isCashMode) => {
-  const unit = programMaterial.material?.defaultUnit?.toLowerCase();
-  return isCashMode
-    ? `₱${programMaterial.cashValue ?? 0}/${unit}`
-    : `${programMaterial.pointValue ?? 0} pts/${unit}`;
-};
+import { formatMaterialRate } from "@/lib/formatMaterialRate";
 
 // max programs shown on the community page; the rest are on /programs
 const COMMUNITY_LIMIT = 2;
+
+// a reward shows "Only N left" at or below this stock
+const LOW_STOCK_LIMIT = 5;
 
 // Only rendered by the parent when the barangay has redemption management
 // enabled, so a disabled barangay never fetches or shows anything here.
@@ -111,27 +91,16 @@ export const ResidentProgramsList = ({ isVerified, limit }) => {
               key={program.id}
               className="flex flex-col items-start gap-3 shadow-none! new-border"
             >
-              <div className="flex flex-row items-start justify-between w-full gap-2">
-                <div className="flex flex-row gap-3 items-center">
+              {/* no mode label: the balance and the material values
+                  ("pts" vs "₱") already show if it's a points or cash program */}
+              <div className="flex flex-row items-center justify-between w-full gap-3">
+                <div className="flex flex-row gap-3 items-center min-w-0">
                   <GiftIcon className="w-6 stroke-accent shrink-0" />
                   <p className="font-bold text-text-primary">{program.name}</p>
                 </div>
-                <Badge
-                  label={program.isCashMode ? "Cash" : "Points"}
-                  color={
-                    program.isCashMode
-                      ? "bg-success/10 text-success"
-                      : "bg-blue-50 text-blue-700"
-                  }
-                />
-              </div>
 
-              {/* the resident's own balance in this program */}
-              <div className="flex flex-row items-center justify-between w-full bg-accent/10 px-3 py-2 rounded-xl">
-                <p className="text-xs font-medium text-text-secondary">
-                  {program.isCashMode ? "You've earned" : "Your points"}
-                </p>
-                <p className="text-sm font-bold text-accent tabular-nums">
+                {/* the resident's own balance in this program */}
+                <p className="shrink-0 bg-accent/10 text-accent text-sm font-bold tabular-nums px-3 py-1 rounded-full">
                   {formatProgramPoints({
                     isCashMode: program.isCashMode,
                     points: program.myPoints ?? 0,
@@ -148,20 +117,15 @@ export const ResidentProgramsList = ({ isVerified, limit }) => {
                   <p className="text-xs font-semibold text-accent">
                     Accepted materials
                   </p>
-                  <div className="flex flex-col gap-1.5">
+                  {/* same chips as the staff program card, all shown */}
+                  <div className="flex flex-row flex-wrap gap-1">
                     {program.programMaterial.map((pm) => (
-                      <div
+                      <MaterialTag
                         key={pm.id}
-                        className="flex flex-row items-center justify-between gap-2"
-                      >
-                        <MaterialTag
-                          materialName={pm.material?.name}
-                          type={pm.material?.category?.name}
-                        />
-                        <p className="text-xs font-medium text-text-primary text-nowrap">
-                          {formatValue(pm, program.isCashMode)}
-                        </p>
-                      </div>
+                        materialName={pm.material?.name}
+                        type={pm.material?.category?.name}
+                        points={formatMaterialRate(pm, program.isCashMode)}
+                      />
                     ))}
                   </div>
                 </div>
@@ -169,29 +133,77 @@ export const ResidentProgramsList = ({ isVerified, limit }) => {
 
               {!program.isCashMode && program.rewardItems?.length > 0 && (
                 <div className="flex flex-col gap-2 w-full">
-                  <p className="text-xs font-semibold text-accent">
-                    Available rewards
-                  </p>
+                  <div className="flex flex-row items-center justify-between gap-2">
+                    <p className="text-xs font-semibold text-accent">
+                      Available rewards
+                    </p>
+                    <p className="text-xs text-text-secondary">
+                      You can claim{" "}
+                      {
+                        program.rewardItems.filter(
+                          (r) =>
+                            r.available > 0 &&
+                            r.pointCost <= (program.myPoints ?? 0),
+                        ).length
+                      }{" "}
+                      of {program.rewardItems.length}
+                    </p>
+                  </div>
+                  {/* cheapest first; rewards within the resident's points look
+                      normal, the rest are muted with the points still missing */}
                   <div className="flex flex-col gap-1.5">
-                    {program.rewardItems.map((reward) => (
-                      <div
-                        key={reward.id}
-                        className="flex flex-row items-center justify-between gap-2"
-                      >
-                        <div className="flex flex-row items-center gap-2 min-w-0">
-                          <Badge
-                            label={REWARD_CATEGORY_LABELS[reward.category]}
-                            color={REWARD_CATEGORY_COLORS[reward.category]}
-                          />
-                          <p className="text-sm text-text-primary truncate">
-                            {reward.name}
-                          </p>
-                        </div>
-                        <p className="text-xs font-medium text-text-primary text-nowrap">
-                          {reward.pointCost} pts
-                        </p>
-                      </div>
-                    ))}
+                    {[...program.rewardItems]
+                      .sort((a, b) => a.pointCost - b.pointCost)
+                      .map((reward) => {
+                        const missingPoints =
+                          Math.round(
+                            (reward.pointCost - (program.myPoints ?? 0)) * 100,
+                          ) / 100;
+                        const isOutOfStock = reward.available <= 0;
+                        const canClaim = missingPoints <= 0 && !isOutOfStock;
+
+                        return (
+                          <div
+                            key={reward.id}
+                            className="flex flex-row items-center justify-between gap-2"
+                          >
+                            <p className="text-sm truncate min-w-0">
+                              <span
+                                className={
+                                  canClaim
+                                    ? "text-text-primary font-medium"
+                                    : "text-text-secondary"
+                                }
+                              >
+                                {reward.name}
+                              </span>
+                              {reward.available <= LOW_STOCK_LIMIT && (
+                                <span className="text-xs text-orange-600 ml-1.5">
+                                  {isOutOfStock
+                                    ? "0 left"
+                                    : `Only ${reward.available} left`}
+                                </span>
+                              )}
+                            </p>
+                            <p className="text-xs text-nowrap tabular-nums">
+                              {missingPoints > 0 && (
+                                <span className="text-text-secondary">
+                                  {missingPoints} more ·{" "}
+                                </span>
+                              )}
+                              <span
+                                className={
+                                  canClaim
+                                    ? "font-semibold text-accent"
+                                    : "text-text-secondary"
+                                }
+                              >
+                                {reward.pointCost} pts
+                              </span>
+                            </p>
+                          </div>
+                        );
+                      })}
                   </div>
                 </div>
               )}
