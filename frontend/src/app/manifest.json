@@ -1,7 +1,29 @@
 {
+  "id": "/",
   "name": "EcoAid",
   "short_name": "EcoAid",
+  "description": "EcoAid turns waste materials into worth through a Community Buyback and management platform.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "lang": "en",
+  "theme_color": "#092517",
+  "background_color": "#092517",
+  "categories": ["utilities", "lifestyle"],
   "icons": [
+    {
+      "src": "/web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
     {
       "src": "/web-app-manifest-192x192.png",
       "sizes": "192x192",
@@ -15,7 +37,68 @@
       "purpose": "maskable"
     }
   ],
-  "theme_color": "#092517",
-  "background_color": "#092517",
-  "display": "standalone"
+  "screenshots": [
+    {
+      "src": "/screenshots/resident-1.png",
+      "sizes": "1284x2778",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Turn your waste into worth"
+    },
+    {
+      "src": "/screenshots/resident-2.png",
+      "sizes": "1284x2778",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Snap a photo, we fill the form"
+    },
+    {
+      "src": "/screenshots/resident-3.png",
+      "sizes": "1284x2778",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Request a pickup"
+    },
+    {
+      "src": "/screenshots/resident-4.png",
+      "sizes": "1284x2778",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Earn points per kilo or per piece"
+    },
+    {
+      "src": "/screenshots/resident-5.png",
+      "sizes": "1284x2778",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Climb your barangay ranks"
+    },
+    {
+      "src": "/screenshots/resident-6.png",
+      "sizes": "1284x2778",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Track every collection"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Scan recyclables",
+      "short_name": "Scan",
+      "description": "Take a photo and start a pickup request",
+      "url": "/capture",
+      "icons": [
+        { "src": "/web-app-manifest-192x192.png", "sizes": "192x192", "type": "image/png" }
+      ]
+    },
+    {
+      "name": "My requests",
+      "short_name": "Requests",
+      "description": "See your ongoing and past pickup requests",
+      "url": "/requests",
+      "icons": [
+        { "src": "/web-app-manifest-192x192.png", "sizes": "192x192", "type": "image/png" }
+      ]
+    }
+  ]
 }
