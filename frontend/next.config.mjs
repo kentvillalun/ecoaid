@@ -14,6 +14,11 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "res.cloudinary.com"
+      },
+      {
+        // thumbnail of the "How EcoAid works" YouTube video
+        protocol: "https",
+        hostname: "i.ytimg.com"
       }
     ],
   },

@@ -31,7 +31,7 @@ export const ResidentBottomNav = ({classname = ""}) => {
 
   return (
     <section
-      className={`min-h-18.75 bottom-0 bg-surface min-w-screen pb-2.25 flex flex-row items-center justify-center px-3 z-1000 fixed ${inter.className} ${classname} new-border`}
+      className={`min-h-18.75 bottom-0 bg-surface min-w-screen pb-2.25 flex flex-row items-center justify-center px-3 z-50 fixed ${inter.className} ${classname} new-border`}
     >
       <div className="grid grid-cols-3 gap-1 text-muted-accent">
         <div className="grid grid-cols-2 gap-3">

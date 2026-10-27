@@ -32,6 +32,12 @@ import {
   ResidentPointsPicker,
   formatProgramPoints,
 } from "@/components/redemption/ResidentPointsPicker";
+import { PlayIcon } from "@heroicons/react/24/solid";
+import {
+  HOW_IT_WORKS_VIDEO_LENGTH,
+  HowItWorksVideoOverlay,
+  howItWorksThumbnail,
+} from "@/components/tutorial/HowItWorksVideo";
 
 // remembers, on this device, which program's points the resident wants to see
 const PINNED_PROGRAM_KEY = "homePointsProgramId";
@@ -113,14 +119,17 @@ export default function HomePage() {
     else router.push("/programs");
   };
 
+  // the "How EcoAid works" video card; a new key so residents who closed the
+  // old FAQ banner still see the video once
   const [showBanner, setShowBanner] = useState(false);
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
 
   useEffect(() => {
-    setShowBanner(!localStorage.getItem("dismissedTutorialBanner"));
-  });
+    setShowBanner(!localStorage.getItem("dismissedHowItWorksVideo"));
+  }, []);
 
   const handleDismiss = () => {
-    localStorage.setItem("dismissedTutorialBanner", "true");
+    localStorage.setItem("dismissedHowItWorksVideo", "true");
     setShowBanner(false);
   };
 
@@ -181,7 +190,7 @@ export default function HomePage() {
           </Card>
         )}
 
-        {/* FAQs Banner */}
+        {/* How EcoAid works video */}
         <AnimatePresence>
           {showBanner && (
             <motion.div
@@ -191,22 +200,34 @@ export default function HomePage() {
             >
               <Card
                 customBorder="0.5px solid var(--color-border)"
-                className="shadow-none! flex flex-row items-center justify-between"
-                handleClick={() => {
-                  router.push("/profile/help-support");
-                }}
+                className="shadow-none! flex flex-row items-center gap-3 p-3! hover:cursor-pointer"
+                handleClick={() => setIsVideoOpen(true)}
               >
-                <div className="">
-                  {/* <p className="text-sm text-new-primary font-medium">First time? Watch the tutorial</p> */}
+                <div className="relative w-28 shrink-0 aspect-video rounded-lg overflow-hidden bg-black">
+                  <Image
+                    src={howItWorksThumbnail}
+                    alt="How EcoAid works"
+                    fill
+                    sizes="112px"
+                    className="object-cover"
+                  />
+                  <span className="absolute inset-0 flex items-center justify-center bg-black/20">
+                    <span className="w-8 h-8 rounded-full gradient-button flex items-center justify-center">
+                      <PlayIcon className="w-4 fill-white ml-0.5" />
+                    </span>
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0">
                   <p className="text-sm text-dark font-medium">
-                    New to EcoAid? Visit our FAQ
+                    New to EcoAid? Watch how it works
                   </p>
                   <p className="text-xs text-text-primary">
-                    Learn how to submit a pickup request →
+                    A {HOW_IT_WORKS_VIDEO_LENGTH} tour of the app
                   </p>
                 </div>
                 <button
-                  className=""
+                  className="self-start"
+                  aria-label="Dismiss"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleDismiss();
@@ -218,6 +239,10 @@ export default function HomePage() {
             </motion.div>
           )}
         </AnimatePresence>
+        <HowItWorksVideoOverlay
+          isOpen={isVideoOpen}
+          onClose={() => setIsVideoOpen(false)}
+        />
 
         {/* Contribution card */}
         <Card
