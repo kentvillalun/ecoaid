@@ -1,6 +1,7 @@
 " use client"
 
 import { AddJunkshopModal } from "../junkshop-sales/modals/AddJunkshopModal";
+import { EditJunkshopModal } from "../junkshop-sales/modals/EditJunkshopModal";
 import { SectionHeader } from "../ui/SectionHeader";
 import Link from "next/link";
 import { Card } from "../ui/Card";
@@ -14,9 +15,10 @@ import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { Empty } from "../ui/Empty";
 
-const TABLE_HEADERS = ["Junkshop", "Location", "Status"];
+const TABLE_HEADERS = ["Junkshop", "Location", "Status", "Action"];
 export const JunkshopSection = () => {
   const [isAddJunkshopModalOpen, setIsAddJunkshopModalOpen] = useState(false);
+  const [editingJunkshopId, setEditingJunkshopId] = useState(null);
 
   const [refetchCount, setRefetchCount] = useState(0);
   const { data, isLoading, isError } = useFetch({
@@ -64,13 +66,13 @@ export const JunkshopSection = () => {
             <tbody className="divide-y divide-gray-100">
               {isLoading ? (
                 <tr className="max-w-md">
-                  <td className="text-center" colSpan={3}>
+                  <td className="text-center" colSpan={TABLE_HEADERS.length}>
                     <Spinner />
                   </td>
                 </tr>
               ) : isError ? (
                 <tr className="max-w-md">
-                  <td className="text-center" colSpan={3}>
+                  <td className="text-center" colSpan={TABLE_HEADERS.length}>
                     <Error
                       handleRefetchCount={handleRefetchCount}
                       subtext={
@@ -81,7 +83,7 @@ export const JunkshopSection = () => {
                 </tr>
               ) : data?.junkshops?.length === 0 ? (
                 <tr className="max-w-md">
-                  <td className="text-center" colSpan={3}>
+                  <td className="text-center" colSpan={TABLE_HEADERS.length}>
                     <Empty
                       text={"No junkshops yet"}
                       subtext={
@@ -109,6 +111,14 @@ export const JunkshopSection = () => {
                             : "bg-gray-200 text-gray-600"
                         }
                       />
+                    </td>
+                    <td className="p-4">
+                      <button
+                        className="text-accent hover:underline"
+                        onClick={() => setEditingJunkshopId(shop.id)}
+                      >
+                        Edit
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -164,7 +174,15 @@ export const JunkshopSection = () => {
                   }
                 />
               </div>
-              <p className="text-xs text-gray-500">{shop.location}</p>
+              <div className="flex flex-row items-center justify-between w-full">
+                <p className="text-xs text-gray-500">{shop.location}</p>
+                <button
+                  className="text-xs text-accent font-medium new-border px-3 py-1.5 rounded-xl"
+                  onClick={() => setEditingJunkshopId(shop.id)}
+                >
+                  Edit
+                </button>
+              </div>
             </Card>
           ))
         )}
@@ -176,6 +194,14 @@ export const JunkshopSection = () => {
         setIsModalOpen={setIsAddJunkshopModalOpen}
         handleRefetchCount={handleRefetchCount}
       />
+      {editingJunkshopId && (
+        <EditJunkshopModal
+          key={editingJunkshopId}
+          junkshopId={editingJunkshopId}
+          onClose={() => setEditingJunkshopId(null)}
+          handleRefetchCount={handleRefetchCount}
+        />
+      )}
     </section>
   );
 };

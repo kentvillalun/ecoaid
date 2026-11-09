@@ -160,7 +160,7 @@ export function AddMaterialModal({
               </option>
               <option value={"KG"}>kg</option>
               <option value={"LBS"}>lbs</option>
-              <option value={"GRAM"}>gram</option>
+              <option value={"GRAMS"}>gram</option>
               <option value={"PIECE"}>pcs</option>
             </select>
           </div>

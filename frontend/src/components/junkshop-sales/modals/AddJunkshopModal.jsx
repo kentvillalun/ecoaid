@@ -10,7 +10,12 @@ import { useMutation } from "@/hooks/useMutation";
 
 
 
-export function AddJunkshopModal({ isOpen, onClose, setIsModalOpen }) {
+export function AddJunkshopModal({
+  isOpen,
+  onClose,
+  setIsModalOpen,
+  handleRefetchCount,
+}) {
   const [priceItems, setPriceItems] = useState([
     { materialId: "", price: "", unit: "KG" },
   ]);

@@ -101,4 +101,29 @@ const addMaterial = async (req, res) => {
   }
 };
 
-export { getTheme, updateTheme, addMaterial };
+const updateMaterialUnit = async (req, res) => {
+  try {
+    const { barangayId } = req.user;
+    const { id } = req.params;
+    const { defaultUnit } = req.body ?? {};
+
+    if (!["KG", "GRAMS", "LBS", "PIECE"].includes(defaultUnit)) {
+      return res.status(400).json({ error: "Invalid unit" });
+    }
+
+    const result = await prisma.material.updateMany({
+      where: { id, barangayId },
+      data: { defaultUnit },
+    });
+
+    if (result.count === 0) {
+      return res.status(404).json({ error: "Material not found" });
+    }
+
+    return res.status(200).json({ message: "Material unit updated" });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+export { getTheme, updateTheme, addMaterial, updateMaterialUnit };

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { CubeIcon } from "@heroicons/react/24/outline";
 import { AddMaterialModal } from "@/components/settings/modals/AddMaterialModal";
+import { EditMaterialModal } from "@/components/settings/modals/EditMaterialModal";
 import { useFetch } from "@/hooks/useFetch";
 import { Empty } from "@/components/ui/Empty";
 import { MaterialTag } from "../ui/MaterialTag";
@@ -12,10 +13,11 @@ import { Spinner } from "../ui/Spinner";
 import Skeleton from "react-loading-skeleton";
 import { Error } from "../ui/Error";
 
-const MATERIALS_TABLE_HEADERS = ["Category", "Material Name", "Unit"];
+const MATERIALS_TABLE_HEADERS = ["Category", "Material Name", "Unit", "Action"];
 
 export const MaterialsSection = () => {
   const [isAddMaterialModalOpen, setIsAddMaterialModalOpen] = useState(false);
+  const [editingMaterial, setEditingMaterial] = useState(null);
 
   // Materials section
   const [materialRefetchCount, setMaterialRefetchCount] = useState(0);
@@ -73,13 +75,13 @@ export const MaterialsSection = () => {
             <tbody className="divide-y divide-gray-100">
               {isMaterialsLoading ? (
                 <tr className="max-w-md">
-                  <td className="text-center" colSpan={3}>
+                  <td className="text-center" colSpan={MATERIALS_TABLE_HEADERS.length}>
                     <Spinner />
                   </td>
                 </tr>
               ) : isMaterialsError ? (
                 <tr className="max-w-md">
-                  <td className="text-center" colSpan={3}>
+                  <td className="text-center" colSpan={MATERIALS_TABLE_HEADERS.length}>
                     <Error
                       handleRefetchCount={handleMaterialRefetchCount}
                       subtext={"Unable to get your materials. Please try again"}
@@ -88,7 +90,7 @@ export const MaterialsSection = () => {
                 </tr>
               ) : Object.keys(materialsByCategory).length === 0 ? (
                 <tr className="max-w-md">
-                  <td className="text-center" colSpan={3}>
+                  <td className="text-center" colSpan={MATERIALS_TABLE_HEADERS.length}>
                     <Empty
                       text={"No materials yet"}
                       subtext={
@@ -118,6 +120,14 @@ export const MaterialsSection = () => {
                         {material.defaultUnit === "PIECE"
                           ? "pcs"
                           : material.defaultUnit}
+                      </td>
+                      <td className="p-4">
+                        <button
+                          className="text-accent hover:underline"
+                          onClick={() => setEditingMaterial(material)}
+                        >
+                          Edit
+                        </button>
                       </td>
                     </tr>
                   )),
@@ -177,11 +187,19 @@ export const MaterialsSection = () => {
                       textOnly={true}
                     />
 
-                    <p className="text-xs text-gray-500 lowercase">
-                      {material.defaultUnit === "PIECE"
-                        ? "pcs"
-                        : material.defaultUnit}
-                    </p>
+                    <div className="flex flex-row items-center gap-3">
+                      <p className="text-xs text-gray-500 lowercase">
+                        {material.defaultUnit === "PIECE"
+                          ? "pcs"
+                          : material.defaultUnit}
+                      </p>
+                      <button
+                        className="text-xs text-accent font-medium new-border px-3 py-1.5 rounded-xl"
+                        onClick={() => setEditingMaterial(material)}
+                      >
+                        Edit
+                      </button>
+                    </div>
                   </Card>
                 ))}
               </div>
@@ -195,6 +213,14 @@ export const MaterialsSection = () => {
         setIsModalOpen={setIsAddMaterialModalOpen}
         handleMaterialRefetchCount={handleMaterialRefetchCount}
       />
+      {editingMaterial && (
+        <EditMaterialModal
+          key={editingMaterial.id}
+          material={editingMaterial}
+          onClose={() => setEditingMaterial(null)}
+          handleMaterialRefetchCount={handleMaterialRefetchCount}
+        />
+      )}
     </section>
   );
 };
