@@ -9,7 +9,7 @@ export const useUpdate = () => {
     const [isError, setIsError] = useState(false)
     const [data, setData] = useState(null)
 
-    const updateStatus = async ({id, status, rejectionReason, items}) => {
+    const updateStatus = async ({id, status, rejectionReason, items, isAssorted}) => {
         try {
             setIsLoading(true)
             const response = await fetch(`/api/pickup-requests/collection-requests/${id}`, {
@@ -17,7 +17,7 @@ export const useUpdate = () => {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({status, rejectionReason, items}),
+                body: JSON.stringify({status, rejectionReason, items, isAssorted}),
                 credentials: "include"
             })
 

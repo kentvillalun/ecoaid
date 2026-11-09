@@ -116,6 +116,7 @@ const listRequests = async (req, res) => {
             select: {
               id: true,
               name: true,
+              defaultUnit: true,
               category: {
                 select: {
                   name: true,
@@ -151,7 +152,7 @@ const listRequests = async (req, res) => {
 const updateStatus = async (req, res) => {
   try {
     const { id } = req.params;
-    const { status, rejectionReason, items } = req.body ?? {};
+    const { status, rejectionReason, items, isAssorted } = req.body ?? {};
     const { barangayId } = req.user;
 
     if (status === "APPROVED") {
@@ -193,6 +194,7 @@ const updateStatus = async (req, res) => {
         where: { id, barangayId },
         select: {
           userId: true,
+          isAssorted: true,
         },
       });
 
@@ -201,6 +203,44 @@ const updateStatus = async (req, res) => {
       }
 
       const { userId } = requestData
+
+      // the collector has the final say on what was collected, so the
+      // resident's single/assorted choice can be overridden here; without a
+      // choice, the request keeps what the resident submitted
+      const finalIsAssorted =
+        typeof isAssorted === "boolean" ? isAssorted : requestData.isAssorted;
+
+      const validUnits = ["KG", "GRAMS", "LBS", "PIECE"];
+      const hasInvalidItem =
+        !Array.isArray(items) ||
+        items.length === 0 ||
+        items.some(
+          (item) =>
+            !item.materialId ||
+            !(item.actualValue > 0) ||
+            !validUnits.includes(item.actualUnit),
+        );
+
+      if (hasInvalidItem) {
+        return res.status(400).json({
+          error: "Every item needs a material, a weight above 0 and a unit",
+        });
+      }
+
+      if (!finalIsAssorted && items.length !== 1) {
+        return res.status(400).json({
+          error: "A single material collection must have exactly one item",
+        });
+      }
+
+      const materialIds = [...new Set(items.map((item) => item.materialId))];
+      const ownMaterials = await prisma.material.count({
+        where: { id: { in: materialIds }, barangayId },
+      });
+
+      if (ownMaterials !== materialIds.length) {
+        return res.status(400).json({ error: "Invalid material" });
+      }
 
       await prisma.$transaction(async (tx) => {
         await tx.collectionItem.createMany({
@@ -232,6 +272,7 @@ const updateStatus = async (req, res) => {
           data: {
             status: "COLLECTED",
             collectedAt: new Date(),
+            isAssorted: finalIsAssorted,
           },
         });
 
@@ -312,6 +353,7 @@ const getRequest = async (req, res) => {
           select: {
             id: true,
             name: true,
+            defaultUnit: true,
             category: {
               select: {
                 name: true,
