@@ -109,8 +109,8 @@ export default function StandingsPage() {
               Climb the standings
             </p>
             <p className="text-xs text-text-secondary">
-              Submit a pickup request and get your recyclables collected to
-              earn your spot on the leaderboard.
+              Contribute your recyclables to the barangay to earn your spot on
+              the leaderboard.
             </p>
           </div>
         </Card>
@@ -121,7 +121,7 @@ export default function StandingsPage() {
               Standings are locked
             </p>
             <p className="text-xs text-text-primary">
-              Complete your first pickup to appear on the standings
+              Ask your barangay to verify your account to appear on the standings
             </p>
           </div>
         ) : (

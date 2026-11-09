@@ -122,7 +122,7 @@ const searchResident = async (req, res) => {
     const users = await prisma.$queryRaw`
       SELECT id, "firstName", "lastName", "role"
       FROM "User"
-      WHERE "barangayId" = ${barangayId} AND CONCAT("firstName", ' ', "lastName") ILIKE ${"%" + name + "%"}
+      WHERE "barangayId" = ${barangayId} AND "isActive" = true AND CONCAT("firstName", ' ', "lastName") ILIKE ${"%" + name + "%"}
     `;
 
     return res.status(200).json({
@@ -150,6 +150,7 @@ const getResidents = async (req, res) => {
         lastName: true,
         address: true,
         purok: true,
+        sitioId: true,
         isVerified: true,
         createdAt: true,
       },

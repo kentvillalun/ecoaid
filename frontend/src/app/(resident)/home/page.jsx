@@ -184,7 +184,7 @@ export default function HomePage() {
                 Your account isn't verified yet
               </p>
               <p className="text-xs text-text-primary">
-                Complete your first pickup to unlock full access
+                Ask your barangay to verify your account to unlock full access
               </p>
             </div>
           </Card>
