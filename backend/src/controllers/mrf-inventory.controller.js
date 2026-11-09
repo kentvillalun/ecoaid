@@ -92,18 +92,20 @@ const getTransactionLogs = async (req, res) => {
       }
     });
 
-    // Running balance per material, applied in chronological order, so each
-    // row can carry the balance as of that transaction (currentTotal).
+    // Running balance per material and unit (kg and pieces can't be added
+    // together), applied in chronological order, so each row can carry the
+    // balance as of that transaction (currentTotal).
     const runningBalances = {};
 
     const transactionLogsWithRunningTotal = transactionLogs.map((log) => {
-      const balanceBefore = runningBalances[log.materialId] ?? 0;
+      const key = `${log.materialId}_${log.unit}`;
+      const balanceBefore = runningBalances[key] ?? 0;
       const balanceAfter =
         log.transactionType === "IN"
           ? balanceBefore + log.quantity
           : balanceBefore - log.quantity;
 
-      runningBalances[log.materialId] = balanceAfter;
+      runningBalances[key] = balanceAfter;
 
       return { ...log, currentTotal: balanceAfter };
     });
@@ -124,7 +126,11 @@ const recordStockOut = async (req, res) => {
     const { id, barangayId } = req.user;
     const { materialId, unit, quantity } = req.body ?? {};
 
-    if (!materialId || !unit || !quantity) {
+    if (
+      !materialId ||
+      !["KG", "GRAMS", "LBS", "PIECE"].includes(unit) ||
+      !(quantity > 0)
+    ) {
       return res.status(422).json({ error: "Missing required fields" });
     }
 
@@ -141,8 +147,12 @@ const recordStockOut = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
+    // stock is kept per unit (kg or piece), so a deduction can only use the
+    // balance of the same unit
+    const ledgerUnit = unit === "PIECE" ? "PIECE" : "KG";
+
     const materialSummary = await prisma.stockTransactionLog.groupBy({
-      where: { barangayId, materialId },
+      where: { barangayId, materialId, unit: ledgerUnit },
       by: ["transactionType"],
       _sum: { quantity: true },
     });
@@ -166,7 +176,7 @@ const recordStockOut = async (req, res) => {
         performedBy: `${user.firstName} ${user.lastName}`,
         materialId,
         quantity: convertToKg(quantity, unit),
-        unit: unit === "PIECE" ? "PIECE" : "KG",
+        unit: ledgerUnit,
         source: "MANUAL_ADJUSTMENT",
         transactionType: "OUT",
       },
