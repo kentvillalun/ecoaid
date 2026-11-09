@@ -57,7 +57,10 @@ export const createCoreMaterials = async (db, barangayId) => {
   }
 };
 
-export const buildClassificationPrompt = () => {
+// The material list is always the core list. `barangayUnits` ({ name: unit })
+// only changes how each core material is measured, using the unit the barangay
+// set in Settings and falling back to the core default.
+export const buildClassificationPrompt = (barangayUnits = {}) => {
   const materialList = Object.entries(CORE_MATERIALS)
     .map(
       ([category, materials]) =>
@@ -65,11 +68,25 @@ export const buildClassificationPrompt = () => {
     )
     .join("\n");
 
-  const pieceCountedMaterials = Object.values(CORE_MATERIALS)
-    .flat()
-    .filter((m) => m.defaultUnit === "PIECE")
-    .map((m) => m.name)
-    .join(", ");
+  const allMaterials = Object.values(CORE_MATERIALS).flat();
+  const namesWithUnit = (unit) =>
+    allMaterials
+      .filter((m) => (barangayUnits[m.name] ?? m.defaultUnit) === unit)
+      .map((m) => m.name)
+      .join(", ");
+
+  const pieceCountedMaterials = namesWithUnit("PIECE");
+  const gramMaterials = namesWithUnit("GRAMS");
+  const poundMaterials = namesWithUnit("LBS");
+
+  const extraUnitRules = [
+    gramMaterials &&
+      `- These specific materials are measured by approximate weight in GRAMS: ${gramMaterials}`,
+    poundMaterials &&
+      `- These specific materials are measured by approximate weight in POUNDS (lbs): ${poundMaterials}`,
+  ]
+    .filter(Boolean)
+    .join("\n");
 
   return `You are a waste classification assistant for a barangay recycling program in the Philippines. Analyze the photo and identify the recyclable material(s) shown.
 
@@ -79,7 +96,7 @@ ${materialList}
 
 COUNTING RULES:
 - These specific materials are counted by PIECE, not weight: ${pieceCountedMaterials}
-- All other materials in the list are measured by approximate weight in kilograms (kg).
+${extraUnitRules ? extraUnitRules + "\n- Always give \"estimatedValue\" in the unit stated for that material above.\n" : ""}- All other materials in the list are measured by approximate weight in kilograms (kg).
 - When estimating quantity, use whole numbers for piece-counted materials (e.g. 3 bottles), and a reasonable approximate decimal for weight-based materials (e.g. 1.5 kg).
 - This is a rough estimate only, not a precise measurement — actual weight/count will be verified by staff during physical collection. Do not overthink precision; give your best reasonable estimate from what's visible in the photo.
 

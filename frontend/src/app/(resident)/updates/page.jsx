@@ -66,7 +66,7 @@ export default function AnnouncementsPage() {
               Announcements are locked
             </p>
             <p className="text-xs text-text-primary">
-              Complete your first pickup to view barangay announcements
+              Ask your barangay to verify your account to view announcements
             </p>
           </div>
         ) : isLoading ? (

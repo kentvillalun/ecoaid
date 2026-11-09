@@ -299,6 +299,10 @@ export default function CapturePage() {
         }
 
         setPendingMaterialName(result?.classification?.material ?? null);
+      } else {
+        // an assorted estimate is one combined weight in kg
+        setValue("estimatedUnit", "KG");
+        setIsUnitLocked(false);
       }
 
       setValue("estimatedValue", result?.classification?.estimatedValue);
@@ -501,6 +505,7 @@ export default function CapturePage() {
                       setValue("isAssorted", true);
                       setCategory("");
                       setValue("materialId", null);
+                      setValue("estimatedUnit", "KG");
                       setIsUnitLocked(false);
                     }}
                   >

@@ -1,7 +1,5 @@
-import {
-  buildClassificationPrompt,
-  CORE_MATERIALS,
-} from "../utils/coreMaterials.js";
+import { buildClassificationPrompt } from "../utils/coreMaterials.js";
+import { prisma } from "../config/db.js";
 import Anthropic from "@anthropic-ai/sdk";
 
 const client = new Anthropic();
@@ -14,7 +12,18 @@ const classifyRecyclable = async (req, res) => {
       return res.status(400).json({ error: "Required fields are missing" });
     }
 
-    const prompt = buildClassificationPrompt();
+    // the materials the AI can pick stay fixed to the core list, only the unit
+    // of each one follows what the barangay set in Settings
+    const barangayMaterials = await prisma.material.findMany({
+      where: { barangayId: req.user.barangayId },
+      select: { name: true, defaultUnit: true },
+    });
+
+    const barangayUnits = Object.fromEntries(
+      barangayMaterials.map((m) => [m.name, m.defaultUnit]),
+    );
+
+    const prompt = buildClassificationPrompt(barangayUnits);
 
     const response = await client.messages.create({
       model: "claude-sonnet-5",

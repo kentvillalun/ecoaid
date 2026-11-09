@@ -33,8 +33,8 @@ export const ResidentProgramsSection = ({ isVerified }) => (
   </div>
 );
 
-// Locked the same way as announcements: unverified residents (no completed
-// pickup yet) see a lock message and the programs are never fetched.
+// Locked the same way as announcements: unverified residents see a lock
+// message and the programs are never fetched.
 export const ResidentProgramsList = ({ isVerified, limit }) => {
   const [refetchCount, setRefetchCount] = useState(0);
   const { data, isLoading, isError } = useFetch({
@@ -51,7 +51,7 @@ export const ResidentProgramsList = ({ isVerified, limit }) => {
           Redemption programs are locked
         </p>
         <p className="text-xs text-text-primary">
-          Complete your first pickup to view redemption programs
+          Ask your barangay to verify your account to view redemption programs
         </p>
       </div>
     );

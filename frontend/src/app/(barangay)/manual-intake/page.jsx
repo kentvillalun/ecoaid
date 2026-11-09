@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/Card";
 import { MaterialTag } from "@/components/ui/MaterialTag";
 import { Modal } from "@/components/ui/Modal";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import { DropdownFilter } from "@/components/ui/DropdownFilter";
 import { useFetch } from "@/hooks/useFetch";
 import { formatDate } from "@/lib/formatDate";
 import {
@@ -69,6 +70,22 @@ export default function ManualIntakePage() {
     setMaterialRows(updated);
   };
 
+  // picking a material fills in the unit the barangay set for it, so the same
+  // material is recorded in the same unit every time (still editable)
+  const handleMaterialChange = (index, materialId) => {
+    const defaultUnit = data?.materials?.find(
+      (m) => m.id === materialId,
+    )?.defaultUnit;
+
+    const updated = [...materialRows];
+    updated[index] = {
+      ...updated[index],
+      materialId,
+      unit: defaultUnit ?? updated[index].unit,
+    };
+    setMaterialRows(updated);
+  };
+
   const [name, setName] = useState("");
   const [residentsList, setResidentsList] = useState([]);
   const [isSearchLoading, setIsSearchLoading] = useState(false);
@@ -96,14 +113,47 @@ export default function ManualIntakePage() {
     refetchCount: transactionsRefetchCount,
   });
 
+  const [sitioFilter, setSitioFilter] = useState("ALL");
+  const { data: sitioData } = useFetch({ url: "/api/barangay/sitio" });
+
+  const allTransactions = transactionsData?.transactions;
+
+  // household entries and staff have no sitio, so they get their own option
+  const sitioFilterOptions = [
+    { value: "ALL", label: "All sitios", count: allTransactions?.length ?? 0 },
+    ...(sitioData?.sitios ?? []).map((s) => ({
+      value: s.id,
+      label: s.name,
+      count: allTransactions?.filter((t) => t.user?.sitioId === s.id).length ?? 0,
+    })),
+    {
+      value: "NONE",
+      label: "No sitio (household / staff)",
+      count: allTransactions?.filter((t) => !t.user?.sitioId).length ?? 0,
+    },
+  ];
+
+  const filteredTransactions = allTransactions?.filter((t) => {
+    if (sitioFilter === "ALL") return true;
+    if (sitioFilter === "NONE") return !t.user?.sitioId;
+    return t.user?.sitioId === sitioFilter;
+  });
+
+  const emptySubtext =
+    sitioFilter === "ALL"
+      ? "There are no intake transactions yet. Please tap the record intake button to make a trasaction."
+      : "No intake transactions match the selected sitio.";
+
   const handleTransactionRefetchCount = () =>
     setTransactionsRefetchCount((prev) => prev + 1);
 
   const onSubmit = async () => {
-    if (!selectedResident && !householdName.trim()) {
-      return toast.error(
-        "Please select a resident or enter a household/ resident name",
-      );
+    if (showHousehold && !householdName.trim()) {
+      return toast.error("Please enter the resident's name");
+    }
+
+    if (!showHousehold && !selectedResident) {
+      return toast.error("Please search and select a resident or staff");
     }
 
     if (
@@ -120,8 +170,8 @@ export default function ManualIntakePage() {
     const success = await makeRequest({
       url: "/api/manual-intake/",
       body: {
-        userId: selectedResident?.id,
-        householdName,
+        userId: showHousehold ? undefined : selectedResident?.id,
+        householdName: showHousehold ? householdName.trim() : undefined,
         items: materialRows.map((row) => ({
           materialId: row.materialId,
           quantity: parseFloat(row.amount),
@@ -152,7 +202,15 @@ export default function ManualIntakePage() {
     setSearchTerm("");
     setMaterialRows([{ materialId: "", amount: "", unit: "" }]);
     setShowHousehold(false);
+    setHouseholdName("");
     setIsModalOpen(false);
+  };
+
+  const clearResidentSearch = () => {
+    setSearchTerm("");
+    setSelectedResident(null);
+    setResidentsList([]);
+    setShowDropdown(false);
   };
 
   const searchResidents = async (name) => {
@@ -179,8 +237,6 @@ export default function ManualIntakePage() {
 
       setIsSearchLoading(false);
       setResidentsList(result.users);
-
-      if (result.users.length === 0) setShowHousehold(true);
 
       setShowDropdown(true);
       return true;
@@ -234,6 +290,30 @@ export default function ManualIntakePage() {
               onConfirm={() => onSubmit()}
             >
               <div className="flex flex-col gap-3 p-6">
+                <div className="flex flex-row gap-1 items-center justify-start text-sm flex-wrap">
+                  <button
+                    className={`py-1.5 px-3 rounded-full new-border ${!showHousehold ? "gradient-button text-white" : "bg-surface text-gray-600"} transition-all ease-in-out duration-200`}
+                    type="button"
+                    onClick={() => {
+                      setShowHousehold(false);
+                      setHouseholdName("");
+                    }}
+                  >
+                    Registered resident
+                  </button>
+                  <button
+                    className={`py-1.5 px-3 rounded-full new-border ${showHousehold ? "gradient-button text-white" : "bg-surface text-gray-600"} transition-all ease-in-out duration-200`}
+                    type="button"
+                    onClick={() => {
+                      setShowHousehold(true);
+                      clearResidentSearch();
+                    }}
+                  >
+                    Not registered
+                  </button>
+                </div>
+
+                {!showHousehold && (
                 <div className="flex flex-col gap-1">
                   <label htmlFor="searchResident" className="label">
                     Resident
@@ -250,7 +330,6 @@ export default function ManualIntakePage() {
                           setShowDropdown(false);
                           setResidentsList([]);
                         } else {
-                          setShowHousehold(false);
                           if (selectedResident !== null)
                             setSelectedResident(null);
                           clearTimeout(timer.current);
@@ -269,11 +348,7 @@ export default function ManualIntakePage() {
                       <button
                         className="hover:cursor-pointer"
                         type="button"
-                        onClick={() => {
-                          setSearchTerm("");
-                          setSelectedResident(null);
-                          setResidentsList([]);
-                        }}
+                        onClick={clearResidentSearch}
                       >
                         <XMarkIcon className="w-5 stroke-gray-400" />
                       </button>
@@ -285,8 +360,8 @@ export default function ManualIntakePage() {
                       >
                         {residentsList.length === 0 ? (
                           <div className="px-3.5 w-full py-1">
-                            No residents or staff found. You may enter a
-                            household name below.
+                            No residents or staff found. If they have no account
+                            yet, choose &quot;Not registered&quot; above.
                           </div>
                         ) : (
                           residentsList.map((r) => (
@@ -317,19 +392,25 @@ export default function ManualIntakePage() {
                     )}
                   </div>
                 </div>
+                )}
 
                 {showHousehold && (
                   <div className="flex flex-col gap-1">
                     <label htmlFor="household" className="label">
-                      Household name
+                      Household / resident name
                     </label>
                     <input
                       type="text"
                       className="input mb-0"
                       id="household"
                       placeholder="Input resident name"
+                      value={householdName}
                       onChange={(e) => setHouseholdName(e.target.value)}
                     />
+                    <p className="text-xs text-text-secondary">
+                      For residents without an account. This record won&apos;t be
+                      linked to an account or earn points.
+                    </p>
                   </div>
                 )}
 
@@ -363,9 +444,9 @@ export default function ManualIntakePage() {
                           <select
                             className="w-full outline-none"
                             onChange={(e) =>
-                              updateRow(index, "materialId", e.target.value)
+                              handleMaterialChange(index, e.target.value)
                             }
-                            defaultValue=""
+                            value={material.materialId}
                           >
                             <option value="" disabled hidden>
                               Select material
@@ -395,7 +476,7 @@ export default function ManualIntakePage() {
                               onChange={(e) => {
                                 updateRow(index, "unit", e.target.value);
                               }}
-                              defaultValue={""}
+                              value={material.unit}
                             >
                               <option value="" disabled hidden >
                                 e.g. kg
@@ -439,6 +520,13 @@ export default function ManualIntakePage() {
             }}
           />
 
+          <DropdownFilter
+            id="sitioFilter"
+            options={sitioFilterOptions}
+            value={sitioFilter}
+            onChange={setSitioFilter}
+          />
+
           {/* Desktop table */}
 
           <Card
@@ -473,19 +561,14 @@ export default function ManualIntakePage() {
                       />
                     </td>
                   </tr>
-                ) : transactionsData?.transactions?.length === 0 ? (
+                ) : filteredTransactions?.length === 0 ? (
                   <tr className="max-w-md">
                     <td className="text-center" colSpan={9}>
-                      <Empty
-                        text={"No items"}
-                        subtext={
-                          "There are no intake transactions yet. Please tap the record intake button to make a trasaction."
-                        }
-                      />
+                      <Empty text={"No items"} subtext={emptySubtext} />
                     </td>
                   </tr>
                 ) : (
-                  transactionsData?.transactions?.map((row) => (
+                  filteredTransactions?.map((row) => (
                     <tr
                       key={row.id}
                       className="text-start hover:bg-bg transition-all transform"
@@ -586,15 +669,10 @@ export default function ManualIntakePage() {
               ))
             ) : isError ? (
               <Error handleRefetchCount={handleTransactionRefetchCount} />
-            ) : transactionsData?.transactions?.length === 0 ? (
-              <Empty
-                text={"No items"}
-                subtext={
-                  "There are no intake transactions yet. Please tap the record intake button to make a trasaction."
-                }
-              />
+            ) : filteredTransactions?.length === 0 ? (
+              <Empty text={"No items"} subtext={emptySubtext} />
             ) : (
-              transactionsData?.transactions?.map((row) => (
+              filteredTransactions?.map((row) => (
                 <Card
                   key={row.id}
                   className="flex flex-col items-start gap-3 shadow-none! new-border"

@@ -80,7 +80,7 @@ You get a notification whenever your request moves to a new status.`,
     {
       key: "locked",
       question: "Why can't I see programs, points or standings yet?",
-      answer: `These unlock after your first contribution is recorded, whether from a collected pickup, a drop-off recorded by the barangay, or a redemption program. Until then, your account shows as not yet verified.`,
+      answer: `These unlock once your account is verified. Your barangay can verify you directly, and your account is also verified automatically when your first contribution is recorded, whether from a collected pickup, a drop-off recorded by the barangay, or a redemption program. Until then, your account shows as not yet verified.`,
     },
     {
       key: "standings",

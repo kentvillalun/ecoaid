@@ -22,6 +22,25 @@ const recordIntake = async (req, res) => {
       return res.status(400).json({ error: "Required fields are missing." });
     }
 
+    const hasHousehold = Boolean(householdName?.trim());
+
+    if (Boolean(userId) === hasHousehold) {
+      return res.status(400).json({
+        error: "Provide either a registered resident or a household name.",
+      });
+    }
+
+    if (userId) {
+      const resident = await prisma.user.findFirst({
+        where: { id: userId, barangayId, isActive: true },
+        select: { id: true },
+      });
+
+      if (!resident) {
+        return res.status(400).json({ error: "Resident does not exist." });
+      }
+    }
+
     await prisma.$transaction(async (tx) => {
       const transaction = await tx.manualIntakeTransaction.create({
         data: {
@@ -87,6 +106,7 @@ const getIntakeTransactions = async (req, res) => {
           select: {
             firstName: true,
             lastName: true,
+            sitioId: true,
             sitio: {
               select: {
                 name: true,

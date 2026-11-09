@@ -251,6 +251,101 @@ const addJunkshop = async (req, res) => {
   }
 };
 
+const updateJunkshop = async (req, res) => {
+  try {
+    const { junkshopId } = req.params;
+    const { barangayId } = req.user;
+    const { name, description, location, isAvailable, priceItems } =
+      req.body ?? {};
+
+    if (!name?.trim()) {
+      return res.status(400).json({ error: "Junkshop name is required" });
+    }
+
+    if (typeof isAvailable !== "boolean") {
+      return res.status(400).json({ error: "Missing availability" });
+    }
+
+    const validUnits = ["KG", "GRAMS", "LBS", "PIECE"];
+
+    if (
+      !Array.isArray(priceItems) ||
+      priceItems.length === 0 ||
+      priceItems.some(
+        (item) =>
+          !item.materialId ||
+          !(item.price > 0) ||
+          !validUnits.includes(item.unit),
+      )
+    ) {
+      return res.status(400).json({
+        error: "Every price item needs a material, a price above 0 and a unit",
+      });
+    }
+
+    const materialIds = priceItems.map((item) => item.materialId);
+
+    if (new Set(materialIds).size !== materialIds.length) {
+      return res
+        .status(400)
+        .json({ error: "A material can only be listed once" });
+    }
+
+    const junkshop = await prisma.junkshop.findUnique({
+      where: { id: junkshopId, barangayId },
+      select: { id: true },
+    });
+
+    if (!junkshop) {
+      return res.status(404).json({ error: "Junkshop do not exist" });
+    }
+
+    const ownMaterials = await prisma.material.count({
+      where: { id: { in: materialIds }, barangayId },
+    });
+
+    if (ownMaterials !== materialIds.length) {
+      return res.status(400).json({ error: "Invalid material" });
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.junkshop.update({
+        where: { id: junkshopId, barangayId },
+        data: {
+          name: name.trim(),
+          description: description?.trim() || null,
+          location: location?.trim() || null,
+          isAvailable,
+        },
+      });
+
+      // past sales keep their own cost, so the price list can be changed freely
+      await tx.junkshopPriceItem.deleteMany({
+        where: { junkshopId, materialId: { notIn: materialIds } },
+      });
+
+      for (const item of priceItems) {
+        await tx.junkshopPriceItem.upsert({
+          where: {
+            junkshopId_materialId: { junkshopId, materialId: item.materialId },
+          },
+          update: { price: item.price, unit: item.unit },
+          create: {
+            junkshopId,
+            materialId: item.materialId,
+            price: item.price,
+            unit: item.unit,
+          },
+        });
+      }
+    });
+
+    return res.status(200).json({ message: "Junkshop updated" });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 const getJunkshopDetails = async (req, res) => {
   try {
     const { junkshopId } = req.params;
@@ -269,6 +364,7 @@ const getJunkshopDetails = async (req, res) => {
             id: true,
             material: {
               select: {
+                id: true,
                 name: true,
                 category: {
                   select: {
@@ -321,6 +417,7 @@ export {
   getJunkshopSales,
   getJunkshopWithPrices,
   addJunkshop,
+  updateJunkshop,
   getJunkshopDetails,
   getJunkshops
 };

@@ -155,6 +155,9 @@ function ViewToggle({ value, onChange }) {
 function CategoryCard({ cat, displayUnit }) {
   const styles = CATEGORY_STYLES[cat.name] ?? CATEGORY_STYLES.default;
 
+  // a material with stock in both units has two rows but is still one material
+  const materialCount = new Set(cat.materials.map((m) => m.materialId)).size;
+
   const totalKg = cat.materials
     .filter((m) => m.unit === "KG")
     .reduce((s, m) => s + m.balance, 0);
@@ -182,9 +185,9 @@ function CategoryCard({ cat, displayUnit }) {
           <span className={`w-2 h-2 rounded-full shrink-0 ${styles.dot}`} />
           <h4 className={`font-semibold text-sm ${styles.text}`}>{cat.name}</h4>
           <span className="text-xs text-gray-400 font-normal">
-            {cat.materials.length === 0
+            {materialCount === 0
               ? "No materials yet"
-              : `${cat.materials.length} ${cat.materials.length !== 1 ? "materials" : "material"}`}
+              : `${materialCount} ${materialCount !== 1 ? "materials" : "material"}`}
           </span>
         </div>
         <span className={`text-xs font-semibold ${styles.text}`}>
@@ -245,7 +248,9 @@ export default function MaterialStockPage() {
   });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedMaterialId, setSelectedMaterialId] = useState("");
+  // stock is kept per material and unit, so a stock out picks one of those
+  // buckets, e.g. "<materialId>_PIECE"
+  const [selectedStockKey, setSelectedStockKey] = useState("");
   const [quantity, setQuantity] = useState(0);
   const [isSelectedMaterialIdError, setIsSelectedMaterialIdError] =
     useState(false);
@@ -253,7 +258,7 @@ export default function MaterialStockPage() {
   const { makeRequest } = useMutation();
 
   const selectedMaterial = data?.enrichedResults?.find(
-    (e) => e.materialId === selectedMaterialId,
+    (e) => `${e.materialId}_${e.unit}` === selectedStockKey,
   );
 
   const handleRefetchCount = () => setRefetchCount((prev) => prev + 1);
@@ -286,7 +291,10 @@ export default function MaterialStockPage() {
           label: "All materials",
           count: transactionLogsData?.transactionLogs?.length ?? 0,
         },
-        ...data.enrichedResults.map((m) => ({
+        // one option per material, even when it has stock in two units
+        ...[
+          ...new Map(data.enrichedResults.map((m) => [m.materialId, m])).values(),
+        ].map((m) => ({
           value: m.materialId,
           label: m.materialName,
           count:
@@ -317,7 +325,7 @@ export default function MaterialStockPage() {
       : `${TOTAL_WEIGHT_KG?.toFixed(3)} kg`;
 
   const onSubmit = async () => {
-    if (!selectedMaterialId) {
+    if (!selectedMaterial) {
       return setIsSelectedMaterialIdError(true);
     }
 
@@ -330,7 +338,7 @@ export default function MaterialStockPage() {
     const success = await makeRequest({
       url: "/api/mrf-inventory/transaction-logs/out",
       body: {
-        materialId: selectedMaterialId,
+        materialId: selectedMaterial.materialId,
         quantity: parseFloat(quantity),
         unit: selectedMaterial?.unit === "PIECE" ? "PIECE" : "KG",
       },
@@ -349,7 +357,7 @@ export default function MaterialStockPage() {
   };
 
   const resetModal = () => {
-    setSelectedMaterialId("");
+    setSelectedStockKey("");
     setQuantity(0);
     setIsSelectedMaterialIdError(false);
     setIsQuantityError(false);
@@ -389,16 +397,28 @@ export default function MaterialStockPage() {
                       id=""
                       className="w-full outline-none"
                       defaultValue=""
-                      onChange={(e) => setSelectedMaterialId(e.target.value)}
+                      onChange={(e) => setSelectedStockKey(e.target.value)}
                     >
                       <option value="" className="" disabled hidden>
                         Select material
                       </option>
-                      {data?.enrichedResults?.map((e, index) => (
-                        <option value={e?.materialId} className="" key={index}>
-                          {e?.materialName}
-                        </option>
-                      ))}
+                      {data?.enrichedResults?.map((e) => {
+                        const key = `${e?.materialId}_${e?.unit}`;
+                        // a material with stock in both units shows which one
+                        const hasTwoUnits =
+                          data.enrichedResults.filter(
+                            (r) => r.materialId === e.materialId,
+                          ).length > 1;
+
+                        return (
+                          <option value={key} className="" key={key}>
+                            {e?.materialName}
+                            {hasTwoUnits
+                              ? ` (${e.unit === "PIECE" ? "pcs" : "kg"})`
+                              : ""}
+                          </option>
+                        );
+                      })}
                     </select>
                   </div>
                   {isSelectedMaterialIdError && (

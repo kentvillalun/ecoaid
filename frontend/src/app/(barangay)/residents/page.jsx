@@ -10,6 +10,7 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 import { Badge } from "@/components/ui/Badge";
 import { IconContainer } from "@/components/ui/IconContainer";
 import { SearchInput } from "@/components/ui/SearchInput";
+import { DropdownFilter } from "@/components/ui/DropdownFilter";
 import { formatDate } from "@/lib/formatDate";
 import {
   UsersIcon,
@@ -19,6 +20,8 @@ import {
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { useFetch } from "@/hooks/useFetch";
+import { useMutation } from "@/hooks/useMutation";
+import { toast } from "sonner";
 import { Spinner } from "@/components/ui/Spinner";
 import { Error } from "@/components/ui/Error";
 import { Empty } from "@/components/ui/Empty";
@@ -61,6 +64,48 @@ export default function ResidentsPage() {
   const [currentResidentData, setCurrentResidentData] = useState([]);
 
   const handleRefetchCount = () => setRefetchCount((prev) => prev + 1);
+
+  const { makeRequest } = useMutation();
+  const [verifyingId, setVerifyingId] = useState(null);
+
+  // staff confirmed this is a real resident, so no transaction is needed
+  const handleVerify = async (resident) => {
+    setVerifyingId(resident.id);
+    const success = await makeRequest({
+      method: "PATCH",
+      url: `/api/resident/${resident.id}`,
+      body: { isVerified: true },
+    });
+    setVerifyingId(null);
+
+    if (success) {
+      toast.success(`${resident.firstName} ${resident.lastName} is now verified`);
+      handleRefetchCount();
+    } else {
+      toast.error("Verification failed. Please try again");
+    }
+  };
+
+  const [sitioFilter, setSitioFilter] = useState("ALL");
+  const { data: sitioData } = useFetch({ url: "/api/barangay/sitio" });
+
+  const sitioFilterOptions = [
+    {
+      value: "ALL",
+      label: "All sitios",
+      count: data?.residents?.length ?? 0,
+    },
+    ...(sitioData?.sitios ?? []).map((s) => ({
+      value: s.id,
+      label: s.name,
+      count:
+        data?.residents?.filter((r) => r.sitioId === s.id).length ?? 0,
+    })),
+  ];
+
+  const filteredResidents = data?.residents?.filter(
+    (r) => sitioFilter === "ALL" || r.sitioId === sitioFilter,
+  );
 
   const totalCount = data?.residents?.length;
   const verifiedCount = data?.residents?.filter(
@@ -182,6 +227,13 @@ export default function ResidentsPage() {
             noButton
           />
 
+          <DropdownFilter
+            id="sitioFilter"
+            options={sitioFilterOptions}
+            value={sitioFilter}
+            onChange={setSitioFilter}
+          />
+
           {/* Desktop table */}
           <Card
             className={`${inter.className} hidden md:flex md:flex-col px-8 md:gap-3 md:items-start shadow-none! new-border`}
@@ -213,17 +265,21 @@ export default function ResidentsPage() {
                         <Error handleRefetchCount={handleRefetchCount} />
                       </td>
                     </tr>
-                  ) : data?.residents?.length === 0 ? (
+                  ) : filteredResidents?.length === 0 ? (
                     <tr>
                       <td colSpan={TABLE_HEADERS.length}>
                         <Empty
                           text="No residents"
-                          subtext="There are no registered residents yet."
+                          subtext={
+                            sitioFilter === "ALL"
+                              ? "There are no registered residents yet."
+                              : "No residents registered in this sitio."
+                          }
                         />
                       </td>
                     </tr>
                   ) : (
-                    data?.residents?.map((resident) => (
+                    filteredResidents?.map((resident) => (
                       <tr
                         key={resident.id}
                         className="hover:bg-bg transition-all duration-150"
@@ -257,15 +313,26 @@ export default function ResidentsPage() {
                           {formatDate(resident.createdAt)}
                         </td>
                         <td className="p-4">
-                          <button
-                            className="text-accent hover:underline"
-                            onClick={() => {
-                              setIsEditModalOpen(true);
-                              setCurrentResidentData(resident);
-                            }}
-                          >
-                            Edit
-                          </button>
+                          <div className="flex flex-row items-center gap-3">
+                            {!resident.isVerified && (
+                              <button
+                                className="text-green-600 hover:underline disabled:opacity-50"
+                                disabled={verifyingId === resident.id}
+                                onClick={() => handleVerify(resident)}
+                              >
+                                Verify
+                              </button>
+                            )}
+                            <button
+                              className="text-accent hover:underline"
+                              onClick={() => {
+                                setIsEditModalOpen(true);
+                                setCurrentResidentData(resident);
+                              }}
+                            >
+                              Edit
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -293,13 +360,17 @@ export default function ResidentsPage() {
               ))
             ) : isError ? (
               <Error handleRefetchCount={handleRefetchCount} />
-            ) : data?.residents?.length === 0 ? (
+            ) : filteredResidents?.length === 0 ? (
               <Empty
                 text="No residents"
-                subtext="There are no registered residents yet."
+                subtext={
+                  sitioFilter === "ALL"
+                    ? "There are no registered residents yet."
+                    : "No residents registered in this sitio."
+                }
               />
             ) : (
-              data?.residents?.map((resident) => (
+              filteredResidents?.map((resident) => (
                 <Card
                   key={resident.id}
                   className="flex flex-col items-start gap-2 shadow-none! new-border"
@@ -335,15 +406,26 @@ export default function ResidentsPage() {
                     <p className="text-xs text-gray-400">
                       {formatDate(resident.createdAt)}
                     </p>
-                    <button
-                      className="text-xs text-accent font-medium new-border px-3 py-1.5 rounded-xl"
-                      onClick={() => {
-                        setIsEditModalOpen(true);
-                        setCurrentResidentData(resident);
-                      }}
-                    >
-                      Edit
-                    </button>
+                    <div className="flex flex-row items-center gap-2">
+                      {!resident.isVerified && (
+                        <button
+                          className="text-xs text-green-600 font-medium new-border px-3 py-1.5 rounded-xl disabled:opacity-50"
+                          disabled={verifyingId === resident.id}
+                          onClick={() => handleVerify(resident)}
+                        >
+                          Verify
+                        </button>
+                      )}
+                      <button
+                        className="text-xs text-accent font-medium new-border px-3 py-1.5 rounded-xl"
+                        onClick={() => {
+                          setIsEditModalOpen(true);
+                          setCurrentResidentData(resident);
+                        }}
+                      >
+                        Edit
+                      </button>
+                    </div>
                   </div>
                 </Card>
               ))
