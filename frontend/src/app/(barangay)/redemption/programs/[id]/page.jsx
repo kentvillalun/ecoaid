@@ -374,6 +374,7 @@ export default function ProgramDetails() {
               <TransactionCard
                 data={{ transactions }}
                 program={data?.program}
+                handleRefetchCount={handleRefetchCount}
               />
             )}
           </section>

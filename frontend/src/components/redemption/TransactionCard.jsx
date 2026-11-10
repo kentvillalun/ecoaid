@@ -7,6 +7,8 @@ import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { useRouter } from "next/navigation";
 import { Empty } from "../ui/Empty";
+import { useState } from "react";
+import { EditTransactionModal } from "./modals/EditTransactionModal";
 
 export const TransactionCard = ({
   data,
@@ -16,6 +18,7 @@ export const TransactionCard = ({
   program = null,
 }) => {
   const router = useRouter();
+  const [editingTransaction, setEditingTransaction] = useState(null);
 
   return (
     <>
@@ -66,6 +69,20 @@ export const TransactionCard = ({
               <div className="flex flex-col w-full">
                 <div className="flex flex-row items-center justify-between mb-1">
                   <h3 className="font-semibold">{d?.residentName}</h3>
+                  <button
+                    className="text-sm text-accent hover:cursor-pointer"
+                    onClick={(e) => {
+                      // the whole card opens the details, so don't let this click through
+                      e.stopPropagation();
+                      // on a program page the program comes in as a prop
+                      setEditingTransaction({
+                        ...d,
+                        program: program ?? d?.program,
+                      });
+                    }}
+                  >
+                    Edit
+                  </button>
                 </div>
                 <div className="flex flex-row gap-1 items-center">
                   {!program && (
@@ -96,6 +113,15 @@ export const TransactionCard = ({
             </div>
           </Card>
         ))
+      )}
+
+      {editingTransaction && (
+        <EditTransactionModal
+          isOpen={true}
+          setIsOpen={() => setEditingTransaction(null)}
+          transaction={editingTransaction}
+          handleRefetchCount={handleRefetchCount}
+        />
       )}
     </>
   );

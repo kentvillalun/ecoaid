@@ -281,10 +281,27 @@
 
 ---
 
+## Completed (continued — Oct 24 – Nov 11, 2026 update)
+
+- **Resident app polish** (Oct 24 – Nov 1) — redesigned redemption program cards for both the resident and staff sides (`lib/formatMaterialRate.js` formats a material's rate); an install prompt (bottom sheet) for the resident PWA with screenshots in the manifest; a dismissable "how it works" card on the home screen and a permanent help video (`components/tutorial/HowItWorksVideo.jsx`) plus improved FAQs on the Help & Support page; the app icon changed to the dark gradient.
+- **Pilot-test fixes, merged Nov 10** (`b424ebd`):
+  - **Residents** — one-tap **Verify** on the Residents list for staff who witness a registration (no transaction needed), a sitio filter, and resident-side lock messages that now ask the barangay to verify the account instead of asking for a pickup.
+  - **Manual intake** — a Registered / Not registered toggle (the household field no longer needs a failed search to appear), a sitio filter on the history, and the unit prefills from the chosen material. `recordIntake` requires exactly one of `userId` or `householdName` and checks the resident is an active user of the caller's barangay.
+  - **Collection** — the collector can override Single/Assorted in the Finalize Record modal; the saved `isAssorted` follows what was collected. The COLLECTED branch validates the items, checks the materials belong to the barangay, and falls back to the stored value when a client sends no `isAssorted` (`useUpdate` now passes it).
+  - **Settings** — a material's unit can be changed (kg, lbs, gram, pcs; `PATCH /settings/materials/:id`), junkshops can be edited including their price list (`EditJunkshopModal`, `PATCH /junkshop-sales/junkshop/:junkshopId`). Fixed `AddJunkshopModal` not receiving `handleRefetchCount` and the gram option sending `GRAM` instead of `GRAMS`.
+  - **AI classifier** — the material list stays fixed to the core list, but each material's unit now follows the barangay's setting (the prompt is unchanged with default units); an assorted result sets the unit to kg on the capture form.
+  - **MRF Inventory** — a material with stock in two units no longer breaks: stock-out is checked against the balance of the chosen unit, the running total is kept per material and unit, and the dropdown, filter and category counts list each material correctly.
+- **Redemption transactions can be edited or deleted** (Nov 11) — for a mistake made while recording (wrong amount or material, or the wrong resident). No schema change.
+  - **Backend** — `PATCH /redemption/transactions/:id` (`updateTransaction`) and `DELETE /redemption/transactions/:id` (`deleteTransaction`), same four roles as create, loaded through `program.barangayId`. Edit replaces the items and the transaction's stock ledger rows in one `$transaction`; a line whose material was already in the transaction keeps its old `currentValue`, a newly added material takes the program's current rate. Delete removes the ledger rows, the items and the transaction. Both run `findProblemWithChange` first and return a 400 message if any material's stock would go below zero (already sold or removed) or the resident's balance in the program would go below zero (reward already released). `getTransaction` and `getTransactions` now also return the program's materials (`programWithMaterials`) so the edit form has its options.
+  - **Frontend** — Edit and Delete buttons in the "Transaction Details" section header of `/redemption/transactions/[id]` (`SectionHeader` gained an optional `actions` slot); an **Edit** link on each row of `TransactionTable` and each `TransactionCard` (also on the program detail page, which now passes `handleRefetchCount`). New `EditTransactionModal` (resident read-only, material rows) and `DeleteTransactionModal`.
+  - **Tested** against the local `ecoaid_demo` database through the API: delete and edit are blocked after a junkshop sale used the stock and after a reward was released; an edit that raises an amount or adds a material works and rewrites the ledger rows; a delete with nothing used restores stock and points. The buttons were not clicked through in the browser, and the test records were left in the demo database.
+
+---
+
 ## In Progress
 
 - Nothing else is in progress. The resident's points are now shown on the home screen and on each program card (below).
-- **Field evaluation / pilot** (planned Nov 8, 2026, real barangay, one or more days): real operations (recycling activity, scheduled Sunday pickup, MRF sorting, 5–10 residents submitting photo requests) plus scripted scenarios for junkshop sales/beautification and reports; the logbook is run in parallel and compared with the app.
+- **Field evaluation / pilot** (planned Nov 8, 2026; the pilot-test fixes were merged on Nov 10, the outcome is not recorded here yet; real barangay, one or more days): real operations (recycling activity, scheduled Sunday pickup, MRF sorting, 5–10 residents submitting photo requests) plus scripted scenarios for junkshop sales/beautification and reports; the logbook is run in parallel and compared with the app.
 
 ---
 
@@ -301,7 +318,8 @@
    - The Reports redemption section repeats a resident's releases on each of their transaction rows
    - A "who has not submitted in a period" view does not exist; non-submitters have to be found by comparing the Residents list with the Collection & Intake report (only registered residents with account-linked entries are traceable)
    - No formal accuracy evaluation of the AI classification exists
-   - `docs`: `fr-process-documentation.md` is a verification snapshot; re-verify the redemption, reward and report sections against the running app after the pilot
+   - `docs`: `fr-process-documentation.md` is a verification snapshot; re-verify the redemption, reward and report sections against the running app after the pilot (it does not cover redemption edit/delete yet)
+   - Redemption edit/delete leaves no history of the old version; add an audit trail only if the barangay asks for one
    - `performedBy` not set in Manual Intake, Redemption, or Collection Request (redemption and releases store collector/staff names as text)
 
    Resolved since the last update: the points-scoping bug, release matching by name, and the stock ledger not receiving pickup collections and redemption transactions.
@@ -323,6 +341,7 @@
 - Redemption is separate from intake
 - MRF Inventory (renamed from Material Stock) is read-only and derived from intake transactions
 - MRF Inventory nets every ledger source: manual intake, pickup-request collections and redemption transactions add stock (`IN`); junkshop sales and manual stock-out adjustments remove it (`OUT`)
+- Editing or deleting a redemption transaction rewrites or removes only that transaction's own `StockTransactionLog` rows, and is blocked when the stock was already sold or the points already spent; do not change other sources' ledger rows the same way
 - Redemption points are never stored: the balance of a resident in a program is computed by `getResidentProgramBalance` (earned in that program minus spent on its rewards). Do not add a stored points column
 - A redemption beneficiary is always a registered resident (`residentId`); recording a redemption transaction also marks the resident verified
 - The core material list (`coreMaterials.js`) is what every barangay is seeded with and what the AI recognizes; changing it needs a backfill (`seedCoreMaterials()` only adds rows, it never renames, re-units or deletes existing ones)

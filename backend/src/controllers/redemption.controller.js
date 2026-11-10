@@ -14,6 +14,18 @@ const materialsBelongToBarangay = async (materialIds, barangayId) => {
   return count === uniqueIds.length;
 };
 
+// the program's materials fill the dropdown when editing a transaction
+const programWithMaterials = {
+  include: {
+    programMaterial: {
+      select: {
+        id: true,
+        material: { select: { name: true, defaultUnit: true } },
+      },
+    },
+  },
+};
+
 const createProgram = async (req, res) => {
   try {
     const {
@@ -496,7 +508,7 @@ const getTransactions = async (req, res) => {
         },
       },
       include: {
-        program: true,
+        program: programWithMaterials,
         redemptionTransactionItem: {
           include: {
             programMaterial: {
@@ -541,7 +553,7 @@ const getTransaction = async (req, res) => {
         },
       },
       include: {
-        program: true,
+        program: programWithMaterials,
         redemptionTransactionItem: {
           include: {
             programMaterial: {
@@ -893,6 +905,224 @@ const getResidentPrograms = async (req, res) => {
   }
 };
 
+// total kg per material, from a list of stock log rows
+const sumByMaterial = (logs) => {
+  const totals = {};
+  logs.forEach((log) => {
+    totals[log.materialId] = (totals[log.materialId] ?? 0) + log.quantity;
+  });
+  return totals;
+};
+
+// Editing or deleting a transaction removes its old stock and points, so first
+// make sure nothing already used them. Returns an error message, or null if
+// the change is safe. `newLogs` and `newItems` are what the transaction will
+// look like afterwards (empty lists when it is being deleted).
+const findProblemWithChange = async (
+  barangayId,
+  transaction,
+  newLogs,
+  newItems,
+) => {
+  const oldTotals = sumByMaterial(transaction.stockTransactionLog);
+  const newTotals = sumByMaterial(newLogs);
+
+  const stockSummary = await prisma.stockTransactionLog.groupBy({
+    where: { barangayId, materialId: { in: Object.keys(oldTotals) } },
+    by: ["materialId", "transactionType"],
+    _sum: { quantity: true },
+  });
+
+  for (const materialId of Object.keys(oldTotals)) {
+    const stockIn =
+      stockSummary.find(
+        (s) => s.materialId === materialId && s.transactionType === "IN",
+      )?._sum?.quantity ?? 0;
+    const stockOut =
+      stockSummary.find(
+        (s) => s.materialId === materialId && s.transactionType === "OUT",
+      )?._sum?.quantity ?? 0;
+
+    const balanceAfter =
+      stockIn - stockOut - oldTotals[materialId] + (newTotals[materialId] ?? 0);
+
+    if (balanceAfter < -0.0001) {
+      const material = await prisma.material.findUnique({
+        where: { id: materialId },
+        select: { name: true },
+      });
+      return `Not enough ${material.name} in stock. Some of it was already sold or removed.`;
+    }
+  }
+
+  if (transaction.residentId) {
+    const oldPoints = transaction.redemptionTransactionItem.reduce(
+      (total, item) => total + item.amount * item.currentValue,
+      0,
+    );
+    const newPoints = newItems.reduce(
+      (total, item) => total + item.amount * item.currentValue,
+      0,
+    );
+    const balance = await getResidentProgramBalance(
+      transaction.residentId,
+      transaction.programId,
+    );
+
+    if (balance - oldPoints + newPoints < -0.0001) {
+      return "The resident already used these points on a reward.";
+    }
+  }
+
+  return null;
+};
+
+const transactionWithStock = (id, barangayId) => {
+  return prisma.redemptionTransaction.findUnique({
+    where: { id, program: { barangayId } },
+    include: {
+      program: { select: { isCashMode: true } },
+      redemptionTransactionItem: true,
+      stockTransactionLog: true,
+    },
+  });
+};
+
+// Fix the materials or amounts of a transaction. The resident and program stay.
+const updateTransaction = async (req, res) => {
+  try {
+    const { barangayId } = req.user;
+    const { id } = req.params;
+    const { items } = req.body ?? {};
+
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: "Add at least one item" });
+    }
+
+    if (items.some((item) => !(item.amount > 0))) {
+      return res.status(400).json({ error: "Amount must be more than 0" });
+    }
+
+    const transaction = await transactionWithStock(id, barangayId);
+
+    if (!transaction) {
+      return res.status(404).json({ error: "Transaction not found" });
+    }
+
+    const materials = await Promise.all(
+      items.map((i) =>
+        prisma.programMaterial.findUnique({
+          where: { id: i.programMaterialId, programId: transaction.programId },
+          select: {
+            pointValue: true,
+            cashValue: true,
+            materialId: true,
+            material: { select: { defaultUnit: true } },
+          },
+        }),
+      ),
+    );
+
+    if (materials.some((m) => m === null)) {
+      return res.status(404).json({ error: "Program material not found" });
+    }
+
+    // a line that was already in the transaction keeps its old rate,
+    // only newly added materials use the program's current rate
+    const newItems = items.map((item, index) => {
+      const oldItem = transaction.redemptionTransactionItem.find(
+        (o) => o.programMaterialId === item.programMaterialId,
+      );
+      const currentRate = transaction.program.isCashMode
+        ? materials[index].cashValue
+        : materials[index].pointValue;
+
+      return {
+        transactionId: id,
+        programMaterialId: item.programMaterialId,
+        amount: item.amount,
+        currentValue: oldItem ? oldItem.currentValue : currentRate,
+      };
+    });
+
+    const newLogs = items.map((item, index) => ({
+      barangayId,
+      userId: transaction.residentId,
+      redemptionTransactionId: id,
+      source: "REDEMPTION",
+      transactionType: "IN",
+      materialId: materials[index].materialId,
+      unit: materials[index].material.defaultUnit === "PIECE" ? "PIECE" : "KG",
+      quantity: convertToKg(item.amount, materials[index].material.defaultUnit),
+    }));
+
+    const problem = await findProblemWithChange(
+      barangayId,
+      transaction,
+      newLogs,
+      newItems,
+    );
+
+    if (problem) {
+      return res.status(400).json({ error: problem });
+    }
+
+    await prisma.$transaction([
+      prisma.stockTransactionLog.deleteMany({
+        where: { redemptionTransactionId: id },
+      }),
+      prisma.redemptionTransactionItem.deleteMany({
+        where: { transactionId: id },
+      }),
+      prisma.redemptionTransactionItem.createMany({ data: newItems }),
+      prisma.stockTransactionLog.createMany({ data: newLogs }),
+    ]);
+
+    return res.status(200).json({ message: "Transaction updated" });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+// Remove a transaction, for example when it was given to the wrong resident.
+const deleteTransaction = async (req, res) => {
+  try {
+    const { barangayId } = req.user;
+    const { id } = req.params;
+
+    const transaction = await transactionWithStock(id, barangayId);
+
+    if (!transaction) {
+      return res.status(404).json({ error: "Transaction not found" });
+    }
+
+    const problem = await findProblemWithChange(
+      barangayId,
+      transaction,
+      [],
+      [],
+    );
+
+    if (problem) {
+      return res.status(400).json({ error: problem });
+    }
+
+    await prisma.$transaction([
+      prisma.stockTransactionLog.deleteMany({
+        where: { redemptionTransactionId: id },
+      }),
+      prisma.redemptionTransactionItem.deleteMany({
+        where: { transactionId: id },
+      }),
+      prisma.redemptionTransaction.delete({ where: { id } }),
+    ]);
+
+    return res.status(200).json({ message: "Transaction deleted" });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 export {
   createProgram,
   getResidentPrograms,
@@ -905,4 +1135,6 @@ export {
   updateProgram,
   getTransaction,
   searchResident,
+  updateTransaction,
+  deleteTransaction,
 };

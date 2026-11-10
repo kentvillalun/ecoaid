@@ -12,6 +12,7 @@ export const SectionHeader = ({
   buttonClassName,
   buttonColor = "gradient-button",
   noButton = false,
+  actions,
   className = ""
 }) => {
   return (
@@ -28,6 +29,7 @@ export const SectionHeader = ({
             <p className="text-gray-600 text-[14px]">{subtitle}</p>
           </div>
         </div>
+        {actions}
         {!noButton && (
           <button
             className={` text-white new-border px-3.5 rounded-lg py-2.5 flex flex-row items-center gap-2 justify-center hover:cursor-pointer transition-all duration-200 ease-in-out min-w-35 md:min-w-45 text-nowrap ${buttonClassName} ${buttonColor}`}

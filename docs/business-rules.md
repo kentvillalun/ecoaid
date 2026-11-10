@@ -35,13 +35,13 @@ COLLECTED means materials are already picked up, sorted, and recorded as intake.
 
 ## 5. ASSORTED Material Type
 
-A pickup request may be marked assorted. During collection, the collector finalizes the actual breakdown by material.
+A pickup request may be marked assorted. The resident's choice is only an estimate: when finalizing, the collector can switch Single/Assorted, and the saved `isAssorted` follows what was actually collected. The collector also finalizes the actual breakdown by material (units prefill from the material).
 
 ---
 
 ## 6. Sunday EcoAid and Other Direct Intake
 
-Entries with no prior request are recorded in the Manual Collection Intake module by searching the person and entering their contribution. The search finds residents **and barangay staff** (staff bring recyclables as their attendance, and that must be recorded against their own account). If the person has no account, a free-text household name can be entered instead.
+Entries with no prior request are recorded in the Manual Collection Intake module by searching the person and entering their contribution. The search finds residents **and barangay staff** (staff bring recyclables as their attendance, and that must be recorded against their own account). If the person has no account, a free-text household name can be entered instead ("Registered" / "Not registered" toggle). A submission needs exactly one of the two, and a registered contributor must be an active user of the caller's barangay.
 
 ---
 
@@ -80,7 +80,7 @@ Each redemption line item stores the value in force at the time (`currentValue`)
 ## 11. Redemption Beneficiary and Points
 
 - The beneficiary of a redemption transaction is a **registered resident** (`residentId`); there is no separate beneficiary record. A resident without an account cannot take part.
-- Recording a redemption transaction marks the resident as verified, like a completed pickup or manual intake, so they can see programs and points in the resident app.
+- Recording a redemption transaction marks the resident as verified, like a completed pickup or manual intake, so they can see programs and points in the resident app. Staff who witness a real registration can also verify a resident with one tap from the Residents list, without waiting for a transaction.
 - Points belong to one resident **in one program**. Nothing stores the number: the balance is computed as *points earned in that program* minus *points spent on rewards in that program*, so it can never disagree with the records.
 - Points earned in one program cannot be spent on another program's rewards.
 
@@ -112,7 +112,7 @@ Program Funds tracks expenses, income/proceeds, and profits. Plant distribution 
 
 ## 15. Junkshop Sales
 
-The barangay sells recyclables to junkshops. Receipts from these sales are recorded as income in Program Funds.
+The barangay sells recyclables to junkshops. Receipts from these sales are recorded as income in Program Funds. Junkshops, including their price lists, can be edited in Settings.
 
 ---
 
@@ -124,7 +124,7 @@ The Junkshop Sales module tracks price offers per material type from multiple ju
 
 ## 17. Core Materials
 
-Every barangay is created with the same core material list (`backend/src/utils/coreMaterials.js`), and the AI photo classification only recognizes materials in that list. Staff (CAPTAIN, SECRETARY) can add more materials in Settings; those work for intake, programs and sales, but the AI will not detect them. Materials cannot be removed or deactivated by a barangay; an unused material is simply ignored.
+Every barangay is created with the same core material list (`backend/src/utils/coreMaterials.js`), and the AI photo classification only recognizes materials in that list. Staff (CAPTAIN, SECRETARY) can add more materials in Settings; those work for intake, programs and sales, but the AI will not detect them. Materials cannot be removed or deactivated by a barangay; an unused material is simply ignored. A barangay can change a material's unit (kg, lbs, gram, pcs) in Settings; the AI classification follows the barangay's unit for each core material, and an assorted result is always in kg. A material can hold stock in two units (for example after a unit change), so MRF stock-out is checked against the balance of the chosen unit only.
 
 ---
 
@@ -137,3 +137,14 @@ Every barangay sees only its own data. Any lookup or change must be scoped to th
 ## 19. Roles and Modules
 
 Staff roles are CAPTAIN, SECRETARY, TREASURER, SK and COLLECTOR. Which routes each role may open is defined once in `frontend/src/lib/roles.js` (`ROLE_MATRIX`) and mirrored by `requireRoles(...)` on each backend route. Separately, a barangay can switch whole modules on or off (`hasCollectionRequests`, `hasRedemptionManagement`, `hasRewardInventory`, `hasLeaderboard`).
+
+---
+
+## 20. Correcting Redemption Transactions
+
+Staff (CAPTAIN, SECRETARY, SK, TREASURER) can fix a mistaken redemption transaction from its detail page, or from the Edit link on the Redemption page's table and cards.
+
+- **Edit** changes the materials and amounts only. The resident and the program stay as recorded. A line whose material was already in the transaction keeps its old rate (`currentValue`); only a newly added material takes the program's current rate, so fixing a quantity never re-prices the transaction (rule 10).
+- **Delete** is for a transaction given to the wrong resident. It removes the transaction, its items and its stock ledger rows. Re-enter it for the right resident.
+- Both actions rewrite the transaction's own `StockTransactionLog` rows, so MRF Inventory and the resident's points correct themselves. No history of the old version is kept.
+- Both are **blocked** when the change would take stock below zero for any material (for example the materials were already sold to a junkshop), or would take the resident's balance in that program below zero (a reward was already released). Staff must deal with the sale or the release first.

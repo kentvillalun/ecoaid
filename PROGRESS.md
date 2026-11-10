@@ -2,7 +2,28 @@
 
 This file tracks completed work, known technical debt, and open items across sessions. Newest entry on top.
 
-> Note: this file didn't exist before 2026-09-06. The docs that `CLAUDE.md` references (`docs/project-overview.md`, `docs/business-rules.md`, `docs/module-boundaries.md`, `docs/current-progress.md`, `AGENTS.md`) do exist and were brought up to date on 2026-10-20.
+> Note: this file didn't exist before 2026-09-06. The docs that `CLAUDE.md` references (`docs/project-overview.md`, `docs/business-rules.md`, `docs/module-boundaries.md`, `docs/current-progress.md`, `AGENTS.md`) do exist and were brought up to date on 2026-10-20 and again on 2026-11-11.
+
+---
+
+## 2026-11-11
+
+### Context
+
+Docs-sync after the pilot-test fixes (merged 2026-11-10) plus one new feature: correcting redemption transactions. The docs had last been updated on 2026-10-21, so everything from `fb3cace` (2026-10-24) onward is covered here and in `docs/current-progress.md`.
+
+### Completed
+
+- **Redemption edit and delete** (uncommitted on branch `feat/redemption-edit-delete` when this was written): `PATCH` and `DELETE /redemption/transactions/:id`, Edit/Delete in the transaction detail header, an Edit link on the Redemption page table and cards. Both rewrite or remove the transaction's own stock ledger rows and are blocked when the stock was already sold or the resident's points already spent. Verified through the API on the local `ecoaid_demo` database. Rules are in `docs/business-rules.md` section 20.
+- **Pilot-test fixes** (one-tap resident verify and sitio filters, manual intake Registered/Not registered toggle, Single/Assorted override when finalizing, editable material units and junkshops, classifier follows the barangay's unit, MRF Inventory with two units) and the resident app polish (install prompt, how-it-works card and help video, redesigned program cards). Details in `docs/current-progress.md`.
+- **Docs touched:** `docs/business-rules.md` (rules 5, 6, 11, 15, 17 and new rule 20), `docs/module-boundaries.md`, `docs/project-overview.md`, `docs/current-progress.md`, and the local `CLAUDE.md`/`AGENTS.md`, whose "append-only ledger" wording now notes the redemption exception.
+
+### Open items
+
+- Redemption edit/delete: the buttons were not clicked through in the browser, and the API test records are still in `ecoaid_demo` (reseed with `prisma/demo-seed.js` to clean, which wipes everything else).
+- The outcome of the Nov 8 field evaluation is not recorded in the docs.
+- `fr-process-documentation.md` does not cover redemption edit/delete and was not re-verified.
+- No history is kept of an edited or deleted redemption transaction.
 
 ---
 

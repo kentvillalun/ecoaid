@@ -13,11 +13,15 @@ import { DocumentIcon, GiftIcon } from "@heroicons/react/24/outline";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { Error } from "@/components/ui/Error";
+import { EditTransactionModal } from "@/components/redemption/modals/EditTransactionModal";
+import { DeleteTransactionModal } from "@/components/redemption/modals/DeleteTransactionModal";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 
 export default function TransactionDetailPage() {
   const [refetchCount, setRefetchCount] = useState(0);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const { id } = useParams();
   const { data, isLoading, isError } = useFetch({
     url: `/api/redemption/transactions/${id}`,
@@ -49,6 +53,24 @@ export default function TransactionDetailPage() {
           title={"Transaction Details"}
           subtitle={"Review transaction information and redemption items"}
           noButton={true}
+          actions={
+            data?.transaction && (
+              <div className="flex flex-row gap-2">
+                <button
+                  className="py-2 px-4 text-sm border border-gray-300 rounded-lg text-gray-700 hover:cursor-pointer"
+                  onClick={() => setIsEditOpen(true)}
+                >
+                  Edit
+                </button>
+                <button
+                  className="py-2 px-4 text-sm text-white rounded-lg hover:cursor-pointer gradient-button-red"
+                  onClick={() => setIsDeleteOpen(true)}
+                >
+                  Delete
+                </button>
+              </div>
+            )
+          }
           className="mt-5"
         />
 
@@ -135,6 +157,22 @@ export default function TransactionDetailPage() {
                   />
                 </div>
               </Card>
+
+              {isEditOpen && (
+                <EditTransactionModal
+                  isOpen={isEditOpen}
+                  setIsOpen={setIsEditOpen}
+                  transaction={data.transaction}
+                  handleRefetchCount={handleRefetchCount}
+                />
+              )}
+              {isDeleteOpen && (
+                <DeleteTransactionModal
+                  isOpen={isDeleteOpen}
+                  setIsOpen={setIsDeleteOpen}
+                  transaction={data.transaction}
+                />
+              )}
 
               <Card className="flex flex-col gap-3 shadow-none! new-border">
                 <h3 className="font-semibold md:text-sm text-xs text-gray-600 border-b border-gray-100 pb-2 min-w-full">

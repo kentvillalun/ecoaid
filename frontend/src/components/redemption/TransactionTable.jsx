@@ -11,6 +11,8 @@ import { Error } from "../ui/Error";
 import { HoverPortal } from "../ui/HoverReveal";
 import { MaterialTag } from "../ui/MaterialTag";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { EditTransactionModal } from "./modals/EditTransactionModal";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -86,6 +88,7 @@ export const TransactionTable = ({
   handleRefetchCount,
 }) => {
   const router = useRouter();
+  const [editingTransaction, setEditingTransaction] = useState(null);
 
   const tableConfig = [
     {
@@ -163,12 +166,18 @@ export const TransactionTable = ({
     {
       header: "Action",
       render: (data) => (
-        <div className="flex items-center justify-start">
+        <div className="flex items-center justify-start gap-4">
           <button
             className="text-accent hover:underline hover:cursor-pointer"
             onClick={() => router.push(`/redemption/transactions/${data.id}`)}
           >
             View Details
+          </button>
+          <button
+            className="text-gray-500 hover:underline hover:cursor-pointer"
+            onClick={() => setEditingTransaction(data)}
+          >
+            Edit
           </button>
         </div>
       ),
@@ -230,6 +239,15 @@ export const TransactionTable = ({
           )}
         </tbody>
       </table>
+
+      {editingTransaction && (
+        <EditTransactionModal
+          isOpen={true}
+          setIsOpen={() => setEditingTransaction(null)}
+          transaction={editingTransaction}
+          handleRefetchCount={handleRefetchCount}
+        />
+      )}
     </Card>
   );
 };
