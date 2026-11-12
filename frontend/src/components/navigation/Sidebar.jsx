@@ -29,9 +29,8 @@ import {
   WalletIcon as ProgramFundsIcon,
   TrophyIcon as LeaderboardIcon,
   XMarkIcon,
-  ChevronDownIcon,
 } from "@heroicons/react/24/outline";
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import { DrawerContext } from "@/app/(barangay)/BarangayLayoutClient.jsx";
 import Link from "next/link";
 import { Inter } from "next/font/google";
@@ -65,12 +64,19 @@ export const Sidebar = () => {
     return !!modules?.[flagKey];
   };
 
-  const topLevelItems = [
+  // One flat list, in the order the system is used: collect, store, reward, sell, account for, report.
+  const navItems = [
     {
       icon: DashboardIcon,
       label: "Dashboard",
       href: "/dashboard",
       solidIcon: HomeIcon,
+    },
+    {
+      icon: ResidentsIcon,
+      label: "Residents",
+      href: "/residents",
+      solidIcon: UserIcon,
     },
     {
       icon: RequestIcon,
@@ -80,30 +86,9 @@ export const Sidebar = () => {
     },
     {
       icon: CollectionSortingIcon,
-      label: "Manual Pickup",
+      label: "Manual Intake",
       href: "/manual-intake",
       solidIcon: ArrowsRightLeftIcon,
-    },
-    {
-      icon: ResidentsIcon,
-      label: "Residents",
-      href: "/residents",
-      solidIcon: UserIcon,
-    },
-    {
-      icon: SettingsIcon,
-      label: "Settings",
-      href: "/settings",
-      solidIcon: Cog6ToothIcon,
-    },
-  ];
-
-  const managementItems = [
-    {
-      icon: MaterialStockIcon,
-      label: "MRF Inventory",
-      href: "/mrf-inventory",
-      solidIcon: CubeIcon,
     },
     {
       icon: RedemptionProgramIcon,
@@ -113,7 +98,7 @@ export const Sidebar = () => {
     },
     {
       icon: RewardsIcon,
-      label: "Reward ",
+      label: "Rewards",
       href: "/reward-inventory",
       solidIcon: ClipboardDocumentCheckIcon,
     },
@@ -124,14 +109,17 @@ export const Sidebar = () => {
       solidIcon: BanknotesIcon,
     },
     {
+      icon: MaterialStockIcon,
+      label: "MRF Inventory",
+      href: "/mrf-inventory",
+      solidIcon: CubeIcon,
+    },
+    {
       icon: ProgramFundsIcon,
       label: "Program Funds",
       href: "/program-funds",
       solidIcon: WalletIcon,
     },
-  ];
-
-  const communicationItems = [
     {
       icon: AnnoucementsIcon,
       label: "Announcements",
@@ -152,23 +140,19 @@ export const Sidebar = () => {
     },
   ];
 
-  const [isManagementOpen, setIsManagementOpen] = useState(false);
-  const [isCommunicationOpen, setIsCommunicationOpen] = useState(false);
+  const settingsItem = {
+    icon: SettingsIcon,
+    label: "Settings",
+    href: "/settings",
+    solidIcon: Cog6ToothIcon,
+  };
 
-  const filteredTopLevelItems = topLevelItems.filter((item) => {
+  const canSee = (item) => {
     const matchedEntry = ROLE_MATRIX.find((entry) => item.href === entry.route);
     return matchedEntry?.roles?.includes(role) && passesModuleCheck(item);
-  });
+  };
 
-  const filteredManagementItems = managementItems.filter((item) => {
-    const matchedEntry = ROLE_MATRIX.find((entry) => item.href === entry.route);
-    return matchedEntry?.roles?.includes(role) && passesModuleCheck(item);
-  });
-
-  const filteredCommunicationItems = communicationItems.filter((item) => {
-    const matchedEntry = ROLE_MATRIX.find((entry) => item.href === entry.route);
-    return matchedEntry?.roles?.includes(role) && passesModuleCheck(item);
-  });
+  const filteredNavItems = navItems.filter(canSee);
 
   const renderNavItem = (item) => (
     <Link
@@ -188,35 +172,6 @@ export const Sidebar = () => {
         {item.label}
       </label>
     </Link>
-  );
-
-  const renderGroup = (label, items, isOpen, setIsOpen) => (
-    <div className="flex flex-col">
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          setIsOpen((prev) => !prev);
-        }}
-        className="flex flex-row items-center justify-between w-full p-2 hover:cursor-pointer text-text-secondary"
-      >
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-text-secondary">
-          {label}
-        </span>
-        <ChevronDownIcon
-          className={`h-4 w-4 transition-transform duration-300 ${isOpen ? "" : "rotate-180"}`}
-        />
-      </button>
-      <div
-        className={`grid transition-all duration-300 ease-in-out ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}
-      >
-        <div className="overflow-hidden">
-          <div className="flex flex-col gap-2 lg:gap-3 border-l-2 border-white/10 pl-2">
-            {items.map(renderNavItem)}
-          </div>
-        </div>
-      </div>
-    </div>
   );
 
   const handleLogout = async () => {
@@ -243,7 +198,7 @@ export const Sidebar = () => {
 
   return (
     <aside
-      className={`w-60 md:w-65 h-svh flex flex-col bg-surface fixed top-0 text-white left-0 z-50 ${inter.className} overflow-y-auto sidebar new-border`}
+      className={`w-60 md:w-65 h-svh flex flex-col bg-surface fixed top-0 text-white left-0 z-50 ${inter.className} overflow-hidden sidebar new-border`}
     >
       <div className="md:hidden flex pt-4 pr-4 items-end w-full justify-end">
         <XMarkIcon
@@ -251,7 +206,7 @@ export const Sidebar = () => {
           onClick={() => setSidebarOpen(!sidebarOpen)}
         />
       </div>
-      <div className="p-4 flex flex-col md:gap-4 gap-8 lg:gap-9">
+      <div className="p-4 flex flex-col md:gap-4 gap-8 lg:gap-9 flex-1 min-h-0 overflow-y-auto">
         <div className="flex flex-col gap-2">
           <div className="flex flex-row justify-start gap-2 border-b-border border pb-4">
             <Logo />
@@ -278,26 +233,13 @@ export const Sidebar = () => {
         </div>
 
         <div className="flex flex-col gap-2 lg:gap-3">
-          {filteredTopLevelItems.map(renderNavItem)}
-
-          {renderGroup(
-            "Management",
-            filteredManagementItems,
-            isManagementOpen,
-            setIsManagementOpen,
-          )}
-
-          {renderGroup(
-            "Communication",
-            filteredCommunicationItems,
-            isCommunicationOpen,
-            setIsCommunicationOpen,
-          )}
+          {filteredNavItems.map(renderNavItem)}
         </div>
       </div>
-      <div className="mt-auto">
-        <button className="pl-6 p-4 mb-15 w-full" onClick={handleLogout}>
-          <div className="flex flex-row gap-3 hover:cursor-pointer p-2 px-3 rounded-xl hover:bg-accent/10 transition-all ease-in-out items-center group">
+      <div className="shrink-0 bg-surface p-4 pb-15 flex flex-col gap-2 lg:gap-3">
+        {canSee(settingsItem) && renderNavItem(settingsItem)}
+        <button className="w-full text-left" onClick={handleLogout}>
+          <div className="flex flex-row gap-3.5 hover:cursor-pointer p-2 px-3 rounded-xl hover:bg-accent/10 transition-all ease-in-out items-center group">
             <LogoutIcon className="h-4 w-4 md:block hidden hover:cursor-pointer group-hover:stroke-accent stroke-text-secondary" />
             <label className="text-base text-text-secondary hover:cursor-pointer group-hover:text-accent">
               Logout
