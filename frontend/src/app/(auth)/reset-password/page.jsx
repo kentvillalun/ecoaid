@@ -103,7 +103,7 @@ export default function ResetPasswordPage() {
       <Page className="lg:hidden bg-bg!">
         <div className={`min-w-full flex flex-col justify-end`}>
           <form
-            className="min-h-auto bg-surface p-8 rounded-t-4xl flex flex-col relative justify-center max-w-full"
+            className="min-h-[85svh] bg-surface p-8 rounded-t-4xl flex flex-col relative justify-center max-w-full"
             onSubmit={handleSubmit(onSubmit)}
           >
             <LogoCircle />
@@ -122,7 +122,7 @@ export default function ResetPasswordPage() {
                     htmlFor="newPassword"
                     className="text-text-primary text-base font-medium"
                   >
-                    New Password
+                    New Password <span className="text-red-500">*</span>
                   </label>
                   <div className="input flex flex-row justify-between text-base mb-0">
                     <input
@@ -150,13 +150,14 @@ export default function ResetPasswordPage() {
 
                 <div className="flex flex-col gap-2">
                   <label
-                    htmlFor=""
+                    htmlFor="confirmPassword"
                     className="text-base text-text-primary font-medium"
                   >
-                    Confirm new password
+                    Confirm new password <span className="text-red-500">*</span>
                   </label>
                   <div className="input flex flex-row justify-between text-base mb-0">
                     <input
+                      id="confirmPassword"
                       type={showConfirmPassword ? "text" : "password"}
                       placeholder="Confirm new password"
                       className="outline-none w-full min-w-0 md:max-w-full text-base flex-1"

@@ -62,7 +62,7 @@ export default function ForgotPasswordPage() {
       <Page className="lg:hidden bg-bg">
         <div className={`min-w-full flex flex-col justify-end`}>
           <form
-            className="min-h-auto bg-surface p-8 rounded-t-4xl flex flex-col relative justify-center max-w-full"
+            className="min-h-[85svh] bg-surface p-8 rounded-t-4xl flex flex-col relative justify-center max-w-full"
             onSubmit={handleSubmit(onSubmit)}
           >
             <LogoCircle />
@@ -93,7 +93,7 @@ export default function ForgotPasswordPage() {
                     htmlFor="contact"
                     className="text-base text-text-primary font-medium"
                   >
-                    Phone number
+                    Phone number <span className="text-red-500">*</span>
                   </label>
                   <input
                     id="contact"

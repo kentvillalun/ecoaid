@@ -86,7 +86,6 @@ const register = async (req, res) => {
     const {
       phoneNumber,
       barangayId,
-      sitioId,
       password,
       confirmPassword,
       termsAccepted,
@@ -103,7 +102,6 @@ const register = async (req, res) => {
       !password ||
       !confirmPassword ||
       !barangayId ||
-      !sitioId ||
       !username ||
       !lastName ||
       !firstName
@@ -114,7 +112,7 @@ const register = async (req, res) => {
     // ── UUID format check ─────────────────────────────────────
     // Never trust IDs from the frontend — validate format before
     // even touching the database
-    if (!isUuid(barangayId) || !isUuid(sitioId)) {
+    if (!isUuid(barangayId)) {
       return res.status(400).json({ error: "Invalid address selection" });
     }
 
@@ -159,20 +157,6 @@ const register = async (req, res) => {
       return res.status(400).json({ error: "Barangay not found" });
     }
 
-    // ── Validate sitio belongs to that barangay ───────────────
-    // Important: someone could send a valid sitioId from a
-    // completely different barangay. We verify the relationship.
-    const sitioRecord = await prisma.sitio.findFirst({
-      where: { id: sitioId, barangayId: barangayRecord.id },
-      select: { id: true, name: true },
-    });
-
-    if (!sitioRecord) {
-      return res.status(400).json({
-        error: "Selected sitio does not belong to the selected barangay",
-      });
-    }
-
     // ── Clear any existing OTPs for this number ───────────────
     // Prevents multiple active OTPs for the same number
     // if the user tries to register more than once
@@ -214,12 +198,12 @@ const verifyOtp = async (req, res) => {
       phoneNumber,
       code,
       barangayId,
-      sitioId,
       password,
       termsAccepted,
       username,
       lastName,
       firstName,
+      middleName,
     } = req.body ?? {};
     const token = req.cookies.resident_token;
 
@@ -255,7 +239,7 @@ const verifyOtp = async (req, res) => {
     // We validate again even though register() already did it.
     // The user could have tampered with sessionStorage between steps.
     // Backend never trusts data just because it saw it before.
-    if (!isUuid(barangayId) || !isUuid(sitioId)) {
+    if (!isUuid(barangayId)) {
       return res.status(400).json({ error: "Invalid address selection" });
     }
 
@@ -268,15 +252,6 @@ const verifyOtp = async (req, res) => {
       return res.status(400).json({ error: "Barangay not found" });
     }
 
-    const sitioRecord = await prisma.sitio.findFirst({
-      where: { id: sitioId, barangayId: barangayRecord.id },
-      select: { id: true, name: true },
-    });
-
-    if (!sitioRecord) {
-      return res.status(400).json({ error: "Invalid sitio selection" });
-    }
-
     // ── Hash password and create the user ─────────────────────
     // bcrypt.hash(password, 10) — 10 is the salt rounds.
     // A salt is random data added before hashing so two users
@@ -287,15 +262,14 @@ const verifyOtp = async (req, res) => {
     const user = await prisma.user.create({
       data: {
         phoneNumber,
-        purok: sitioRecord.name,
         passwordHash: hashedPassword,
         barangay: { connect: { id: barangayRecord.id } },
-        sitio: { connect: { id: sitioRecord.id } },
         termsAccepted,
         termsAcceptedAt: new Date(),
         username,
         lastName,
         firstName,
+        middleName,
       },
       select: {
         id: true,

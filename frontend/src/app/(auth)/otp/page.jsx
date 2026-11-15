@@ -16,6 +16,12 @@ import { ButtonSpinner } from "@/components/ui/buttonSpinner";
 // How many seconds the user must wait before resending
 const RESEND_COOLDOWN = 60;
 
+// Hides the middle of the number, e.g. 09123456789 becomes 0912.....89
+const maskPhone = (phone) => {
+  if (phone.length <= 6) return phone;
+  return phone.slice(0, 4) + ".".repeat(phone.length - 6) + phone.slice(-2);
+};
+
 export default function OtpPage() {
   const router = useRouter();
 
@@ -33,7 +39,7 @@ export default function OtpPage() {
 
   // ── Flow type and registration data from sessionStorage ───────
   // otpFlow tells us whether we came from signup or forgot-password.
-  // pendingData is only needed for signup (holds barangayId, sitioId, etc.)
+  // pendingData is only needed for signup (holds barangayId, etc.)
   const [otpFlow, setOtpFlow] = useState("signup");
   const [pendingPhone, setPendingPhone] = useState("");
   const [pendingData, setPendingData] = useState(null);
@@ -190,12 +196,12 @@ export default function OtpPage() {
         phoneNumber: pendingData.phoneNumber,
         code,
         barangayId: pendingData.barangayId,
-        sitioId: pendingData.sitioId,
         password: pendingData.password,
         termsAccepted: pendingData.termsAccepted,
         username: pendingData.username,
         lastName: pendingData.lastName,
         firstName: pendingData.firstName,
+        middleName: pendingData.middleName,
       }),
     });
 
@@ -290,7 +296,7 @@ export default function OtpPage() {
 
       <Page className="lg:hidden bg-bg!">
         <div className={`min-w-full flex flex-col justify-end`}>
-          <div className="min-h-auto bg-surface p-8 rounded-t-4xl flex flex-col relative justify-center max-w-full">
+          <div className="min-h-[85svh] bg-surface p-8 rounded-t-4xl flex flex-col relative justify-center max-w-full">
             <LogoCircle />
 
             <motion.div
@@ -305,9 +311,9 @@ export default function OtpPage() {
                 </h3>
                 <p className="text-text-primary text-base">
                   We have sent a verification code to{" "}
-                  {/* Show the phone number so user knows where the OTP was sent */}
+                  {/* Masked, so the full number is never shown on screen */}
                   <span className="font-medium text-black">
-                    {pendingPhone || "your number"}
+                    {pendingPhone ? maskPhone(pendingPhone) : "your number"}
                   </span>
                 </p>
               </div>

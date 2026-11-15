@@ -34,15 +34,14 @@ const schema = yup.object().shape({
     ),
   firstName: yup.string().required("First name is required"),
   lastName: yup.string().required("Last name is required"),
-  phoneNumber: yup.string().required("Phone number is required"),
+  middleName: yup.string().required("Middle name is required"),
+  phoneNumber: yup.string().required("Phone number is required").matches(/^09\d{9}$/, "Enter a valid 11-digit contact number"),
 
   barangayName: yup.string().required("Barangay is required"),
 
   barangayId: yup
     .string()
     .required("Please select a barangay from the suggestions"),
-
-  sitioId: yup.string().required("Sitio or Purok is required"),
 
   password: yup
     .string()
@@ -94,13 +93,13 @@ export default function SignupPage() {
       phoneNumber: "",
       barangayName: "",
       barangayId: "",
-      sitioId: "",
       password: "",
       confirmPassword: "",
       termsAccepted: false,
       username: "",
       firstName: "",
       lastName: "",
+      middleName: "",
     },
   });
 
@@ -120,10 +119,6 @@ export default function SignupPage() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isBarangayLoading, setIsBarangayLoading] = useState(false);
   const [barangayError, setBarangayError] = useState("");
-
-  // Sitio dropdown state
-  const [sitioOptions, setSitioOptions] = useState([]);
-  const [isSitioLoading, setIsSitioLoading] = useState(false);
 
   useEffect(() => {
     if (!barangayQuery.trim()) {
@@ -171,44 +166,6 @@ export default function SignupPage() {
     };
   }, [barangayQuery, selectedBarangay]);
 
-  
-  useEffect(() => {
-    if (!selectedBarangay?.id) {
-      setSitioOptions([]);
-      return;
-    }
-
-    let isActive = true;
-
-    const loadSitios = async () => {
-      setIsSitioLoading(true);
-
-      try {
-        const response = await fetch(
-          `${API_BASE_URL}/auth/barangays/${selectedBarangay.id}/sitios`,
-        );
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          throw new Error(result.error ?? "Failed to load sitios");
-        }
-
-        if (isActive) setSitioOptions(result.data ?? []);
-      } catch {
-        if (isActive) setSitioOptions([]);
-      } finally {
-        if (isActive) setIsSitioLoading(false);
-      }
-    };
-
-    loadSitios();
-
-    return () => {
-      isActive = false;
-    };
-  }, [selectedBarangay]);
-
   const handleBarangayInputChange = (value) => {
     setBarangayQuery(value);
     setShowSuggestions(true);
@@ -219,22 +176,19 @@ export default function SignupPage() {
     if (selectedBarangay && value.trim() !== selectedBarangay.name) {
       setSelectedBarangay(null);
       setValue("barangayId", "", { shouldValidate: true });
-      setSitioOptions([]);
-      setValue("sitioId", "");
-      clearErrors("sitioId");
     }
 
     if (!value.trim()) {
       setSelectedBarangay(null);
       setValue("barangayId", "", { shouldValidate: true });
-      setSitioOptions([]);
-      setValue("sitioId", "");
     }
   };
 
   const handleBarangaySelect = (barangay) => {
     setSelectedBarangay(barangay);
-    setBarangayQuery(`${barangay.name}, ${barangay.municipality}, ${barangay.province}`);
+    setBarangayQuery(
+      `${barangay.name}, ${barangay.municipality}, ${barangay.province}`,
+    );
     setBarangayOptions([]);
     setShowSuggestions(false);
     setBarangayError("");
@@ -242,12 +196,7 @@ export default function SignupPage() {
     setValue("barangayName", `${barangay.name}`, { shouldValidate: true });
     setValue("barangayId", barangay.id, { shouldValidate: true });
     clearErrors(["barangayName", "barangayId"]);
-
-    setSitioOptions([]);
-    setValue("sitioId", "");
-    clearErrors("sitioId");
   };
-      console.log(selectedBarangay)
 
   const onSubmit = async (data) => {
     setSubmitError("");
@@ -271,10 +220,10 @@ export default function SignupPage() {
         body: JSON.stringify({
           firstName: data.firstName,
           lastName: data.lastName,
+          middleName: data.middleName,
           username: data.username,
           phoneNumber: data.phoneNumber,
           barangayId: selectedBarangay.id,
-          sitioId: data.sitioId,
           password: data.password,
           confirmPassword: data.confirmPassword,
           termsAccepted: data.termsAccepted,
@@ -294,10 +243,10 @@ export default function SignupPage() {
         JSON.stringify({
           firstName: data.firstName,
           lastName: data.lastName,
+          middleName: data.middleName,
           username: data.username,
           phoneNumber: data.phoneNumber,
           barangayId: selectedBarangay.id,
-          sitioId: data.sitioId,
           password: data.password,
           termsAccepted: true,
         }),
@@ -360,6 +309,10 @@ export default function SignupPage() {
               </div>
 
               <div className="flex flex-col gap-4 text-text-secondary my-10">
+                <p className="text-xs text-gray-400">
+                  <span className="text-red-500">*</span> Required field
+                </p>
+
                 {/* First name */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-2">
@@ -367,7 +320,7 @@ export default function SignupPage() {
                       htmlFor="fname"
                       className="text-base text-text-primary font-medium"
                     >
-                      First name
+                      First name <span className="text-red-500">*</span>
                     </label>
                     <input
                       id="fname"
@@ -383,13 +336,35 @@ export default function SignupPage() {
                     )}
                   </div>
 
+                  {/* Middle name */}
+                  <div className="flex flex-col gap-2">
+                    <label
+                      htmlFor="middleName"
+                      className="text-text-primary text-base font-medium"
+                    >
+                      Middle name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="middleName"
+                      type="text"
+                      placeholder="Reyes"
+                      className="input text-base mb-0"
+                      {...register("middleName")}
+                    />
+                    {errors.middleName?.message && (
+                      <p className="text-xs text-red-500">
+                        {errors.middleName?.message}
+                      </p>
+                    )}
+                  </div>
+
                   {/* Last name */}
                   <div className="flex flex-col gap-2">
                     <label
                       htmlFor="lname"
                       className="text-base text-text-primary font-medium"
                     >
-                      Last name
+                      Last name <span className="text-red-500">*</span>
                     </label>
                     <input
                       id="lname"
@@ -404,28 +379,28 @@ export default function SignupPage() {
                       </p>
                     )}
                   </div>
-                </div>
 
-                {/* Username */}
-                <div className="flex flex-col gap-2">
-                  <label
-                    htmlFor="username"
-                    className="text-text-primary text-base font-medium"
-                  >
-                    Username
-                  </label>
-                  <input
-                    id="username"
-                    type="text"
-                    placeholder="juandelacruz123"
-                    className="input text-base mb-0"
-                    {...register("username")}
-                  />
-                  {errors.username?.message && (
-                    <p className="text-xs text-red-500">
-                      {errors.username?.message}
-                    </p>
-                  )}
+                  {/* Username */}
+                  <div className="flex flex-col gap-2">
+                    <label
+                      htmlFor="username"
+                      className="text-text-primary text-base font-medium"
+                    >
+                      Username <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="username"
+                      type="text"
+                      placeholder="juandelacruz123"
+                      className="input text-base mb-0"
+                      {...register("username")}
+                    />
+                    {errors.username?.message && (
+                      <p className="text-xs text-red-500">
+                        {errors.username?.message}
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 {/* Phone number */}
@@ -434,7 +409,7 @@ export default function SignupPage() {
                     htmlFor="contact"
                     className="text-text-primary text-base font-medium"
                   >
-                    Phone number
+                    Phone number <span className="text-red-500">*</span>
                   </label>
 
                   <input
@@ -460,7 +435,7 @@ export default function SignupPage() {
                       htmlFor="barangay"
                       className="text-text-primary text-base font-medium"
                     >
-                      Barangay
+                      Barangay <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -533,55 +508,13 @@ export default function SignupPage() {
                   )}
                 </div>
 
-                {/* Sitio */}
-                <div className="flex flex-col gap-2">
-                  <label
-                    htmlFor="sitio"
-                    className="text-text-primary text-base font-medium"
-                  >
-                    Sitio
-                  </label>
-                  <div className="input px-2 text-base disabled:bg-gray-100 mb-0">
-                    <select
-                      id="sitio"
-                      className=" w-full outline-none"
-                      defaultValue=""
-                      disabled={!selectedBarangay?.id || isSitioLoading}
-                      {...register("sitioId")}
-                      onChange={(e) => {
-                        clearErrors("sitioId");
-                        setSubmitError("");
-                      }}
-                    >
-                      <option value="" disabled hidden>
-                        {!selectedBarangay?.id
-                          ? "Select barangay first"
-                          : isSitioLoading
-                            ? "Loading sitios..."
-                            : "Select your sitio or purok"}
-                      </option>
-
-                      {sitioOptions.map((sitio) => (
-                        <option key={sitio.id} value={sitio.id}>
-                          {sitio.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  {errors.sitioId?.message && (
-                    <p className="text-xs text-red-500">
-                      {errors.sitioId?.message}
-                    </p>
-                  )}
-                </div>
-
                 {/* Password */}
                 <div className="flex flex-col gap-2">
                   <label
                     htmlFor="password"
                     className="text-text-primary text-base font-medium"
                   >
-                    Password
+                    Password <span className="text-red-500">*</span>
                   </label>
                   <div className="input flex flex-row items-center justify-between text-base mb-0">
                     <input
@@ -612,7 +545,7 @@ export default function SignupPage() {
                     htmlFor="confirmPassword"
                     className="text-base text-text-primary font-medium"
                   >
-                    Confirm password
+                    Confirm password <span className="text-red-500">*</span>
                   </label>
                   <div className="input flex flex-row items-center justify-between text-base mb-0">
                     <input
@@ -631,7 +564,8 @@ export default function SignupPage() {
                     </button>
                   </div>
                   {errors.confirmPassword?.message && (
-                    <p className="text-xs text-red-500">                      {errors.confirmPassword?.message}
+                    <p className="text-xs text-red-500">
+                      {errors.confirmPassword?.message}
                     </p>
                   )}
                 </div>
