@@ -18,6 +18,7 @@ import { useMutation } from "@/hooks/useMutation";
 
 const schema = yup.object().shape({
   firstName: yup.string().required("First name is required"),
+  middleName: yup.string().required("Middle name is required"),
   lastName: yup.string().required("Last name is required"),
   role: yup
     .string()
@@ -92,9 +93,12 @@ export const AddStaffModal = ({
       formOnSubmit={handleSubmit(onSubmit)}
     >
       <div className="p-6 flex flex-col gap-3">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+        <p className="text-xs text-gray-400">
+          <span className="text-red-500">*</span> Required field
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
           <div className="flex flex-col gap-1.5">
-            <AdminLabel htmlFor="staffFirstName">First name</AdminLabel>
+            <AdminLabel htmlFor="staffFirstName" required={true}>First name</AdminLabel>
             <AdminInput
               id="staffFirstName"
               type="text"
@@ -108,7 +112,21 @@ export const AddStaffModal = ({
             )}
           </div>
           <div className="flex flex-col gap-1.5">
-            <AdminLabel htmlFor="staffLastName">Last name</AdminLabel>
+            <AdminLabel htmlFor="staffMiddleName" required={true}>Middle name</AdminLabel>
+            <AdminInput
+              id="staffMiddleName"
+              type="text"
+              placeholder="Enter middle name"
+              {...register("middleName")}
+            />
+            {errors?.middleName && (
+              <p className="text-xs text-start text-red-400">
+                {errors?.middleName?.message}
+              </p>
+            )}
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <AdminLabel htmlFor="staffLastName" required={true}>Last name</AdminLabel>
             <AdminInput
               id="staffLastName"
               type="text"
@@ -124,7 +142,7 @@ export const AddStaffModal = ({
         </div>
 
         <div className="flex flex-col gap-1.5 w-full">
-          <AdminLabel htmlFor="staffRole">Role</AdminLabel>
+          <AdminLabel htmlFor="staffRole" required={true}>Role</AdminLabel>
           <div className="input mb-0 focus-within:outline-admin-accent">
             <select
               id="staffRole"
@@ -150,7 +168,7 @@ export const AddStaffModal = ({
         </div>
 
         <div className="flex flex-col gap-1.5 w-full">
-          <AdminLabel htmlFor="staffContactNumber">Phone number</AdminLabel>
+          <AdminLabel htmlFor="staffContactNumber" required={true}>Phone number</AdminLabel>
           <AdminInput
             id="staffContactNumber"
             type="text"
@@ -165,7 +183,7 @@ export const AddStaffModal = ({
         </div>
 
         <div className="flex flex-col gap-1.5 w-full">
-          <AdminLabel htmlFor="staffUsername">Username</AdminLabel>
+          <AdminLabel htmlFor="staffUsername" required={true}>Username</AdminLabel>
           <AdminInput
             id="staffUsername"
             type="text"
@@ -180,7 +198,7 @@ export const AddStaffModal = ({
         </div>
 
         <div className="flex flex-col gap-1.5 w-full">
-          <AdminLabel htmlFor="staffPassword">Password</AdminLabel>
+          <AdminLabel htmlFor="staffPassword" required={true}>Password</AdminLabel>
           <div className="input flex flex-row justify-between duration-300 ease-in-out mb-0 focus-within:outline-admin-accent">
             <input
               type={isPasswordVisible ? "text" : "password"}

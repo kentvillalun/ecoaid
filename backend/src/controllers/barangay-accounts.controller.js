@@ -199,7 +199,7 @@ const getBarangayDetails = async (req, res) => {
 
 const registerStaffAccount = async (req, res) => {
   try {
-    const { username, password, firstName, lastName, phoneNumber, role } =
+    const { username, password, firstName, lastName, middleName, phoneNumber, role } =
       req.body ?? {};
     const { id } = req.params;
 
@@ -207,6 +207,7 @@ const registerStaffAccount = async (req, res) => {
       !username ||
       !password ||
       !firstName ||
+      !middleName ||
       !lastName ||
       !phoneNumber ||
       !role
@@ -242,6 +243,7 @@ const registerStaffAccount = async (req, res) => {
         username,
         passwordHash: hashedPassword,
         firstName,
+        middleName,
         lastName,
         phoneNumber,
         role,
@@ -271,6 +273,7 @@ const getStaffAccountsByBarangay = async (req, res) => {
         lastName: true,
         phoneNumber: true,
         role: true,
+        isActive: true,
         createdAt: true,
       },
     });
@@ -281,6 +284,37 @@ const getStaffAccountsByBarangay = async (req, res) => {
         message: "Barangay staff accounts fetched successful",
         accounts,
       });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+const updateStaffStatus = async (req, res) => {
+  try {
+    const { id, staffId } = req.params;
+    const { isActive } = req.body ?? {};
+
+    if (typeof isActive !== "boolean") {
+      return res.status(400).json({ error: "isActive must be true or false" });
+    }
+
+    // Only staff of this barangay can be changed, never a resident or another barangay's user
+    const staff = await prisma.user.findFirst({
+      where: { id: staffId, barangayId: id, role: { in: BARANGAY_ROLES } },
+    });
+
+    if (!staff) {
+      return res.status(404).json({ error: "Staff account not found" });
+    }
+
+    await prisma.user.update({
+      where: { id: staffId },
+      data: { isActive },
+    });
+
+    return res
+      .status(200)
+      .json({ message: "Staff account status updated successfully" });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -377,6 +411,7 @@ export {
   getBarangayDetails,
   registerStaffAccount,
   getStaffAccountsByBarangay,
+  updateStaffStatus,
   createSitio,
   getSitios,
   editSitios

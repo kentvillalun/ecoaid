@@ -133,6 +133,7 @@ model User {
   username String? @unique 
 
   firstName String?
+  middleName String?
   lastName String?
 
   address String?

@@ -305,6 +305,7 @@ export default function BarangayAccountDetailsPage() {
                 </div>
 
                 <StaffTable
+                  barangayId={id}
                   accounts={staffData?.accounts}
                   isLoading={isStaffLoading}
                   isError={isStaffError}

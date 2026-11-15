@@ -1,10 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import { Inter } from "next/font/google";
+import { toast } from "sonner";
+import { UserMinusIcon, UserPlusIcon } from "@heroicons/react/24/outline";
 import { Card } from "@/components/ui/Card";
+import { Modal } from "@/components/ui/Modal";
 import { Spinner } from "@/components/ui/Spinner";
 import { Error } from "@/components/ui/Error";
 import { STAFF_ROLES } from "@/lib/staffRoles";
+import { useMutation } from "@/hooks/useMutation";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -19,7 +24,7 @@ const ROLE_STYLES = {
   SK: { bg: "#fce7f3", text: "#9d174d" },
 };
 
-const TABLE_HEADERS = ["Name", "Role", "Username", "Contact Number"];
+const TABLE_HEADERS = ["Name", "Role", "Username", "Contact Number", "Status", "Action"];
 
 const RoleTag = ({ role }) => {
   const roleMeta = STAFF_ROLES.find((r) => r.value === role);
@@ -34,10 +39,42 @@ const RoleTag = ({ role }) => {
   );
 };
 
-export const StaffTable = ({ accounts, isLoading, isError, handleRefetchCount }) => {
+export const StaffTable = ({
+  barangayId,
+  accounts,
+  isLoading,
+  isError,
+  handleRefetchCount,
+}) => {
+  const { makeRequest } = useMutation();
+  // the staff account waiting for the admin to confirm deactivate / reactivate
+  const [selectedAccount, setSelectedAccount] = useState(null);
+
+  const handleToggleStatus = async () => {
+    const newStatus = !selectedAccount.isActive;
+    toast.loading("Updating staff account");
+    const success = await makeRequest({
+      url: `/api/admin/barangays/${barangayId}/staff/${selectedAccount.id}`,
+      method: "PATCH",
+      body: { isActive: newStatus },
+    });
+
+    toast.dismiss();
+    if (success) {
+      toast.success(newStatus ? "Staff account reactivated" : "Staff account deactivated");
+      handleRefetchCount();
+      setSelectedAccount(null);
+    } else {
+      toast.error("Unable to update staff account");
+    }
+  };
+
   // Every real account gets its own row — never collapsed or hidden,
   // even if multiple accounts share the same role.
-  const filledRoleValues = new Set(accounts?.map((a) => a.role));
+  // Only active accounts fill a role, so a deactivated Captain shows the role as vacant again.
+  const filledRoleValues = new Set(
+    accounts?.filter((a) => a.isActive).map((a) => a.role),
+  );
 
   // Only roles with zero accounts get a placeholder row.
   const missingRoles = STAFF_ROLES.filter(
@@ -80,7 +117,10 @@ export const StaffTable = ({ accounts, isLoading, isError, handleRefetchCount })
           {!isLoading &&
             !isError &&
             accounts?.map((account) => (
-              <tr key={account.id} className="text-start">
+              <tr
+                key={account.id}
+                className={`text-start ${account.isActive ? "" : "opacity-60"}`}
+              >
                 <td className="p-4">
                   <p className="font-semibold text-text-primary">
                     {account.firstName} {account.lastName}
@@ -91,6 +131,22 @@ export const StaffTable = ({ accounts, isLoading, isError, handleRefetchCount })
                 </td>
                 <td className="p-4 text-gray-600">{account.username}</td>
                 <td className="p-4 text-gray-600">{account.phoneNumber}</td>
+                <td className="p-4">
+                  <span
+                    className={`text-xs font-medium px-3 py-1 rounded-full ${account.isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
+                  >
+                    {account.isActive ? "Active" : "Inactive"}
+                  </span>
+                </td>
+                <td className="p-4">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedAccount(account)}
+                    className={`text-sm hover:underline hover:cursor-pointer ${account.isActive ? "text-red-500" : "text-admin-accent"}`}
+                  >
+                    {account.isActive ? "Deactivate" : "Reactivate"}
+                  </button>
+                </td>
               </tr>
             ))}
           {!isLoading &&
@@ -107,10 +163,35 @@ export const StaffTable = ({ accounts, isLoading, isError, handleRefetchCount })
                 </td>
                 <td className="p-4 text-gray-300">—</td>
                 <td className="p-4 text-gray-300">—</td>
+                <td className="p-4 text-gray-300">—</td>
+                <td className="p-4 text-gray-300">—</td>
               </tr>
             ))}
         </tbody>
       </table>
+
+      <Modal
+        isOpen={!!selectedAccount}
+        onClose={() => setSelectedAccount(null)}
+        icon={
+          selectedAccount?.isActive ? (
+            <UserMinusIcon className="w-6 stroke-red-500" />
+          ) : (
+            <UserPlusIcon className="w-6 stroke-admin-accent" />
+          )
+        }
+        title={selectedAccount?.isActive ? "Deactivate account" : "Reactivate account"}
+        subtitle={`${selectedAccount?.firstName} ${selectedAccount?.lastName}`}
+        confirmLabel={selectedAccount?.isActive ? "Yes, deactivate" : "Yes, reactivate"}
+        confirmClassName={selectedAccount?.isActive ? "gradient-button-red" : "gradient-button-admin"}
+        onConfirm={handleToggleStatus}
+      >
+        <p className="p-6 text-sm text-gray-600 text-start">
+          {selectedAccount?.isActive
+            ? "This staff member will no longer be able to log in. You can reactivate the account anytime."
+            : "This staff member will be able to log in again."}
+        </p>
+      </Modal>
     </Card>
   );
 };
