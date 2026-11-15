@@ -147,6 +147,7 @@ const getResidents = async (req, res) => {
         id: true,
         phoneNumber: true,
         firstName: true,
+        middleName: true,
         lastName: true,
         address: true,
         purok: true,
@@ -167,12 +168,13 @@ const getResidents = async (req, res) => {
 const editResident = async (req, res) => {
   try {
     const { id } = req.params;
-    const { firstName, lastName, phoneNumber, sitioId, isVerified } =
+    const { firstName, middleName, lastName, phoneNumber, sitioId, isVerified } =
       req.body ?? {};
     const { barangayId } = req.user;
 
     const data = {};
     if (firstName !== undefined) data.firstName = firstName;
+    if (middleName !== undefined) data.middleName = middleName;
     if (lastName !== undefined) data.lastName = lastName;
     if (phoneNumber !== undefined) data.phoneNumber = phoneNumber;
     if (sitioId !== undefined) data.sitioId = sitioId;

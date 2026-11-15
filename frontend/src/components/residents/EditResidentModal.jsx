@@ -15,6 +15,9 @@ export function EditResidentModal({
   handleRefetchCount,
 }) {
   const [firstName, setFirstName] = useState(currentResidentData.firstName);
+  const [middleName, setMiddleName] = useState(
+    currentResidentData.middleName ?? "",
+  );
   const [lastName, setLastName] = useState(currentResidentData.lastName);
   const [phoneNumber, setPhoneNumber] = useState(
     currentResidentData.phoneNumber,
@@ -28,6 +31,7 @@ export function EditResidentModal({
 
   const resetModal = () => {
     setFirstName(currentResidentData.firstName);
+    setMiddleName(currentResidentData.middleName ?? "");
     setLastName(currentResidentData.lastName);
     setPhoneNumber(currentResidentData.phoneNumber);
     setSitio(currentResidentData.purok);
@@ -36,6 +40,7 @@ export function EditResidentModal({
 
   const hasChanges =
     firstName !== currentResidentData.firstName ||
+    middleName !== (currentResidentData.middleName ?? "") ||
     lastName !== currentResidentData.lastName ||
     phoneNumber !== currentResidentData.phoneNumber ||
     sitio !== currentResidentData.sitioId ||
@@ -43,6 +48,9 @@ export function EditResidentModal({
 
   const handleSubmit = async () => {
     if (!hasChanges) return;
+    if (!firstName.trim() || !lastName.trim() || !phoneNumber.trim()) {
+      return toast.error("First name, last name and phone number are required");
+    }
     toast.loading();
     const success = await makeRequest({
       method: "PATCH",
@@ -50,6 +58,10 @@ export function EditResidentModal({
       body: {
         firstName:
           firstName !== currentResidentData.firstName ? firstName : undefined,
+        middleName:
+          middleName !== (currentResidentData.middleName ?? "")
+            ? middleName
+            : undefined,
         lastName:
           lastName !== currentResidentData.lastName ? lastName : undefined,
         phoneNumber:
@@ -93,7 +105,7 @@ export function EditResidentModal({
         {/* First name */}
         <div className="flex flex-col gap-1">
           <label htmlFor="firstName" className="label">
-            First name
+            First name <span className="text-red-500">*</span>
           </label>
           <div className="input flex items-center mb-0">
             <input
@@ -107,10 +119,27 @@ export function EditResidentModal({
           </div>
         </div>
 
+        {/* Middle name */}
+        <div className="flex flex-col gap-1">
+          <label htmlFor="middleName" className="label">
+            Middle name
+          </label>
+          <div className="input flex items-center mb-0">
+            <input
+              type="text"
+              id="middleName"
+              className="w-full outline-none"
+              placeholder="e.g. Reyes"
+              value={middleName}
+              onChange={(e) => setMiddleName(e.target.value)}
+            />
+          </div>
+        </div>
+
         {/* Last name */}
         <div className="flex flex-col gap-1">
           <label htmlFor="lastName" className="label">
-            Last name
+            Last name <span className="text-red-500">*</span>
           </label>
           <div className="input flex items-center mb-0">
             <input
@@ -127,7 +156,7 @@ export function EditResidentModal({
         {/* Phone number */}
         <div className="flex flex-col gap-1">
           <label htmlFor="phoneNumber" className="label">
-            Phone number
+            Phone number <span className="text-red-500">*</span>
           </label>
           <div className="input flex items-center mb-0">
             <input
@@ -141,29 +170,31 @@ export function EditResidentModal({
           </div>
         </div>
 
-        {/* Sitio */}
-        <div className="flex flex-col gap-1">
-          <label htmlFor="sitio" className="label">
-            Sitio
-          </label>
-          <div className="input flex items-center mb-0">
-            <select
-              id="sitio"
-              className="w-full outline-none"
-              value={sitio}
-              onChange={(e) => setSitio(e.target.value)}
-            >
-              <option defaultValue={""} disabled hidden>
-                {currentResidentData.purok}
-              </option>
-              {data?.sitios?.map((s) => (
-                <option value={s.id} key={s.id}>
-                  {s.name}
+        {/* Sitio: hidden when the barangay has no sitios */}
+        {data?.sitios?.length > 0 && (
+          <div className="flex flex-col gap-1">
+            <label htmlFor="sitio" className="label">
+              Sitio
+            </label>
+            <div className="input flex items-center mb-0">
+              <select
+                id="sitio"
+                className="w-full outline-none"
+                value={sitio ?? ""}
+                onChange={(e) => setSitio(e.target.value)}
+              >
+                <option defaultValue={""} disabled hidden>
+                  {currentResidentData.purok ?? "Not assigned"}
                 </option>
-              ))}
-            </select>
+                {data?.sitios?.map((s) => (
+                  <option value={s.id} key={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Verified status — visually separated, distinct from field edits */}
         <div className="min-w-full border-t border-gray-200 mt-1 pt-4 flex flex-row items-center justify-between">
