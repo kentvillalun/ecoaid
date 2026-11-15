@@ -121,34 +121,37 @@ export function BarangayForm({
 
   return (
     <form
-      className="grid grid-cols-1 gap-3"
+      className="grid grid-cols-1 lg:grid-cols-3 gap-3"
       onSubmit={handleSubmit(handleFormSubmit)}
     >
       {/* Basic information */}
-      <Card className="flex flex-col items-start gap-4 shadow-none! new-border">
+      <Card className="flex flex-col items-start gap-4 shadow-none! new-border lg:col-span-2">
         <CardHeader
           title="Basic Information"
           subtitle="Core details about the barangay"
         />
 
-        <div className="flex flex-col gap-1.5 w-full">
-          <AdminLabel htmlFor="barangayName">Barangay name</AdminLabel>
-          <AdminInput
-            id="barangayName"
-            type="text"
-            placeholder="Enter barangay name"
-            {...register("name")}
-          />
-          {errors?.name && (
-            <p className="text-xs text-red-400 text-start">
-              {errors?.name?.message}
-            </p>
-          )}
-        </div>
+        <p className="text-xs text-gray-400">
+          <span className="text-red-500">*</span> Required field
+        </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+        <div className="grid grid-cols-2 gap-4 w-full">
           <div className="flex flex-col gap-1.5">
-            <AdminLabel htmlFor="municipality">Municipality</AdminLabel>
+            <AdminLabel htmlFor="barangayName" required={true}>Barangay name</AdminLabel>
+            <AdminInput
+              id="barangayName"
+              type="text"
+              placeholder="Enter barangay name"
+              {...register("name")}
+            />
+            {errors?.name && (
+              <p className="text-xs text-red-400 text-start">
+                {errors?.name?.message}
+              </p>
+            )}
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <AdminLabel htmlFor="municipality" required={true}>Municipality</AdminLabel>
             <AdminInput
               id="municipality"
               type="text"
@@ -162,7 +165,7 @@ export function BarangayForm({
             )}
           </div>
           <div className="flex flex-col gap-1.5">
-            <AdminLabel htmlFor="province">Province</AdminLabel>
+            <AdminLabel htmlFor="province" required={true}>Province</AdminLabel>
             <AdminInput
               id="province"
               type="text"
@@ -175,11 +178,11 @@ export function BarangayForm({
               </p>
             )}
           </div>
+          
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+        <div className="grid grid-cols-2 w-full gap-4">
           <div className="flex flex-col gap-1.5">
-            <AdminLabel htmlFor="zipCode">Zip code</AdminLabel>
+            <AdminLabel htmlFor="zipCode" required={true}>Zip code</AdminLabel>
             <AdminInput
               id="zipCode"
               type="text"
@@ -193,7 +196,7 @@ export function BarangayForm({
             )}
           </div>
           <div className="flex flex-col gap-1.5">
-            <AdminLabel htmlFor="contactNumber">Contact number</AdminLabel>
+            <AdminLabel htmlFor="contactNumber" required={true} >Contact number</AdminLabel>
             <AdminInput
               id="contactNumber"
               type="text"
@@ -210,7 +213,7 @@ export function BarangayForm({
       </Card>
 
       {/* Theme and Modules */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div className="flex flex-col gap-3">
         <Card className="flex flex-col items-start gap-4 shadow-none! new-border">
           <CardHeader
             title="Theme"
@@ -218,7 +221,7 @@ export function BarangayForm({
           />
 
           <div className="flex flex-col gap-1.5 w-full">
-            <AdminLabel htmlFor="themeAccent">Theme preset</AdminLabel>
+            <AdminLabel htmlFor="themeAccent" required={true} >Theme preset</AdminLabel>
             <div className="input mb-0 focus-within:outline-admin-accent">
               <select
                 id="themeAccent"
@@ -265,7 +268,7 @@ export function BarangayForm({
       </div>
 
       {/* Actions */}
-      <Card className="flex flex-col shadow-none! new-border">
+      <Card className="flex flex-col shadow-none! new-border lg:col-span-3">
         <div className="grid grid-cols-2 gap-3 w-full">
           <button
             type="button"
