@@ -79,7 +79,7 @@ export function CreateAnnouncementModal({ isOpen, setIsCreateModalOpen, handleRe
       <div className="p-6 flex flex-col gap-4">
         {/* Title */}
         <div className="flex flex-col gap-1">
-          <label className="label">Title</label>
+          <label className="label">Title <span className="text-red-500">*</span></label>
           <div className="input flex items-center mb-0">
             <input
               type="text"
@@ -94,7 +94,7 @@ export function CreateAnnouncementModal({ isOpen, setIsCreateModalOpen, handleRe
 
         {/* Category */}
         <div className="flex flex-col gap-1">
-          <label className="label">Category</label>
+          <label className="label">Category <span className="text-red-500">*</span></label>
           <div className="input flex items-center mb-0">
             <select
               className="w-full outline-none"
@@ -118,7 +118,7 @@ export function CreateAnnouncementModal({ isOpen, setIsCreateModalOpen, handleRe
 
         {/* Content */}
         <div className="flex flex-col gap-1">
-          <label className="label">Content</label>
+          <label className="label">Content <span className="text-red-500">*</span></label>
           <div className="input flex items-start mb-0 max-h-none">
             <textarea
               className="w-full outline-none"

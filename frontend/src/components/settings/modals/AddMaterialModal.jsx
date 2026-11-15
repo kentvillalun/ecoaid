@@ -101,7 +101,7 @@ export function AddMaterialModal({
         {/* Category */}
         <div className="flex flex-col gap-1">
           <label htmlFor="materialCategory" className="label">
-            Category
+            Category <span className="text-red-500">*</span>
           </label>
           <div className="input flex items-center mb-0">
             <select
@@ -128,7 +128,7 @@ export function AddMaterialModal({
         {/* Name */}
         <div className="flex flex-col gap-1">
           <label htmlFor="materialName" className="label">
-            Material name
+            Material name <span className="text-red-500">*</span>
           </label>
           <div className="input flex items-center mb-0">
             <input
@@ -146,7 +146,7 @@ export function AddMaterialModal({
         {/* Unit */}
         <div className="flex flex-col gap-1">
           <label htmlFor="materialUnit" className="label">
-            Default unit
+            Default unit <span className="text-red-500">*</span>
           </label>
           <div className="input flex items-center mb-0">
             <select

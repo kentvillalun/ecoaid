@@ -389,7 +389,7 @@ export default function MaterialStockPage() {
               <div className="p-6 flex flex-col gap-3 ">
                 <div className="flex flex-col gap-1">
                   <label htmlFor="materialId" className="label">
-                    Material
+                    Material <span className="text-red-500">*</span>
                   </label>
                   <div className="input">
                     <select
@@ -431,7 +431,8 @@ export default function MaterialStockPage() {
                     <label htmlFor="quantity" className="label">
                       {selectedMaterial?.unit === "PIECE"
                         ? "Quantity"
-                        : "Amount"}
+                        : "Amount"}{" "}
+                      <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="number"

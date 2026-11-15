@@ -108,7 +108,7 @@ export const AddExpenseModal = ({ isModalOpen, setIsModalOpen, handleSummaryRefe
       <div className="p-6 flex flex-col gap-3">
         <div className="flex flex-col gap-1">
           <label htmlFor="programId" className="label">
-            Program
+            Program <span className="text-red-500">*</span>
           </label>
           <div className="input">
             <select
@@ -134,7 +134,7 @@ export const AddExpenseModal = ({ isModalOpen, setIsModalOpen, handleSummaryRefe
 
         <div className="flex flex-col gap-1">
           <label htmlFor="expenseName" className="label">
-            Expense Name
+            Expense Name <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
@@ -151,7 +151,7 @@ export const AddExpenseModal = ({ isModalOpen, setIsModalOpen, handleSummaryRefe
 
         <div className="flex flex-col gap-1">
           <label htmlFor="amount" className="label">
-            Amount
+            Amount <span className="text-red-500">*</span>
           </label>
           <input
             type="number"
@@ -169,7 +169,7 @@ export const AddExpenseModal = ({ isModalOpen, setIsModalOpen, handleSummaryRefe
 
         <div className="flex flex-col gap-1">
           <label htmlFor="description" className="label">
-            Description
+            Description <span className="text-red-500">*</span>
           </label>
           <textarea
             id="description"

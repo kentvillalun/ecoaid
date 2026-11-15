@@ -150,13 +150,14 @@ export default function LoginPage() {
                 <div className="flex flex-col gap-6 text-text-secondary my-10">
                   <div className="flex flex-col gap-2">
                     <label
-                      htmlFor=""
+                      htmlFor="username"
                       className="text-text-primary text-base font-medium"
                     >
-                      Username
+                      Username <span className="text-red-500">*</span>
                     </label>
                     <div className="flex flex-col gap-2">
                       <input
+                        id="username"
                         type="text"
                         placeholder="Input username"
                         className="input text-base mb-0"
@@ -173,13 +174,14 @@ export default function LoginPage() {
 
                   <div className="flex flex-col gap-2">
                     <label
-                      htmlFor=""
+                      htmlFor="password"
                       className="text-base text-text-primary font-medium"
                     >
-                      Password
+                      Password <span className="text-red-500">*</span>
                     </label>
                     <div className="input flex flex-row gap-3.25 justify-between text-base mb-0">
                       <input
+                        id="password"
                         type={showPassword ? "text" : "password"}
                         placeholder="Input password"
                         className="outline-none w-full min-w-0  md:max-w-full text-base"

@@ -184,7 +184,7 @@ export const RecordTransactionModal = ({
     >
       <div className="p-6 flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <label className="text-text-primary font-medium">Program</label>
+          <label className="text-text-primary font-medium">Program <span className="text-red-500">*</span></label>
           {preselectedProgram ? (
             <input
               className="input mb-0"
@@ -219,7 +219,7 @@ export const RecordTransactionModal = ({
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-text-primary font-medium">Resident</label>
+          <label className="text-text-primary font-medium">Resident <span className="text-red-500">*</span></label>
 
           <div className="input flex flex-row items-center relative mb-0 gap-2">
             <input
@@ -290,7 +290,7 @@ export const RecordTransactionModal = ({
 
         <div className="flex flex-col gap-1">
           <label className="text-text-primary font-medium">
-            Material items
+            Material items <span className="text-red-500">*</span>
           </label>
 
           <div className="flex flex-col gap-3">

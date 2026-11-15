@@ -98,7 +98,7 @@ export function RecordSaleModal({
       <div className="p-6 flex flex-col gap-4">
         {/* Junkshop select */}
         <div className="flex flex-col gap-1">
-          <label className="label">Junkshop</label>
+          <label className="label">Junkshop <span className="text-red-500">*</span></label>
           <div className="input flex items-center mb-0">
             <select
               className="w-full outline-none"
@@ -119,7 +119,7 @@ export function RecordSaleModal({
 
         {/* Dynamic item rows */}
         <div className="flex flex-col gap-1">
-          <label className="label">Materials sold</label>
+          <label className="label">Materials sold <span className="text-red-500">*</span></label>
           <div className="flex flex-col gap-3">
             {items.map((_, index) => (
               <div key={index} className="new-border bg-surface rounded-xl p-4">

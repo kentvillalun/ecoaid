@@ -314,7 +314,7 @@ export const InProgressActions = ({
                 {!material && (
                   <>
                     <label className="font-medium text-base text-text-primary px-2">
-                      Material
+                      Material <span className="text-red-500">*</span>
                     </label>
                     <div className="input">
                       <select
@@ -356,7 +356,7 @@ export const InProgressActions = ({
                   </>
                 )}
                 <label className="font-medium text-base text-text-primary px-2">
-                  Actual Value
+                  Actual Value <span className="text-red-500">*</span>
                 </label>
                 <div className="outline-1 py-2.5 pl-3.5 text-text-secondary outline-border rounded-lg focus-within:outline-accent transition-colors flex items-center justify-between">
                   <div className="flex flex-row justify-center items-center w-full pr-4">

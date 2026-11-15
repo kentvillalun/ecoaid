@@ -119,7 +119,7 @@ export function AddJunkshopModal({
         {/* Name */}
         <div className="flex flex-col gap-1">
           <label htmlFor="junkshopName" className="label">
-            Name
+            Name <span className="text-red-500">*</span>
           </label>
           <div className="input flex items-center mb-0">
             <input
@@ -165,7 +165,7 @@ export function AddJunkshopModal({
 
         {/* Price Items */}
         <div className="flex flex-col gap-1">
-          <label className="label">Price Items</label>
+          <label className="label">Price Items <span className="text-red-500">*</span></label>
           <div className="flex flex-col gap-3">
             {priceItems.map((_, index) => (
               <div key={index} className="new-border bg-surface rounded-xl p-4">

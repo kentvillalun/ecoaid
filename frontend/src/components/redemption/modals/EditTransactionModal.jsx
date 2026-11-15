@@ -91,7 +91,7 @@ export const EditTransactionModal = ({
 
         <div className="flex flex-col gap-1">
           <label className="text-text-primary font-medium">
-            Material items
+            Material items <span className="text-red-500">*</span>
           </label>
 
           <div className="flex flex-col gap-3">

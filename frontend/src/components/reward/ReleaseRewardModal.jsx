@@ -220,7 +220,7 @@ export const ReleaseRewardModal = ({
     >
       <div className="p-6 flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <label className="label">Program</label>
+          <label className="label">Program <span className="text-red-500">*</span></label>
           <div className="input flex items-center mb-0">
             <select
               className="w-full outline-none"
@@ -243,7 +243,7 @@ export const ReleaseRewardModal = ({
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="label">Resident</label>
+          <label className="label">Resident <span className="text-red-500">*</span></label>
           <div className="input flex flex-row items-center relative mb-0 gap-2">
             <input
               type="text"
@@ -309,7 +309,7 @@ export const ReleaseRewardModal = ({
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="label">Reward items</label>
+          <label className="label">Reward items <span className="text-red-500">*</span></label>
 
           <div className="flex flex-col gap-3">
             {items.map((row, index) => {

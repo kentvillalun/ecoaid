@@ -328,7 +328,7 @@ export const AddProgramModal = ({
     >
       <div className="p-6 flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <label className="text-text-primary font-medium">Program name</label>
+          <label className="text-text-primary font-medium">Program name <span className="text-red-500">*</span></label>
           <input
             type="text"
             className="input mb-0"
@@ -344,7 +344,7 @@ export const AddProgramModal = ({
 
         <div className="flex flex-col gap-1">
           <label className="text-text-primary font-medium">
-            Program description
+            Program description <span className="text-red-500">*</span>
           </label>
           <textarea
             type="text"
@@ -396,7 +396,7 @@ export const AddProgramModal = ({
 
         <div className={`grid gap-3 grid-cols-1`}>
           <div className="flex flex-col gap-1 ">
-            <label className="text-text-primary font-medium">Allotted budget</label>
+            <label className="text-text-primary font-medium">Allotted budget <span className="text-red-500">*</span></label>
             <input
               type="number"
               className="input mb-0"
@@ -416,7 +416,8 @@ export const AddProgramModal = ({
             <label className="text-text-primary font-medium">
               {isCashMode === true || isCashMode === "true"
                 ? "Materials and cash values"
-                : "Materials and point values"}
+                : "Materials and point values"}{" "}
+              <span className="text-red-500">*</span>
             </label>
             <p className="text-text-primary text-sm">
               {isCashMode === true || isCashMode === "true"

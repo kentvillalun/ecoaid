@@ -146,7 +146,7 @@ export const AddRewardItemModal = ({
       <div className="p-6 flex flex-col gap-3">
         <div className="flex flex-col gap-1">
           <label htmlFor="programId" className="label">
-            Program
+            Program <span className="text-red-500">*</span>
           </label>
           <div className="input">
             <select
@@ -172,7 +172,7 @@ export const AddRewardItemModal = ({
 
         <div className="flex flex-col gap-1">
           <label htmlFor="name" className="label">
-            Reward Item Name
+            Reward Item Name <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
@@ -187,7 +187,7 @@ export const AddRewardItemModal = ({
 
         <div className="flex flex-col gap-1">
           <label htmlFor="category" className="label">
-            Category
+            Category <span className="text-red-500">*</span>
           </label>
           <div className="input">
             <select
@@ -214,7 +214,7 @@ export const AddRewardItemModal = ({
         <div className="flex flex-row gap-3">
           <div className="flex flex-col gap-1 flex-1">
             <label htmlFor="quantity" className="label">
-              Quantity
+              Quantity <span className="text-red-500">*</span>
             </label>
             <input
               type="number"
@@ -232,7 +232,7 @@ export const AddRewardItemModal = ({
 
           <div className="flex flex-col gap-1 flex-1">
             <label htmlFor="pointCost" className="label">
-              Point Cost
+              Point Cost <span className="text-red-500">*</span>
             </label>
             <input
               type="number"

@@ -55,7 +55,7 @@ export function EditMaterialModal({
       <div className="p-6 flex flex-col gap-4">
         <div className="flex flex-col gap-1">
           <label htmlFor="editMaterialUnit" className="label">
-            Default unit
+            Default unit <span className="text-red-500">*</span>
           </label>
           <div className="input flex items-center mb-0">
             <select
