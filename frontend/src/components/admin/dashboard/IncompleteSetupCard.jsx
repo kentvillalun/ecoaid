@@ -8,7 +8,6 @@ import { useRouter } from "next/navigation";
 
 const getMissingItems = (barangay) => {
   const items = [...barangay.missingRoles];
-  if (barangay.sitioCount === 0) items.push("No sitios added yet");
   return items.join(", ");
 };
 
@@ -32,7 +31,7 @@ export const IncompleteSetupCard = ({
       ) : data?.length === 0 ? (
         <Empty
           text="All caught up"
-          subtext="Every registered barangay has its required staff roles and sitios."
+          subtext="Every registered barangay has its required staff roles."
         />
       ) : (
         data?.map((barangay) => (

@@ -102,6 +102,10 @@ export default function LeaderboardPage() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  // Hide the Sitio column when none of the residents has a sitio
+  const hasSitio = leaderboard?.some((r) => r.purok);
+  const tableHeaders = TABLE_HEADERS.filter((h) => h !== "Sitio" || hasSitio);
+
   return (
     <Page className="bg-bg!">
       <BarangayTopBar title="Leaderboard" />
@@ -279,9 +283,11 @@ export default function LeaderboardPage() {
                       <p className="font-bold text-text-primary text-sm leading-tight">
                         {resident.name}
                       </p>
-                      <p className="text-xs text-text-secondary">
-                        {resident.purok}
-                      </p>
+                      {resident.purok && (
+                        <p className="text-xs text-text-secondary">
+                          {resident.purok}
+                        </p>
+                      )}
                     </div>
                     <div className="flex flex-col items-center gap-1">
                       <span
@@ -316,7 +322,7 @@ export default function LeaderboardPage() {
             <table className="w-full text-sm border-collapse">
               <thead className="border-b border-border">
                 <tr>
-                  {TABLE_HEADERS.map((h) => (
+                  {tableHeaders.map((h) => (
                     <th
                       key={h}
                       className="font-medium text-sm text-text-secondary p-4 text-left"
@@ -329,19 +335,19 @@ export default function LeaderboardPage() {
               <tbody>
                 {isLoading ? (
                   <tr>
-                    <td colSpan={TABLE_HEADERS.length}>
+                    <td colSpan={tableHeaders.length}>
                       <Spinner />
                     </td>
                   </tr>
                 ) : isError ? (
                   <tr>
-                    <td colSpan={TABLE_HEADERS.length}>
+                    <td colSpan={tableHeaders.length}>
                       <Error handleRefetchCount={handleRefetchCount} />
                     </td>
                   </tr>
                 ) : !rest || rest.length === 0 ? (
                   <tr>
-                    <td colSpan={TABLE_HEADERS.length}>
+                    <td colSpan={tableHeaders.length}>
                       <Empty
                         text="No more rankings"
                         subtext="There are no residents beyond the top 3 yet."
@@ -364,9 +370,13 @@ export default function LeaderboardPage() {
                           {r.name}
                         </p>
                       </td>
-                      <td className="p-4">
-                        <p className="text-text-secondary text-sm">{r.purok}</p>
-                      </td>
+                      {hasSitio && (
+                        <td className="p-4">
+                          <p className="text-text-secondary text-sm">
+                            {r.purok ?? "—"}
+                          </p>
+                        </td>
+                      )}
                       <td className="p-4">
                         <p className="font-bold text-text-primary">
                           {r.total} {unitLabel}
@@ -415,7 +425,9 @@ export default function LeaderboardPage() {
                     <p className="font-semibold text-text-primary truncate">
                       {r.name}
                     </p>
-                    <p className="text-xs text-text-secondary">{r.purok}</p>
+                    {r.purok && (
+                      <p className="text-xs text-text-secondary">{r.purok}</p>
+                    )}
                   </div>
                   <div className="flex flex-col items-end shrink-0">
                     <p className="font-bold text-text-primary text-sm">

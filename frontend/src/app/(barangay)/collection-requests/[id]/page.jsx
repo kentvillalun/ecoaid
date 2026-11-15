@@ -90,7 +90,9 @@ export default function RequestDetails() {
                   name={"Contact number"}
                   value={req?.user?.phoneNumber}
                 />
-                <LabelValue name={"Sitio"} value={req?.user?.sitio?.name} />
+                {req?.user?.sitio?.name && (
+                  <LabelValue name={"Sitio"} value={req?.user?.sitio?.name} />
+                )}
               </Card>
 
               <Card className="flex flex-col items-start gap-3 shadow-none! new-border">

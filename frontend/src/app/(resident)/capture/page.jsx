@@ -172,7 +172,8 @@ export default function CapturePage() {
         return;
       }
 
-      if (sitio === "" || !sitio) {
+      // A resident of a barangay without sitios has no sitio, so only wait while it loads
+      if (sitioLoading) {
         toast.error("Sitio is loading, please wait")
         return;
       }
@@ -228,7 +229,6 @@ export default function CapturePage() {
         if (response.status === 401) handleUnauthorized();
         if (!response.ok) throw new Error("Network response was not ok");
         const result = await response.json();
-        console.log(result)
         setSitio(result?.user?.sitio?.name);
       } catch (error) {
         setError(error.message);
@@ -240,9 +240,6 @@ export default function CapturePage() {
 
     fetchdata();
   }, []);
-
-  console.log(sitio)
-  console.log(sitio)
 
   const compressImage = async () => {
     const compressed = await imageCompression(imageFile, {
@@ -525,7 +522,7 @@ export default function CapturePage() {
                 <>
                   <div className="flex flex-col gap-2">
                     <label className="text-base text-text-primary font-medium">
-                      Material category
+                      Material category <span className="text-red-500">*</span>
                     </label>
                     <div className="input text-base mb-0">
                       <select
@@ -552,7 +549,7 @@ export default function CapturePage() {
 
                   <div className="flex flex-col gap-2">
                     <label className="font-medium text-base text-text-primary">
-                      Material
+                      Material <span className="text-red-500">*</span>
                     </label>
                     <div className="input text-base mb-0">
                       <select
@@ -580,8 +577,8 @@ export default function CapturePage() {
 
               <div className="grid grid-cols-2 gap-3 w-full">
                 <div className="flex flex-col gap-2">
-                  <label className="font-medium text-case text-text-primary ">
-                    Estimated value
+                  <label className="font-medium text-base text-text-primary ">
+                    Estimated value <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
@@ -600,7 +597,7 @@ export default function CapturePage() {
 
                 <div className="flex flex-col gap-2">
                   <label className="font-medium text-base text-text-primary ">
-                    Unit
+                    Unit <span className="text-red-500">*</span>
                   </label>
                   <div
                     className={`input text-base mb-0 ${isUnitLocked && "bg-gray-100"}`}
@@ -627,18 +624,21 @@ export default function CapturePage() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2">
-                <label className="font-medium text-base text-text-primary ">
-                  Purok
-                </label>
-                <input
-                  value={sitio ?? "Loading..."}
-                  disabled
-                  type="text"
-                  className="input mb-0 disabled:bg-gray-100"
-                  placeholder="e.g. Sitio 1"
-                />
-              </div>
+              {/* Hidden for residents of a barangay without sitios */}
+              {(sitioLoading || sitio) && (
+                <div className="flex flex-col gap-2">
+                  <label className="font-medium text-base text-text-primary ">
+                    Purok
+                  </label>
+                  <input
+                    value={sitio ?? "Loading..."}
+                    disabled
+                    type="text"
+                    className="input mb-0 disabled:bg-gray-100"
+                    placeholder="e.g. Sitio 1"
+                  />
+                </div>
+              )}
 
               <div className="flex flex-col gap-2">
                 <label className="font-medium text-base text-text-primary">

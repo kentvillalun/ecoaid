@@ -118,6 +118,10 @@ export default function ManualIntakePage() {
 
   const allTransactions = transactionsData?.transactions;
 
+  // Hide the Sitio column and filter when none of the residents has a sitio
+  const hasSitio = allTransactions?.some((t) => t.user?.sitioId);
+  const tableHeaders = TABLE_HEADERS.filter((h) => h !== "Sitio" || hasSitio);
+
   // household entries and staff have no sitio, so they get their own option
   const sitioFilterOptions = [
     { value: "ALL", label: "All sitios", count: allTransactions?.length ?? 0 },
@@ -316,7 +320,7 @@ export default function ManualIntakePage() {
                 {!showHousehold && (
                 <div className="flex flex-col gap-1">
                   <label htmlFor="searchResident" className="label">
-                    Resident
+                    Resident <span className="text-red-500">*</span>
                   </label>
                   <div className="input flex flex-row relative mb-0">
                     <input
@@ -397,7 +401,8 @@ export default function ManualIntakePage() {
                 {showHousehold && (
                   <div className="flex flex-col gap-1">
                     <label htmlFor="household" className="label">
-                      Household / resident name
+                      Household / resident name{" "}
+                      <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -416,7 +421,7 @@ export default function ManualIntakePage() {
 
                 <div className="flex flex-col gap-1">
                   <label htmlFor="" className="label">
-                    Materials
+                    Materials <span className="text-red-500">*</span>
                   </label>
 
                   <div className="flex flex-col gap-3">
@@ -520,12 +525,14 @@ export default function ManualIntakePage() {
             }}
           />
 
-          <DropdownFilter
-            id="sitioFilter"
-            options={sitioFilterOptions}
-            value={sitioFilter}
-            onChange={setSitioFilter}
-          />
+          {hasSitio && (
+            <DropdownFilter
+              id="sitioFilter"
+              options={sitioFilterOptions}
+              value={sitioFilter}
+              onChange={setSitioFilter}
+            />
+          )}
 
           {/* Desktop table */}
 
@@ -535,7 +542,7 @@ export default function ManualIntakePage() {
             <table className="w-full text-sm border-collapse text-gray-600 overflow-x-auto">
               <thead className="border-b border-border">
                 <tr>
-                  {TABLE_HEADERS.map((h) => (
+                  {tableHeaders.map((h) => (
                     <th
                       key={h}
                       className="font-medium text-start p-4 text-nowrap"
@@ -585,9 +592,11 @@ export default function ManualIntakePage() {
                           />
                         )}
                       </td>
-                      <td className="p-4 text-nowrap">
-                        {row?.user?.sitio?.name ?? "—"}
-                      </td>
+                      {hasSitio && (
+                        <td className="p-4 text-nowrap">
+                          {row?.user?.sitio?.name ?? "—"}
+                        </td>
+                      )}
                       <td className="p-4">
                         <HoverPortal
                           content={
@@ -690,9 +699,11 @@ export default function ManualIntakePage() {
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-gray-500">
-                      Sitio: {row?.user?.sitio?.name ?? "—"}
-                    </p>
+                    {hasSitio && (
+                      <p className="text-sm text-gray-500">
+                        Sitio: {row?.user?.sitio?.name ?? "—"}
+                      </p>
+                    )}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 mt-1.5 w-full">
                       {row?.manualIntakeItems?.map((m) => (
                         <div

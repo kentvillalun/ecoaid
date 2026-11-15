@@ -39,7 +39,8 @@ const getOnboardingStatus = async (req, res) => {
         .filter((role) => !role.present)
         .map((role) => `Missing ${role.name} role`);
 
-      const isIncomplete = missingRoles.length > 0 || barangay._count.sitios === 0;
+      // A barangay without sitios is valid (small barangays don't have any)
+      const isIncomplete = missingRoles.length > 0;
       return {
         barangay: {
           name: barangay.name,

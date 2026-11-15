@@ -107,9 +107,11 @@ export const RequestCard = ({
                             ? `${d?.user?.firstName} ${d?.user?.lastName}`
                             : d?.user?.phoneNumber}
                         </h3>
-                        <p className="text-xs text-gray-500">
-                          {d?.user?.sitio?.name}
-                        </p>
+                        {d?.user?.sitio?.name && (
+                          <p className="text-xs text-gray-500">
+                            {d?.user?.sitio?.name}
+                          </p>
+                        )}
                         <p className="text-xs text-gray-500">
                           {d?.isAssorted === true
                             ? "Assorted"
@@ -177,9 +179,11 @@ export const RequestCard = ({
                             ? `${d?.user?.firstName} ${d?.user?.lastName}`
                             : d?.user?.phoneNumber}
                         </h3>
-                        <p className="text-xs text-gray-500">
-                          {d?.user?.sitio?.name}
-                        </p>
+                        {d?.user?.sitio?.name && (
+                          <p className="text-xs text-gray-500">
+                            {d?.user?.sitio?.name}
+                          </p>
+                        )}
                         <p className="text-xs text-gray-500">
                           {d?.isAssorted === true
                             ? "Assorted"

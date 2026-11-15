@@ -78,7 +78,7 @@ export default function AdminDashboardPage() {
             >
               <ExclamationTriangleIcon className="w-3.5 stroke-admin-accent" />
               <p className="text-admin-accent font-semibold">
-                Missing staff or sitios
+                Missing staff roles
               </p>
             </div>
           </div>
@@ -87,7 +87,7 @@ export default function AdminDashboardPage() {
         <SectionHeader
           icon={<ExclamationTriangleIcon className="w-6 stroke-admin-accent" />}
           title="Incomplete setup"
-          subtitle="Barangays missing a required staff role or sitio"
+          subtitle="Barangays missing a required staff role"
           noButton
         />
 

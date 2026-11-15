@@ -227,12 +227,15 @@ export default function ResidentsPage() {
             noButton
           />
 
-          <DropdownFilter
-            id="sitioFilter"
-            options={sitioFilterOptions}
-            value={sitioFilter}
-            onChange={setSitioFilter}
-          />
+          {/* Hidden when the barangay has no sitios */}
+          {sitioData?.sitios?.length > 0 && (
+            <DropdownFilter
+              id="sitioFilter"
+              options={sitioFilterOptions}
+              value={sitioFilter}
+              onChange={setSitioFilter}
+            />
+          )}
 
           {/* Desktop table */}
           <Card
@@ -288,9 +291,9 @@ export default function ResidentsPage() {
                           {resident.firstName} {resident.lastName}
                         </td>
                         <td className="p-4 text-gray-500 text-xs text-nowrap">
-                          {resident.address
-                            ? `${resident.address}, ${resident.purok}`
-                            : resident.purok}
+                          {[resident.address, resident.purok]
+                            .filter(Boolean)
+                            .join(", ") || "—"}
                         </td>
                         <td className="p-4 text-gray-500 text-nowrap">
                           {resident.phoneNumber}
@@ -394,9 +397,9 @@ export default function ResidentsPage() {
                   </div>
                   <div className="flex flex-row items-center gap-2">
                     <p className="text-xs text-gray-500">
-                      {resident.address
-                        ? `${resident.address}, ${resident.purok}`
-                        : resident.purok}
+                      {[resident.address, resident.purok]
+                        .filter(Boolean)
+                        .join(", ") || "—"}
                     </p>
                     <p className="text-xs text-gray-500">
                       {resident.phoneNumber}

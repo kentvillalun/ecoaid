@@ -47,7 +47,7 @@ export const RequestTable = ({
       {
         header: "Sitio",
         render: (data) => (
-          <p className="text-gray-600">{data?.user?.sitio?.name}</p>
+          <p className="text-gray-600">{data?.user?.sitio?.name ?? "—"}</p>
         ),
       },
       {
@@ -156,7 +156,7 @@ export const RequestTable = ({
       {
         header: "Sitio",
         render: (data) => (
-          <p className="text-gray-600">{data?.user?.sitio?.name}</p>
+          <p className="text-gray-600">{data?.user?.sitio?.name ?? "—"}</p>
         ),
       },
       {
@@ -251,7 +251,7 @@ export const RequestTable = ({
       {
         header: "Sitio",
         render: (data) => (
-          <p className="text-gray-600">{data?.user?.sitio?.name}</p>
+          <p className="text-gray-600">{data?.user?.sitio?.name ?? "—"}</p>
         ),
       },
       {
@@ -341,7 +341,7 @@ export const RequestTable = ({
       {
         header: "Sitio",
         render: (data) => (
-          <p className="text-gray-600">{data?.user?.sitio?.name}</p>
+          <p className="text-gray-600">{data?.user?.sitio?.name ?? "—"}</p>
         ),
       },
       {
@@ -435,7 +435,7 @@ export const RequestTable = ({
       {
         header: "Sitio",
         render: (data) => (
-          <p className="text-gray-600">{data?.user?.sitio?.name}</p>
+          <p className="text-gray-600">{data?.user?.sitio?.name ?? "—"}</p>
         ),
       },
       {
@@ -514,7 +514,7 @@ export const RequestTable = ({
       {
         header: "Sitio",
         render: (data) => (
-          <p className="text-gray-600">{data?.user?.sitio?.name}</p>
+          <p className="text-gray-600">{data?.user?.sitio?.name ?? "—"}</p>
         ),
       },
       {
@@ -599,7 +599,7 @@ export const RequestTable = ({
       {
         header: "Sitio",
         render: (data) => (
-          <p className="text-gray-600">{data?.user?.sitio?.name}</p>
+          <p className="text-gray-600">{data?.user?.sitio?.name ?? "—"}</p>
         ),
       },
       {
@@ -670,7 +670,11 @@ export const RequestTable = ({
     ],
   };
 
-  const columns = tableConfig[status];
+  // Hide the Sitio column when none of the residents has a sitio
+  const hasSitio = data?.some((req) => req?.user?.sitio);
+  const columns = tableConfig[status]?.filter(
+    (col) => col.header !== "Sitio" || hasSitio,
+  );
 
   const activeTabConfig = STATUS_TABS.find((tab) => tab.label === status);
 

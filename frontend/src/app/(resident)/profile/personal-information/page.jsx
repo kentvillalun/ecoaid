@@ -104,42 +104,42 @@ export default function PersonalInformationPage() {
             {isLoading ? (
               <div className="flex flex-col gap-3 md:max-w-xl md:mx-auto">
                 <div className="flex flex-col gap-1 border-b border-border p-2.5 text-sm">
-                  <label htmlFor="" className="text-start font-medium">
+                  <label htmlFor="" className="text-start font-medium text-base">
                     First name
                   </label>
                   <Skeleton width={150} />
                 </div>
 
                 <div className="flex flex-col gap-1 border-b border-border p-2.5 text-sm">
-                  <label htmlFor="" className="text-start font-medium">
+                  <label htmlFor="" className="text-start font-medium text-base">
                     Last name
                   </label>
                   <Skeleton width={150} />
                 </div>
 
                 <div className="flex flex-col gap-1 border-b border-border p-2.5 text-sm">
-                  <label htmlFor="" className="text-start font-medium">
+                  <label htmlFor="" className="text-start font-medium text-base">
                     Phone number
                   </label>
                   <Skeleton width={150} />
                 </div>
 
                 <div className="flex flex-col gap-1 border-b border-border p-2.5 text-sm">
-                  <label htmlFor="" className="text-start font-medium">
+                  <label htmlFor="" className="text-start font-medium text-base">
                     Address
                   </label>
                   <Skeleton width={200} />
                 </div>
 
                 <div className="flex flex-col gap-1 border-b border-border p-2.5 text-sm">
-                  <label htmlFor="" className="text-start font-medium">
+                  <label htmlFor="" className="text-start font-medium text-base">
                     Sitio
                   </label>
                   <Skeleton width={50} />
                 </div>
 
                 <div className="flex flex-col gap-1 border-b border-border p-2.5 text-sm">
-                  <label htmlFor="" className="text-start font-medium">
+                  <label htmlFor="" className="text-start font-medium text-base">
                     Registered Barangay
                   </label>
                   <Skeleton width={150} />
@@ -193,7 +193,7 @@ export default function PersonalInformationPage() {
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <label htmlFor="" className="text-start font-medium">
+                  <label htmlFor="" className="text-start font-medium text-base">
                     Phone number
                   </label>
                   <input
@@ -207,20 +207,23 @@ export default function PersonalInformationPage() {
                   />
                 </div>
 
-                <div className="flex flex-col gap-2">
-                  <label htmlFor="" className="text-start font-medium">
-                    Sitio
-                  </label>
-                  <input
-                    type="text"
-                    className="input mb-0 text-base"
-                    disabled={true}
-                    value={data?.user?.sitio}
-                  />
-                </div>
+                {/* Hidden when the resident has no sitio */}
+                {data?.user?.sitio && (
+                  <div className="flex flex-col gap-2">
+                    <label htmlFor="" className="text-start font-medium text-base">
+                      Sitio
+                    </label>
+                    <input
+                      type="text"
+                      className="input mb-0 text-base"
+                      disabled={true}
+                      value={data?.user?.sitio}
+                    />
+                  </div>
+                )}
 
                 <div className="flex flex-col gap-2">
-                  <label htmlFor="" className="text-start font-medium">
+                  <label htmlFor="" className="text-start font-medium text-base">
                     Registered Barangay
                   </label>
                   <input
@@ -231,8 +234,8 @@ export default function PersonalInformationPage() {
                   />
                 </div>
                 <p className="text-sm text-gray-400 italic">
-                  Sitio and barangay cannot be changed. Contact your barangay
-                  for updates
+                  {data?.user?.sitio ? "Sitio and barangay" : "Barangay"} cannot
+                  be changed. Contact your barangay for updates
                 </p>
                 <AnimatePresence>
                   {isEditing && (

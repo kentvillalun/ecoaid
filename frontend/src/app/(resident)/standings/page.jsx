@@ -248,9 +248,11 @@ export default function StandingsPage() {
                           <p className="font-bold text-text-primary text-xs leading-tight truncate max-w-full">
                             {isCurrentUser ? "You" : resident.name}
                           </p>
-                          <p className="text-[10px] text-text-secondary">
-                            {resident.purok}
-                          </p>
+                          {resident.purok && (
+                            <p className="text-[10px] text-text-secondary">
+                              {resident.purok}
+                            </p>
+                          )}
                         </div>
                         <span
                           className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${config.bg} ${config.text} border ${config.border}`}
@@ -282,9 +284,11 @@ export default function StandingsPage() {
                         <p className="font-semibold text-text-primary truncate">
                           {isCurrentUser ? "You" : r.name}
                         </p>
-                        <p className="text-xs text-text-secondary">
-                          {r.purok}
-                        </p>
+                        {r.purok && (
+                          <p className="text-xs text-text-secondary">
+                            {r.purok}
+                          </p>
+                        )}
                       </div>
                       <div className="flex flex-col items-end shrink-0">
                         <p className="font-bold text-text-primary text-sm">

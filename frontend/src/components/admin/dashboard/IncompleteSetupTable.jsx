@@ -10,7 +10,6 @@ const TABLE_HEADERS = ["Barangay", "Missing Items", "Action"];
 
 const getMissingItems = (barangay) => {
   const items = [...barangay.missingRoles];
-  if (barangay.sitioCount === 0) items.push("No sitios added yet");
   return items.join(", ");
 };
 
@@ -59,7 +58,7 @@ export const IncompleteSetupTable = ({
                 <Empty
                 className="pt-10!"
                   text="All caught up"
-                  subtext="Every registered barangay has its required staff roles and sitios."
+                  subtext="Every registered barangay has its required staff roles."
                 />
               </td>
             </tr>
