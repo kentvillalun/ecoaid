@@ -108,7 +108,7 @@ export default function BarangayLoginPage() {
             Barangay Admin Portal
           </p>
         </div>
-        <div className=" bg-surface p-10 rounded-4xl flex flex-col gap-8 new-border md:min-w-171 md:max-w-172.5 text-text-primary">
+        <div className=" bg-surface p-10 rounded-4xl flex flex-col gap-8 new-border md:min-w-120 text-text-primary">
           <div className="flex flex-col justify-center items-start">
             <h3 className="text-2xl font-semibold">Sign In</h3>
             <p className="text-sm text-gray-600">
