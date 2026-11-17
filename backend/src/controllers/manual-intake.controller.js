@@ -1,4 +1,5 @@
 import { prisma } from "../config/db.js";
+import { formatFullName } from "../utils/formatFullName.js";
 import { convertToKg } from "../utils/covertToKg.js";
 
 const recordIntake = async (req, res) => {
@@ -10,6 +11,7 @@ const recordIntake = async (req, res) => {
       where: { id },
       select: {
         firstName: true,
+        middleName: true,
         lastName: true,
       },
     });
@@ -48,7 +50,7 @@ const recordIntake = async (req, res) => {
           householdName,
           collectorId: id,
           barangayId,
-          collectorName: `${collectorName.firstName} ${collectorName.lastName}`,
+          collectorName: formatFullName(collectorName),
           manualIntakeItems: {
             createMany: {
               data: items.map((item) => ({
@@ -105,6 +107,7 @@ const getIntakeTransactions = async (req, res) => {
         user: {
           select: {
             firstName: true,
+            middleName: true,
             lastName: true,
             sitioId: true,
             sitio: {

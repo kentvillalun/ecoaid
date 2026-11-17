@@ -1,4 +1,5 @@
 import { prisma } from "../config/db.js";
+import { formatFullName } from "./formatFullName.js";
 
 const timeFrameDays = {
   weekly: 7,
@@ -30,7 +31,7 @@ export const getRankedLeaderboard = async (barangayId, unit, timeFrame) => {
 
   const users = await prisma.user.findMany({
     where: { id: { in: grouped.map((g) => g.userId) } },
-    select: { id: true, firstName: true, lastName: true, purok: true },
+    select: { id: true, firstName: true, middleName: true, lastName: true, purok: true },
   });
 
   return grouped.map((entry, index) => {
@@ -38,7 +39,7 @@ export const getRankedLeaderboard = async (barangayId, unit, timeFrame) => {
     return {
       rank: index + 1,
       userId: user.id,
-      name: `${user.firstName} ${user.lastName}`,
+      name: formatFullName(user),
       purok: user.purok,
       total: entry._sum.quantity,
     };

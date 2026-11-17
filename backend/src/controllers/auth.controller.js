@@ -428,6 +428,7 @@ const login = async (req, res) => {
         username: user.username,
         phoneNumber: user.phoneNumber,
         firstName: user.firstName,
+        middleName: user.middleName,
         lastName: user.lastName,
         barangay: user.barangay,
         sitio: user.sitio,
@@ -683,6 +684,7 @@ const barangayLogin = async (req, res) => {
         id: user.id,
         username: user.username,
         firstName: user.firstName,
+        middleName: user.middleName,
         lastName: user.lastName,
         role: user.role,
         barangay: user.barangay,
@@ -757,6 +759,7 @@ const barangayMe = async (req, res) => {
       where: { id, barangayId },
       select: {
         firstName: true,
+        middleName: true,
         lastName: true,
       },
     });
@@ -824,6 +827,7 @@ const superAdminLogin = async (req, res) => {
         role: true,
         username: true,
         firstName: true,
+        middleName: true,
         lastName: true,
       },
     });
@@ -871,6 +875,7 @@ const superAdminLogin = async (req, res) => {
         id: user.id,
         username: user.username,
         firstName: user.firstName,
+        middleName: user.middleName,
         lastName: user.lastName,
         role: user.role,
       },

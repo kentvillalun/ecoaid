@@ -1,4 +1,5 @@
 import { prisma } from "../config/db.js";
+import { formatFullName } from "../utils/formatFullName.js";
 
 const addExpense = async (req, res) => {
   try {
@@ -13,6 +14,7 @@ const addExpense = async (req, res) => {
       where: { id, barangayId },
       select: {
         firstName: true,
+        middleName: true,
         lastName: true,
       },
     });
@@ -25,7 +27,7 @@ const addExpense = async (req, res) => {
         name,
         amount,
         description,
-        performedBy: `${user.firstName} ${user.lastName}`,
+        performedBy: formatFullName(user),
         performedByRole: role,
       },
     });

@@ -22,7 +22,7 @@ export function EditResidentModal({
   const [phoneNumber, setPhoneNumber] = useState(
     currentResidentData.phoneNumber,
   );
-  const [sitio, setSitio] = useState(currentResidentData.purok);
+  const [sitio, setSitio] = useState(currentResidentData.sitioId ?? "");
   const [isVerified, setIsVerified] = useState(currentResidentData.isVerified);
   const { data } = useFetch({ url: "/api/barangay/sitio" });
   const { makeRequest } = useMutation();
@@ -34,41 +34,43 @@ export function EditResidentModal({
     setMiddleName(currentResidentData.middleName ?? "");
     setLastName(currentResidentData.lastName);
     setPhoneNumber(currentResidentData.phoneNumber);
-    setSitio(currentResidentData.purok);
+    setSitio(currentResidentData.sitioId ?? "");
     setIsVerified(currentResidentData.isVerified);
   };
 
+  const first = (firstName ?? "").trim();
+  const middle = middleName.trim();
+  const last = (lastName ?? "").trim();
+  const phone = (phoneNumber ?? "").trim();
+  const originalSitio = currentResidentData.sitioId ?? "";
+
   const hasChanges =
-    firstName !== currentResidentData.firstName ||
-    middleName !== (currentResidentData.middleName ?? "") ||
-    lastName !== currentResidentData.lastName ||
-    phoneNumber !== currentResidentData.phoneNumber ||
-    sitio !== currentResidentData.sitioId ||
+    first !== currentResidentData.firstName ||
+    middle !== (currentResidentData.middleName ?? "") ||
+    last !== currentResidentData.lastName ||
+    phone !== currentResidentData.phoneNumber ||
+    sitio !== originalSitio ||
     isVerified !== currentResidentData.isVerified;
 
   const handleSubmit = async () => {
     if (!hasChanges) return;
-    if (!firstName.trim() || !lastName.trim() || !phoneNumber.trim()) {
-      return toast.error("First name, last name and phone number are required");
+    if (!first || !middle || !last || !phone) {
+      return toast.error(
+        "First name, middle name, last name and phone number are required",
+      );
     }
-    toast.loading();
+    toast.loading("Saving changes...");
     const success = await makeRequest({
       method: "PATCH",
       url: `/api/resident/${currentResidentData.id}`,
       body: {
-        firstName:
-          firstName !== currentResidentData.firstName ? firstName : undefined,
+        firstName: first !== currentResidentData.firstName ? first : undefined,
         middleName:
-          middleName !== (currentResidentData.middleName ?? "")
-            ? middleName
-            : undefined,
-        lastName:
-          lastName !== currentResidentData.lastName ? lastName : undefined,
+          middle !== (currentResidentData.middleName ?? "") ? middle : undefined,
+        lastName: last !== currentResidentData.lastName ? last : undefined,
         phoneNumber:
-          phoneNumber !== currentResidentData.phoneNumber
-            ? phoneNumber
-            : undefined,
-        sitioId: sitio !== currentResidentData.purok ? sitio : undefined,
+          phone !== currentResidentData.phoneNumber ? phone : undefined,
+        sitioId: sitio !== originalSitio ? sitio : undefined,
         isVerified:
           isVerified !== currentResidentData.isVerified
             ? isVerified
@@ -83,7 +85,7 @@ export function EditResidentModal({
       handleRefetchCount();
     } else {
       toast.dismiss();
-      toast.error("Edit failed. Plaese try again");
+      toast.error("Edit failed. Please try again");
     }
   };
 
@@ -122,7 +124,7 @@ export function EditResidentModal({
         {/* Middle name */}
         <div className="flex flex-col gap-1">
           <label htmlFor="middleName" className="label">
-            Middle name
+            Middle name <span className="text-red-500">*</span>
           </label>
           <div className="input flex items-center mb-0">
             <input
@@ -183,7 +185,7 @@ export function EditResidentModal({
                 value={sitio ?? ""}
                 onChange={(e) => setSitio(e.target.value)}
               >
-                <option defaultValue={""} disabled hidden>
+                <option value="" disabled hidden>
                   {currentResidentData.purok ?? "Not assigned"}
                 </option>
                 {data?.sitios?.map((s) => (

@@ -1,4 +1,5 @@
 import { prisma } from "../config/db.js";
+import { formatFullName } from "../utils/formatFullName.js";
 import { convertToKg } from "../utils/covertToKg.js";
 
 const recordSale = async (req, res) => {
@@ -10,6 +11,7 @@ const recordSale = async (req, res) => {
       where: { id },
       select: {
         firstName: true,
+        middleName: true,
         lastName: true,
       },
     });
@@ -87,7 +89,7 @@ const recordSale = async (req, res) => {
         data: {
           junkshopId,
           userId: id,
-          performedBy: `${user.firstName} ${user.lastName}`,
+          performedBy: formatFullName(user),
           performedByRole: role,
           saleItems: {
             createMany: {
@@ -106,7 +108,7 @@ const recordSale = async (req, res) => {
         data: items.map((item) => ({
           barangayId,
           junkshopSalesId: sale.id,
-          performedBy: `${user.firstName} ${user.lastName}`,
+          performedBy: formatFullName(user),
           source: "JUNKSHOP_SALES",
           transactionType: "OUT",
           materialId: item.materialId,

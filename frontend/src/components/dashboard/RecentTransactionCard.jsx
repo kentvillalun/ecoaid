@@ -1,3 +1,4 @@
+import { formatFullName } from "@/lib/formatFullName";
 import Skeleton from "react-loading-skeleton";
 import { Card } from "../ui/Card";
 import { Error } from "../ui/Error";
@@ -59,7 +60,7 @@ export const RecentTransactionCard = ({
             <div className="flex flex-row justify-between w-full">
               <div className="flex flex-col">
                 <h3 className="font-semibold">
-                  {d?.request?.user?.firstName} {d?.request?.user?.lastName}
+                  {formatFullName(d?.request?.user)}
                 </h3>
                 <div className="flex flex-row gap-1 items-center">
                   <p className="text-sm text-gray-500">Pickup Request</p>

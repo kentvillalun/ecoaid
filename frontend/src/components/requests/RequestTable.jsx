@@ -1,3 +1,4 @@
+import { formatFullName } from "@/lib/formatFullName";
 import { Inter } from "next/font/google";
 import { StatusBadge } from "../ui/StatusBadge";
 import { PendingActions } from "./actions/PendingActions";
@@ -39,7 +40,7 @@ export const RequestTable = ({
         render: (data) => (
           <p className="font-semibold text-text-primary">
             {data?.user?.firstName
-              ? `${data?.user?.firstName} ${data?.user?.lastName}`
+              ? formatFullName(data?.user)
               : data?.user?.phoneNumber}
           </p>
         ),
@@ -148,7 +149,7 @@ export const RequestTable = ({
         render: (data) => (
           <p className="font-semibold text-text-primary">
             {data?.user?.firstName
-              ? `${data?.user?.firstName} ${data?.user?.lastName}`
+              ? formatFullName(data?.user)
               : data?.user?.phoneNumber}
           </p>
         ),
@@ -243,7 +244,7 @@ export const RequestTable = ({
         render: (data) => (
           <p className="font-semibold text-text-primary">
             {data?.user?.firstName
-              ? `${data?.user?.firstName} ${data?.user?.lastName}`
+              ? formatFullName(data?.user)
               : data?.user?.phoneNumber}
           </p>
         ),
@@ -333,7 +334,7 @@ export const RequestTable = ({
         render: (data) => (
           <p className="font-semibold text-text-primary">
             {data?.user?.firstName
-              ? `${data?.user?.firstName} ${data?.user?.lastName}`
+              ? formatFullName(data?.user)
               : data?.user?.phoneNumber}
           </p>
         ),
@@ -427,7 +428,7 @@ export const RequestTable = ({
         render: (data) => (
           <p className="font-semibold text-text-primary">
             {data?.user?.firstName
-              ? `${data?.user?.firstName} ${data?.user?.lastName}`
+              ? formatFullName(data?.user)
               : data?.user?.phoneNumber}
           </p>
         ),
@@ -506,7 +507,7 @@ export const RequestTable = ({
         render: (data) => (
           <p className="font-semibold text-text-primary">
             {data?.user?.firstName
-              ? `${data?.user?.firstName} ${data?.user?.lastName}`
+              ? formatFullName(data?.user)
               : data?.user?.phoneNumber}
           </p>
         ),
@@ -591,7 +592,7 @@ export const RequestTable = ({
         render: (data) => (
           <p className="font-semibold text-text-primary">
             {data?.user?.firstName
-              ? `${data?.user?.firstName} ${data?.user?.lastName}`
+              ? formatFullName(data?.user)
               : data?.user?.phoneNumber}
           </p>
         ),

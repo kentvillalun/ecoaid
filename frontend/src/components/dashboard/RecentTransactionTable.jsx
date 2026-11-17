@@ -1,3 +1,4 @@
+import { formatFullName } from "@/lib/formatFullName";
 import { Card } from "../ui/Card";
 import { Spinner } from "../ui/Spinner";
 import { Error } from "../ui/Error";
@@ -20,7 +21,7 @@ export const RecentTransactionTable = ({
       render: (data) => (
         <span className="font-semibold text-text-primary">
           {" "}
-          {data?.request?.user?.firstName} {data?.request?.user?.lastName}
+          {formatFullName(data?.request?.user)}
         </span>
       ),
     },

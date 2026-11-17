@@ -1,3 +1,4 @@
+import { formatFullName } from "@/lib/formatFullName";
 import {
   HomeIcon,
   InboxStackIcon,
@@ -222,7 +223,7 @@ export const Sidebar = () => {
 
           <div className="flex flex-col">
             <p className="text-text-primary font-medium">
-              {user ? `${user.firstName} ${user.lastName}` : " "}
+              {user ? formatFullName(user) : " "}
             </p>
             {role && (
               <p className="text-xs text-gray-400 capitalize">

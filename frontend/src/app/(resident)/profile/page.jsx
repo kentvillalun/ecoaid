@@ -1,5 +1,6 @@
 "use client";
 
+import { formatFullName } from "@/lib/formatFullName";
 import { Page } from "@/components/layout/Page";
 import { PageContent } from "@/components/layout/PageContent";
 import { ResidentHeader } from "@/components/navigation/ResidentHeader";
@@ -93,7 +94,7 @@ export default function ProfilePage() {
             ) : (
               <div className="text-center ">
                 <p className="font-semibold text-lg">
-                  {data?.user?.firstName} {data?.user?.lastName}
+                  {formatFullName(data?.user)}
                 </p>
                 <p className="text-sm text-[#727272]">
                   Brgy. {data?.user?.barangay}, {data?.user?.municipality},{" "}

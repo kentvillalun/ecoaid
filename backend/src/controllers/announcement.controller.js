@@ -1,4 +1,5 @@
 import { prisma } from "../config/db.js";
+import { formatFullName } from "../utils/formatFullName.js";
 
 const createAnnouncement = async (req, res) => {
   try {
@@ -9,6 +10,7 @@ const createAnnouncement = async (req, res) => {
       where: { id },
       select: {
         firstName: true,
+        middleName: true,
         lastName: true,
       },
     });
@@ -20,7 +22,7 @@ const createAnnouncement = async (req, res) => {
         title,
         content,
         category,
-        performedBy: `${user.firstName} ${user.lastName}`,
+        performedBy: formatFullName(user),
         performedByRole: role,
       },
     });

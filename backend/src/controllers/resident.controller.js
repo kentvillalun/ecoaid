@@ -8,6 +8,7 @@ const getResidentProfile = async (req, res) => {
       where: { id },
       select: {
         firstName: true,
+        middleName: true,
         lastName: true,
         sitio: {
           select: {
@@ -35,6 +36,7 @@ const getResidentProfile = async (req, res) => {
       message: "Fetching resident info success",
       user: {
         firstName: user.firstName,
+        middleName: user.middleName,
         lastName: user.lastName,
         sitio: user.sitio?.name,
         phoneNumber: user.phoneNumber,
@@ -79,15 +81,30 @@ const getBarangayInfo = async (req, res) => {
   }
 };
 
+// returns the name of the first field that was sent but is blank
+const findBlankField = (fields) => {
+  const blank = Object.entries(fields).find(
+    ([, value]) =>
+      value !== undefined && (typeof value !== "string" || !value.trim()),
+  );
+  return blank?.[0];
+};
+
 const updateResidentProfile = async (req, res) => {
   try {
     const id = req.user.id;
-    const { firstName, lastName, phoneNumber, address } = req.body ?? {};
+    const { firstName, middleName, lastName, phoneNumber, address } = req.body ?? {};
+
+    const blankField = findBlankField({ firstName, lastName, phoneNumber });
+    if (blankField) {
+      return res.status(400).json({ error: `${blankField} cannot be empty` });
+    }
 
     const data = {};
-    if (firstName !== undefined) data.firstName = firstName;
-    if (lastName !== undefined) data.lastName = lastName;
-    if (phoneNumber !== undefined) data.phoneNumber = phoneNumber;
+    if (firstName !== undefined) data.firstName = firstName.trim();
+    if (middleName !== undefined) data.middleName = middleName?.trim() || null;
+    if (lastName !== undefined) data.lastName = lastName.trim();
+    if (phoneNumber !== undefined) data.phoneNumber = phoneNumber.trim();
 
     if (Object.keys(data).length === 0) {
       return res.status(400).json("Invalid request");
@@ -98,6 +115,7 @@ const updateResidentProfile = async (req, res) => {
       data,
       select: {
         firstName: true,
+        middleName: true,
         lastName: true,
         phoneNumber: true,
       },
@@ -120,9 +138,12 @@ const searchResident = async (req, res) => {
     // staff are included too: barangay staff bring recyclables as their
     // attendance, and those have to be recorded against their own account
     const users = await prisma.$queryRaw`
-      SELECT id, "firstName", "lastName", "role"
+      SELECT id, "firstName", "middleName", "lastName", "role"
       FROM "User"
-      WHERE "barangayId" = ${barangayId} AND "isActive" = true AND CONCAT("firstName", ' ', "lastName") ILIKE ${"%" + name + "%"}
+      WHERE "barangayId" = ${barangayId} AND "isActive" = true AND (
+        CONCAT_WS(' ', "firstName", NULLIF("middleName", ''), "lastName") ILIKE ${"%" + name + "%"}
+        OR CONCAT("firstName", ' ', "lastName") ILIKE ${"%" + name + "%"}
+      )
     `;
 
     return res.status(200).json({
@@ -172,11 +193,19 @@ const editResident = async (req, res) => {
       req.body ?? {};
     const { barangayId } = req.user;
 
+    // the name and phone number can be changed but never left blank
+    // middleName stays optional here: residents from before the field existed
+    // have none, and the frontend forms are what ask for it
+    const blankField = findBlankField({ firstName, lastName, phoneNumber });
+    if (blankField) {
+      return res.status(400).json({ error: `${blankField} cannot be empty` });
+    }
+
     const data = {};
-    if (firstName !== undefined) data.firstName = firstName;
-    if (middleName !== undefined) data.middleName = middleName;
-    if (lastName !== undefined) data.lastName = lastName;
-    if (phoneNumber !== undefined) data.phoneNumber = phoneNumber;
+    if (firstName !== undefined) data.firstName = firstName.trim();
+    if (middleName !== undefined) data.middleName = middleName?.trim() || null;
+    if (lastName !== undefined) data.lastName = lastName.trim();
+    if (phoneNumber !== undefined) data.phoneNumber = phoneNumber.trim();
     if (sitioId !== undefined) data.sitioId = sitioId;
     if (isVerified !== undefined) data.isVerified = isVerified;
 
@@ -188,6 +217,7 @@ const editResident = async (req, res) => {
       const sitio = await prisma.sitio.findUnique({
         where: {
           id: sitioId,
+          barangayId,
         },
         select: {
           name: true,

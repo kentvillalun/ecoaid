@@ -75,6 +75,7 @@ const getRecentTransactions = async (req, res) => {
             user: {
               select: {
                 firstName: true,
+                middleName: true,
                 lastName: true,
               },
             },

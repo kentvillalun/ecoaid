@@ -1,5 +1,6 @@
 "use client";
 
+import { formatFullName } from "@/lib/formatFullName";
 import { Page } from "@/components/layout/Page.jsx";
 import { ResidentHeader } from "@/components/navigation/ResidentHeader";
 import Image from "next/image";
@@ -24,6 +25,7 @@ export default function PersonalInformationPage() {
 
   const [formData, setFormData] = useState({
     firstName: "",
+    middleName: "",
     lastName: "",
     phoneNumber: "",
   });
@@ -36,6 +38,7 @@ export default function PersonalInformationPage() {
     if (data) {
       setFormData({
         firstName: data?.user?.firstName,
+        middleName: data?.user?.middleName ?? "",
         lastName: data?.user?.lastName,
         phoneNumber: data?.user?.phoneNumber,
       });
@@ -91,7 +94,7 @@ export default function PersonalInformationPage() {
                 <p className="font-semibold text-lg">Something went wrong</p>
               ) : (
                 <p className="font-semibold text-lg">
-                  {data?.user?.firstName} {data?.user?.lastName}
+                  {formatFullName(data?.user)}
                 </p>
               )}
             </div>
@@ -106,6 +109,13 @@ export default function PersonalInformationPage() {
                 <div className="flex flex-col gap-1 border-b border-border p-2.5 text-sm">
                   <label htmlFor="" className="text-start font-medium text-base">
                     First name
+                  </label>
+                  <Skeleton width={150} />
+                </div>
+
+                <div className="flex flex-col gap-1 border-b border-border p-2.5 text-sm">
+                  <label htmlFor="" className="text-start font-medium text-base">
+                    Middle name
                   </label>
                   <Skeleton width={150} />
                 </div>
@@ -154,49 +164,73 @@ export default function PersonalInformationPage() {
               />
             ) : (
               <div className="flex flex-col gap-3 md:max-w-xl md:mx-auto">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="flex flex-col gap-2">
-                    <label
-                      htmlFor=""
-                      className="text-start font-medium text-base"
-                    >
-                      First name
-                    </label>
-                    <input
-                      type="text"
-                      className={`input mb-0 text-base ${!isEditing && "text-gray-400"}`}
-                      value={formData.firstName}
-                      disabled={!isEditing}
-                      onChange={(e) =>
-                        setFormData({ ...formData, firstName: e.target.value })
-                      }
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    <label
-                      htmlFor=""
-                      className="text-start font-medium text-base"
-                    >
-                      Last name
-                    </label>
-                    <input
-                      type="text"
-                      className={`input mb-0 text-base ${!isEditing && "text-gray-400"}`}
-                      value={formData.lastName}
-                      disabled={!isEditing}
-                      onChange={(e) =>
-                        setFormData({ ...formData, lastName: e.target.value })
-                      }
-                    />
-                  </div>
+                <div className="flex flex-col gap-2">
+                  <label
+                    htmlFor="firstName"
+                    className="text-start font-medium text-base"
+                  >
+                    First name {isEditing && <span className="text-red-500">*</span>}
+                  </label>
+                  <input
+                    id="firstName"
+                    type="text"
+                    className={`input mb-0 text-base ${!isEditing && "text-gray-400"}`}
+                    value={formData.firstName}
+                    disabled={!isEditing}
+                    onChange={(e) =>
+                      setFormData({ ...formData, firstName: e.target.value })
+                    }
+                  />
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <label htmlFor="" className="text-start font-medium text-base">
-                    Phone number
+                  <label
+                    htmlFor="middleName"
+                    className="text-start font-medium text-base"
+                  >
+                    Middle name {isEditing && <span className="text-red-500">*</span>}
                   </label>
                   <input
+                    id="middleName"
+                    type="text"
+                    placeholder="Set your middle name"
+                    className={`input mb-0 text-base ${!isEditing && "text-gray-400"}`}
+                    value={formData.middleName}
+                    disabled={!isEditing}
+                    onChange={(e) =>
+                      setFormData({ ...formData, middleName: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label
+                    htmlFor="lastName"
+                    className="text-start font-medium text-base"
+                  >
+                    Last name {isEditing && <span className="text-red-500">*</span>}
+                  </label>
+                  <input
+                    id="lastName"
+                    type="text"
+                    className={`input mb-0 text-base ${!isEditing && "text-gray-400"}`}
+                    value={formData.lastName}
+                    disabled={!isEditing}
+                    onChange={(e) =>
+                      setFormData({ ...formData, lastName: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label
+                    htmlFor="phoneNumber"
+                    className="text-start font-medium text-base"
+                  >
+                    Phone number {isEditing && <span className="text-red-500">*</span>}
+                  </label>
+                  <input
+                    id="phoneNumber"
                     type="number"
                     className={`input mb-0 text-base ${!isEditing && "text-gray-400"}`}
                     value={formData.phoneNumber}
@@ -246,8 +280,16 @@ export default function PersonalInformationPage() {
                       transition={{ duration: 0.3 }}
                       className="w-full bg-accent text-white font-medium py-3.75 px-24 rounded-[14px] disabled:opacity-70 text-sm gradient-button"
                       onClick={async () => {
+                        if (
+                          !formData.firstName?.trim() ||
+                          !formData.middleName?.trim() ||
+                          !formData.lastName?.trim() ||
+                          !String(formData.phoneNumber ?? "").trim()
+                        ) {
+                          toast.error("First name, middle name, last name and phone number are required");
+                          return;
+                        }
                         toast.loading("Updating personal information");
-                        console.log(formData);
                         const success = await makeRequest({
                           url,
                           method: "PATCH",

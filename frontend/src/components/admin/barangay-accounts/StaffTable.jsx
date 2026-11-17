@@ -1,5 +1,6 @@
 "use client";
 
+import { formatFullName } from "@/lib/formatFullName";
 import { useState } from "react";
 import { Inter } from "next/font/google";
 import { toast } from "sonner";
@@ -123,7 +124,7 @@ export const StaffTable = ({
               >
                 <td className="p-4">
                   <p className="font-semibold text-text-primary">
-                    {account.firstName} {account.lastName}
+                    {formatFullName(account)}
                   </p>
                 </td>
                 <td className="p-4">
@@ -181,7 +182,7 @@ export const StaffTable = ({
           )
         }
         title={selectedAccount?.isActive ? "Deactivate account" : "Reactivate account"}
-        subtitle={`${selectedAccount?.firstName} ${selectedAccount?.lastName}`}
+        subtitle={formatFullName(selectedAccount)}
         confirmLabel={selectedAccount?.isActive ? "Yes, deactivate" : "Yes, reactivate"}
         confirmClassName={selectedAccount?.isActive ? "gradient-button-red" : "gradient-button-admin"}
         onConfirm={handleToggleStatus}

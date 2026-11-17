@@ -1,3 +1,4 @@
+import { formatFullName } from "@/lib/formatFullName";
 import { Card } from "../ui/Card";
 import { StatusBadge } from "../ui/StatusBadge";
 import { MaterialTag } from "../ui/MaterialTag";
@@ -104,7 +105,7 @@ export const RequestCard = ({
                       <div className="flex flex-col gap-0.5">
                         <h3 className="font-semibold text-text-primary ">
                           {d?.user?.firstName
-                            ? `${d?.user?.firstName} ${d?.user?.lastName}`
+                            ? formatFullName(d?.user)
                             : d?.user?.phoneNumber}
                         </h3>
                         {d?.user?.sitio?.name && (
@@ -176,7 +177,7 @@ export const RequestCard = ({
                       <div className="flex flex-col gap-0.5">
                         <h3 className="font-semibold text-text-primary ">
                           {d?.user?.firstName
-                            ? `${d?.user?.firstName} ${d?.user?.lastName}`
+                            ? formatFullName(d?.user)
                             : d?.user?.phoneNumber}
                         </h3>
                         {d?.user?.sitio?.name && (

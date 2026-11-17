@@ -1,4 +1,5 @@
 import { prisma } from "../config/db.js";
+import { formatFullName } from "./formatFullName.js";
 
 export const getMrfInventoryReport = async (barangayId, startDate, endDate) => {
   const end = new Date(endDate);
@@ -82,6 +83,7 @@ export const getCollectionIntakeReports = async (
       user: {
         select: {
           firstName: true,
+          middleName: true,
           lastName: true,
         },
       },
@@ -117,6 +119,7 @@ export const getCollectionIntakeReports = async (
       user: {
         select: {
           firstName: true,
+          middleName: true,
           lastName: true,
         },
       },
@@ -143,7 +146,7 @@ export const getCollectionIntakeReports = async (
 
   const mappedRequests = requests.map((r) => {
     return {
-      residentName: `${r.user.firstName} ${r.user.lastName}`,
+      residentName: formatFullName(r.user),
       date: r.collectedAt,
       channel: "App Request",
       materials: r.collectionItems.map((item) => ({
@@ -158,7 +161,7 @@ export const getCollectionIntakeReports = async (
   const mappedManualIntakes = manualIntakes.map((intake) => {
     return {
       residentName: intake.user
-        ? `${intake.user.firstName} ${intake.user.lastName}`
+        ? formatFullName(intake.user)
         : intake.householdName,
       date: intake.createdAt,
       channel: "Manual Intake",

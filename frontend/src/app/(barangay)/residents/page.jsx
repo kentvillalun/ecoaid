@@ -1,5 +1,6 @@
 "use client";
 
+import { formatFullName } from "@/lib/formatFullName";
 import { Inter } from "next/font/google";
 import { Page } from "@/components/layout/Page";
 import { PageContent } from "@/components/layout/PageContent";
@@ -79,7 +80,7 @@ export default function ResidentsPage() {
     setVerifyingId(null);
 
     if (success) {
-      toast.success(`${resident.firstName} ${resident.lastName} is now verified`);
+      toast.success(`${formatFullName(resident)} is now verified`);
       handleRefetchCount();
     } else {
       toast.error("Verification failed. Please try again");
@@ -288,7 +289,7 @@ export default function ResidentsPage() {
                         className="hover:bg-bg transition-all duration-150"
                       >
                         <td className="p-4 font-bold text-text-primary text-nowrap">
-                          {resident.firstName} {resident.lastName}
+                          {formatFullName(resident)}
                         </td>
                         <td className="p-4 text-gray-500 text-xs text-nowrap">
                           {[resident.address, resident.purok]
@@ -380,7 +381,7 @@ export default function ResidentsPage() {
                 >
                   <div className="flex flex-row items-center justify-between w-full gap-2">
                     <p className="text-sm font-bold text-text-primary">
-                      {resident.firstName} {resident.lastName}
+                      {formatFullName(resident)}
                     </p>
                     <Badge
                       label={

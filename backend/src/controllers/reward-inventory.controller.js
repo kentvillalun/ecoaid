@@ -1,4 +1,5 @@
 import { prisma } from "../config/db.js";
+import { formatFullName } from "../utils/formatFullName.js";
 import { getResidentProgramBalance } from "../utils/residentPoints.js";
 
 const addRewardItem = async (req, res) => {
@@ -146,6 +147,7 @@ const releaseReward = async (req, res) => {
       where: { barangayId, id: residentId, role: "RESIDENT" },
       select: {
         firstName: true,
+        middleName: true,
         lastName: true,
       },
     });
@@ -158,6 +160,7 @@ const releaseReward = async (req, res) => {
       where: { barangayId, id },
       select: {
         firstName: true,
+        middleName: true,
         lastName: true,
       },
     });
@@ -204,8 +207,8 @@ const releaseReward = async (req, res) => {
         residentId,
         programId,
         barangayId,
-        residentName: `${resident.firstName} ${resident.lastName}`,
-        performedBy: `${user.firstName} ${user.lastName}`,
+        residentName: formatFullName(resident),
+        performedBy: formatFullName(user),
         performedByRole: role,
         quantity: item.quantity,
       })),
@@ -227,7 +230,7 @@ const searchResident = async (req, res) => {
     }
 
     // "juan dela" should match first name "Juan" + last name "Dela Cruz",
-    // so every typed word must match either the first or the last name
+    // so every typed word must match the first, middle or last name
     const words = (name ?? "").trim().split(/\s+/).filter(Boolean);
 
     // every resident shows up, even with 0 points, so staff can see why a
@@ -239,6 +242,7 @@ const searchResident = async (req, res) => {
         AND: words.map((word) => ({
           OR: [
             { firstName: { contains: word, mode: "insensitive" } },
+            { middleName: { contains: word, mode: "insensitive" } },
             { lastName: { contains: word, mode: "insensitive" } },
           ],
         })),
@@ -246,6 +250,7 @@ const searchResident = async (req, res) => {
       select: {
         id: true,
         firstName: true,
+        middleName: true,
         lastName: true,
       },
       take: 10,
@@ -254,7 +259,7 @@ const searchResident = async (req, res) => {
     const residentsWithPoints = await Promise.all(
       residents.map(async (resident) => ({
         id: resident.id,
-        name: `${resident.firstName} ${resident.lastName}`,
+        name: formatFullName(resident),
         points: await getResidentProgramBalance(resident.id, programId),
       })),
     );

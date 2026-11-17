@@ -1,4 +1,5 @@
 import { prisma } from "../config/db.js";
+import { formatFullName } from "../utils/formatFullName.js";
 import { convertToKg } from "../utils/covertToKg.js";
 
 const getStockSummary = async (req, res) => {
@@ -139,6 +140,7 @@ const recordStockOut = async (req, res) => {
       select: {
         id: true,
         firstName: true,
+        middleName: true,
         lastName: true,
       },
     });
@@ -173,7 +175,7 @@ const recordStockOut = async (req, res) => {
       data: {
         barangayId,
         userId: id,
-        performedBy: `${user.firstName} ${user.lastName}`,
+        performedBy: formatFullName(user),
         materialId,
         quantity: convertToKg(quantity, unit),
         unit: ledgerUnit,

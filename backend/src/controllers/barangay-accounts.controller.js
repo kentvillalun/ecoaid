@@ -270,6 +270,7 @@ const getStaffAccountsByBarangay = async (req, res) => {
         id: true,
         username: true,
         firstName: true,
+        middleName: true,
         lastName: true,
         phoneNumber: true,
         role: true,

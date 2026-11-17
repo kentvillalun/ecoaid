@@ -105,6 +105,7 @@ const listRequests = async (req, res) => {
           user: {
             select: {
               firstName: true,
+              middleName: true,
               lastName: true,
               sitio: { select: { name: true } },
               phoneNumber: true,
@@ -296,7 +297,10 @@ const updateStatus = async (req, res) => {
     }
 
     if (status === "REJECTED") {
-      if (!rejectionReason) {
+      const reason =
+        typeof rejectionReason === "string" ? rejectionReason.trim() : "";
+
+      if (!reason) {
         return res
           .status(400)
           .json({ error: "Missing rejection reason field" });
@@ -307,7 +311,7 @@ const updateStatus = async (req, res) => {
         data: {
           status: "REJECTED",
           rejectedAt: new Date(),
-          rejectionReason: rejectionReason,
+          rejectionReason: reason,
         },
       });
 
@@ -340,6 +344,7 @@ const getRequest = async (req, res) => {
         user: {
           select: {
             firstName: true,
+            middleName: true,
             lastName: true,
             phoneNumber: true,
             sitio: {

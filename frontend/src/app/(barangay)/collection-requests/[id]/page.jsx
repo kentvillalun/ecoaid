@@ -1,5 +1,6 @@
 "use client";
 
+import { formatFullName } from "@/lib/formatFullName";
 import { Page } from "@/components/layout/Page";
 import { PageContent } from "@/components/layout/PageContent";
 import { BarangayTopBar } from "@/components/navigation/BarangayTopBar";
@@ -84,7 +85,7 @@ export default function RequestDetails() {
                 </h3>
                 <LabelValue
                   name={"Full name"}
-                  value={`${req?.user?.firstName ? `${req.user.firstName} ${req.user.lastName}` : "Name not set"}`}
+                  value={`${req?.user?.firstName ? formatFullName(req.user) : "Name not set"}`}
                 />
                 <LabelValue
                   name={"Contact number"}

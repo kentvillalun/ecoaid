@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 export const PendingActions = ({ id, onSuccess, variant }) => {
-  const { data, isLoading, error, isError, updateStatus } = useUpdate();
+  const { data, isLoading, error, isError, updateStatus, errorMessageRef } = useUpdate();
   const [isOpen, setIsOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const router = useRouter()
@@ -26,32 +26,39 @@ export const PendingActions = ({ id, onSuccess, variant }) => {
             icon={<ExclamationTriangleIcon className="w-6 stroke-accent" />}
             confirmLabel={"Decline"}
             confirmClassName={"gradient-button-red duration-300 ease-in-out transition-all"}
-            onClose={() => setIsOpen(false)}
+            onClose={() => {
+              setIsOpen(false)
+              setRejectionReason("")
+            }}
             onConfirm={async () => {
+              if (!rejectionReason.trim()) {
+                toast.error("Please enter a rejection reason")
+                return
+              }
               toast.loading("Declining request...")
-              const success = await updateStatus({ id, status: "REJECTED", rejectionReason });
+              const success = await updateStatus({ id, status: "REJECTED", rejectionReason: rejectionReason.trim() });
               if (success) {
                 toast.dismiss()
                 toast.success("Request declined")
                 setIsOpen(false)
+                setRejectionReason("")
                 onSuccess();
               } else {
                 toast.dismiss()
-                toast.error("Someting went wrong")
-
+                toast.error(errorMessageRef.current ?? "Something went wrong")
               }
             }}
             isPill={true}
           >
             <div className="flex flex-col gap-1 p-6">
               <label className="label">
-                Rejection Reason
+                Rejection Reason <span className="text-red-500">*</span>
               </label>
               <textarea
-                type="text"
                 className="input mb-0 max-h-none"
                 rows={4}
                 placeholder="Input the reason here"
+                value={rejectionReason}
                 onChange={(event) => setRejectionReason(event.target.value)}
               />
             </div>
@@ -75,8 +82,8 @@ export const PendingActions = ({ id, onSuccess, variant }) => {
             toast.success("Request approved");
             onSuccess()
           } else {
-            toast.dismiss
-            toast.error("Someting went wrong")
+            toast.dismiss()
+            toast.error(errorMessageRef.current ?? "Something went wrong")
           }
         }}
         

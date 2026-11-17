@@ -1,5 +1,6 @@
 "use client";
 
+import { formatFullName } from "@/lib/formatFullName";
 import { Page } from "@/components/layout/Page";
 import { PageContent } from "@/components/layout/PageContent";
 import { BarangayTopBar } from "@/components/navigation/BarangayTopBar";
@@ -375,14 +376,14 @@ export default function ManualIntakePage() {
                               onClick={() => {
                                 setSelectedResident({
                                   id: r.id,
-                                  displayName: `${r.firstName} ${r.lastName}`,
+                                  displayName: formatFullName(r),
                                 });
-                                setSearchTerm(`${r.firstName} ${r.lastName}`);
+                                setSearchTerm(formatFullName(r));
                                 setShowDropdown(false);
                               }}
                             >
                               <p className="">
-                                {r.firstName} {r.lastName}
+                                {formatFullName(r)}
                                 {r.role !== "RESIDENT" && (
                                   <span className="ml-2 text-xs text-gray-400 uppercase">
                                     {r.role.toLowerCase()}
@@ -583,7 +584,7 @@ export default function ManualIntakePage() {
                       <td className="p-4">
                         {row.user ? (
                           <ResidentNameCell
-                            name={`${row?.user?.firstName} ${row?.user?.lastName}`}
+                            name={formatFullName(row?.user)}
                           />
                         ) : (
                           <ResidentNameCell
@@ -690,7 +691,7 @@ export default function ManualIntakePage() {
                     <div className="flex flex-row items-center gap-2 flex-wrap">
                       <h3 className="font-semibold text-text-primary">
                         {row?.user
-                          ? `${row?.user?.firstName} ${row?.user?.lastName}`
+                          ? formatFullName(row?.user)
                           : row?.householdName}
                       </h3>
                       {!row?.user && (

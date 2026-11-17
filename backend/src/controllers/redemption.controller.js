@@ -1,4 +1,5 @@
 import { prisma } from "../config/db.js";
+import { formatFullName } from "../utils/formatFullName.js";
 import { convertToKg } from "../utils/covertToKg.js";
 import { getResidentProgramBalance } from "../utils/residentPoints.js";
 
@@ -70,6 +71,7 @@ const createProgram = async (req, res) => {
         where: { id: userId },
         select: {
           firstName: true,
+          middleName: true,
           lastName: true,
         },
       });
@@ -104,7 +106,7 @@ const createProgram = async (req, res) => {
         title: `${name}`,
         content: `${description}\n\nAccepted materials:\n${materialLines.join("\n")}`,
         category: "EVENT",
-        performedBy: `${user.firstName} ${user.lastName}`,
+        performedBy: formatFullName(user),
         performedByRole: role,
       };
     }
@@ -395,6 +397,7 @@ const createTransaction = async (req, res) => {
       where: { barangayId, id },
       select: {
         firstName: true,
+        middleName: true,
         lastName: true,
       },
     });
@@ -404,6 +407,7 @@ const createTransaction = async (req, res) => {
       select: {
         id: true,
         firstName: true,
+        middleName: true,
         lastName: true,
       },
     });
@@ -445,8 +449,8 @@ const createTransaction = async (req, res) => {
         data: {
           programId,
           residentId: resident.id,
-          collectorName: `${collector.firstName} ${collector.lastName}`,
-          residentName: `${resident.firstName} ${resident.lastName}`,
+          collectorName: formatFullName(collector),
+          residentName: formatFullName(resident),
           redemptionTransactionItem: {
             createMany: {
               data: items.map((item, index) => ({
@@ -600,7 +604,7 @@ const searchResident = async (req, res) => {
     }
 
     // "juan dela" should match first name "Juan" + last name "Dela Cruz",
-    // so every typed word must match either the first or the last name
+    // so every typed word must match the first, middle or last name
     const words = (name ?? "").trim().split(/\s+/).filter(Boolean);
 
     const residents = await prisma.user.findMany({
@@ -610,6 +614,7 @@ const searchResident = async (req, res) => {
         AND: words.map((word) => ({
           OR: [
             { firstName: { contains: word, mode: "insensitive" } },
+            { middleName: { contains: word, mode: "insensitive" } },
             { lastName: { contains: word, mode: "insensitive" } },
           ],
         })),
@@ -617,6 +622,7 @@ const searchResident = async (req, res) => {
       select: {
         id: true,
         firstName: true,
+        middleName: true,
         lastName: true,
       },
       take: 10,
@@ -626,7 +632,7 @@ const searchResident = async (req, res) => {
     const residentsWithPoints = await Promise.all(
       residents.map(async (resident) => ({
         id: resident.id,
-        name: `${resident.firstName} ${resident.lastName}`,
+        name: formatFullName(resident),
         points: await getResidentProgramBalance(resident.id, programId),
       })),
     );
