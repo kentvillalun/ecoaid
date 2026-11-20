@@ -66,10 +66,7 @@ export function TransactionMaterialsBreakdown({ items, isCashMode }) {
       </tbody>
       <tfoot>
         <tr className="border-t border-gray-100">
-          <td
-            className="pt-2 pr-4 font-semibold text-text-primary"
-            colSpan={2}
-          >
+          <td className="pt-2 pr-4 font-semibold text-text-primary" colSpan={2}>
             Total
           </td>
           <td className="pt-2 pr-1 font-bold text-text-primary tabular-nums text-nowrap">
@@ -95,9 +92,7 @@ export const TransactionTable = ({
       header: "Resident",
       render: (data) => (
         <div className="flex flex-col items-start justify-center">
-          <p className="font-semibold text-text-primary">
-            {data.residentName}
-          </p>
+          <p className="font-semibold text-text-primary">{data.residentName}</p>
           <p className="capitalize text-gray-400 text-sm">
             Collected by: {data.collectorName}{" "}
           </p>
@@ -199,22 +194,20 @@ export const TransactionTable = ({
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100">
-          {isLoading && (
+          
+          {isLoading ? (
             <tr className="max-w-md">
               <td className="text-center" colSpan={6}>
                 <Spinner />
               </td>
             </tr>
-          )}
-
-          {isError && (
+          ) : isError ? (
             <tr className="max-w-md">
               <td className="text-center" colSpan={6}>
                 <Error handleRefetchCount={handleRefetchCount} />
               </td>
             </tr>
-          )}
-          {data?.transactions?.length === 0 ? (
+          ) : data?.transactions?.length === 0 ? (
             <tr className="max-w-md">
               <td className="text-center" colSpan={6}>
                 <Empty
