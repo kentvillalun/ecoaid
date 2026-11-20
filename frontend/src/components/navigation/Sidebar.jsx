@@ -6,7 +6,6 @@ import {
   MegaphoneIcon,
   CubeIcon,
   BanknotesIcon,
-  ChartBarIcon,
   Cog6ToothIcon,
   ArrowsRightLeftIcon,
   GiftIcon,
@@ -21,7 +20,6 @@ import {
   MegaphoneIcon as AnnoucementsIcon,
   CubeIcon as MaterialStockIcon,
   BanknotesIcon as JunkshopSalesIcon,
-  ChartBarIcon as ReportsIcon,
   Cog6ToothIcon as SettingsIcon,
   ArrowLeftStartOnRectangleIcon as LogoutIcon,
   ArrowsRightLeftIcon as CollectionSortingIcon,
@@ -30,8 +28,9 @@ import {
   WalletIcon as ProgramFundsIcon,
   TrophyIcon as LeaderboardIcon,
   XMarkIcon,
+  ChevronDownIcon,
 } from "@heroicons/react/24/outline";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { DrawerContext } from "@/app/(barangay)/BarangayLayoutClient.jsx";
 import Link from "next/link";
 import { Inter } from "next/font/google";
@@ -51,6 +50,8 @@ export const Sidebar = () => {
     useContext(DrawerContext);
   const router = useRouter();
   const pathName = usePathname();
+  // Only holds groups the user has toggled by hand; the rest follow the active page.
+  const [openGroups, setOpenGroups] = useState({});
 
   const MODULE_FLAG_MAP = {
     "/collection-requests": "hasCollectionRequests",
@@ -65,79 +66,106 @@ export const Sidebar = () => {
     return !!modules?.[flagKey];
   };
 
-  // One flat list, in the order the system is used: collect, store, reward, sell, account for, report.
-  const navItems = [
+  // Standalone key modules stay one tap away. The rest sit under group headings.
+  const dashboard = {
+    icon: DashboardIcon,
+    label: "Dashboard",
+    href: "/dashboard",
+    solidIcon: HomeIcon,
+  };
+  const residents = {
+    icon: ResidentsIcon,
+    label: "Residents",
+    href: "/residents",
+    solidIcon: UserIcon,
+  };
+  const collectionRequests = {
+    icon: RequestIcon,
+    label: "Collection Requests",
+    href: "/collection-requests",
+    solidIcon: InboxStackIcon,
+  };
+  const redemption = {
+    icon: RedemptionProgramIcon,
+    label: "Redemption",
+    href: "/redemption",
+    solidIcon: GiftIcon,
+  };
+  // Standalone position, group-style heading. Expands to one subitem per
+  // report section (one page each). href is only used for the role check.
+  const reports = {
+    label: "Reports",
+    href: "/reports",
+    subItems: [
+      { label: "Material Inventory", href: "/reports/material-inventory" },
+      { label: "Collection & Intake", href: "/reports/collection-intake" },
+      { label: "Redemption & Rewards", href: "/reports/redemption-rewards" },
+      { label: "Program Funds", href: "/reports/program-funds" },
+    ],
+  };
+
+  const navLayout = [
+    dashboard,
+    residents,
+    collectionRequests,
+    redemption,
+    reports,
     {
-      icon: DashboardIcon,
-      label: "Dashboard",
-      href: "/dashboard",
-      solidIcon: HomeIcon,
+      title: "Materials",
+      items: [
+        {
+          icon: CollectionSortingIcon,
+          label: "Manual Intake",
+          href: "/manual-intake",
+          solidIcon: ArrowsRightLeftIcon,
+        },
+        {
+          icon: MaterialStockIcon,
+          label: "Inventory",
+          href: "/mrf-inventory",
+          solidIcon: CubeIcon,
+        },
+      ],
     },
     {
-      icon: ResidentsIcon,
-      label: "Residents",
-      href: "/residents",
-      solidIcon: UserIcon,
+      title: "Finance",
+      items: [
+        {
+          icon: JunkshopSalesIcon,
+          label: "Junkshop Sales",
+          href: "/junkshop-sales",
+          solidIcon: BanknotesIcon,
+        },
+        {
+          icon: ProgramFundsIcon,
+          label: "Program Funds",
+          href: "/program-funds",
+          solidIcon: WalletIcon,
+        },
+      ],
     },
     {
-      icon: RequestIcon,
-      label: "Collection Requests",
-      href: "/collection-requests",
-      solidIcon: InboxStackIcon,
-    },
-    {
-      icon: CollectionSortingIcon,
-      label: "Manual Intake",
-      href: "/manual-intake",
-      solidIcon: ArrowsRightLeftIcon,
-    },
-    {
-      icon: RedemptionProgramIcon,
-      label: "Redemption",
-      href: "/redemption",
-      solidIcon: GiftIcon,
-    },
-    {
-      icon: RewardsIcon,
-      label: "Rewards",
-      href: "/reward-inventory",
-      solidIcon: ClipboardDocumentCheckIcon,
-    },
-    {
-      icon: JunkshopSalesIcon,
-      label: "Junkshop Sales",
-      href: "/junkshop-sales",
-      solidIcon: BanknotesIcon,
-    },
-    {
-      icon: MaterialStockIcon,
-      label: "MRF Inventory",
-      href: "/mrf-inventory",
-      solidIcon: CubeIcon,
-    },
-    {
-      icon: ProgramFundsIcon,
-      label: "Program Funds",
-      href: "/program-funds",
-      solidIcon: WalletIcon,
-    },
-    {
-      icon: AnnoucementsIcon,
-      label: "Announcements",
-      href: "/announcements",
-      solidIcon: MegaphoneIcon,
-    },
-    {
-      icon: LeaderboardIcon,
-      label: "Leaderboard",
-      href: "/leaderboard",
-      solidIcon: TrophyIcon,
-    },
-    {
-      icon: ReportsIcon,
-      label: "Reports",
-      href: "/reports",
-      solidIcon: ChartBarIcon,
+      title: "Community",
+      items: [
+        {
+          icon: RewardsIcon,
+          label: "Rewards",
+          href: "/reward-inventory",
+          solidIcon: ClipboardDocumentCheckIcon,
+        },
+        {
+          icon: LeaderboardIcon,
+          label: "Leaderboard",
+          href: "/leaderboard",
+          solidIcon: TrophyIcon,
+        },
+        {
+          icon: AnnoucementsIcon,
+          label: "Announcements",
+          href: "/announcements",
+          solidIcon: MegaphoneIcon,
+        },
+      ],
     },
   ];
 
@@ -153,7 +181,12 @@ export const Sidebar = () => {
     return matchedEntry?.roles?.includes(role) && passesModuleCheck(item);
   };
 
-  const filteredNavItems = navItems.filter(canSee);
+  // A group heading only shows if the role can see at least one item inside it.
+  const visibleNav = navLayout
+    .map((entry) =>
+      entry.items ? { ...entry, items: entry.items.filter(canSee) } : entry,
+    )
+    .filter((entry) => (entry.items ? entry.items.length > 0 : canSee(entry)));
 
   const renderNavItem = (item) => (
     <Link
@@ -174,6 +207,78 @@ export const Sidebar = () => {
       </label>
     </Link>
   );
+
+  const renderSubItem = (item) => {
+    const isActive = pathName.startsWith(item.href);
+    return (
+      <Link
+        key={item.href}
+        href={item.href}
+        className={`flex flex-row items-center rounded-xl p-2 px-3 transition-all ease-in-out hover:cursor-pointer hover:bg-accent/10 group ${isActive ? "gradient-button" : ""}`}
+      >
+        <span
+          className={`text-base ${isActive ? "text-surface" : "text-text-secondary group-hover:text-accent"}`}
+        >
+          {item.label}
+        </span>
+      </Link>
+    );
+  };
+
+  // Heading + animated list, shared by the three groups and by Reports.
+  // Closed by default; a section holding the current page starts open.
+  const renderAccordion = (title, hasActiveItem, items) => {
+    const isOpen = openGroups[title] ?? hasActiveItem;
+
+    return (
+      <div className="flex flex-col" key={title}>
+        <button
+          type="button"
+          aria-expanded={isOpen}
+          onClick={(e) => {
+            // On mobile the drawer sits inside a backdrop that closes on click.
+            // A heading should only toggle, not close the drawer.
+            e.stopPropagation();
+            setOpenGroups((prev) => ({ ...prev, [title]: !isOpen }));
+          }}
+          className="flex w-full flex-row items-center justify-between p-2 text-text-secondary hover:cursor-pointer"
+        >
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-text-secondary">
+            {title}
+          </span>
+          <ChevronDownIcon
+            className={`h-4 w-4 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
+          />
+        </button>
+        <div
+          className={`grid transition-all duration-300 ease-in-out ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}
+        >
+          {/* invisible while closed keeps hidden links out of the tab order */}
+          <div
+            className={`overflow-hidden transition-[visibility] duration-300 ${isOpen ? "visible" : "invisible"}`}
+          >
+            <div className="flex flex-col gap-2 border-l-2 border-white/10 pl-2 lg:gap-3">
+              {items}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderParent = (parent) =>
+    renderAccordion(
+      parent.label,
+      pathName.startsWith(parent.href),
+      parent.subItems.map(renderSubItem),
+    );
+
+  const renderGroup = (group) =>
+    renderAccordion(
+      group.title,
+      group.items.some((item) => pathName.startsWith(item.href)),
+      group.items.map(renderNavItem),
+    );
 
   const handleLogout = async () => {
     try {
@@ -199,7 +304,7 @@ export const Sidebar = () => {
 
   return (
     <aside
-      className={`w-60 md:w-65 h-svh flex flex-col bg-surface fixed top-0 text-white left-0 z-50 ${inter.className} overflow-hidden sidebar new-border`}
+      className={`w-60 md:w-65 h-svh flex flex-col bg-surface fixed top-0 text-white left-0 z-40 ${inter.className} overflow-hidden sidebar new-border`}
     >
       <div className="md:hidden flex pt-4 pr-4 items-end w-full justify-end">
         <XMarkIcon
@@ -234,7 +339,13 @@ export const Sidebar = () => {
         </div>
 
         <div className="flex flex-col gap-2 lg:gap-3">
-          {filteredNavItems.map(renderNavItem)}
+          {visibleNav.map((entry) =>
+            entry.items
+              ? renderGroup(entry)
+              : entry.subItems
+                ? renderParent(entry)
+                : renderNavItem(entry),
+          )}
         </div>
       </div>
       <div className="shrink-0 bg-surface p-4 pb-15 flex flex-col gap-2 lg:gap-3">
