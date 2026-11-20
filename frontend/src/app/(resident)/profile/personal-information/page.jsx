@@ -74,7 +74,7 @@ export default function PersonalInformationPage() {
     setErrors(EMPTY_ERRORS);
   };
 
-  // the header calls setIsEditing((prev) => !prev), so this ignores its argument
+  // the header passes this straight to onClick, so it ignores the click event
   const toggleEditing = () => {
     if (isEditing) resetForm();
     setIsEditing((prev) => !prev);

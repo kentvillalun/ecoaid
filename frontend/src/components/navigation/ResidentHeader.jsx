@@ -26,7 +26,7 @@ export const ResidentHeader = ({
       case "notification":
         return <NotificationBell />;
       case 'edit':
-        return <PencilSquareIcon className="w-5 h-5 text-[#727272]" onClick={() => setIsEditing((prev) => !prev)}/>
+        return <PencilSquareIcon className="w-5 h-5 text-[#727272]" onClick={setIsEditing}/>
 
       default: 
        return <div className="w-6"></div> 
