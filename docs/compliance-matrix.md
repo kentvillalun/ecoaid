@@ -2,7 +2,7 @@
 
 Post-defense panel revisions. This file is the single place to see what is done and what is next, so a new chat can pick up from here without the old conversations.
 
-> Last updated: 2026-11-19. Goal: 100% of the panel's recommendations, ideally before the December Christmas break, because the finished system is needed for the internship paperwork. No exact deadline has been given. Ask the adviser for the revision deadline and what "100%" means for the paperwork.
+> Last updated: 2026-11-21. Goal: 100% of the panel's recommendations, ideally before the December Christmas break, because the finished system is needed for the internship paperwork. No exact deadline has been given. Ask the adviser for the revision deadline and what "100%" means for the paperwork.
 
 **Working style:** the maintainer writes the code. The AI assistant acts as a senior developer (review, risks, explanations, plans) and writes code only for repetitive work when the maintainer asks. Nothing is committed unless asked. One item at a time, planned only as deep as needed right before building it.
 
@@ -12,7 +12,7 @@ Legend: `[x]` done, `[~]` partly done, `[ ]` not started, `[?]` waiting on a dec
 
 ## 1. At a glance
 
-**3 done, 3 partly done, 8 not started, 1 waiting** (15 items).
+**6 done, 3 partly done, 5 not started, 1 waiting** (15 items).
 
 | # | Item | Status | Next step |
 |---|------|--------|-----------|
@@ -25,12 +25,12 @@ Legend: `[x]` done, `[~]` partly done, `[ ]` not started, `[?]` waiting on a dec
 | 7 | SMS for points and announcements (panel: optional) | `[?]` | Waiting on the SMS provider (email in section 8) |
 | 8 | Prices always 2 decimals, right-aligned | `[~]` | Audit the 15 files that bypass `formatCurrency` (format decided: `₱10.00`) |
 | 9 | Reward for the monthly leaderboard winner | `[ ]` | Brainstorm |
-| 10 | Expand "MRF" to "Materials Recycling Facility" | `[ ]` | Visible text rename |
+| 10 | Expand "MRF" to "Material Recycling Facility" | `[x]` | Done Nov 21: sidebar says "Inventory", the page title says "Material Recycling Facility Inventory". The backend Excel sheet name still says "MRF Inventory Report" |
 | 11 | System-wide warning before critical actions | `[ ]` | Brainstorm |
 | 12 | Per-user light and dark theme | `[ ]` | Largest item; start early |
 | 13 | Enhance the app logo | `[ ]` | Design decision |
-| 14 | Group the sidebar items into categories | `[ ]` | Standalone key modules plus a few group headings; names decided when building |
-| 15 | Reports as sidebar subitems (one section = one page) | `[ ]` | Build with 14; each page keeps its export button |
+| 14 | Group the sidebar items into categories | `[x]` | Done Nov 21: collapsible groups Materials, Finance and Community; check the drawer on a phone and with the Collector, SK and Treasurer roles |
+| 15 | Reports as sidebar subitems (one section = one page) | `[x]` | Done Nov 21: four pages under Reports; each has Export and Export all (see section 3) |
 
 Items 14 and 15 were raised verbally by the panel (panelist not recorded) and are not in the written sheet. They are treated as required, because the panel can raise them again at the next check.
 
@@ -79,7 +79,7 @@ Items 14 and 15 were raised verbally by the panel (panelist not recorded) and ar
 - **Item 5 storage:** one `photoMismatch` flag on each pickup request plus one nullable `reactivatedAt` on the user. The count is computed, never stored (project rule).
 - **Item 8:** keep the `₱10.00` format. All numbers (prices, kg and other floats) show 2 decimals. Anything that shows currency or money is right-aligned, not only table columns (cards, summaries and modals too). Number columns in tables are right-aligned as well.
 - **Item 14:** a mixed sidebar like the earlier version. Important modules stand alone (dashboard, collections, residents, settings, and redemption, which should stay one tap away on mobile). Other modules sit under group headings such as Communication or Management. Not every module belongs to a group.
-- **Item 15:** Reports is either standalone or inside a group (flexible). When opened it shows its four sections as subitems. Each page shows one section and keeps its own export button (export per section, no bundle).
+- **Item 15:** Reports is either standalone or inside a group (flexible). When opened it shows its four sections as subitems. Each page shows one section and keeps its own export button (export per section). Decision changed on Nov 21: each page has Export (this section only) and Export all (all four sheets, using the filters last set on each page).
 
 - **Item 3 scope:** real-time validation is not needed on every field or form. Use it where a typo costs something: registration, barangay onboarding, login, staff. Elsewhere, simple validation on submit is enough. This is a design principle, not a shortcut: for each form ask "does it actually need real-time feedback?" The panel asked for real-time validation, so the scoped forms must really have it, and this reasoning is the answer if the panel asks why the rest don't.
 
@@ -98,7 +98,6 @@ Items 14 and 15 were raised verbally by the panel (panelist not recorded) and ar
 ### Still open
 
 - **Item 5:** can staff clear a mismatch flag after Finalize? (Leaning no, for now. Decide when building Phase B.)
-- **Item 14:** the exact category names and which modules go in which group. Decide when building.
 
 ---
 
@@ -126,7 +125,7 @@ Keep these short. Go deeper right before building each one.
 - Brainstorm: who sets the prize, title or prize or both, per month, who gets notified.
 
 **10. MRF rename**
-- Visible text only (sidebar, headings, reports, delete modal). Routes and DB names stay. Check how the long name fits in the sidebar.
+- Done Nov 21. Visible text only. The sidebar label is "Inventory" and the page title is "Material Recycling Facility Inventory" (singular, as the maintainer chose). The Reports section, the delete modal text, routes and DB names are unchanged apart from that. Left for polish: the Excel sheet name "MRF Inventory Report".
 
 **11. Warnings**
 - Brainstorm: which actions are critical, exact triggers (negative fund balance, large unsold stock), warn or block, where the message shows. Example: negative program fund balance, so tell staff to sell stock before collecting more.
@@ -138,10 +137,10 @@ Keep these short. Go deeper right before building each one.
 - Decide on the design. Then swap it in the login pages, sidebar, favicon and app icon.
 
 **14. Sidebar categories**
-- The sidebar was flattened to one list on Nov 13 for the demo. Restore a mixed layout: standalone key modules plus a few group headings (see section 2).
+- Done Nov 21. Standalone: Dashboard, Residents, Collection Requests, Redemption, Reports. Collapsible groups (closed by default, the group with the active page opens automatically): Materials (Manual Intake, Inventory), Finance, Community. Groups with no visible items for a role are hidden. Reports is a heading-style parent with four subitems. Not yet tested: the mobile drawer for Reports, and the Collector, SK and Treasurer roles.
 
 **15. Reports as subitems**
-- Reports has four sections. Each becomes one sidebar subitem (shown when Reports is open) and one page that shows only that section, so nobody scrolls. Each page keeps its export button. Build it together with item 14.
+- Done Nov 21. Pages: `/reports/material-inventory`, `/reports/collection-intake`, `/reports/redemption-rewards`, `/reports/program-funds`; `/reports` redirects to the first. Each page has **Export** (its own section) and **Export all**. Filters live in a shared context in `reports/layout.jsx`, so they persist when switching report pages (a page refresh resets them). The Material Inventory page also got a material filter (`GET /reports/materials`). Known gap: the backend groups days in UTC, so records between 00:00 and 08:00 Manila time count on the previous day.
 
 ---
 
@@ -152,6 +151,7 @@ Not from the panel. Do these only after items 1 to 15, and build once on the Res
 - Reusable search bar for every module (names and any detail of that module). The current search bars are hidden.
 - Pagination on desktop and infinite scroll on mobile. Search and pagination are one backend problem, so design them together.
 - Rate limits, starting with login and OTP.
+- Barangay logo. A logo upload on the Settings page, then show the logo with the barangay name somewhere in the app (where to show it is still open, for example the sidebar header and the resident header). The `Barangay.logoUrl` column already exists, but nothing reads or writes it yet. It still needs an update endpoint, the logo in the barangay data the app already fetches, and a decision on where the image file is stored.
 
 ---
 
@@ -159,7 +159,7 @@ Not from the panel. Do these only after items 1 to 15, and build once on the Res
 
 **Next session (evening, 2026-11-19):**
 1. [ ] Push-test `3e2893e` on local `ecoaid_demo` (checklist below).
-2. [ ] Item 10: rename the visible "MRF" text to "Materials Recycling Facility" (routes and database names stay).
+2. [x] Item 10: rename the visible "MRF" text (done Nov 21, see section 3).
 3. [ ] Item 3: add `mode: "onTouched"` to the signup, barangay onboarding, login and staff forms, then check each shows its errors on leaving a field.
 
 Item 8 is not part of this session.
