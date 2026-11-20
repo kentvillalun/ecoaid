@@ -307,11 +307,12 @@ Post-defense items 10, 14 and 15 (see `docs/compliance-matrix.md`).
 - **Sidebar groups restored** — standalone Dashboard, Residents, Collection Requests, Redemption and Reports, then collapsible groups Materials, Finance and Community (closed by default; the group holding the current page opens itself; empty groups are hidden per role). `Sidebar.jsx` renders both groups and the Reports parent through one `renderAccordion`. In the mobile drawer a heading click uses `stopPropagation` so the drawer stays open.
 - **Reports split into four pages** — `/reports/material-inventory`, `/collection-intake`, `/redemption-rewards`, `/program-funds` (`/reports` redirects). `ReportPageShell` gives each page an **Export** button (its section only) and **Export all** (`Operational_Reports.xlsx`). `ReportFiltersProvider` (`reports/layout.jsx`) keeps every section's filters while moving between report pages; a refresh resets them.
 - **Export API** — `POST /reports/export` accepts any subset of `mrfInventory`, `collectionIntake`, `redemption`, `programFunds` and returns a workbook with only those sheets; no section or missing dates gives 400.
+- **Invalid ids** — `filterReports` and `exportReports` return 400 "Invalid id" for a `materialId` or `programId` that is not a UUID (empty still means no filter).
 - **Material filter** on Material Inventory — new `GET /reports/materials` (all of the barangay's materials, readable by every role that can open Reports); `materialId` is passed to `filterReports` and the export.
 - **Date picker fixes** — the chosen mode (This week, This month, Custom) is stored with the dates so the label survives page changes; dates are built from local parts, since `toISOString()` shifted Manila midnight back one day.
 - **Rename** — the sidebar says "Inventory"; the page title is "Material Recycling Facility Inventory".
 - **Inline validation** — forms show errors when a field is left (`mode: "onTouched"`); the stock-out modal, manual intake, Edit Resident and others got field-level messages.
-- **Known gaps** — the backend buckets days in UTC (00:00–08:00 Manila counts on the previous day); an invalid UUID for `materialId` or `programId` returns 500; the Excel sheet is still named "MRF Inventory Report"; the mobile drawer and the Collector, SK and Treasurer roles were not browser-tested.
+- **Known gaps** — the backend buckets days in UTC (00:00–08:00 Manila counts on the previous day); the Excel sheet is still named "MRF Inventory Report"; the mobile drawer and the Collector, SK and Treasurer roles were not browser-tested.
 
 ---
 
