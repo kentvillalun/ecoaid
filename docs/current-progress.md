@@ -3,20 +3,22 @@
 > This file is a chronological log. Later sections supersede earlier ones: for example, the early redemption entries below describe beneficiaries, a maximum-points field and educational level, all of which were replaced (see "Oct 2026 update"). For the current state read the last "Completed" section, "In Progress", "Next Steps" and "Notes".
 
 ## Completed
+
+> Older entries below describe the app as it was on their dates. Since then: signup no longer asks for a sitio and a middle name was added (Nov 15–17), the sidebar groups became one flat list (Nov 13), and staff accounts can be deactivated (Nov 15). See the later sections.
 - Resident-side authentication frontend is fixed and now stable
 - Stable auth flows:
   - onboarding
   - login (resident, connected to backend)
-  - signup with barangay autocomplete and sitio dependent dropdown (connected to backend)
+  - signup with barangay autocomplete and sitio dependent dropdown (connected to backend) *(superseded: sitio removed from signup on 2026-11-15)*
   - OTP validation (6-digit input, resend cooldown, verify/resend endpoints)
   - forgot password (full flow: phone → OTP → reset password, all connected to backend)
   - reset password page
 - Collection Requests UI tabs
 - Basic request filtering using mock data
 - Approved tab selection and mock batch collection flow to In Progress
-- Resident signup address selection (barangay autocomplete + sitio dependent dropdown)
+- Resident signup address selection (barangay autocomplete + sitio dependent dropdown) *(superseded: sitio removed from signup on 2026-11-15)*
 - Backend endpoints for barangay search and sitio listing
-- Backend validation for barangay/sitio combinations during registration
+- Backend validation for barangay/sitio combinations during registration *(superseded: sitio removed from signup on 2026-11-15)*
 - OTP backend: `OtpVerification` model, `sendOtp` utility, verify and resend endpoints
 - Forgot password backend: `PasswordResetToken` model, `forgotPassword`, `verifyForgotPasswordOtp`, `resetPassword` controllers + routes
 - `resendOtp` updated to handle both signup and forgot-password flows via `otpFlow` param
@@ -31,7 +33,7 @@
 - Protected dashboard route: `GET /dashboard` (requires valid JWT + CAPTAIN role)
 
 - **Username/password auth system**: `username` field added to `User` model (unique, optional for backward compat); login for both residents and barangay staff now accepts `username` instead of `phoneNumber`
-- Signup flow now collects `firstName`, `lastName`, and `username` upfront; backend validates uniqueness and passes them through `register` → `verifyOtp` → `prisma.user.create`
+- Signup flow now collects `firstName`, `lastName`, and `username` upfront; backend validates uniqueness and passes them through `register` → `verifyOtp` → `prisma.user.create` *(a `middleName` was added on 2026-11-15)*
 - `authenticateResident` and `authenticateBarangay` split from the single `authenticate` middleware — each only accepts its own cookie (`resident_token` / `barangay_token`), preventing cross-role token acceptance
 - `GET /auth/me` now uses `authenticateResident`; new `GET /auth/barangay/me` added using `authenticateBarangay`
 - All pickup-request routes updated: resident routes use `authenticateResident`, barangay collection-request routes use `authenticateBarangay`
@@ -57,7 +59,7 @@
 - `useUpdate` hook — now forwards `items` array to the backend for the COLLECTED transition
 - `InProgressActions` redesigned — simple mode (single weight input) for non-ASSORTED requests; ASSORTED mode shows a dynamic table of rows (materialType/actualWeight/weightUnit) with add/remove row support
 - "Finalized Collection" card — detail page `/collection-requests/[id]` shows a breakdown table of `collectionItems` when status is `COLLECTED`; `getRequest` controller now selects `collectionItems` relation
-- Capture page sitio auto-fetch — fetches resident's sitio from `GET /auth/me` on mount; displays it as a read-only field
+- Capture page sitio auto-fetch — fetches resident's sitio from `GET /auth/me` on mount; displays it as a read-only field *(the field is hidden when the resident has no sitio, 2026-11-15)*
 - Login page session guards — redirects to `/home` if already logged in; redirects to `/onboarding` if user hasn't seen it
 - Root page redirect — `app/page.js` redirects `/` to `/login`
 
@@ -92,7 +94,7 @@
 - **UI polish** — fixed cut logo icon on Android devices; fixed slow loading issue on onboarding screens; logo position adjusted; input fields given minimum and maximum height values; select input container aligned with `items-center`
 
 - **`contactNumber` field on `Barangay` model** — `contactNumber VARCHAR(20)` added via migration `20260423175548_add_barangay_contact`; seed updated so dev barangay is seeded with `contactNumber: "09177744669"`
-- **Resident profile endpoint** — `GET /resident/me` returns `firstName`, `lastName`, `sitio`, `phoneNumber`, `barangay`, `address`; protected by `authenticateResident`
+- **Resident profile endpoint** — `GET /resident/me` returns `firstName`, `lastName`, `sitio`, `phoneNumber`, `barangay`, `address`; protected by `authenticateResident` *(`middleName` added on 2026-11-15)*
 - **Barangay info endpoint** — `GET /resident/barangay-info` returns `name`, `isRegistered`, `contactNumber`, `city` for the authenticated resident's barangay; protected by `authenticateResident`
 - **My requests endpoint** — `GET /pickup-requests/my-requests` (`getMyRequest` controller) returns the authenticated resident's own pickup requests; protected by `authenticateResident`
 - **Resident home page wired to real data** — fetches resident name and barangay name from `GET /resident/me`; fetches recent requests from `GET /pickup-requests/my-requests`; skeleton loading states, `Error` and `Empty` components used for all states; request cards show material type, notes, date, estimated weight, and status pill
@@ -108,10 +110,10 @@
 - **Resident request detail page fully built** — `/requests/[id]` fetches from `GET /pickup-requests/my-requests/:id`; shows photo banner, Request Information section (material pill, estimated weight, notes textarea, submitted date), Status Timeline section (conditional entries per status with connecting line), and Collection Details section (breakdown table of `collectionItems` when `COLLECTED`, placeholder text otherwise); skeleton loading and error states implemented
 - **Home page request cards navigate to detail** — "Recent Requests" cards on `/home` are now tappable and push to `/requests/:id`
 
-- **`PATCH /resident/me` backend endpoint** — `updateResidentProfile` controller; accepts partial updates for `firstName`, `lastName`, `phoneNumber`, `address`; ignores undefined fields; protected by `authenticateResident`
+- **`PATCH /resident/me` backend endpoint** — `updateResidentProfile` controller; accepts partial updates for `firstName`, `lastName`, `phoneNumber`, `address`; ignores undefined fields; protected by `authenticateResident` *(`middleName` added on 2026-11-15)*
 - **`PATCH /redemption/programs/:id` backend endpoint** — `updateProgram` controller; updates `name`, `allotedBudget`, `description`, `maxPoints`, `isActive`; upserts per-material `pointValue` entries when a `materials` map is included; enables program deactivate/reactivate and in-place editing; protected by `authenticateBarangay` + `requireRoles(["CAPTAIN", "SECRETARY", "SK"])`
 - **Resident profile page wired to live data** — `/profile` fetches from `GET /api/resident/me`; displays live first/last name and barangay name; skeleton loading and inline error state with retry button; logout flow clears cookie and session storage
-- **Personal Information page fully built** — `/profile/personal-information` has an edit mode toggle (`PencilSquareIcon` in header); editable fields for `firstName`, `lastName`, `phoneNumber`, `address`; `sitio` and `barangay` shown as read-only with explanatory note; "Save Changes" button wired to `PATCH /api/resident/me` via `useMutation`; discard-changes confirmation modal (rendered via `createPortal`) when navigating back with unsaved edits; skeleton loading and `Error` states throughout
+- **Personal Information page fully built** — `/profile/personal-information` has an edit mode toggle (`PencilSquareIcon` in header); editable fields for `firstName`, `lastName`, `phoneNumber`, `address`; `sitio` and `barangay` shown as read-only with explanatory note; "Save Changes" button wired to `PATCH /api/resident/me` via `useMutation`; discard-changes confirmation modal (rendered via `createPortal`) when navigating back with unsaved edits; skeleton loading and `Error` states throughout *(`middleName` added on 2026-11-15)*
 - **Profile sub-pages (UI shells)** — Notification Settings (`/profile/notifications`): toggle UI for request-status and barangay-update notifications (local state only, not yet wired to backend); Settings (`/profile/settings`): toggle UI for Language and Dark Mode (local state only, not yet wired); Help & Support (`/profile/help-support`): FAQ accordion with 8 static questions about app usage
 - **`ResidentHeader` enhancements** — added `handleClick` prop (defaults to `history.back()`); `edit` action type renders `PencilSquareIcon` and toggles edit mode via `setIsEditing`; back arrow now fires `handleClick` instead of always calling `history.back()` directly
 - **`Modal` component** — added `cancelLabel` prop for customizable cancel button text (defaults to `"Cancel"`)
@@ -263,7 +265,7 @@
   - New index `(residentId, programId)` on both tables; the `User` model gained the back-relations
   - `utils/beneficiaryPoints.js` became `utils/residentPoints.js`, `getResidentProgramBalance(residentId, programId)` = points earned in the program minus points spent on its rewards
   - `createTransaction` takes `residentId` (required, `role: RESIDENT`, same barangay), validates the program (same barangay, active) and that every item belongs to that program, snapshots the names itself, writes the stock ledger with the resident's `userId` (so redemption counts on the leaderboard) and marks the resident verified. The "create a new beneficiary" path is gone.
-  - `searchBeneficiary`/`getBeneficiaries` replaced by `GET /redemption/residents/search` (and `GET /rewards/residents/search`): word-by-word first/last name match, max 10, returns `{ id, name, points }`. The reward version now lists every resident, including those with 0 points, so staff can see why a release is not possible.
+  - `searchBeneficiary`/`getBeneficiaries` replaced by `GET /redemption/residents/search` (and `GET /rewards/residents/search`): word-by-word first/last name match, max 10, returns `{ id, name, points }`. The reward version now lists every resident, including those with 0 points, so staff can see why a release is not possible. *(the match includes the middle name since 2026-11-17)*
   - `releaseReward` rewritten: requires `residentId`, rejects non-positive quantities, rejects reward items outside the program/barangay (this used to crash with a 500), merges duplicate rows of the same item before checking stock and cost.
 - **Program editing fixed** — `updateProgram` previously only upserted materials, so a deselected material was never removed ("success" with no change), and cash-mode programs could not be edited at all. It now loads the program, rejects an empty material list, deletes materials missing from the new list unless they already appear in a transaction, writes `cashValue`/`pointValue` according to the program's mode, can change the mode only while the program has no transactions (clearing the other mode's value), and runs everything in one `$transaction`. `createProgram` and `updateProgram` verify every material belongs to the caller's barangay. The Add/Edit Program modal shows a toast and stops before sending when a mode change is not allowed.
 - **Frontend for the new model** — Record Transaction and Release Reward modals search registered residents (toast/inline errors for blank or unknown resident), the "Beneficiary" labels became "Resident", educational level removed everywhere, the Reports Redemption & Rewards section and Excel sheet (now 9 columns) use `residentName`, and reports match releases to transactions by `residentId` (name fallback only for rows from before the migration). The program details transaction table gained a hover breakdown of materials. The Reward Inventory page gained a program filter on both the items and the release history (`DropdownFilter`); the Release Reward modal fetches reward items per picked program (`GET /rewards?programId=`) and shows out-of-stock items disabled with simple error messages.
@@ -298,7 +300,23 @@
 
 ---
 
+## Completed (continued — Nov 13–17, 2026 update)
+
+Post-defense revisions. The panel's items are tracked in `docs/compliance-matrix.md`; this section records what changed in the code.
+
+- **Sidebar in workflow order** (Nov 13) — the three collapsible groups are replaced by one flat list in the order the system is used (collect, store, reward, sell, account for, report); "Manual Pickup" is now "Manual Intake" and "Reward" is "Rewards". `docs/defense-demo-script.md` follows the same order.
+- **Middle name** (Nov 15–17, migration `20261115043552_add_middle_name_in_user_table`) — `User.middleName` is nullable. It is asked at signup, in the staff form, in Edit Resident and on the resident profile; the frontend forms require it and the backend keeps it optional because older residents have none. `formatFullName` (`frontend/src/lib/` and `backend/src/utils/`) builds "First Middle Last" on about 11 screens and in the backend responses that carry a name; name searches (`searchResident`, redemption, reward inventory) also match the middle name. The home greeting stays first-name-only.
+- **Sitio removed from resident signup** — `register` and `verifyOtp` no longer take or check a sitio and the signup page no longer shows the dropdown. Staff assign the sitio in Edit Resident (`editResident` now scopes the sitio lookup to the caller's barangay). Sitio columns hide when none of the listed rows has one; the Residents sitio filter and the Edit Resident dropdown hide when the barangay has no sitios; the resident profile hides the sitio when the resident has none.
+- **Staff accounts can be deactivated and reactivated** — `PATCH /admin/barangays/:id/staff/:staffId` (`updateStaffStatus`) sets `isActive` for a staff member of that barangay only. `StaffTable` has a Deactivate/Reactivate action with a confirm modal and an Active/Inactive pill, and a deactivated account no longer fills its role. Login and `authMiddleware.js` already rejected inactive users.
+- **Required-field asterisks** — labels show a red asterisk based on each form's own validation (not a shared input component). The OTP screen masks the phone number.
+- **Validation and error handling** — the resident profile update and `editResident` trim values and reject a blank first name, last name or phone number; the Edit Resident "no changes" check no longer compares a sitio name to an id; declining a pickup request needs a non-blank reason (trimmed on the server, blocked in the modal, which shows the server's message); `useUpdate` returns `false` on failure, resets `isLoading` and exposes `errorMessageRef` like `useMutation`.
+- **Not tested yet** — no build, browser click-through or end-to-end test has been run on this batch (`3e2893e`).
+
+---
+
 ## In Progress
+
+- **Post-defense revisions** — the final defense passed. Items 1, 2 and 4 of `docs/compliance-matrix.md` are done; 5, 6 and 8 are partly done; the rest are not started or waiting on the SMS provider.
 
 - Nothing else is in progress. The resident's points are now shown on the home screen and on each program card (below).
 - **Field evaluation / pilot** (planned Nov 8, 2026; the pilot-test fixes were merged on Nov 10, the outcome is not recorded here yet; real barangay, one or more days): real operations (recycling activity, scheduled Sunday pickup, MRF sorting, 5–10 residents submitting photo requests) plus scripted scenarios for junkshop sales/beautification and reports; the logbook is run in parallel and compared with the app.
@@ -307,7 +325,8 @@
 
 ## Next Steps (priority order)
 
-0. Run the field evaluation (planned Nov 8, 2026); the resident's points are already shown on the home screen and on each Programs page card. Before the pilot: take a database snapshot, apply the `resident_as_beneficiary` migration to production with `prisma migrate deploy`, deploy the code in the same window, and run `seedCoreMaterials()` (if not already done) so existing barangays get the new materials.
+0. Record the outcome of the field evaluation (planned Nov 8, 2026; its pilot-test fixes were merged Nov 10, the outcome is not written down yet); the resident's points are already shown on the home screen and on each Programs page card. Before the pilot: take a database snapshot, apply the `resident_as_beneficiary` and `add_middle_name_in_user_table` migrations to production with `prisma migrate deploy`, deploy the code in the same window, and run `seedCoreMaterials()` (if not already done) so existing barangays get the new materials.
+0b. Finish the post-defense revisions in `docs/compliance-matrix.md` (it holds the status, plans and schedule per item)
 1. Audit barangay `has___` feature-flag enforcement beyond Sidebar filtering — add middleware-level (or at least page-level) gating so a disabled module can't be reached by direct URL, matching how `ROLE_MATRIX` is already enforced in `proxy.js`
 2. Technical debt batch:
    - Archive pattern (soft delete) — panel forbids hard deletion
@@ -354,3 +373,5 @@
 - The AI classification prompt's material list (`CORE_MATERIALS` in `backend/src/utils/coreMaterials.js`) is a separate, hand-maintained catalog from the live `Material`/`Category` DB tables — adding a new material via Settings does not make Claude able to detect it; `CORE_MATERIALS` must be updated too, and its names must exactly match the DB `Material.name` values for the frontend's name-matching to work
 - Backend is deployed on Render (`ecoaid-ydrs.onrender.com`), not Railway — the Railway URL is kept commented out in `frontend/next.config.mjs` as a historical fallback only
 - `ROLE_MATRIX` should stay in sync with each route file's `requireRoles(...)` on the backend; nothing currently enforces this automatically (see the junkshop-sales `/prices` inconsistency noted above)
+- Residents sign up without a sitio; staff assign it in Edit Resident, and screens that show a sitio hide it when nobody has one
+- A person's name is shown as First Middle Last through `formatFullName` (`frontend/src/lib/`, `backend/src/utils/`); any new backend query that returns a name must also select `middleName`

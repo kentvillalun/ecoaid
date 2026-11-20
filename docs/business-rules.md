@@ -148,3 +148,10 @@ Staff (CAPTAIN, SECRETARY, SK, TREASURER) can fix a mistaken redemption transact
 - **Delete** is for a transaction given to the wrong resident. It removes the transaction, its items and its stock ledger rows. Re-enter it for the right resident.
 - Both actions rewrite the transaction's own `StockTransactionLog` rows, so MRF Inventory and the resident's points correct themselves. No history of the old version is kept.
 - Both are **blocked** when the change would take stock below zero for any material (for example the materials were already sold to a junkshop), or would take the resident's balance in that program below zero (a reward was already released). Staff must deal with the sale or the release first.
+
+## 21. Resident Names and Sitio
+
+- A person's name has a first, middle and last name and is shown everywhere as "First Middle Last". The frontend forms (signup, resident profile, Edit Resident, staff creation) require the middle name; the backend keeps it optional because residents from before the field existed have none.
+- Name searches (manual intake, redemption, reward inventory) match the middle name too.
+- Residents do not pick a sitio when they sign up. CAPTAIN and SECRETARY assign it later in Edit Resident, and it must belong to their own barangay.
+- Screens hide the sitio when nobody has one yet, so a barangay that does not use sitios never sees an empty column.

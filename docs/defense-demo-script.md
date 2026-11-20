@@ -1,5 +1,7 @@
 # Defense Demo Script
 
+> Written for the final defense, which passed. If you reuse it: since 2026-11-15 signup (Act 3 step 1) asks for a middle name and no sitio, staff accounts have Deactivate/Reactivate (Act 1 step 1), and a decline with an empty reason is now blocked in the modal.
+
 Sidebar order = demo order, so the panel can follow along visually. Each step names the FR (from `fr-process-documentation.md`) it proves. One barangay account (Captain) opens every page.
 
 ## Setup (before the panel)
@@ -41,7 +43,7 @@ Sidebar order = demo order, so the panel can follow along visually. Each step na
 ## Act 3: The resident side, full flow (finale)
 
 1. Brand-new resident signs up into Beddeng Laud (incognito), OTP from the backend console, log in (FR1, FR2). Unverified, so no Programs yet. That sets up the payoff.
-2. Capture with image recognition: photo → suggested material → confirm/correct, estimate, submit (FR7, FR5). The FR doc lists FR7 as not implemented, but commit 1f46f90 added a classifier. Verify it in the running app first; if it fails, say honestly that it is photo evidence only.
+2. Capture with image recognition: photo → suggested material → confirm/correct, estimate, submit (FR7, FR5). The classifier shipped on 2026-09-12 and FR7 was revised from the code on 2026-11-18 (not verified live). Verify it in the running app first; if it fails, say honestly that it is photo evidence only.
 3. Flip to the Captain tab: the request appears under Pending, approve it (closes the loop with FR9).
 4. Flip back: notification (FR25), request status and history (FR8). Cancel a second request (FR6).
 5. Switch to the verified resident tab: announcements the Captain just posted (FR24), Programs (FR31), points balance, leaderboard (FR26). End on the leaderboard.
@@ -59,5 +61,5 @@ Role restriction (FR4 / FR9 gates): explain via `ROLE_MATRIX`, or show a 20-seco
 
 - "Invalid Date" in the timeline of cancelled/expired requests.
 - "Stat TBD / Placeholder" card on Junkshop Sales.
-- "Someting went wrong" toast when declining a request with an empty reason.
+- "Someting went wrong" toast when declining a request with an empty reason (fixed 2026-11-17: the modal now blocks an empty reason).
 - FR3, 4, 10, 13-17, 26, 28, 30, 31 were revised from code and not verified live. Rehearse these first, along with redemption edit/delete.

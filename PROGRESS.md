@@ -2,7 +2,42 @@
 
 This file tracks completed work, known technical debt, and open items across sessions. Newest entry on top.
 
-> Note: this file didn't exist before 2026-09-06. The docs that `CLAUDE.md` references (`docs/project-overview.md`, `docs/business-rules.md`, `docs/module-boundaries.md`, `docs/current-progress.md`, `AGENTS.md`) do exist and were brought up to date on 2026-10-20 and again on 2026-11-11.
+> Note: this file didn't exist before 2026-09-06. The docs that `CLAUDE.md` references (`docs/project-overview.md`, `docs/business-rules.md`, `docs/module-boundaries.md`, `docs/current-progress.md`, `AGENTS.md`) do exist and were brought up to date on 2026-10-20, again on 2026-11-11 and again on 2026-11-18.
+
+---
+
+## 2026-11-18
+
+### Context
+
+Docs-sync after the final defense passed. The panel's revisions are tracked in `docs/compliance-matrix.md` (13 items). This entry covers the commits from `da79c1f` (2026-11-13) to `3e2893e` (2026-11-17), compared against the code. The redemption edit/delete from the 2026-11-11 entry landed on `main` as `24a8572`. `main` matches `origin/main`.
+
+### Completed
+
+- **Sidebar in workflow order** (`da79c1f`): one flat list in the order the system is used (collect, store, reward, sell, account for, report) instead of three collapsible groups; "Manual Pickup" is now "Manual Intake" and "Reward" is "Rewards". `docs/defense-demo-script.md` follows the same order.
+- **Middle name** (migration `20261115043552_add_middle_name_in_user_table`): `User.middleName`, nullable. Asked at signup, in the staff form, in Edit Resident and on the resident profile. The frontend forms require it; the backend keeps it optional because older residents have none. `formatFullName` (`frontend/src/lib/`, `backend/src/utils/`) gives "First Middle Last" on about 11 screens, and every backend query that returns a name also selects `middleName`. Name searches (`searchResident`, redemption, reward inventory) match the middle name too.
+- **Sitio removed from resident signup** (`0abe381`, `b7b8e5e`): `register` and `verifyOtp` no longer take or check a sitio. Staff assign it in Edit Resident, and `editResident` now scopes the sitio lookup to the caller's barangay. Sitio columns hide when none of the listed rows has one; the Residents filter and the Edit Resident dropdown hide when the barangay has no sitios; the resident profile hides the sitio when the resident has none.
+- **Staff accounts can be deactivated and reactivated** (`cc3614c`): `PATCH /admin/barangays/:id/staff/:staffId` (`updateStaffStatus`) sets `isActive` for staff of that barangay only. `StaffTable` has a Deactivate/Reactivate action with a confirm modal and an Active/Inactive pill, and a deactivated account no longer fills its role. Login and `authMiddleware.js` already rejected inactive users.
+- **Required-field asterisks** (`8b31155`, `81e8de2`, `3e2893e`) based on each form's own validation, not a shared input component. The OTP screen masks the phone number.
+- **Validation and error handling** (`3e2893e`): profile update and `editResident` trim values and reject a blank first name, last name or phone number; the Edit Resident "no changes" check no longer compares a sitio name to an id (Save with no changes used to show "Edit failed"); declining a pickup request needs a non-blank reason (trimmed on the server, blocked in the modal, server message shown); `useUpdate` returns `false` on failure, resets `isLoading` and exposes `errorMessageRef` like `useMutation`.
+- **Docs second pass (same day):** the FR doc still said image recognition was "not implemented" (FR7) and that no dedicated verify action existed (FR27), and its Manual Intake, MRF Inventory and resident-list role notes predated the Nov 10 changes; all were revised from the code. Older entries in `docs/current-progress.md` that describe the sitio signup are marked as superseded, and the demo script is marked as written for the defense.
+
+### Decisions
+
+- Middle name is required in the frontend forms and optional in the backend.
+- `useUpdate` stays for the pickup request lifecycle; `useMutation` is used everywhere else.
+- `searchResident` keeps `$queryRaw` on purpose (it searches residents and staff together by joined name). It is the one exception to the "no raw SQL" rule.
+- The missing status-transition guard on pickup requests is accepted risk for now.
+
+### Open items
+
+- No build, browser click-through or end-to-end test has been run on `3e2893e`.
+- Production: apply `20261115043552_add_middle_name_in_user_table` with `prisma migrate deploy` before the deployed backend runs this code.
+- Line endings: working files are CRLF, the repo stores LF, so `git status` shows about 31 files as modified with no real change. Settle `.gitattributes` or `core.autocrlf`.
+- Old records keep first-and-last-name text in the stored `performedBy` and `collectorName` columns.
+- A `react-hooks/set-state-in-effect` lint error on the resident personal information page (it predates this work).
+- Remaining panel items are in `docs/compliance-matrix.md`.
+- `fr-process-documentation.md`: FR1, FR4, FR5, FR7, FR9, FR10, FR11, FR14, FR20, FR26, FR27 and FR30 were revised from the code, not re-verified in the running app.
 
 ---
 

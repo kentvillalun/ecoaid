@@ -58,7 +58,7 @@ Staff (CAPTAIN, SECRETARY, SK) post announcements by category; residents read th
 ---
 
 ## Residents (staff side)
-CAPTAIN and SECRETARY list residents (with a sitio filter), edit their details and verify them with one tap, without waiting for a transaction.
+CAPTAIN and SECRETARY list residents (with a sitio filter), edit their details and verify them with one tap, without waiting for a transaction. Residents sign up without a sitio; staff assign it in the Edit Resident modal. The sitio filter and column appear only when the barangay has sitios and a listed row has one.
 
 ---
 
@@ -73,4 +73,4 @@ CAPTAIN and SECRETARY choose the barangay's color theme, add materials, change a
 ---
 
 ## Super Admin
-A separate platform portal (own login, cookie and middleware). Registers barangays (address, contact, theme, module flags), manages their staff accounts and sitios, and shows which barangays still miss a required role or sitios. It is not part of the barangay `ROLE_MATRIX`.
+A separate platform portal (own login, cookie and middleware). Registers barangays (address, contact, theme, module flags), manages their staff accounts (including deactivating and reactivating them) and sitios, and shows which barangays still miss a required role or sitios. It is not part of the barangay `ROLE_MATRIX`.

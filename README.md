@@ -123,7 +123,7 @@ Abbreviations: **staff** = CAPTAIN, SECRETARY, TREASURER, SK, COLLECTOR. Routes 
 | Method | Path                                | Description                                      |
 |--------|-------------------------------------|--------------------------------------------------|
 | GET    | `/auth/barangays?search=`           | Search registered barangays (max 10)             |
-| GET    | `/auth/barangays/:barangayId/sitios`| List sitios for a barangay                       |
+| GET    | `/auth/barangays/:barangayId/sitios`| List sitios for a barangay (signup no longer uses it) |
 | POST   | `/auth/register`                    | Register resident + send OTP                     |
 | POST   | `/auth/login`                       | Resident login by username + password            |
 | POST   | `/auth/verify-otp`                  | Verify OTP + activate account                    |
@@ -143,7 +143,7 @@ Abbreviations: **staff** = CAPTAIN, SECRETARY, TREASURER, SK, COLLECTOR. Routes 
 | Method | Path                      | Roles                          | Description                                              |
 |--------|---------------------------|--------------------------------|----------------------------------------------------------|
 | GET    | `/resident/me`            | RESIDENT                       | Profile (name, sitio, barangay, phone, `isVerified`)     |
-| PATCH  | `/resident/me`            | RESIDENT                       | Update first/last name, phone, address                   |
+| PATCH  | `/resident/me`            | RESIDENT                       | Update first/middle/last name, phone, address                   |
 | GET    | `/resident/barangay-info` | RESIDENT                       | Barangay name, address, contact, registration status, and whether redemption is enabled |
 | GET    | `/resident/search?name=`  | CAPTAIN, SECRETARY, COLLECTOR, SK | Search residents **and staff** by name (manual intake) |
 | GET    | `/resident`               | CAPTAIN, SECRETARY             | List the barangay's residents                            |
@@ -224,7 +224,7 @@ Abbreviations: **staff** = CAPTAIN, SECRETARY, TREASURER, SK, COLLECTOR. Routes 
 
 ### Super Admin (`/admin`) — `authenticateSuperAdmin`
 
-Barangay CRUD (`/admin/barangays`, `/admin/barangay/register`, `/admin/barangay/:id`), staff accounts (`/admin/barangays/:id/staff`), sitios (`/admin/barangays/:id/sitios`, `/admin/sitios/:id`) and `GET /admin/onboarding-status`.
+Barangay CRUD (`/admin/barangays`, `/admin/barangay/register`, `/admin/barangay/:id`), staff accounts (`/admin/barangays/:id/staff`, plus `PATCH /admin/barangays/:id/staff/:staffId` to deactivate or reactivate one), sitios (`/admin/barangays/:id/sitios`, `/admin/sitios/:id`) and `GET /admin/onboarding-status`.
 
 ---
 

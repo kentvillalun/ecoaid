@@ -2,6 +2,8 @@
 
 Verified against the running app (barangay dashboard at `/dashboard` logged in as the seeded Captain account, resident PWA) and the backend source (`backend/src/controllers/*`, `backend/src/routes/*`, `backend/prisma/schema.prisma`) on 2026-08-24.
 
+> **Update 2026-11-18:** FR1, FR4, FR5, FR7, FR9, FR10, FR11, FR14, FR20, FR26, FR27 and FR30 were revised again **from the code and commit history, not re-verified in the running app**, after the Nov 10 pilot-test fixes, the Nov 11 redemption edit/delete and the Nov 15–17 post-defense revisions (sitio removed from signup, middle name, staff deactivation). Where an older paragraph below contradicts a revision note, the note wins.
+>
 > **Update 2026-10-20:** FR3, FR4, FR10, FR13–FR17, FR26, FR28 and FR30 were revised, and FR31 added, **from the code and commit history, not re-verified in the running app**, after the redemption overhaul (the resident is now the beneficiary, educational level removed, `Beneficiary` table removed) and the core-material change. All other sections still describe the 2026-08-24 verification. Re-verify the revised sections live before using them as evidence.
 
 **Roles** (`Role` enum): `RESIDENT`, `CAPTAIN`, `SECRETARY`, `TREASURER`, `SK`, `COLLECTOR`, `SUPER_ADMIN`. The dev seed now creates a barangay with one account per staff role plus a Super Admin and a sample resident (see `backend/prisma/seed.js`), so every role can be logged into locally. The role-gates below were originally verified from route-file code (`requireRoles([...])`) rather than from a live login as each role.
@@ -12,16 +14,18 @@ Verified against the running app (barangay dashboard at `/dashboard` logged in a
 
 ### 1. Register User Account
 
+> *Revised 2026-11-18 from the code (not re-verified live): sitio was removed from signup and a middle name field was added after the final defense. The live-verified notes below date from before that change.*
+
 **Roles allowed:** Public (no auth) — `POST /auth/register`, `POST /auth/verify-otp`.
 
 **Process steps:**
-1. Resident opens `/signup`. Fields: First name, Last name, Username, Phone number, Barangay (free-text autocomplete), Sitio (dropdown), Password, Confirm password, "I accept Terms & conditions and Privacy policy" checkbox.
+1. Resident opens `/signup`. Fields: First name, Middle name, Last name, Username, Phone number, Barangay (free-text autocomplete), Password, Confirm password, "I accept Terms & conditions and Privacy policy" checkbox.
 2. Resident types into **Barangay** — a debounced suggestion list appears (backend-driven, `GET /auth/barangays?search=`, no third-party address API, per `CLAUDE.md`).
    - Branch: if the typed text isn't selected from the suggestion list, inline error "Please select a barangay from the suggestions" — a barangayId must come from a real selection, not free text.
-3. Selecting a barangay populates **Sitio** as a dependent dropdown (`GET /auth/barangays/:barangayId/sitios`).
+3. *(Removed 2026-11-18.)* Sitio is no longer asked at signup; staff assign it later in the Edit Resident modal.
 4. Resident fills Password/Confirm password and checks the Terms checkbox, then taps **Create Account**.
-   - Branch (client-side, empty submit): every field shows its own inline error — "First name is required", "Last name is required", "Username is required", "Phone number is required", "Barangay is required", "Sitio or Purok is required", "Password is required", "Please confirm password", "You must accept the Terms and Conditions to continue". Confirmed live.
-5. On submit, frontend calls `POST /auth/register`. Backend re-validates everything server-side (all fields required via `!field` checks; `barangayId`/`sitioId` format-checked as UUID; sitio re-verified to belong to that barangay; `password === confirmPassword`; `termsAccepted !== true` rejected), checks phoneNumber and username are not already taken, then sends an OTP and stores it in `OtpVerification` (expires in 10 minutes). **The `User` row is NOT created at this step.**
+   - Branch (client-side, empty submit): every field shows its own inline error — "First name is required", "Middle name is required", "Last name is required", "Username is required", "Phone number is required", "Barangay is required", "Password is required", "Please confirm password", "You must accept the Terms and Conditions to continue". Confirmed live.
+5. On submit, frontend calls `POST /auth/register`. Backend re-validates everything server-side (required fields checked with `!field` (the server does not require `middleName`); `barangayId` format-checked as UUID; `password === confirmPassword`; `termsAccepted !== true` rejected), checks phoneNumber and username are not already taken, then sends an OTP and stores it in `OtpVerification` (expires in 10 minutes). **The `User` row is NOT created at this step.**
 6. Frontend stores pending registration data in `sessionStorage` and redirects to `/otp`.
 7. Resident enters the 6-digit code and taps **Verify Code**, which calls `POST /auth/verify-otp`.
    - Branch: wrong/expired code → 400 "Invalid or expired verification code"; address data is **re-validated a second time** here (defense against tampering with `sessionStorage` between steps).
@@ -31,16 +35,16 @@ Verified against the running app (barangay dashboard at `/dashboard` logged in a
 
 **Fields involved:**
 - First name — text — required (server + client)
+- Middle name — text — required on the form (client only; the server accepts a missing one)
 - Last name — text — required (server + client)
 - Username — text — required, must be unique (server 400 "Username is already taken")
 - Phone number — text — required, must be unique (server 400 "This phone number is already registered")
 - Barangay — selected from autocomplete → `barangayId` UUID — required, must resolve to a registered barangay
-- Sitio — dependent dropdown → `sitioId` UUID — required, must belong to the selected barangay
 - Password / Confirm password — required, must match exactly
 - Terms & Conditions checkbox — required, must be boolean `true`
 
 **Discrepancies found:**
-- The FR draft description matches the live form field-for-field (first/last name, username, phone, barangay, sitio, password, terms). No missing/extra fields.
+- The FR draft description matches the live form field-for-field (first/middle/last name, username, phone, barangay, password, terms; sitio was removed on 2026-11-15). No missing/extra fields.
 - **Registration does not auto-log the new resident in.** Verified live: after creating a brand-new account ("FRTest Walkthrough") and completing OTP, the app redirected to `/login`, not `/home`, and no session cookie was set for the new user (confirmed via `GET /api/resident/me` still returning the previously logged-in resident's data). The user must sign in with their new username/password afterward.
 - **Confirmed live bug, worth flagging strongly:** if a *different* resident's session is still active in the same browser when a new account finishes signup, the post-OTP `router.push("/login")` gets intercepted by `/login`'s own "already logged in → skip straight to `/home`" guard (`frontend/src/app/(auth)/login/page.jsx`). The brand-new user is silently dropped into the **previous** resident's home dashboard instead of ever seeing a login form for their own account. Reproduced directly: after registering "FRTest Walkthrough" while Kent Villalun's session was still cached, the OTP screen redirected straight into Kent's `/home` (Kent's contribution stats, Kent's requests) with zero indication anything was wrong. This is a real risk on a shared/household device where a second family member registers their own account after the first is already logged in.
 
@@ -94,15 +98,18 @@ Verified against the running app (barangay dashboard at `/dashboard` logged in a
 
 > *Revised 2026-10-20 from the code (not re-verified live). Previously recorded as "not implemented anywhere".*
 
-**Roles allowed:** `SUPER_ADMIN` — `POST /admin/barangays/:id/staff`, `GET /admin/barangays/:id/staff`.
+> *Revised 2026-11-18 from the code (not re-verified live): middle name added, Deactivate/Reactivate added.*
+
+**Roles allowed:** `SUPER_ADMIN` — `POST /admin/barangays/:id/staff`, `GET /admin/barangays/:id/staff`, `PATCH /admin/barangays/:id/staff/:staffId`.
 
 **Process steps:**
 1. On a barangay's detail page, the staff table lists every account (each as its own row) and shows placeholders for any missing required role. **Add staff** opens a modal.
 2. The server creates a `User` scoped to that barangay with a role from `CAPTAIN, SECRETARY, TREASURER, SK, COLLECTOR`, after checking that the username and the phone number are unused.
 3. Sitios are managed on the same page (`POST/GET /admin/barangays/:id/sitios`, `PATCH /admin/sitios/:id`), unique per barangay.
 4. A staff member then logs in at the barangay login and lands on the first page their role may open (`ROLE_MATRIX`).
+5. **Deactivate / Reactivate** on a row (with a confirm modal) calls `PATCH /admin/barangays/:id/staff/:staffId` with a boolean `isActive`; the server only changes staff of that barangay. An inactive account shows an Inactive pill, no longer fills its role in the table (the role shows as vacant) and is rejected at login and by `authMiddleware.js`.
 
-**Fields involved:** username, password, first name, last name, phone number, role.
+**Fields involved:** username, password, first name, middle name (required by the form and the server), last name, phone number, role.
 
 **Discrepancies found:** Because accounts of every role can now be created, every role-gate in this document can be tested by logging in as that role (the dev seed also creates one account per role).
 
@@ -120,7 +127,7 @@ Verified against the running app (barangay dashboard at `/dashboard` logged in a
 3. Once a photo is chosen, the placeholder is replaced by a preview and two buttons appear: **Retake** and **Next**.
 4. Tapping **Next** uploads the photo directly to Cloudinary (unsigned upload preset) and shows a loading toast ("Uploading photo...") then a success toast ("Photo uploaded!"). Only after a successful Cloudinary upload does the rest of the form appear.
    - Branch: Cloudinary upload failure → error toast, form does not reveal.
-5. Form fields reveal: **Mixed/ Assorted materials** checkbox, **Material category** dropdown, **Material** dropdown (dependent on category), **Estimated value** (number) + unit dropdown (kg / grams / lbs / piece/s), **Purok / Sitio** (read-only, auto-filled from the resident's own profile via `GET /auth/me`), **Notes (Optional)**.
+5. Form fields reveal: **Mixed/ Assorted materials** checkbox, **Material category** dropdown, **Material** dropdown (dependent on category), **Estimated value** (number) + unit dropdown (kg / grams / lbs / piece/s), **Purok / Sitio** (read-only, auto-filled from the resident's own profile via `GET /auth/me`; hidden when the resident has no sitio), **Notes (Optional)**.
    - Branch: checking **Mixed/ Assorted materials** hides both the Material category and Material dropdowns and shows an italic note, "Collector will identify materials during pickup." Confirmed live.
 6. Resident taps **Submit Request**.
    - Branch (client-side yup validation): Estimated value required, must be a positive number; Estimated unit required (one of KG/GRAMS/LBS/PIECE); Material is required **unless** Assorted is checked.
@@ -134,7 +141,7 @@ Verified against the running app (barangay dashboard at `/dashboard` logged in a
 - Material category / Material — dropdowns — required unless Assorted is checked
 - Estimated value — number — required, must be positive
 - Estimated unit — select (KG/GRAMS/LBS/PIECE) — required
-- Purok/Sitio — read-only, system-filled, not user-editable
+- Purok/Sitio — read-only, system-filled, not user-editable (hidden when the resident has no sitio)
 - Notes — text — optional
 
 **Discrepancies found:** None against the FR draft's description of the flow itself. See FR7 for the separate "image recognition" claim, which does not apply to this screen (this screen is a plain photo attachment with no material suggestion).
@@ -166,15 +173,25 @@ Verified against the running app (barangay dashboard at `/dashboard` logged in a
 
 ### 7. Capture Recyclables via Image Recognition
 
-**Roles allowed:** N/A — **not implemented.**
+> *Revised 2026-11-18 from the code (not re-verified live). On 2026-08-24 this was recorded as "not implemented"; Claude-powered classification shipped on 2026-09-12.*
 
-**Process steps:** None to document as "image recognition." The `/capture` screen (see FR5) is a plain photo-attachment step: `<input type="file" accept="image/*" capture="environment">` → Cloudinary upload → manual material dropdown selection by the resident. There is no ML/vision call anywhere in `frontend/src/app/(resident)/capture/page.jsx`, no material-suggestion API, and nothing in the backend that inspects the uploaded image. The photo is stored purely as evidence attached to the request (`photoUrl`), viewed later by staff as "Photo Evidence" on the request detail page.
+**Roles allowed:** `RESIDENT` — `POST /pickup-requests/classify` (`authenticateResident`, `requireRoles(["RESIDENT"])`, rate-limited to 5 requests per minute because every call is a paid API call).
 
-**Fields involved:** N/A.
+**Process steps:**
+1. On `/capture` the resident attaches a photo. **Analyze Photo** compresses it in the browser (`browser-image-compression`) and sends it as base64 to `POST /pickup-requests/classify`.
+2. The backend asks `claude-sonnet-5` (through `@anthropic-ai/sdk`) to classify the photo into the fixed core material catalog (`CORE_MATERIALS` in `backend/src/utils/coreMaterials.js`). Each material's unit in the prompt follows the barangay's own unit setting (since 2026-11-10).
+3. The response fills the capture form (material, estimated value and unit, Assorted flag). An assorted result sets the unit to kg. The resident can correct anything before submitting (FR5).
+   - Branch: if the detected material cannot be matched to the barangay's materials, the form says "Couldn't match the detected material, please select manually".
+   - Branch: if the analysis fails, the page shows "Couldn't analyze this photo." and a **Fill in manually** button, so a request never depends on the classifier.
 
-**Discrepancies found:** Matches the FR table's own footnote — "Capture Recyclables via Image Recognition" is explicitly listed as "committed scope pending implementation." Confirmed accurate: photo capture exists, the recognition/suggestion half does not.
+**Fields involved:** the compressed photo (base64) in the request; the response is a suggested material, estimated value, unit and Assorted flag. The classify call itself stores nothing.
 
-**Open questions:** Is the intended UX "suggest, then let resident/staff confirm or correct" (per the FR wording) meant to run client-side, or as a backend call at submit time? Not yet decided in code.
+**Discrepancies found:**
+- Matches the FR wording ("suggest, then let the resident confirm or correct").
+- No formal accuracy evaluation against the target material classes has been recorded anywhere; if the adviser wants a number, it still has to be measured.
+- The catalog the AI picks from (`CORE_MATERIALS`) is hand-maintained and separate from the live `Material` table, so a material added in Settings cannot be detected until it is added to the catalog too.
+
+**Open questions:** None beyond the missing accuracy evaluation.
 
 ---
 
@@ -199,6 +216,8 @@ Verified against the running app (barangay dashboard at `/dashboard` logged in a
 ---
 
 ### 9. Manage Pickup Request Lifecycle
+
+> *Revised 2026-11-18 from the code (not re-verified live): in the Finalize Record modal the collector can override Single/Assorted, the saved `isAssorted` follows what was collected, and the COLLECTED branch validates the items and checks the materials belong to the barangay (2026-11-10). Declining needs a non-blank reason: it is trimmed and checked on the server, blocked in the modal, and the server's message is shown (2026-11-17).*
 
 **Roles allowed:** `CAPTAIN, SECRETARY, COLLECTOR` — `GET /pickup-requests/collection-requests` (list), `GET /pickup-requests/collection-requests/:id` (detail), `PATCH /pickup-requests/collection-requests/:id` (status transitions). *(FR draft says "authorized barangay staff" generically — actual gate excludes `TREASURER` and `SK`.)*
 
@@ -250,6 +269,8 @@ Verified against the running app (barangay dashboard at `/dashboard` logged in a
 
 ### 10. Record Scheduled Recyclable Collection ("Manual Collection Intake" module)
 
+> *Revised 2026-11-18 from the code (not re-verified live): the modal has a **Registered / Not registered** toggle, so the household-name field no longer needs a failed search first; the unit prefills from the chosen material; the history has a sitio filter and its Sitio column hides when no row has a sitio (2026-11-10, 2026-11-15). `recordIntake` now requires exactly one of `userId` or `householdName` (400 "Provide either a registered resident or a household name.") and checks the resident is an active user of the caller's barangay.*
+
 **Roles allowed:** `CAPTAIN, SECRETARY, SK, COLLECTOR` — `POST /manual-intake`, `GET /manual-intake` (`authenticateBarangay`). *(FR draft says "barangay staff" generically — confirmed this specific set; note it includes `SK`, unlike FR9's pickup-request lifecycle roles.)*
 
 > See the disambiguation table under FR9 — this is the module used for Sunday EcoAid / any direct intake where **no prior pickup request exists.**
@@ -264,18 +285,20 @@ Verified against the running app (barangay dashboard at `/dashboard` logged in a
 5. `POST /manual-intake` with `{ items, userId (nullable), householdName (nullable) }`. For each item, one `ManualIntakeItems` row and one matching `StockTransactionLog` row (`source: MANUAL_INTAKE`, `transactionType: IN`, quantity normalized to KG via `convertToKg` except for PIECE-unit materials) are written.
 
 **Fields involved:**
-- Resident — search-select OR household-name free text — **not actually mutually-exclusive-required server-side**: the controller only checks `if (!items)`, so a submission with both `userId` and `householdName` empty is technically accepted by the backend (the UI's own flow makes this unlikely in practice, but it's not enforced)
+- Resident — search-select (`userId`, must be an active user of the caller's barangay) OR household-name free text (`householdName`); the server requires exactly one of the two
 - Materials — one or more `{ materialId, quantity, unit }` rows — the server only checks the `items` array is truthy, **not that it's non-empty**, so a zero-row submission is technically possible
 
 **Discrepancies found:**
 - FR draft doesn't mention `SK` explicitly, but the live role gate includes it (matches the code, no wording problem — flagged only because it differs from FR9's role set for the "similar-sounding" pickup lifecycle module, which is exactly the kind of role confusion item #2 in this task's "specific items needing resolution" asked to check).
-- Minor validation gaps (empty `items` array, `userId`+`householdName` both absent) are accepted server-side with no error — worth a defensive fix, low real-world risk given the UI always drives one of the two paths.
+- Minor validation gap: the server only checks that `items` is truthy, not that it is non-empty, so a zero-row submission is technically possible. The earlier gap about both `userId` and `householdName` being empty is fixed.
 
 **Open questions:** None beyond the validation gaps above.
 
 ---
 
 ### 11. View MRF Inventory
+
+> *Revised 2026-11-18 from the code: the running-total bug recorded below was fixed on 2026-11-10. A material with stock in two units no longer breaks: a stock-out is checked against the balance of the chosen unit, the running total is kept per material and unit, and the dropdown, filter and category counts list each material correctly. The open question below is resolved.*
 
 **Roles allowed:** `CAPTAIN, SK, COLLECTOR, SECRETARY` — `GET /mrf-inventory`, `GET /mrf-inventory/transaction-logs`. *(Note: excludes `TREASURER`.)*
 
@@ -354,6 +377,8 @@ Verified against the running app (barangay dashboard at `/dashboard` logged in a
 
 ### 14. Record Redemption Transaction
 
+> *Revised 2026-11-18 from the code: a transaction recorded by mistake can be edited or deleted (`PATCH` and `DELETE /redemption/transactions/:id`, same four roles). Both rewrite or remove only that transaction's own stock ledger rows and are blocked when the stock was already sold or the resident's points were already spent; see `docs/business-rules.md` rule 20. This was tested through the API only, not verified live. The resident name search also matches the middle name.*
+
 > *Revised 2026-10-20 from the code (not re-verified live). The 2026-08-24 version described a free-text "Beneficiary" and an "Educational level" field; both are gone.*
 
 **Roles allowed:** `CAPTAIN, SECRETARY, SK, TREASURER` — `POST /redemption/transactions`. *(FR draft says "Captain, Secretary, or SK Staff"; the code also allows `TREASURER`.)*
@@ -361,7 +386,7 @@ Verified against the running app (barangay dashboard at `/dashboard` logged in a
 **Process steps:**
 1. From `/redemption` (or from a program's detail page, where the program is pre-selected), staff clicks **Record transaction**. Modal: **Program** (dropdown of active programs), **Resident** (search; disabled with "Select program first" until a program is chosen), **Material items** (repeatable rows: Material select, amount, "pts/unit" or "₱/unit" suffix), a live **Estimated total**, Cancel / **Record Transaction**.
 2. Selecting a Program enables **Resident**, a debounced search (`GET /redemption/residents/search?name=&programId=`).
-   - Every typed word must match the resident's first or last name (any order); up to 10 registered residents of the staff member's barangay are returned, each with their **balance in that program** (computed, not stored; see FR15).
+   - Every typed word must match the resident's first, middle or last name (any order); up to 10 registered residents of the staff member's barangay are returned, each with their **balance in that program** (computed, not stored; see FR15).
    - Branch — no match: "No registered resident found". There is no longer an option to create a person: only registered residents can take part.
    - Editing the text after picking a resident clears the pick, so what is shown is what is submitted.
 3. Staff adds one or more material rows and submits. Client-side checks come first, with toasts: "Please select a resident" (nothing typed), "Resident not found" (text typed but no resident picked), and the add-at-least-one-material message.
@@ -485,6 +510,8 @@ Verified against the running app (barangay dashboard at `/dashboard` logged in a
 
 ### 20. Manage Junkshop Partners
 
+> *Revised 2026-11-18 from the code: a junkshop can now be edited, including its price list (`PATCH /junkshop-sales/junkshop/:junkshopId`, `CAPTAIN, SECRETARY, TREASURER`, `EditJunkshopModal`).*
+
 **Roles allowed:** Split across two different endpoints powering two different screens — **this is a confirmed, practically-impactful role mismatch:**
 - **Add a junkshop** (`POST /junkshop-sales/junkshop`): `CAPTAIN, SECRETARY, SK, TREASURER`
 - **List junkshops for management** (`GET /junkshop-sales/junkshop`, powers the Settings screen described below): `CAPTAIN, SECRETARY` **only**
@@ -605,6 +632,8 @@ Verified against the running app (barangay dashboard at `/dashboard` logged in a
 
 ### 26. View Leaderboard Rankings
 
+> *Revised 2026-11-18 from the code: the Sitio column hides when no ranked row has a sitio.*
+
 > *Note added 2026-10-20 (from the code): redemption transactions now write their stock rows with the resident's `userId`, and manual intake can be recorded against staff accounts, so both now count on the leaderboard (staff included). The statements below about `REDEMPTION` rows having no `userId` describe the 2026-08-24 behavior.*
 
 **Roles allowed:** Staff view `CAPTAIN, SECRETARY, SK, TREASURER` (`GET /leaderboard`); resident view `RESIDENT` (`GET /leaderboard/residents`).
@@ -626,31 +655,33 @@ Verified against the running app (barangay dashboard at `/dashboard` logged in a
 
 ### 27. Manage Barangay Residents
 
-**Roles allowed:** split across three different endpoints:
-- **List** (`GET /resident/`): `CAPTAIN, SECRETARY, TREASURER, SK` — **no `COLLECTOR`**
-- **Search** (`GET /resident/search`): `CAPTAIN, SECRETARY, COLLECTOR, SK` — **no `TREASURER`**
-- **Edit** (`PATCH /resident/:id`): `CAPTAIN, SECRETARY` **only**
+> *Revised 2026-11-18 from the code (not re-verified live). The 2026-08-24 version said there was no dedicated "verify" action; one-tap Verify and a sitio filter were added on 2026-11-10, and a middle name field on 2026-11-15.*
 
-*(FR draft says "authorized barangay staff" generically — the three actions under this one FR actually have three different role sets.)*
+**Roles allowed:**
+- **List** (`GET /resident/`): `CAPTAIN, SECRETARY`
+- **Search** (`GET /resident/search`): `CAPTAIN, SECRETARY, COLLECTOR, SK` — returns residents and staff
+- **Edit / verify** (`PATCH /resident/:id`): `CAPTAIN, SECRETARY`
 
 **Process steps:**
-1. Staff opens `/residents`. Header stats: Total Residents, Verified, Unverified.
-2. Table: Name, Location, Contact, Status (Verified/Unverified pill), Registered date, **Edit** action.
-3. **Edit** opens a modal: **First name**, **Last name**, **Phone number**, **Sitio** (dropdown), and a **Verified** toggle switch labeled "Mark this resident as verified for your barangay" — confirmed live, sitting inline with the other editable fields, not a separate dedicated "Verify" button/action anywhere in the UI.
-4. `PATCH /resident/:id` accepts any subset of `{ firstName, lastName, phoneNumber, sitioId, isVerified }`; if `sitioId` is provided it's re-validated to exist and the resident's denormalized `purok` field is overwritten to match.
+1. Staff opens `/residents`. Header stats: Total Residents, Verified, Unverified. A sitio filter appears when the barangay has sitios.
+2. Table: Name ("First Middle Last"), Location (address and sitio), Contact, Status (Verified/Unverified pill), Registered date, and an action column with **Verify** (only on unverified residents) and **Edit**.
+3. **Verify** is one tap: it calls `PATCH /resident/:id` with `{ isVerified: true }` and shows a "<name> is now verified" toast. It is for staff who witnessed a registration and do not want to wait for a pickup or an intake.
+4. **Edit** opens a modal: **First name**, **Middle name** (required in the form), **Last name**, **Phone number**, **Sitio** (dropdown, hidden when the barangay has no sitios) and a **Verified** toggle. Save with no changes is detected and does nothing.
+5. `PATCH /resident/:id` accepts any subset of `{ firstName, middleName, lastName, phoneNumber, sitioId, isVerified }`. It trims values and rejects a blank first name, last name or phone number. If `sitioId` is given, the sitio must belong to the caller's barangay, and the resident's denormalized `purok` is overwritten to match.
 
-**Fields involved:** First name, Last name, Phone number, Sitio, Verified toggle — all optional per-request (partial update pattern; whichever fields are present get written).
+**Fields involved:** First name, Middle name, Last name, Phone number, Sitio, Verified toggle — all optional per request (partial update; whichever fields are present get written).
 
 **Discrepancies found:**
-- **No dedicated "verify" endpoint or action exists.** "Verify" is simply the `isVerified` boolean, one of several fields in the general-purpose Edit modal — confirmed live. There's also no guard against un-verifying someone by flipping it back off through the same control.
-- **This is one of three independent ways a resident becomes verified**, and only one of the three is a deliberate staff action:
-  1. Automatically, whenever any of their pickup requests is transitioned to `COLLECTED` (FR9) — re-set on *every* collection, not just the first.
-  2. Automatically, whenever a Manual Collection Intake (FR10) entry is matched to their resident account.
-  3. Manually here, via the Edit modal's Verified toggle (`CAPTAIN`/`SECRETARY` only).
-- The three role sets above (list/search/edit) don't line up with each other — a `TREASURER` can see the full resident list but can't use the search box; a `COLLECTOR` can search but can't see the full list; neither can edit/verify anyone.
-- `searchResident` is the one place in the entire backend that uses raw SQL (`prisma.$queryRaw`, tagged-template so it's auto-parameterized and not an injection risk) rather than the Prisma query builder — inconsistent with `CLAUDE.md`'s "Prisma for all DB access — no raw SQL" rule, worth a note even though it isn't unsafe as written.
+- A resident becomes verified in several ways, and only the last two are deliberate staff actions:
+  1. Automatically, whenever one of their pickup requests moves to `COLLECTED` (FR9), re-set on every collection.
+  2. Automatically, when a Manual Collection Intake entry (FR10) is matched to their account.
+  3. Automatically, when a redemption transaction is recorded for them (FR14).
+  4. Manually, with the one-tap **Verify** button on the Residents list.
+  5. Manually, with the Verified toggle in the Edit modal, which can also set it back to unverified; nothing guards against un-verifying someone.
+- The List and Edit roles now match (`CAPTAIN, SECRETARY`); Search is wider (`CAPTAIN, SECRETARY, COLLECTOR, SK`) because manual intake needs it.
+- `searchResident` is the one place in the backend that uses raw SQL (`prisma.$queryRaw`, a tagged template, so it is parameterized). It is a decided exception to the "no raw SQL" rule: it searches residents and staff together by their joined name, including the middle name.
 
-**Open questions:** Are the three different role sets across List/Search/Edit intentional, or should they be unified to one consistent set (matching the FR draft's single "authorized barangay staff" phrasing)?
+**Open questions:** None.
 
 ---
 
@@ -695,6 +726,8 @@ Verified against the running app (barangay dashboard at `/dashboard` logged in a
 ---
 
 ### 30. Manage Recyclable Materials
+
+> *Revised 2026-11-18 from the code: a material's unit can be changed in Settings (kg, lbs, gram, pcs; `PATCH /settings/materials/:id`, `CAPTAIN, SECRETARY`). The AI classification keeps the fixed core material list but follows each barangay's unit setting.*
 
 *(Listed as the final row in the source FR table, under the heading "Manage Recyclable Materials.")*
 
@@ -769,11 +802,11 @@ Verified against the running app (barangay dashboard at `/dashboard` logged in a
 | Customize Barangay Appearance — view | "authorized barangay staff" | all five roles |
 | Customize Barangay Appearance — change | "authorized barangay staff" | `CAPTAIN, SECRETARY` **only** |
 | Manage Recyclable Materials | "authorized barangay staff" | `CAPTAIN, SECRETARY` **only** |
-| Manage Barangay Residents — list | "authorized barangay staff" | `CAPTAIN, SECRETARY, TREASURER, SK` (no `COLLECTOR`) |
+| Manage Barangay Residents — list | "authorized barangay staff" | `CAPTAIN, SECRETARY` (no `TREASURER`, `SK` or `COLLECTOR`) |
 | Manage Barangay Residents — search | "authorized barangay staff" | `CAPTAIN, SECRETARY, COLLECTOR, SK` (no `TREASURER`) |
 | Manage Barangay Residents — edit/verify | "authorized barangay staff" | `CAPTAIN, SECRETARY` **only** |
 | View Leaderboard Rankings (staff) | "residents and barangay staff" | `CAPTAIN, SECRETARY, SK, TREASURER` (no `COLLECTOR`) |
 
 ## Summary — Register User Account required fields (per this task's item 3)
 
-All of first name, last name, username, phone number, barangay, sitio, password, confirm password, and Terms & Privacy acceptance are **enforced as required, both client-side (inline yup validation, confirmed live) and server-side** (`register` and `verify-otp` both re-check every field). None are optional; none are missing from the live form. The only nuance is that **Barangay** must be selected from the backend-driven autocomplete suggestion list — free-typed text that doesn't match a suggestion is rejected with "Please select a barangay from the suggestions," since there is no raw `barangayName` field, only a `barangayId` resolved from a real selection.
+All of first name, last name, username, phone number, barangay, password, confirm password, and Terms & Privacy acceptance are **enforced as required, both client-side (inline yup validation, confirmed live before 2026-11-15) and server-side** (`register` and `verify-otp` both re-check every field). Two changes since then, from the code: sitio is no longer asked at signup (removed 2026-11-15), and middle name is required on the form only (the server accepts a missing one). None of the other fields are optional. The only nuance is that **Barangay** must be selected from the backend-driven autocomplete suggestion list — free-typed text that doesn't match a suggestion is rejected with "Please select a barangay from the suggestions," since there is no raw `barangayName` field, only a `barangayId` resolved from a real selection.
