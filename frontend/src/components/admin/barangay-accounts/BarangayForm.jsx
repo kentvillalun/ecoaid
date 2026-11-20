@@ -109,6 +109,7 @@ export function BarangayForm({
       themeAccent: "",
       ...defaultValues,
     },
+    mode: "onTouched"
   });
 
   const toggleModule = (key) => {

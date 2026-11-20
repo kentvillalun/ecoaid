@@ -12,6 +12,7 @@ export const PendingActions = ({ id, onSuccess, variant }) => {
   const { data, isLoading, error, isError, updateStatus, errorMessageRef } = useUpdate();
   const [isOpen, setIsOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
+  const [rejectionReasonError, setRejectionReasonError] = useState(null)
   const router = useRouter()
 
   return (
@@ -29,10 +30,11 @@ export const PendingActions = ({ id, onSuccess, variant }) => {
             onClose={() => {
               setIsOpen(false)
               setRejectionReason("")
+              setRejectionReasonError(null)
             }}
             onConfirm={async () => {
               if (!rejectionReason.trim()) {
-                toast.error("Please enter a rejection reason")
+                setRejectionReasonError("Rejection reason is required")
                 return
               }
               toast.loading("Declining request...")
@@ -42,6 +44,7 @@ export const PendingActions = ({ id, onSuccess, variant }) => {
                 toast.success("Request declined")
                 setIsOpen(false)
                 setRejectionReason("")
+                setRejectionReasonError(null)
                 onSuccess();
               } else {
                 toast.dismiss()
@@ -59,8 +62,14 @@ export const PendingActions = ({ id, onSuccess, variant }) => {
                 rows={4}
                 placeholder="Input the reason here"
                 value={rejectionReason}
-                onChange={(event) => setRejectionReason(event.target.value)}
+                onChange={(event) => {
+                  setRejectionReason(event.target.value)
+                  setRejectionReasonError(null)
+                }}
               />
+              {rejectionReasonError && (
+                <p className="text-xs text-red-400">{rejectionReasonError}</p>
+              )}
             </div>
           </Modal>,
           document.body,

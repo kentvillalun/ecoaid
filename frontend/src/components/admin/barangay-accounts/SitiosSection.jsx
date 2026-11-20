@@ -3,7 +3,12 @@
 import { useRef, useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { handleUnauthorized } from "@/lib/handleUnauthorized";
-import { CheckIcon, MapPinIcon, PlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  CheckIcon,
+  MapPinIcon,
+  PlusIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 
 // Neutral gray — sitios aren't an on/off state like Modules, so they don't
 // use the MODULE_STATE_STYLES on/off palette.
@@ -16,7 +21,10 @@ const SitioPill = ({ sitio, isSelected, onSelect }) => (
     className={`text-xs font-medium px-2.5 py-1 rounded-full text-nowrap hover:cursor-pointer border ${
       isSelected ? "border-admin-accent" : "border-transparent"
     }`}
-    style={{ backgroundColor: SITIO_PILL_STYLE.bg, color: SITIO_PILL_STYLE.text }}
+    style={{
+      backgroundColor: SITIO_PILL_STYLE.bg,
+      color: SITIO_PILL_STYLE.text,
+    }}
   >
     {sitio.name}
   </button>
@@ -53,7 +61,13 @@ export const SitiosSection = ({
 
   const handleSubmit = async () => {
     const trimmed = name.trim();
-    if (!trimmed || isSubmitting) return;
+
+    if (isSubmitting) return;
+
+    if (!trimmed) {
+      setError("Sitio name is required");
+      return;
+    }
 
     setIsSubmitting(true);
     setError("");
@@ -110,7 +124,9 @@ export const SitiosSection = ({
       </div>
 
       <div className="flex flex-wrap gap-1.5 w-full">
-        {isLoading && <p className="text-xs text-gray-400">Loading sitios...</p>}
+        {isLoading && (
+          <p className="text-xs text-gray-400">Loading sitios...</p>
+        )}
         {isError && (
           <p className="text-xs text-red-400">Unable to load sitios.</p>
         )}

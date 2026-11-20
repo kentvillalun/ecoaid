@@ -7,6 +7,20 @@ import { toast } from "sonner";
 import { useFetch } from "@/hooks/useFetch";
 import { handleUnauthorized } from "@/lib/handleUnauthorized";
 
+const emptyRow = () => ({
+  categoryId: "",
+  materialId: "",
+  actualValue: "",
+  actualUnit: "",
+});
+
+// the keys match the row fields, so a field name can also be its error key
+const emptyRowErrors = () => ({
+  materialId: null,
+  actualValue: null,
+  actualUnit: null,
+});
+
 export const InProgressActions = ({
   id,
   onSuccess,
@@ -21,21 +35,47 @@ export const InProgressActions = ({
   // the resident's choice is only an estimate, the collector decides what was
   // really collected
   const [assorted, setAssorted] = useState(isAssorted === true);
-  const [actualValue, setActualValue] = useState(null);
+  const [actualValue, setActualValue] = useState("");
   // starts from the unit the barangay set for the requested material
   const [actualUnit, setActualUnit] = useState(material?.defaultUnit ?? "");
   const { updateStatus } = useUpdate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [materialOptions, setMaterialOptions] = useState([[], []]);
 
-  const [items, setItems] = useState([
-    { categoryId: "", materialId: "", actualValue: "", actualUnit: "" },
-    { categoryId: "", materialId: "", actualValue: "", actualUnit: "" },
+  const [items, setItems] = useState([emptyRow(), emptyRow()]);
+
+  // itemErrors runs parallel to items (mixed mode), singleErrors is for the
+  // single form
+  const [itemErrors, setItemErrors] = useState([
+    emptyRowErrors(),
+    emptyRowErrors(),
   ]);
+  const [singleErrors, setSingleErrors] = useState(emptyRowErrors());
+
+  const clearItemError = (index, field) => {
+    setItemErrors((prev) =>
+      prev.map((errors, i) =>
+        i === index ? { ...errors, [field]: null } : errors,
+      ),
+    );
+  };
+
+  const clearSingleError = (field) => {
+    setSingleErrors((prev) => ({ ...prev, [field]: null }));
+  };
+
+  // the two modes show different fields, so leaving one drops its messages
+  const switchMode = (toAssorted) => {
+    setAssorted(toAssorted);
+    setItemErrors(items.map(() => emptyRowErrors()));
+    setSingleErrors(emptyRowErrors());
+  };
 
   const updateItem = (index, field, value) => {
-    const updated = [...items];
-    updated[index][field] = value;
-    setItems(updated);
+    setItems(
+      items.map((item, i) => (i === index ? { ...item, [field]: value } : item)),
+    );
+    clearItemError(index, field);
   };
 
   // picking a material fills in the unit the barangay set for it (still editable)
@@ -52,82 +92,149 @@ export const InProgressActions = ({
     };
     setItems(updated);
 
-    // the single form reads its unit from its own state
-    if (index === 0 && defaultUnit) setActualUnit(defaultUnit);
+    clearItemError(index, "materialId");
+    if (defaultUnit) clearItemError(index, "actualUnit");
+
+    // index 0 is also the single form, which reads its unit from its own state
+    if (index === 0) {
+      clearSingleError("materialId");
+      if (defaultUnit) {
+        setActualUnit(defaultUnit);
+        clearSingleError("actualUnit");
+      }
+    }
   };
 
   const addRow = () => {
-    setItems([
-      ...items,
-      { categoryId: "", materialId: "", actualValue: "", actualUnit: "" },
-    ]);
+    setItems([...items, emptyRow()]);
     setMaterialOptions([...materialOptions, []]);
+    setItemErrors([...itemErrors, emptyRowErrors()]);
   };
 
+  // items, materialOptions and itemErrors are parallel lists, so a row leaves
+  // all three
   const removeRow = (index) => {
-    const removed = items.filter((item, i) => i !== index);
-    setItems(removed);
+    setItems(items.filter((item, i) => i !== index));
+    setMaterialOptions(materialOptions.filter((options, i) => i !== index));
+    setItemErrors(itemErrors.filter((errors, i) => i !== index));
+  };
+
+  const resetForm = () => {
+    setActualValue("");
+    setActualUnit(material?.defaultUnit ?? "");
+    setItems([emptyRow(), emptyRow()]);
+    setMaterialOptions([[], []]);
+    setItemErrors([emptyRowErrors(), emptyRowErrors()]);
+    setSingleErrors(emptyRowErrors());
+  };
+
+  // starts the form from the material the resident requested (still editable).
+  // The request only carries the category name, and names are unique, so the
+  // id comes from the categories list. Done on open, not on mount, because
+  // categories may still be loading when the component first renders.
+  const prefillRequestedMaterial = () => {
+    if (!material) return;
+
+    const categoryId =
+      categories?.find((c) => c.name === material.category?.name)?.id ?? "";
+
+    setItems((prev) =>
+      prev.map((item, i) =>
+        i === 0
+          ? {
+              ...item,
+              categoryId,
+              materialId: material.id,
+              actualUnit: material.defaultUnit ?? item.actualUnit,
+            }
+          : item,
+      ),
+    );
+
+    // the material select needs its options to show the chosen material
+    if (categoryId) loadMaterials(0, categoryId);
   };
 
   const handleAssortedConfirm = async () => {
-    const isComplete = items.every(
-      (item) => item.materialId && item.actualValue > 0 && item.actualUnit,
-    );
+    if (isSubmitting) return;
 
-    if (!isComplete) {
-      return toast.error("Please fill in the material, weight and unit of every row");
+    // check every row at once so the user sees all the problems in one go
+    const nextErrors = items.map((item) => ({
+      materialId: item.materialId ? null : "Select a material",
+      actualValue:
+        Number(item.actualValue) > 0 ? null : "Enter a weight greater than 0",
+      actualUnit: item.actualUnit ? null : "Select a unit",
+    }));
+    setItemErrors(nextErrors);
+
+    if (nextErrors.some((errors) => Object.values(errors).some(Boolean))) {
+      return;
     }
 
+    setIsSubmitting(true);
     toast.loading("Finalizing Record ");
     const success = await updateStatus({
       id,
       status: "COLLECTED",
-      items,
+      // the inputs hold strings, the request gets real numbers
+      items: items.map((item) => ({
+        ...item,
+        actualValue: Number(item.actualValue),
+      })),
       isAssorted: true,
     });
+    setIsSubmitting(false);
+    toast.dismiss();
 
     if (success) {
-      toast.dismiss();
-      toast.success("Record finalize! Request collected!");
+      toast.success("Record finalized! Request collected!");
       setIsOpen(false);
+      resetForm();
       onSuccess();
     } else {
-      toast.dismiss();
       toast.error("Something went wrong");
     }
   };
 
   const handleSimpleConfirm = async () => {
-    // a request submitted as assorted has no material, so the collector picks
-    // one in the first row
-    const materialId = material?.id ?? items[0].materialId;
+    if (isSubmitting) return;
 
-    if (!materialId || !(actualValue > 0) || !actualUnit) {
-      return toast.error("Please fill in the material, weight and unit");
-    }
+    // the collector can change the requested material, so the first row is the
+    // source of truth
+    const materialId = items[0].materialId;
 
+    const nextErrors = {
+      materialId: materialId ? null : "Select a material",
+      actualValue:
+        Number(actualValue) > 0 ? null : "Enter a weight greater than 0",
+      actualUnit: actualUnit ? null : "Select a unit",
+    };
+    setSingleErrors(nextErrors);
+
+    if (Object.values(nextErrors).some(Boolean)) return;
+
+    setIsSubmitting(true);
     toast.loading("Finalizing Record ");
     const success = await updateStatus({
       id,
       status: "COLLECTED",
-      items: [{ materialId, actualValue, actualUnit }],
+      items: [{ materialId, actualValue: Number(actualValue), actualUnit }],
       isAssorted: false,
     });
- 
+    setIsSubmitting(false);
+    toast.dismiss();
+
     if (success) {
-      toast.dismiss();
-      toast.success("Record finalize! Request collected!");
+      toast.success("Record finalized! Request collected!");
       setIsOpen(false);
+      resetForm();
       onSuccess();
     } else {
-      toast.dismiss();
       toast.error("Something went wrong");
     }
   };
 
-  const handleCategoryChange = async (index, categoryId) => {
-    updateItem(index, "categoryId", categoryId);
-
+  const loadMaterials = async (index, categoryId) => {
     const response = await fetch(`/api/material/barangay?categoryId=${categoryId}`, {
       method: "GET",
       headers: {
@@ -138,11 +245,33 @@ export const InProgressActions = ({
 
     if (response.status === 401) return handleUnauthorized();
 
+    if (!response.ok) {
+      toast.error("Could not load the materials");
+      return;
+    }
+
     const result = await response.json();
 
-    const updated = [...materialOptions];
-    updated[index] = result.materials;
-    setMaterialOptions(updated);
+    // functional update, because the fetch above makes this async
+    setMaterialOptions((prev) =>
+      prev.map((options, i) => (i === index ? (result.materials ?? []) : options)),
+    );
+  };
+
+  const handleCategoryChange = (index, categoryId) => {
+    // the old material belongs to the old category, so drop it and its options
+    setItems((prev) =>
+      prev.map((item, i) =>
+        i === index ? { ...item, categoryId, materialId: "" } : item,
+      ),
+    );
+    setMaterialOptions((prev) =>
+      prev.map((options, i) => (i === index ? [] : options)),
+    );
+    clearItemError(index, "materialId");
+    if (index === 0) clearSingleError("materialId");
+
+    loadMaterials(index, categoryId);
   };
 
   return (
@@ -163,24 +292,7 @@ export const InProgressActions = ({
             }
             onClose={() => {
               setIsOpen(false);
-              // the weight input is emptied when the modal closes, so the
-              // saved value has to be cleared too
-              setActualValue(null);
-              setActualUnit(material?.defaultUnit ?? "");
-              setItems([
-                {
-                  categoryId: "",
-                  materialId: "",
-                  actualValue: "",
-                  actualUnit: "",
-                },
-                {
-                  categoryId: "",
-                  materialId: "",
-                  actualValue: "",
-                  actualUnit: "",
-                },
-              ]);
+              resetForm();
             }}
             onConfirm={assorted ? handleAssortedConfirm : handleSimpleConfirm}
             isPill={true}
@@ -190,14 +302,14 @@ export const InProgressActions = ({
                 <button
                   className={`py-1.5 px-3 rounded-full new-border ${!assorted ? "gradient-button text-white" : "bg-surface text-gray-600"} transition-all ease-in-out duration-200`}
                   type="button"
-                  onClick={() => setAssorted(false)}
+                  onClick={() => switchMode(false)}
                 >
                   Single material
                 </button>
                 <button
                   className={`py-1.5 px-3 rounded-full new-border ${assorted ? "gradient-button text-white" : "bg-surface text-gray-600"} transition-all ease-in-out duration-200`}
                   type="button"
-                  onClick={() => setAssorted(true)}
+                  onClick={() => switchMode(true)}
                 >
                   Mixed or assorted material
                 </button>
@@ -263,39 +375,55 @@ export const InProgressActions = ({
                         ))}
                       </select>
                     </div>
+                    {itemErrors[index]?.materialId && (
+                      <p className="text-xs text-red-400 px-2 mb-2">
+                        {itemErrors[index].materialId}
+                      </p>
+                    )}
 
                     <div className="grid grid-cols-2 gap-2">
-                      <div className="input flex-1 mb-0">
-                        <input
-                          type="number"
-                          className="outline-none w-full"
-                          placeholder="e.g. 1"
-                          min={0}
-                          onChange={(e) =>
-                            updateItem(
-                              index,
-                              "actualValue",
-                              parseFloat(e.target.value),
-                            )
-                          }
-                        />
+                      <div>
+                        <div className="input flex-1 mb-0">
+                          <input
+                            type="number"
+                            className="outline-none w-full"
+                            placeholder="e.g. 1"
+                            min={0}
+                            value={item.actualValue}
+                            onChange={(e) =>
+                              updateItem(index, "actualValue", e.target.value)
+                            }
+                          />
+                        </div>
+                        {itemErrors[index]?.actualValue && (
+                          <p className="text-xs text-red-400 px-2 mt-1">
+                            {itemErrors[index].actualValue}
+                          </p>
+                        )}
                       </div>
-                      <div className="input min-w-28 mb-0">
-                        <select
-                          className="w-full outline-none"
-                          onChange={(e) =>
-                            updateItem(index, "actualUnit", e.target.value)
-                          }
-                          value={item.actualUnit}
-                        >
-                          <option value="" hidden disabled>
-                            e.g. kg
-                          </option>
-                          <option value="KG">kg</option>
-                          <option value="GRAMS">grams</option>
-                          <option value="LBS">lbs</option>
-                          <option value="PIECE">piece/s</option>
-                        </select>
+                      <div>
+                        <div className="input min-w-28 mb-0">
+                          <select
+                            className="w-full outline-none"
+                            onChange={(e) =>
+                              updateItem(index, "actualUnit", e.target.value)
+                            }
+                            value={item.actualUnit}
+                          >
+                            <option value="" hidden disabled>
+                              e.g. kg
+                            </option>
+                            <option value="KG">kg</option>
+                            <option value="GRAMS">grams</option>
+                            <option value="LBS">lbs</option>
+                            <option value="PIECE">piece/s</option>
+                          </select>
+                        </div>
+                        {itemErrors[index]?.actualUnit && (
+                          <p className="text-xs text-red-400 px-2 mt-1">
+                            {itemErrors[index].actualUnit}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -311,49 +439,50 @@ export const InProgressActions = ({
               </div>
             ) : (
               <div className="flex flex-col gap-1 p-6">
-                {!material && (
-                  <>
-                    <label className="font-medium text-base text-text-primary px-2">
-                      Material <span className="text-red-500">*</span>
-                    </label>
-                    <div className="input">
-                      <select
-                        className="w-full outline-none"
-                        onChange={(e) =>
-                          handleCategoryChange(0, e.target.value)
-                        }
-                        value={items[0].categoryId}
-                      >
-                        <option value="" disabled hidden>
-                          Category
-                        </option>
-                        {categories?.map((c) => (
-                          <option key={c.id} value={c.id}>
-                            {c.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="input">
-                      <select
-                        className="w-full outline-none"
-                        onChange={(e) =>
-                          handleItemMaterialChange(0, e.target.value)
-                        }
-                        disabled={!items[0].categoryId}
-                        value={items[0].materialId}
-                      >
-                        <option value="" disabled hidden>
-                          Material
-                        </option>
-                        {materialOptions[0]?.map((m) => (
-                          <option value={m.id} key={m.id}>
-                            {m.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </>
+                <label className="font-medium text-base text-text-primary px-2">
+                  Material <span className="text-red-500">*</span>
+                </label>
+                <div className="input">
+                  <select
+                    className="w-full outline-none"
+                    onChange={(e) =>
+                      handleCategoryChange(0, e.target.value)
+                    }
+                    value={items[0].categoryId}
+                  >
+                    <option value="" disabled hidden>
+                      Category
+                    </option>
+                    {categories?.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="input">
+                  <select
+                    className="w-full outline-none"
+                    onChange={(e) =>
+                      handleItemMaterialChange(0, e.target.value)
+                    }
+                    disabled={!items[0].categoryId}
+                    value={items[0].materialId}
+                  >
+                    <option value="" disabled hidden>
+                      Material
+                    </option>
+                    {materialOptions[0]?.map((m) => (
+                      <option value={m.id} key={m.id}>
+                        {m.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {singleErrors.materialId && (
+                  <p className="text-xs text-red-400 px-2 mb-2">
+                    {singleErrors.materialId}
+                  </p>
                 )}
                 <label className="font-medium text-base text-text-primary px-2">
                   Actual Value <span className="text-red-500">*</span>
@@ -365,14 +494,18 @@ export const InProgressActions = ({
                       className="outline-none w-full"
                       placeholder="e.g. 1"
                       min={0}
+                      value={actualValue}
                       onChange={(event) => {
-                        const value = parseFloat(event.target.value);
-                        setActualValue(value);
+                        setActualValue(event.target.value);
+                        clearSingleError("actualValue");
                       }}
                     />
                     <select
                       className="outline-none"
-                      onChange={(event) => setActualUnit(event.target.value)}
+                      onChange={(event) => {
+                        setActualUnit(event.target.value);
+                        clearSingleError("actualUnit");
+                      }}
                       value={actualUnit ?? ""}
                       
                     >
@@ -386,6 +519,16 @@ export const InProgressActions = ({
                     </select>
                   </div>
                 </div>
+                {singleErrors.actualValue && (
+                  <p className="text-xs text-red-400 px-2">
+                    {singleErrors.actualValue}
+                  </p>
+                )}
+                {singleErrors.actualUnit && (
+                  <p className="text-xs text-red-400 px-2">
+                    {singleErrors.actualUnit}
+                  </p>
+                )}
               </div>
             )}
           </Modal>,
@@ -396,6 +539,7 @@ export const InProgressActions = ({
         className={` ${variant === "detail" ? "py-2.5 text-white rounded-xl hover:cursor-pointer gradient-button transition-all duration-200 ease-in-out" : "text-green-600 hover:underline"}`}
         onClick={() => {
           setAssorted(isAssorted === true);
+          if (!isOpen) prefillRequestedMaterial();
           setIsOpen((prev) => !prev);
         }}
       >

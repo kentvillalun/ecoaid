@@ -19,9 +19,12 @@ export function RecordSaleModal({
     { materialId: "", quantity: "", unit: "KG" },
   ]);
   const { makeRequest } = useMutation();
+  // Error messages
+  const [junkshopError, setJunkshopError] = useState(null);
+  const [materialItemError, setMaterialItemError] = useState(null);
 
   const addItem = () =>
-    setItems((prev) => [...prev, { materialId: "", quantity: "", unit: "kg" }]);
+    setItems((prev) => [...prev, { materialId: "", quantity: "", unit: "KG" }]);
   const removeItem = (index) =>
     setItems((prev) => prev.filter((_, i) => i !== index));
 
@@ -36,6 +39,8 @@ export function RecordSaleModal({
   const resetModal = () => {
     setPreselectedJunkshop("");
     setItems([{ materialId: "", quantity: "", unit: "KG" }]);
+    setJunkshopError(null);
+    setMaterialItemError(null);
   };
 
   const selectedJunkshop = junkshops?.find(
@@ -43,18 +48,33 @@ export function RecordSaleModal({
   );
 
   const handleSubmit = async () => {
+    let hasError = false;
+
     if (!preselectedJunkshopId || preselectedJunkshopId === "") {
-      toast.error("Recording failed. Junkshop is required");
-      return
+      setJunkshopError("Junkshop is required");
+      hasError = true;
+    } else {
+      setJunkshopError(null);
     }
 
-    if (
-      items.length === 0 ||
-      items.some((row) => !row.materialId || !row.quantity || !row.unit)
+    if (items.length === 0) {
+      setMaterialItemError("Please complete at least one material item");
+      hasError = true;
+    } else if (
+      items.some(
+        (row) =>
+          !row.materialId || !row.unit || !(parseFloat(row.quantity) > 0),
+      )
     ) {
-      toast.error("Recording failed. Please add at least one material item");
-      return
+      setMaterialItemError(
+        "Please complete all material items with a quantity above 0",
+      );
+      hasError = true;
+    } else {
+      setMaterialItemError(null);
     }
+
+    if (hasError) return;
 
     toast.loading("Recording sale");
 
@@ -74,10 +94,10 @@ export function RecordSaleModal({
       toast.success("Sale recorded");
       setSalesRefetchCount((prev) => prev + 1);
       resetModal();
-      setIsModalOpen(false)
+      setIsModalOpen(false);
     } else {
-      toast.dismiss()
-      toast.error("Recording sale failed")
+      toast.dismiss();
+      toast.error("Recording sale failed");
     }
   };
 
@@ -98,12 +118,17 @@ export function RecordSaleModal({
       <div className="p-6 flex flex-col gap-4">
         {/* Junkshop select */}
         <div className="flex flex-col gap-1">
-          <label className="label">Junkshop <span className="text-red-500">*</span></label>
+          <label className="label">
+            Junkshop <span className="text-red-500">*</span>
+          </label>
           <div className="input flex items-center mb-0">
             <select
               className="w-full outline-none"
               defaultValue={preselectedJunkshopId ?? ""}
-              onChange={(e) => setPreselectedJunkshop(e.target.value)}
+              onChange={(e) => {
+                setPreselectedJunkshop(e.target.value);
+                setJunkshopError(null);
+              }}
             >
               <option value="" disabled hidden>
                 Select junkshop
@@ -115,11 +140,16 @@ export function RecordSaleModal({
               ))}
             </select>
           </div>
+          {junkshopError && (
+            <p className="text-xs text-red-400">{junkshopError}</p>
+          )}
         </div>
 
         {/* Dynamic item rows */}
         <div className="flex flex-col gap-1">
-          <label className="label">Materials sold <span className="text-red-500">*</span></label>
+          <label className="label">
+            Materials sold <span className="text-red-500">*</span>
+          </label>
           <div className="flex flex-col gap-3">
             {items.map((_, index) => (
               <div key={index} className="new-border bg-surface rounded-xl p-4">
@@ -129,7 +159,10 @@ export function RecordSaleModal({
                   </span>
                   <button
                     type="button"
-                    onClick={() => removeItem(index)}
+                    onClick={() => {
+                      removeItem(index);
+                      setMaterialItemError(null);
+                    }}
                     disabled={items.length <= 1}
                     className="hover:cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                   >
@@ -144,6 +177,7 @@ export function RecordSaleModal({
                     defaultValue=""
                     onChange={(e) => {
                       updateRow(index, "materialId", e.target.value);
+                      setMaterialItemError(null);
                     }}
                     disabled={preselectedJunkshopId === ""}
                   >
@@ -170,6 +204,7 @@ export function RecordSaleModal({
                       placeholder="e.g. 5"
                       onChange={(e) => {
                         updateRow(index, "quantity", e.target.value);
+                        setMaterialItemError(null);
                       }}
                     />
                   </div>
@@ -179,6 +214,7 @@ export function RecordSaleModal({
                       defaultValue="KG"
                       onChange={(e) => {
                         updateRow(index, "unit", e.target.value);
+                        setMaterialItemError(null);
                       }}
                     >
                       <option value="KG">kg</option>
@@ -189,6 +225,9 @@ export function RecordSaleModal({
               </div>
             ))}
           </div>
+          {materialItemError && (
+            <p className="text-xs text-red-400">{materialItemError}</p>
+          )}
 
           <button
             type="button"

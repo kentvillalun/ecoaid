@@ -61,6 +61,7 @@ export default function ResetPasswordPage() {
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: { password: "", confirmPassword: "" },
+    mode: 'onTouched',
   });
 
   const onSubmit = async (data) => {

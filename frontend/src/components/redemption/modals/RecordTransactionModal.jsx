@@ -48,6 +48,7 @@ export const RecordTransactionModal = ({
     defaultValues: {
       programId: "",
     },
+    mode: "onTouched"
   });
 
   useEffect(() => {
@@ -60,26 +61,45 @@ export const RecordTransactionModal = ({
   const selectedProgram =
     preselectedProgram ?? filteredData?.find((p) => p.id === selectedProgramId);
   const activeProgramId = selectedProgram?.id ?? "";
+  const [materialRowsError, setMaterialRowsError] = useState(null);
+  const [residentError, setResidentError] = useState(null);
 
-  const onSubmit = async (formData) => {
-    // no resident picked from the results: either nothing was typed, or what
-    // was typed doesn't match a registered resident
+  const validateExtras = () => {
+    let hasError = false;
+
     if (!selectedResident) {
-      return toast.error(
+      setResidentError(
         searchQuery.trim()
           ? "Resident not found. Please select a registered resident from the search results"
           : "Please select a resident",
       );
+      hasError = true;
+    } else {
+      setResidentError(null);
     }
 
     if (
       materialRows.length === 0 ||
       materialRows.some((row) => !row.programMaterialId || !row.amount)
     ) {
-      return toast.error(
-        "Creation failed. Please add at least one material item",
-      );
+      setMaterialRowsError("Complete at least one material item");
+      hasError = true
+    } else if (materialRows.some((row) => !(parseFloat(row.amount) > 0))) {
+      setMaterialRowsError("Material amounts should be greater than 0");
+      hasError = true
+    } else {
+      setMaterialRowsError(null);
     }
+
+    return !hasError;
+  };
+
+  const onInvalid = () => {
+    validateExtras();
+  };
+
+  const onSubmit = async (formData) => {
+    if (!validateExtras()) return;
 
     toast.loading("Creating transaction");
 
@@ -180,11 +200,13 @@ export const RecordTransactionModal = ({
         "gradient-button transition-all duration-200 ease-in-out"
       }
       buttonLabelSize="text-sm"
-      onConfirm={() => handleSubmit(onSubmit)()}
+      onConfirm={() => handleSubmit(onSubmit, onInvalid)()}
     >
       <div className="p-6 flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <label className="text-text-primary font-medium">Program <span className="text-red-500">*</span></label>
+          <label className="text-text-primary font-medium">
+            Program <span className="text-red-500">*</span>
+          </label>
           {preselectedProgram ? (
             <input
               className="input mb-0"
@@ -212,14 +234,16 @@ export const RecordTransactionModal = ({
           )}
 
           {errors.programId && (
-            <p className="xs text-red-500 text-start">
+            <p className="text-xs text-red-500 text-start">
               {errors.programId?.message}
             </p>
           )}
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-text-primary font-medium">Resident <span className="text-red-500">*</span></label>
+          <label className="text-text-primary font-medium">
+            Resident <span className="text-red-500">*</span>
+          </label>
 
           <div className="input flex flex-row items-center relative mb-0 gap-2">
             <input
@@ -236,6 +260,7 @@ export const RecordTransactionModal = ({
                 setSearchQuery(e.target.value);
                 // editing the text means the earlier pick no longer matches it
                 setSelectedResident(null);
+                setResidentError(null);
               }}
             />
 
@@ -268,6 +293,7 @@ export const RecordTransactionModal = ({
                       onClick={() => {
                         setSelectedResident(r);
                         setSearchQuery(r.name);
+                        setResidentError(null);
                       }}
                     >
                       <p className="text-text-primary">{r.name}</p>
@@ -286,6 +312,9 @@ export const RecordTransactionModal = ({
               </div>
             )}
           </div>
+          {residentError && (
+            <p className="text-xs text-red-400">{residentError}</p>
+          )}
         </div>
 
         <div className="flex flex-col gap-1">
@@ -302,7 +331,10 @@ export const RecordTransactionModal = ({
                   </span>
                   <button
                     type="button"
-                    onClick={() => removeRow(index)}
+                    onClick={() => {
+                      removeRow(index);
+                      setMaterialRowsError(null);
+                    }}
                     className="hover:cursor-pointer"
                     disabled={materialRows.length === 1}
                   >
@@ -316,6 +348,7 @@ export const RecordTransactionModal = ({
                     disabled={selectedProgramId === ""}
                     onChange={(e) => {
                       updateRow(index, "programMaterialId", e.target.value);
+                      setMaterialRowsError(null);
                     }}
                     value={material.programMaterialId}
                   >
@@ -341,6 +374,7 @@ export const RecordTransactionModal = ({
                       placeholder="e.g. 2"
                       onChange={(e) => {
                         updateRow(index, "amount", e.target.value);
+                        setMaterialRowsError(null);
                       }}
                       value={material.amount}
                     />
@@ -354,6 +388,9 @@ export const RecordTransactionModal = ({
               </div>
             ))}
           </div>
+          {materialRowsError && (
+            <p className="text-xs text-red-400">{materialRowsError}</p>
+          )}
 
           <div className="min-w-full border-t  border-gray-200 mt-3 flex flex-col gap-3 pt-3">
             <div className="flex flex-row items-center justify-between">

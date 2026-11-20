@@ -15,6 +15,22 @@ import { Modal } from "@/components/ui/Modal";
 import { createPortal } from "react-dom";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { AnimatePresence, motion } from "motion/react";
+import { PHONE_REGEX } from "@/lib/validators";
+
+const EMPTY_ERRORS = {
+  firstName: null,
+  middleName: null,
+  lastName: null,
+  phoneNumber: null,
+};
+
+// one mapping for the initial state, the data effect and the reset
+const toFormData = (user) => ({
+  firstName: user?.firstName ?? "",
+  middleName: user?.middleName ?? "",
+  lastName: user?.lastName ?? "",
+  phoneNumber: user?.phoneNumber ?? "",
+});
 
 export default function PersonalInformationPage() {
   const [isEditing, setIsEditing] = useState(false);
@@ -23,34 +39,92 @@ export default function PersonalInformationPage() {
   const { isLoading, isError, data } = useFetch({ url, refetchCount });
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const [formData, setFormData] = useState({
-    firstName: "",
-    middleName: "",
-    lastName: "",
-    phoneNumber: "",
-  });
+  const [formData, setFormData] = useState(toFormData());
+  const [errors, setErrors] = useState(EMPTY_ERRORS);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { makeRequest } = useMutation();
+  const { makeRequest, errorMessageRef } = useMutation();
 
   const handleRefetchCount = () => setRefetchCount((prev) => prev + 1);
 
   useEffect(() => {
     if (data) {
-      setFormData({
-        firstName: data?.user?.firstName,
-        middleName: data?.user?.middleName ?? "",
-        lastName: data?.user?.lastName,
-        phoneNumber: data?.user?.phoneNumber,
-      });
+      setFormData(toFormData(data?.user));
     }
   }, [data]);
+
+  const validatePhone = (value) => {
+    const phone = String(value ?? "").trim();
+
+    if (!phone) return "Phone number is required";
+    if (!PHONE_REGEX.test(phone))
+      return "Enter an 11-digit number starting with 09";
+    return null;
+  };
+
+  const handleChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    setErrors((prev) => ({ ...prev, [field]: null }));
+  };
+
+  // leaving edit mode throws the draft away, so unsaved text and old error
+  // messages don't stay on the (now disabled) fields
+  const resetForm = () => {
+    setFormData(toFormData(data?.user));
+    setErrors(EMPTY_ERRORS);
+  };
+
+  // the header calls setIsEditing((prev) => !prev), so this ignores its argument
+  const toggleEditing = () => {
+    if (isEditing) resetForm();
+    setIsEditing((prev) => !prev);
+  };
+
+  const handleSubmit = async () => {
+    if (isSubmitting) return;
+
+    // validate and send the trimmed values
+    const values = {
+      firstName: formData.firstName.trim(),
+      middleName: formData.middleName.trim(),
+      lastName: formData.lastName.trim(),
+      phoneNumber: String(formData.phoneNumber ?? "").trim(),
+    };
+
+    const nextErrors = {
+      firstName: values.firstName ? null : "First name is required",
+      middleName: values.middleName ? null : "Middle name is required",
+      lastName: values.lastName ? null : "Last name is required",
+      phoneNumber: validatePhone(values.phoneNumber),
+    };
+    setErrors(nextErrors);
+    if (Object.values(nextErrors).some(Boolean)) return;
+
+    setIsSubmitting(true);
+    toast.loading("Updating personal information");
+    const success = await makeRequest({
+      url,
+      method: "PATCH",
+      body: values,
+    });
+    setIsSubmitting(false);
+    toast.dismiss();
+
+    if (success) {
+      toast.success("Update successful");
+      handleRefetchCount();
+      setIsEditing(false);
+    } else {
+      toast.error(errorMessageRef.current ?? "Update failed");
+    }
+  };
 
   return (
     <Page className="bg-bg!">
       <ResidentHeader
         title={"Personal Information"}
         action={"edit"}
-        setIsEditing={setIsEditing}
+        setIsEditing={toggleEditing}
         isEditing={isEditing}
         handleClick={() => {
           if (isEditing) {
@@ -107,49 +181,70 @@ export default function PersonalInformationPage() {
             {isLoading ? (
               <div className="flex flex-col gap-3 md:max-w-xl md:mx-auto">
                 <div className="flex flex-col gap-1 border-b border-border p-2.5 text-sm">
-                  <label htmlFor="" className="text-start font-medium text-base">
+                  <label
+                    htmlFor=""
+                    className="text-start font-medium text-base"
+                  >
                     First name
                   </label>
                   <Skeleton width={150} />
                 </div>
 
                 <div className="flex flex-col gap-1 border-b border-border p-2.5 text-sm">
-                  <label htmlFor="" className="text-start font-medium text-base">
+                  <label
+                    htmlFor=""
+                    className="text-start font-medium text-base"
+                  >
                     Middle name
                   </label>
                   <Skeleton width={150} />
                 </div>
 
                 <div className="flex flex-col gap-1 border-b border-border p-2.5 text-sm">
-                  <label htmlFor="" className="text-start font-medium text-base">
+                  <label
+                    htmlFor=""
+                    className="text-start font-medium text-base"
+                  >
                     Last name
                   </label>
                   <Skeleton width={150} />
                 </div>
 
                 <div className="flex flex-col gap-1 border-b border-border p-2.5 text-sm">
-                  <label htmlFor="" className="text-start font-medium text-base">
+                  <label
+                    htmlFor=""
+                    className="text-start font-medium text-base"
+                  >
                     Phone number
                   </label>
                   <Skeleton width={150} />
                 </div>
 
                 <div className="flex flex-col gap-1 border-b border-border p-2.5 text-sm">
-                  <label htmlFor="" className="text-start font-medium text-base">
+                  <label
+                    htmlFor=""
+                    className="text-start font-medium text-base"
+                  >
                     Address
                   </label>
                   <Skeleton width={200} />
                 </div>
 
                 <div className="flex flex-col gap-1 border-b border-border p-2.5 text-sm">
-                  <label htmlFor="" className="text-start font-medium text-base">
+                  <label
+                    htmlFor=""
+                    className="text-start font-medium text-base"
+                  >
                     Sitio
                   </label>
                   <Skeleton width={50} />
                 </div>
 
                 <div className="flex flex-col gap-1 border-b border-border p-2.5 text-sm">
-                  <label htmlFor="" className="text-start font-medium text-base">
+                  <label
+                    htmlFor=""
+                    className="text-start font-medium text-base"
+                  >
                     Registered Barangay
                   </label>
                   <Skeleton width={150} />
@@ -169,18 +264,21 @@ export default function PersonalInformationPage() {
                     htmlFor="firstName"
                     className="text-start font-medium text-base"
                   >
-                    First name {isEditing && <span className="text-red-500">*</span>}
+                    First name{" "}
+                    {isEditing && <span className="text-red-500">*</span>}
                   </label>
                   <input
                     id="firstName"
                     type="text"
+                    placeholder="Set your first name"
                     className={`input mb-0 text-base ${!isEditing && "text-gray-400"}`}
                     value={formData.firstName}
                     disabled={!isEditing}
-                    onChange={(e) =>
-                      setFormData({ ...formData, firstName: e.target.value })
-                    }
+                    onChange={(e) => handleChange("firstName", e.target.value)}
                   />
+                  {errors?.firstName && (
+                    <p className="text-xs text-red-400">{errors?.firstName}</p>
+                  )}
                 </div>
 
                 <div className="flex flex-col gap-2">
@@ -188,7 +286,8 @@ export default function PersonalInformationPage() {
                     htmlFor="middleName"
                     className="text-start font-medium text-base"
                   >
-                    Middle name {isEditing && <span className="text-red-500">*</span>}
+                    Middle name{" "}
+                    {isEditing && <span className="text-red-500">*</span>}
                   </label>
                   <input
                     id="middleName"
@@ -197,10 +296,11 @@ export default function PersonalInformationPage() {
                     className={`input mb-0 text-base ${!isEditing && "text-gray-400"}`}
                     value={formData.middleName}
                     disabled={!isEditing}
-                    onChange={(e) =>
-                      setFormData({ ...formData, middleName: e.target.value })
-                    }
+                    onChange={(e) => handleChange("middleName", e.target.value)}
                   />
+                  {errors?.middleName && (
+                    <p className="text-xs text-red-400">{errors?.middleName}</p>
+                  )}
                 </div>
 
                 <div className="flex flex-col gap-2">
@@ -208,18 +308,21 @@ export default function PersonalInformationPage() {
                     htmlFor="lastName"
                     className="text-start font-medium text-base"
                   >
-                    Last name {isEditing && <span className="text-red-500">*</span>}
+                    Last name{" "}
+                    {isEditing && <span className="text-red-500">*</span>}
                   </label>
                   <input
                     id="lastName"
                     type="text"
+                    placeholder="Set your last name"
                     className={`input mb-0 text-base ${!isEditing && "text-gray-400"}`}
                     value={formData.lastName}
                     disabled={!isEditing}
-                    onChange={(e) =>
-                      setFormData({ ...formData, lastName: e.target.value })
-                    }
+                    onChange={(e) => handleChange("lastName", e.target.value)}
                   />
+                  {errors?.lastName && (
+                    <p className="text-xs text-red-400">{errors?.lastName}</p>
+                  )}
                 </div>
 
                 <div className="flex flex-col gap-2">
@@ -227,24 +330,32 @@ export default function PersonalInformationPage() {
                     htmlFor="phoneNumber"
                     className="text-start font-medium text-base"
                   >
-                    Phone number {isEditing && <span className="text-red-500">*</span>}
+                    Phone number{" "}
+                    {isEditing && <span className="text-red-500">*</span>}
                   </label>
                   <input
                     id="phoneNumber"
-                    type="number"
+                    type="tel"
+                    placeholder="Set your phone number"
                     className={`input mb-0 text-base ${!isEditing && "text-gray-400"}`}
                     value={formData.phoneNumber}
                     disabled={!isEditing}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phoneNumber: e.target.value })
-                    }
+                    onChange={(e) => handleChange("phoneNumber", e.target.value)}
                   />
+                  {errors?.phoneNumber && (
+                    <p className="text-xs text-red-400">
+                      {errors?.phoneNumber}
+                    </p>
+                  )}
                 </div>
 
                 {/* Hidden when the resident has no sitio */}
                 {data?.user?.sitio && (
                   <div className="flex flex-col gap-2">
-                    <label htmlFor="" className="text-start font-medium text-base">
+                    <label
+                      htmlFor=""
+                      className="text-start font-medium text-base"
+                    >
                       Sitio
                     </label>
                     <input
@@ -257,7 +368,10 @@ export default function PersonalInformationPage() {
                 )}
 
                 <div className="flex flex-col gap-2">
-                  <label htmlFor="" className="text-start font-medium text-base">
+                  <label
+                    htmlFor=""
+                    className="text-start font-medium text-base"
+                  >
                     Registered Barangay
                   </label>
                   <input
@@ -279,33 +393,8 @@ export default function PersonalInformationPage() {
                       exit={{ opacity: 0, height: 0, marginBottom: 0 }}
                       transition={{ duration: 0.3 }}
                       className="w-full bg-accent text-white font-medium py-3.75 px-24 rounded-[14px] disabled:opacity-70 text-sm gradient-button"
-                      onClick={async () => {
-                        if (
-                          !formData.firstName?.trim() ||
-                          !formData.middleName?.trim() ||
-                          !formData.lastName?.trim() ||
-                          !String(formData.phoneNumber ?? "").trim()
-                        ) {
-                          toast.error("First name, middle name, last name and phone number are required");
-                          return;
-                        }
-                        toast.loading("Updating personal information");
-                        const success = await makeRequest({
-                          url,
-                          method: "PATCH",
-                          body: formData,
-                        });
-
-                        if (success) {
-                          toast.dismiss();
-                          toast.success("Update successful");
-                          handleRefetchCount();
-                          setIsEditing(false);
-                        } else {
-                          toast.dismiss();
-                          toast.error("Update failed");
-                        }
-                      }}
+                      onClick={handleSubmit}
+                      disabled={isSubmitting}
                     >
                       Save Changes
                     </motion.button>

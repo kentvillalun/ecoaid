@@ -60,6 +60,8 @@ export const AddRewardItemModal = ({
     setCategoryError(null);
   };
 
+  const trimmedName = name.trim()
+
   const onSubmit = async () => {
     let hasError = false;
 
@@ -70,7 +72,7 @@ export const AddRewardItemModal = ({
       setProgramError(null);
     }
 
-    if (name === "" || name === null) {
+    if (trimmedName === "" || trimmedName === null) {
       setNameError("Name is required");
       hasError = true;
     } else {
@@ -84,30 +86,30 @@ export const AddRewardItemModal = ({
       setCategoryError(null);
     }
 
-    if (quantity <= 0 || quantity === null) {
-      setQuantityError("Quantity must be greated than 0");
+    const quantityNumber = Number(quantity)
+    if (quantity <= 0 || !Number.isInteger(quantityNumber)) {
+      setQuantityError("Quantity must be a whole number greater than 0");
       hasError = true;
     } else {
       setQuantityError(null);
     }
 
     if (pointCost <= 0 || pointCost === null) {
-      setPointCostError("Point cost must be greated than 0");
+      setPointCostError("Point cost must be greater than 0");
       hasError = true;
     } else {
       setPointCostError(null);
     }
 
-    if (hasError)
-      return toast.error("Adding reward item failed. Please try again.");
+    if (hasError) return;
 
-    toast.loading();
+    toast.loading("Adding reward item");
 
     const success = await makeRequest({
       url: "/api/rewards",
       body: {
         programId,
-        name,
+        name: trimmedName,
         category,
         quantity: parseFloat(quantity),
         pointCost: parseFloat(pointCost),
@@ -153,7 +155,10 @@ export const AddRewardItemModal = ({
               id="programId"
               className="w-full outline-none"
               value={programId}
-              onChange={(e) => setProgramId(e.target.value)}
+              onChange={(e) => {
+                setProgramId(e.target.value)
+                setProgramError(null)
+              }}
             >
               <option value="" disabled hidden>
                 Select program
@@ -180,7 +185,10 @@ export const AddRewardItemModal = ({
             className="input"
             placeholder="Input reward item name"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              setName(e.target.value)
+              setNameError(null)
+            }}
           />
           {nameError && <p className="text-xs text-red-500">{nameError}</p>}
         </div>
@@ -194,7 +202,10 @@ export const AddRewardItemModal = ({
               id="category"
               className="w-full outline-none"
               value={category}
-              onChange={(e) => setCategory(e.target.value)}
+              onChange={(e) => {
+                setCategory(e.target.value)
+                setCategoryError(null)
+              }}
             >
               <option value="" disabled hidden>
                 Select category
@@ -223,7 +234,10 @@ export const AddRewardItemModal = ({
               placeholder="e.g. 50"
               min={0}
               value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
+              onChange={(e) => {
+                setQuantity(e.target.value)
+                setQuantityError(null)
+              }}
             />
             {quantityError && (
               <p className="text-xs text-red-500">{quantityError}</p>
@@ -241,7 +255,10 @@ export const AddRewardItemModal = ({
               placeholder="e.g. 100"
               min={0}
               value={pointCost}
-              onChange={(e) => setPointCost(e.target.value)}
+              onChange={(e) => {
+                setPointCost(e.target.value)
+                setPointCostError(null)
+              }}
             />
             {pointCostError && (
               <p className="text-xs text-red-500">{pointCostError}</p>

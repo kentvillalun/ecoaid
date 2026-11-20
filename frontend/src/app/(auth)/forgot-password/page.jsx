@@ -29,6 +29,7 @@ export default function ForgotPasswordPage() {
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: { phoneNumber: "" },
+    mode: "onTouched",
   });
 
   const onSubmit = async (data) => {

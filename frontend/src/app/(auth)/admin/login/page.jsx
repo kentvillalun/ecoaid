@@ -35,6 +35,7 @@ export default function AdminLoginPage() {
       username: "",
       password: "",
     },
+    mode: 'onTouched',
   });
 
   const onSubmit = async (data) => {

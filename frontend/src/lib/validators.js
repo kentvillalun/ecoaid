@@ -1,0 +1,1 @@
+export const PHONE_REGEX = /^09\d{9}$/;

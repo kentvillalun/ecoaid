@@ -60,6 +60,7 @@ export const AddStaffModal = ({
       username: "",
       password: "",
     },
+    mode: "onTouched"
   });
 
   const onSubmit = async (data) => {

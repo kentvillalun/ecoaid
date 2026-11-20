@@ -43,6 +43,7 @@ export default function LoginPage() {
       username: "",
       password: "",
     },
+    mode: 'onTouched'
   });
 
   useEffect(() => {

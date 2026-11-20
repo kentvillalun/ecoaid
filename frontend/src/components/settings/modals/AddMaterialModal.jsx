@@ -29,11 +29,13 @@ export function AddMaterialModal({
     setCategory("");
     setName("");
     setUnit("");
-    setCategoryError(null)
-    setNameError(null)
-    setUnitError(null)
+    setCategoryError(null);
+    setNameError(null);
+    setUnitError(null);
     setIsModalOpen(false);
   };
+
+  const trimmedName = name.trim();
 
   const handleSubmit = async () => {
     let hasError = false;
@@ -45,7 +47,7 @@ export function AddMaterialModal({
       setCategoryError(null);
     }
 
-    if (!name.trim() || name === "") {
+    if (!trimmedName) {
       setNameError("Name is required");
       hasError = true;
     } else {
@@ -59,8 +61,7 @@ export function AddMaterialModal({
       setUnitError(null);
     }
 
-    if (hasError)
-      return toast.error("Adding material failed. Please try again.");
+    if (hasError) return;
 
     toast.loading("Adding material");
 
@@ -68,14 +69,14 @@ export function AddMaterialModal({
       url: "/api/settings/materials",
       body: {
         categoryId: category,
-        name,
+        name: trimmedName,
         defaultUnit: unit,
       },
     });
 
     if (success) {
       toast.dismiss();
-      toast.success("Material added successful");
+      toast.success("Material added successfully");
       resetModal();
       handleMaterialRefetchCount();
     } else {
@@ -108,7 +109,10 @@ export function AddMaterialModal({
               id="materialCategory"
               className="w-full outline-none"
               value={category}
-              onChange={(e) => setCategory(e.target.value)}
+              onChange={(e) => {
+                setCategory(e.target.value)
+                setCategoryError(null)
+              }}
             >
               <option value="" disabled hidden>
                 Select category
@@ -137,7 +141,10 @@ export function AddMaterialModal({
               className="w-full outline-none"
               placeholder="e.g. Aluminum Cans"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setName(e.target.value)
+                setNameError(null)
+              }}
             />
           </div>
           {nameError && <p className="text-error text-xs">{nameError}</p>}
@@ -153,7 +160,10 @@ export function AddMaterialModal({
               id="materialUnit"
               className="w-full outline-none"
               value={unit}
-              onChange={(e) => setUnit(e.target.value)}
+              onChange={(e) => {
+                setUnit(e.target.value)
+                setUnitError(null)
+              }}
             >
               <option value="" disabled hidden>
                 Select unit

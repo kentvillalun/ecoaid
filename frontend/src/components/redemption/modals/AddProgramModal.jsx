@@ -99,6 +99,7 @@ export const AddProgramModal = ({
       isCashMode: program?.isCashMode ?? false,
       announce: false,
     },
+    mode: "onTouched"
   });
 
   const isCashMode = watch("isCashMode");

@@ -7,8 +7,11 @@ import { useState } from "react";
 import { useMutation } from "@/hooks/useMutation";
 import { toast } from "sonner";
 
-export function CreateAnnouncementModal({ isOpen, setIsCreateModalOpen, handleRefetchCount }) {
-  if (!isOpen) return null;
+export function CreateAnnouncementModal({
+  isOpen,
+  setIsCreateModalOpen,
+  handleRefetchCount,
+}) {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState(null);
   const [content, setContent] = useState("");
@@ -16,11 +19,15 @@ export function CreateAnnouncementModal({ isOpen, setIsCreateModalOpen, handleRe
   const [categoryError, setCategoryError] = useState(null);
   const [contentError, setContentError] = useState(null);
   const { makeRequest } = useMutation();
+  if (!isOpen) return null;
+
+  const trimmedTitle = title.trim();
+  const trimmedContent = content.trim();
 
   const handleSubmit = async () => {
     let hasError = false;
 
-    if (!title || title === "") {
+    if (!trimmedTitle) {
       setTitleError("Title is required");
       hasError = true;
     } else {
@@ -34,41 +41,51 @@ export function CreateAnnouncementModal({ isOpen, setIsCreateModalOpen, handleRe
       setCategoryError(null);
     }
 
-    if (!content || content === "") {
+    if (!trimmedContent) {
       setContentError("Content is required");
       hasError = true;
     } else {
       setContentError(null);
     }
 
-    if (hasError) return toast.error("Announcement creation failed");
+    if (hasError) return;
 
     toast.loading("Creating announcement");
 
     const success = await makeRequest({
       url: "/api/announcements",
       body: {
-        title,
+        title: trimmedTitle,
         category,
-        content,
+        content: trimmedContent,
       },
     });
 
     if (success) {
       toast.dismiss();
       toast.success("Announcement created");
-      setIsCreateModalOpen(false);
-      handleRefetchCount()
+      resetModal()
+      handleRefetchCount();
     } else {
       toast.dismiss();
       toast.error("Announcement creation failed");
     }
   };
 
+  const resetModal = () => {
+    setTitle("")
+    setCategory(null)
+    setContent("")
+    setTitleError(null)
+    setCategoryError(null)
+    setContentError(null)
+    setIsCreateModalOpen(false)
+  }
+
   return createPortal(
     <Modal
       isOpen={isOpen}
-      onClose={() => setIsCreateModalOpen(false)}
+      onClose={() => resetModal()}
       icon={<MegaphoneIcon className="w-6 stroke-accent" />}
       title="Create Announcement"
       subtitle="Publish a new announcement to residents"
@@ -79,14 +96,19 @@ export function CreateAnnouncementModal({ isOpen, setIsCreateModalOpen, handleRe
       <div className="p-6 flex flex-col gap-4">
         {/* Title */}
         <div className="flex flex-col gap-1">
-          <label className="label">Title <span className="text-red-500">*</span></label>
+          <label className="label">
+            Title <span className="text-red-500">*</span>
+          </label>
           <div className="input flex items-center mb-0">
             <input
               type="text"
               className="w-full outline-none"
               placeholder="e.g. Community Cleanup Drive"
               required
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                setTitleError(null);
+              }}
             />
           </div>
           {titleError && <p className="text-xs text-red-400">{titleError}</p>}
@@ -94,12 +116,17 @@ export function CreateAnnouncementModal({ isOpen, setIsCreateModalOpen, handleRe
 
         {/* Category */}
         <div className="flex flex-col gap-1">
-          <label className="label">Category <span className="text-red-500">*</span></label>
+          <label className="label">
+            Category <span className="text-red-500">*</span>
+          </label>
           <div className="input flex items-center mb-0">
             <select
               className="w-full outline-none"
               defaultValue=""
-              onChange={(e) => setCategory(e.target.value)}
+              onChange={(e) => {
+                setCategory(e.target.value);
+                setCategoryError(null);
+              }}
             >
               <option value="" hidden disabled>
                 Choose a category
@@ -112,20 +139,25 @@ export function CreateAnnouncementModal({ isOpen, setIsCreateModalOpen, handleRe
             </select>
           </div>
           {categoryError && (
-            <p className="text-xs text-red-400">{titleError}</p>
+            <p className="text-xs text-red-400">{categoryError}</p>
           )}
         </div>
 
         {/* Content */}
         <div className="flex flex-col gap-1">
-          <label className="label">Content <span className="text-red-500">*</span></label>
+          <label className="label">
+            Content <span className="text-red-500">*</span>
+          </label>
           <div className="input flex items-start mb-0 max-h-none">
             <textarea
               className="w-full outline-none"
               rows={4}
               placeholder="Write the announcement details..."
               required
-              onChange={(e) => setContent(e.target.value)}
+              onChange={(e) => {
+                setContent(e.target.value);
+                setContentError(null);
+              }}
             />
           </div>
           {contentError && (

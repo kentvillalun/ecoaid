@@ -81,6 +81,7 @@ export const ReleaseRewardModal = ({
     setSelectedResident(null);
     setSearchQuery("");
     setSearchResults([]);
+    setItemsError(null);
     setItems([{ rewardItemId: "", quantity: "" }]);
   };
 
@@ -147,11 +148,18 @@ export const ReleaseRewardModal = ({
       (r) => r.id === overStockedRow?.rewardItemId,
     );
 
-    if (
-      items.length === 0 ||
-      items.some((row) => !row.rewardItemId || !(row.quantity > 0))
-    ) {
+    if (items.length === 0) {
       setItemsError("Add at least one item");
+      hasError = true;
+    } else if (
+      items.some(
+        (row) =>
+          !row.rewardItemId ||
+          !Number.isInteger(Number(row.quantity)) ||
+          !(Number(row.quantity) > 0),
+      )
+    ) {
+      setItemsError("Complete all items with a whole-number quantity above 0");
       hasError = true;
     } else if (overStockedItem) {
       setItemsError(
@@ -220,12 +228,17 @@ export const ReleaseRewardModal = ({
     >
       <div className="p-6 flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <label className="label">Program <span className="text-red-500">*</span></label>
+          <label className="label">
+            Program <span className="text-red-500">*</span>
+          </label>
           <div className="input flex items-center mb-0">
             <select
               className="w-full outline-none"
               value={programId}
-              onChange={handleProgramChange}
+              onChange={(e) => {
+                handleProgramChange(e);
+                setProgramError(null);
+              }}
             >
               <option value="" disabled hidden>
                 Select program
@@ -243,17 +256,24 @@ export const ReleaseRewardModal = ({
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="label">Resident <span className="text-red-500">*</span></label>
+          <label className="label">
+            Resident <span className="text-red-500">*</span>
+          </label>
           <div className="input flex flex-row items-center relative mb-0 gap-2">
             <input
               type="text"
               className="w-full outline-none "
               placeholder={
-                programId ? "Search registered resident" : "Select program first"
+                programId
+                  ? "Search registered resident"
+                  : "Select program first"
               }
               disabled={!programId}
               value={searchQuery}
-              onChange={handleSearchChange}
+              onChange={(e) => {
+                handleSearchChange(e);
+                setResidentError(null);
+              }}
             />
 
             {selectedResident && (
@@ -285,11 +305,14 @@ export const ReleaseRewardModal = ({
                       onClick={() => {
                         setSelectedResident(r);
                         setSearchQuery(r.name);
+                        setResidentError(null);
                       }}
                     >
                       <p className="text-text-primary">{r.name}</p>
                       <p className="text-xs text-gray-500">
-                        {isCashMode ? formatCurrency(r.points) : `${r.points} pts`}
+                        {isCashMode
+                          ? formatCurrency(r.points)
+                          : `${r.points} pts`}
                       </p>
                     </div>
                   ))
@@ -302,14 +325,14 @@ export const ReleaseRewardModal = ({
             )}
           </div>
           {residentError && (
-            <p className="text-xs text-red-500 text-start">
-              {residentError}
-            </p>
+            <p className="text-xs text-red-500 text-start">{residentError}</p>
           )}
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="label">Reward items <span className="text-red-500">*</span></label>
+          <label className="label">
+            Reward items <span className="text-red-500">*</span>
+          </label>
 
           <div className="flex flex-col gap-3">
             {items.map((row, index) => {
@@ -328,7 +351,10 @@ export const ReleaseRewardModal = ({
                     </span>
                     <button
                       type="button"
-                      onClick={() => removeRow(index)}
+                      onClick={() => {
+                        removeRow(index);
+                        setItemsError(null);
+                      }}
                       className="hover:cursor-pointer"
                       disabled={items.length === 1}
                     >
@@ -340,9 +366,10 @@ export const ReleaseRewardModal = ({
                     <select
                       className="w-full outline-none"
                       disabled={!programId}
-                      onChange={(e) =>
-                        updateRow(index, "rewardItemId", e.target.value)
-                      }
+                      onChange={(e) => {
+                        updateRow(index, "rewardItemId", e.target.value);
+                        setItemsError(null);
+                      }}
                       value={row.rewardItemId}
                     >
                       <option value="" disabled hidden>
@@ -355,7 +382,11 @@ export const ReleaseRewardModal = ({
                               : "Select reward item"}
                       </option>
                       {rewardItems.map((r) => (
-                        <option value={r.id} key={r.id} disabled={r.available <= 0}>
+                        <option
+                          value={r.id}
+                          key={r.id}
+                          disabled={r.available <= 0}
+                        >
                           {r.available > 0
                             ? `${r.name} (${r.available} available)`
                             : `${r.name} (out of stock)`}
@@ -371,9 +402,10 @@ export const ReleaseRewardModal = ({
                         className="w-full outline-none flex-1"
                         min={0}
                         placeholder="e.g. 1"
-                        onChange={(e) =>
-                          updateRow(index, "quantity", e.target.value)
-                        }
+                        onChange={(e) => {
+                          updateRow(index, "quantity", e.target.value);
+                          setItemsError(null);
+                        }}
                         value={row.quantity}
                       />
                       <label className="text-sm text-nowrap">
@@ -398,7 +430,9 @@ export const ReleaseRewardModal = ({
                 {isCashMode ? "Total Cost" : "Total Point Cost"}
               </label>
               <p className="text-gray-700 font-semibold">
-                {isCashMode ? formatCurrency(totalPointCost) : `${totalPointCost} pts`}
+                {isCashMode
+                  ? formatCurrency(totalPointCost)
+                  : `${totalPointCost} pts`}
               </p>
             </div>
             <button

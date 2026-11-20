@@ -52,23 +52,59 @@ function ResidentNameCell({ name, isRegistered = true }) {
   );
 }
 
+const emptyRow = () => ({ materialId: "", amount: "", unit: "" });
+
+// the keys match the row fields, so a field name can also be its error key
+const emptyRowErrors = () => ({ materialId: null, amount: null, unit: null });
+
+const validateAmount = (amount, unit) => {
+  const text = String(amount ?? "").trim();
+  if (!text) return "Enter an amount";
+
+  const value = Number(text);
+  if (!Number.isFinite(value) || value <= 0) {
+    return "Enter an amount greater than 0";
+  }
+  if (unit === "PIECE" && !Number.isInteger(value)) {
+    return "Pieces must be a whole number";
+  }
+  return null;
+};
+
 export default function ManualIntakePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showHousehold, setShowHousehold] = useState(false);
 
-  const [materialRows, setMaterialRows] = useState([
-    { materialId: "", amount: "", unit: "" },
-  ]);
+  const [materialRows, setMaterialRows] = useState([emptyRow()]);
 
+  // rowErrors runs parallel to materialRows, whoError covers the resident /
+  // household section
+  const [rowErrors, setRowErrors] = useState([emptyRowErrors()]);
+  const [whoError, setWhoError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const clearRowError = (index, field) => {
+    setRowErrors((prev) =>
+      prev.map((errors, i) =>
+        i === index ? { ...errors, [field]: null } : errors,
+      ),
+    );
+  };
+
+  // the two lists are parallel, so a row leaves both. The last row stays.
   const removeRow = (index) => {
-    const removed = materialRows.filter((_, i) => i !== index);
-    setMaterialRows(removed);
+    if (materialRows.length === 1) return;
+    setMaterialRows(materialRows.filter((_, i) => i !== index));
+    setRowErrors(rowErrors.filter((_, i) => i !== index));
   };
 
   const updateRow = (index, field, value) => {
-    const updated = [...materialRows];
-    updated[index][field] = value;
-    setMaterialRows(updated);
+    setMaterialRows(
+      materialRows.map((row, i) =>
+        i === index ? { ...row, [field]: value } : row,
+      ),
+    );
+    clearRowError(index, field);
   };
 
   // picking a material fills in the unit the barangay set for it, so the same
@@ -85,6 +121,9 @@ export default function ManualIntakePage() {
       unit: defaultUnit ?? updated[index].unit,
     };
     setMaterialRows(updated);
+
+    clearRowError(index, "materialId");
+    if (defaultUnit) clearRowError(index, "unit");
   };
 
   const [name, setName] = useState("");
@@ -102,7 +141,7 @@ export default function ManualIntakePage() {
     url: "/api/material/barangay",
     refetchCount: materialRefetchCount,
   });
-  const { makeRequest } = useMutation();
+  const { makeRequest, errorMessageRef } = useMutation();
   const [householdName, setHouseholdName] = useState("");
   const [transactionsRefetchCount, setTransactionsRefetchCount] = useState(0);
   const {
@@ -153,23 +192,31 @@ export default function ManualIntakePage() {
     setTransactionsRefetchCount((prev) => prev + 1);
 
   const onSubmit = async () => {
+    if (isSubmitting) return;
+
+    let nextWhoError = null;
     if (showHousehold && !householdName.trim()) {
-      return toast.error("Please enter the resident's name");
+      nextWhoError = "Enter the resident's name";
+    } else if (!showHousehold && !selectedResident) {
+      nextWhoError = "Search and select a resident or staff";
     }
 
-    if (!showHousehold && !selectedResident) {
-      return toast.error("Please search and select a resident or staff");
-    }
+    // check every row at once so the user sees all the problems in one go
+    const nextRowErrors = materialRows.map((row) => ({
+      materialId: row.materialId ? null : "Select a material",
+      amount: validateAmount(row.amount, row.unit),
+      unit: row.unit ? null : "Select a unit",
+    }));
 
-    if (
-      materialRows.length === 0 ||
-      materialRows.some((row) => !row.materialId || !row.amount || !row.unit)
-    ) {
-      return toast.error(
-        "Creation failed. Please add at least one material item",
-      );
-    }
+    setWhoError(nextWhoError);
+    setRowErrors(nextRowErrors);
 
+    const hasRowError = nextRowErrors.some((errors) =>
+      Object.values(errors).some(Boolean),
+    );
+    if (nextWhoError || hasRowError) return;
+
+    setIsSubmitting(true);
     toast.loading("Creating intake transaction");
 
     const success = await makeRequest({
@@ -179,20 +226,23 @@ export default function ManualIntakePage() {
         householdName: showHousehold ? householdName.trim() : undefined,
         items: materialRows.map((row) => ({
           materialId: row.materialId,
-          quantity: parseFloat(row.amount),
+          quantity: Number(row.amount),
           unit: row.unit,
         })),
       },
     });
 
+    setIsSubmitting(false);
+    toast.dismiss();
+
     if (success) {
-      toast.dismiss();
       toast.success("Intake transaction created");
       handleTransactionRefetchCount();
       resetModal();
     } else {
-      toast.dismiss();
-      toast.error("Creating intake transaction failed");
+      toast.error(
+        errorMessageRef.current ?? "Creating intake transaction failed",
+      );
     }
   };
 
@@ -205,7 +255,9 @@ export default function ManualIntakePage() {
     setShowDropdown(false);
     setSelectedResident(null);
     setSearchTerm("");
-    setMaterialRows([{ materialId: "", amount: "", unit: "" }]);
+    setMaterialRows([emptyRow()]);
+    setRowErrors([emptyRowErrors()]);
+    setWhoError(null);
     setShowHousehold(false);
     setHouseholdName("");
     setIsModalOpen(false);
@@ -302,6 +354,7 @@ export default function ManualIntakePage() {
                     onClick={() => {
                       setShowHousehold(false);
                       setHouseholdName("");
+                      setWhoError(null);
                     }}
                   >
                     Registered resident
@@ -312,6 +365,7 @@ export default function ManualIntakePage() {
                     onClick={() => {
                       setShowHousehold(true);
                       clearResidentSearch();
+                      setWhoError(null);
                     }}
                   >
                     Not registered
@@ -331,6 +385,7 @@ export default function ManualIntakePage() {
                       placeholder="Search and select resident or staff name"
                       onChange={(e) => {
                         setSearchTerm(e.target.value);
+                        setWhoError(null);
                         if (!e.target.value) {
                           setShowDropdown(false);
                           setResidentsList([]);
@@ -380,6 +435,7 @@ export default function ManualIntakePage() {
                                 });
                                 setSearchTerm(formatFullName(r));
                                 setShowDropdown(false);
+                                setWhoError(null);
                               }}
                             >
                               <p className="">
@@ -396,6 +452,9 @@ export default function ManualIntakePage() {
                       </div>
                     )}
                   </div>
+                  {whoError && (
+                    <p className="text-xs text-red-400 px-2">{whoError}</p>
+                  )}
                 </div>
                 )}
 
@@ -411,8 +470,14 @@ export default function ManualIntakePage() {
                       id="household"
                       placeholder="Input resident name"
                       value={householdName}
-                      onChange={(e) => setHouseholdName(e.target.value)}
+                      onChange={(e) => {
+                        setHouseholdName(e.target.value);
+                        setWhoError(null);
+                      }}
                     />
+                    {whoError && (
+                      <p className="text-xs text-red-400 px-2">{whoError}</p>
+                    )}
                     <p className="text-xs text-text-secondary">
                       For residents without an account. This record won&apos;t be
                       linked to an account or earn points.
@@ -438,6 +503,7 @@ export default function ManualIntakePage() {
                           <button
                             type="button"
                             className="hover:cursor-pointer"
+                            disabled={materialRows.length === 1}
                             onClick={() => {
                               removeRow(index);
                             }}
@@ -464,34 +530,55 @@ export default function ManualIntakePage() {
                             ))}
                           </select>
                         </div>
+                        {rowErrors[index]?.materialId && (
+                          <p className="text-xs text-red-400 px-2 mb-2">
+                            {rowErrors[index].materialId}
+                          </p>
+                        )}
 
-                        <div className="flex flex-row gap-2">
-                          <div className="input flex-2 mb-0">
-                            <input
-                              type="number"
-                              className="outline-none w-full"
-                              placeholder="Amount, e.g. 20"
-                              onChange={(e) => {
-                                updateRow(index, "amount", e.target.value);
-                              }}
-                            />
+                        <div className="flex flex-row gap-2 items-start">
+                          <div className="flex-2">
+                            <div className="input mb-0">
+                              <input
+                                type="number"
+                                className="outline-none w-full"
+                                placeholder="Amount, e.g. 20"
+                                min={0}
+                                value={material.amount}
+                                onChange={(e) => {
+                                  updateRow(index, "amount", e.target.value);
+                                }}
+                              />
+                            </div>
+                            {rowErrors[index]?.amount && (
+                              <p className="text-xs text-red-400 px-2 mt-1">
+                                {rowErrors[index].amount}
+                              </p>
+                            )}
                           </div>
-                          <div className="input min-w-28 mb-0 flex-1">
-                            <select
-                              className="w-full outline-none"
-                              onChange={(e) => {
-                                updateRow(index, "unit", e.target.value);
-                              }}
-                              value={material.unit}
-                            >
-                              <option value="" disabled hidden >
-                                e.g. kg
-                              </option>
-                              <option value={"KG"}>kg</option>
-                              <option value={"LBS"}>lbs</option>
-                              <option value={"GRAMS"}>grams</option>
-                              <option value={"PIECE"}>piece</option>
-                            </select>
+                          <div className="flex-1 min-w-28">
+                            <div className="input mb-0">
+                              <select
+                                className="w-full outline-none"
+                                onChange={(e) => {
+                                  updateRow(index, "unit", e.target.value);
+                                }}
+                                value={material.unit}
+                              >
+                                <option value="" disabled hidden>
+                                  e.g. kg
+                                </option>
+                                <option value={"KG"}>kg</option>
+                                <option value={"LBS"}>lbs</option>
+                                <option value={"GRAMS"}>grams</option>
+                                <option value={"PIECE"}>piece</option>
+                              </select>
+                            </div>
+                            {rowErrors[index]?.unit && (
+                              <p className="text-xs text-red-400 px-2 mt-1">
+                                {rowErrors[index].unit}
+                              </p>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -502,10 +589,8 @@ export default function ManualIntakePage() {
                   className="flex flex-row items-center justify-center text-base py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:cursor-pointer gap-2 mt-3"
                   type="button"
                   onClick={() => {
-                    setMaterialRows([
-                      ...materialRows,
-                      { materialId: "", amount: "", unit: "" },
-                    ]);
+                    setMaterialRows([...materialRows, emptyRow()]);
+                    setRowErrors([...rowErrors, emptyRowErrors()]);
                   }}
                 >
                   <p className="text-gray-700">Add material</p>

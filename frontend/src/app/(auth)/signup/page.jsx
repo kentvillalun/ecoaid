@@ -101,6 +101,7 @@ export default function SignupPage() {
       lastName: "",
       middleName: "",
     },
+    mode: "onTouched"
   });
 
   // ── UI state ───────────────────────────────────────────────────

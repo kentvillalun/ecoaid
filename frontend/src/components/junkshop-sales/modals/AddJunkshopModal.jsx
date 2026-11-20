@@ -8,8 +8,6 @@ import { useFetch } from "@/hooks/useFetch";
 import { toast } from "sonner";
 import { useMutation } from "@/hooks/useMutation";
 
-
-
 export function AddJunkshopModal({
   isOpen,
   onClose,
@@ -25,7 +23,7 @@ export function AddJunkshopModal({
   const [nameError, setNameError] = useState(null);
   const [priceItemError, setPriceItemError] = useState(null);
   const { data: materialData } = useFetch({ url: `/api/material/barangay` });
-  const { makeRequest } = useMutation()
+  const { makeRequest } = useMutation();
 
   const addPriceItem = () =>
     setPriceItems((prev) => [
@@ -42,71 +40,80 @@ export function AddJunkshopModal({
     setPriceItems(updated);
   };
 
-
   if (!isOpen) return null;
 
   const resetModal = () => {
-    setName("")
-    setDescription("")
-    setLocation("")
-    setPriceItems([{ materialId: "", price: "", unit: "KG" }])
-    setNameError(null)
-    setPriceItemError(null)
-    setIsModalOpen(false)
-  }
+    setName("");
+    setDescription("");
+    setLocation("");
+    setPriceItems([{ materialId: "", price: "", unit: "KG" }]);
+    setNameError(null);
+    setPriceItemError(null);
+    setIsModalOpen(false);
+  };
+
+  const trimmedName = name.trim();
+  const trimmedDescription = (description ?? "").trim();
+  const trimmedLocation = (location ?? "").trim();
 
   const handleSubmit = async () => {
-    let hasError = false
+    let hasError = false;
 
-    if (!name || name === "") {
-      setNameError("Junkshop name is required")
-      hasError = true
+    if (!trimmedName) {
+      setNameError("Junkshop name is required");
+      hasError = true;
     } else {
-      setNameError(null)
+      setNameError(null);
     }
 
     if (priceItems.length === 0) {
-      setPriceItemError("Please complete at least one row of price item")
-      hasError = true
-    } else if (priceItems.some((row) => !row.materialId || !row.price || !row.unit)) {
-      setPriceItemError("Please complete all material rows")
-      hasError = true
+      setPriceItemError("Please complete at least one row of price item");
+      hasError = true;
+    } else if (
+      priceItems.some((row) => !row.materialId || !row.price || !row.unit)
+    ) {
+      setPriceItemError("Please complete all material rows");
+      hasError = true;
+    } else if (priceItems.some((row) => parseFloat(row.price) <= 0)) {
+      setPriceItemError("Price should be higher than 0");
+      hasError = true;
+    } else {
+      setPriceItemError(null);
     }
 
-    if (hasError) return toast.error("Junkshop registration failed")
+    if (hasError) return;
 
-    toast.loading("Junkshop registration on process")
+    toast.loading("Junkshop registration on process");
 
     const success = await makeRequest({
       url: `/api/junkshop-sales/junkshop`,
       body: {
-        name,
-        description,
-        location,
+        name: trimmedName,
+        description: trimmedDescription,
+        location: trimmedLocation,
         priceItems: priceItems.map((item) => ({
           ...item,
-          price: parseFloat(item.price)
-        }))
-      }
-    })
+          price: parseFloat(item.price),
+        })),
+      },
+    });
 
     if (success) {
-      toast.dismiss()
-      toast.success("Junkshop registered")
-      resetModal()
-      handleRefetchCount()
+      toast.dismiss();
+      toast.success("Junkshop registered");
+      resetModal();
+      handleRefetchCount();
     } else {
-      toast.dismiss()
-      toast.error("Junkshop registration failed")
+      toast.dismiss();
+      toast.error("Junkshop registration failed");
     }
-  }
-
+  };
 
   return createPortal(
     <Modal
       isOpen={isOpen}
       onClose={() => {
-        resetModal()
+        resetModal();
       }}
       icon={<BuildingStorefrontIcon className="w-6 stroke-accent" />}
       title="Add Junkshop"
@@ -127,7 +134,10 @@ export function AddJunkshopModal({
               id="junkshopName"
               className="w-full outline-none"
               placeholder="e.g. Beddeng Recycling Center"
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setName(e.target.value);
+                setNameError(null);
+              }}
             />
           </div>
           {nameError && <p className="text-red-400 text-xs">{nameError}</p>}
@@ -165,7 +175,9 @@ export function AddJunkshopModal({
 
         {/* Price Items */}
         <div className="flex flex-col gap-1">
-          <label className="label">Price Items <span className="text-red-500">*</span></label>
+          <label className="label">
+            Price Items <span className="text-red-500">*</span>
+          </label>
           <div className="flex flex-col gap-3">
             {priceItems.map((_, index) => (
               <div key={index} className="new-border bg-surface rounded-xl p-4">
@@ -175,7 +187,10 @@ export function AddJunkshopModal({
                   </span>
                   <button
                     type="button"
-                    onClick={() => removePriceItem(index)}
+                    onClick={() => {
+                      setPriceItemError(null);
+                      removePriceItem(index);
+                    }}
                     disabled={priceItems.length <= 1}
                     className="hover:cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                   >
@@ -188,9 +203,10 @@ export function AddJunkshopModal({
                   <select
                     className="w-full outline-none"
                     defaultValue=""
-                    onChange={(e) =>
-                      updatePriceItem(index, "materialId", e.target.value)
-                    }
+                    onChange={(e) => {
+                      updatePriceItem(index, "materialId", e.target.value);
+                      setPriceItemError(null);
+                    }}
                   >
                     <option value="" disabled hidden>
                       Select material
@@ -211,18 +227,20 @@ export function AddJunkshopModal({
                       className="w-full outline-none flex-1"
                       min={0}
                       placeholder="Price, e.g. 15"
-                      onChange={(e) =>
-                        updatePriceItem(index, "price", e.target.value)
-                      }
+                      onChange={(e) => {
+                        updatePriceItem(index, "price", e.target.value);
+                        setPriceItemError(null);
+                      }}
                     />
                   </div>
                   <div className="input w-24 flex items-center mb-0">
                     <select
                       className="w-full outline-none"
                       defaultValue="KG"
-                      onChange={(e) =>
-                        updatePriceItem(index, "unit", e.target.value)
-                      }
+                      onChange={(e) => {
+                        updatePriceItem(index, "unit", e.target.value);
+                        setPriceItemError(null);
+                      }}
                     >
                       <option value="KG">kg</option>
                       <option value="PIECE">pcs</option>
@@ -232,7 +250,9 @@ export function AddJunkshopModal({
               </div>
             ))}
           </div>
-          {priceItemError && <p className="text-red-400 text-xs">{priceItemError}</p>}
+          {priceItemError && (
+            <p className="text-red-400 text-xs">{priceItemError}</p>
+          )}
 
           <button
             type="button"

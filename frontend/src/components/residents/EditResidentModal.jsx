@@ -7,6 +7,7 @@ import { UserCircleIcon } from "@heroicons/react/24/outline";
 import { useFetch } from "@/hooks/useFetch";
 import { useMutation } from "@/hooks/useMutation";
 import { toast } from "sonner";
+import { PHONE_REGEX } from "@/lib/validators";
 
 export function EditResidentModal({
   isOpen,
@@ -27,6 +28,12 @@ export function EditResidentModal({
   const { data } = useFetch({ url: "/api/barangay/sitio" });
   const { makeRequest } = useMutation();
 
+  // error messages
+  const [firstNameError, setFirstNameError] = useState(null);
+  const [middleNameError, setMiddleNameError] = useState(null);
+  const [lastNameError, setLastNameError] = useState(null);
+  const [phoneNumberError, setPhoneNumberError] = useState(null);
+
   if (!isOpen) return null;
 
   const resetModal = () => {
@@ -36,6 +43,10 @@ export function EditResidentModal({
     setPhoneNumber(currentResidentData.phoneNumber);
     setSitio(currentResidentData.sitioId ?? "");
     setIsVerified(currentResidentData.isVerified);
+    setFirstNameError(null);
+    setMiddleNameError(null);
+    setLastNameError(null);
+    setPhoneNumberError(null);
   };
 
   const first = (firstName ?? "").trim();
@@ -53,12 +64,42 @@ export function EditResidentModal({
     isVerified !== currentResidentData.isVerified;
 
   const handleSubmit = async () => {
-    if (!first || !middle || !last || !phone ) {
-      return toast.error(
-        "First name, middle name, last name and phone number are required",
-      );
+    let hasError = false;
+
+    if (!first) {
+      setFirstNameError("First name is required");
+      hasError = true;
+    } else {
+      setFirstNameError(null);
     }
-    if (!hasChanges) return toast.error("There are no changes")
+
+    if (!middle) {
+      setMiddleNameError("Middle name is required");
+      hasError = true;
+    } else {
+      setMiddleNameError(null);
+    }
+
+    if (!last) {
+      setLastNameError("Last name is required");
+      hasError = true;
+    } else {
+      setLastNameError(null);
+    }
+
+    if (!phone) {
+      setPhoneNumberError("Phone number is required");
+      hasError = true;
+    } else if (!PHONE_REGEX.test(phone)){
+      setPhoneNumberError("Enter a valid 11-digit phone number");
+      hasError = true
+    } else {
+      setPhoneNumberError(null)
+    }
+
+    if (hasError) return;
+
+    if (!hasChanges) return toast.error("There are no changes");
     toast.loading("Saving changes...");
     const success = await makeRequest({
       method: "PATCH",
@@ -66,7 +107,9 @@ export function EditResidentModal({
       body: {
         firstName: first !== currentResidentData.firstName ? first : undefined,
         middleName:
-          middle !== (currentResidentData.middleName ?? "") ? middle : undefined,
+          middle !== (currentResidentData.middleName ?? "")
+            ? middle
+            : undefined,
         lastName: last !== currentResidentData.lastName ? last : undefined,
         phoneNumber:
           phone !== currentResidentData.phoneNumber ? phone : undefined,
@@ -116,9 +159,15 @@ export function EditResidentModal({
               className="w-full outline-none"
               placeholder="e.g. Juan"
               value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
+              onChange={(e) => {
+                setFirstName(e.target.value);
+                setFirstNameError(null);
+              }}
             />
           </div>
+          {firstNameError && (
+            <p className="text-xs text-red-400">{firstNameError}</p>
+          )}
         </div>
 
         {/* Middle name */}
@@ -133,9 +182,15 @@ export function EditResidentModal({
               className="w-full outline-none"
               placeholder="e.g. Reyes"
               value={middleName}
-              onChange={(e) => setMiddleName(e.target.value)}
+              onChange={(e) => {
+                setMiddleName(e.target.value);
+                setMiddleNameError(null);
+              }}
             />
           </div>
+          {middleNameError && (
+            <p className="text-xs text-red-400">{middleNameError}</p>
+          )}
         </div>
 
         {/* Last name */}
@@ -150,9 +205,15 @@ export function EditResidentModal({
               className="w-full outline-none"
               placeholder="e.g. Dela Cruz"
               value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
+              onChange={(e) => {
+                setLastName(e.target.value)
+                setLastNameError(null)
+              }}
             />
           </div>
+          {lastNameError && (
+            <p className="text-xs text-red-400">{lastNameError}</p>
+          )}
         </div>
 
         {/* Phone number */}
@@ -167,9 +228,15 @@ export function EditResidentModal({
               className="w-full outline-none"
               placeholder="e.g. 09171234567"
               value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
+              onChange={(e) => {
+                setPhoneNumber(e.target.value)
+                setPhoneNumberError(null)
+              }}
             />
           </div>
+          {phoneNumberError && (
+            <p className="text-xs text-red-400">{phoneNumberError}</p>
+          )}
         </div>
 
         {/* Sitio: hidden when the barangay has no sitios */}

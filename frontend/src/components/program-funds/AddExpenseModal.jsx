@@ -8,50 +8,61 @@ import { useFetch } from "@/hooks/useFetch";
 import { toast } from "sonner";
 import { useMutation } from "@/hooks/useMutation";
 
-export const AddExpenseModal = ({ isModalOpen, setIsModalOpen, handleSummaryRefetchCount, handleTransactionRefetchCount }) => {
+export const AddExpenseModal = ({
+  isModalOpen,
+  setIsModalOpen,
+  handleSummaryRefetchCount,
+  handleTransactionRefetchCount,
+}) => {
   const [programId, setProgramId] = useState("");
   const [expenseName, setExpenseName] = useState("");
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const { data } = useFetch({ url: "/api/redemption/programs" });
-  const [isProgramError, setIsProgramError] = useState(false);
-  const [isNameError, setIsNameError] = useState(false);
-  const [isAmountError, setIsAmountError] = useState(false);
-  const [isDescriptionError, setIsDescriptionError] = useState(false);
+  const [programError, setProgramError] = useState(null);
+  const [nameError, setNameError] = useState(null);
+  const [amountError, setAmountError] = useState(null);
+  const [descriptionError, setDescriptionError] = useState(null);
   const { makeRequest } = useMutation();
+
+  const trimmedName = expenseName.trim();
+  const trimmedDescription = description.trim();
 
   const onSubmit = async () => {
     let hasError = false;
 
     if (programId === "" || programId === null) {
       hasError = true;
-      setIsProgramError(true);
+      setProgramError("Program is required");
     } else {
-      setIsProgramError(false);
+      setProgramError(null);
     }
 
-    if (expenseName === "" || expenseName === null) {
+    if (trimmedName === "" || trimmedName === null) {
       hasError = true;
-      setIsNameError(true);
+      setNameError("Expense name is required");
     } else {
-      setIsNameError(false);
+      setNameError(null);
     }
 
     if (amount === "" || amount === null) {
       hasError = true;
-      setIsAmountError(true);
-    } else {
-      setIsAmountError(false);
-    }
-
-    if (description === "" || description === null) {
+      setAmountError("Amount is required");
+    } else if (!(parseFloat(amount) > 0)) {
       hasError = true;
-      setIsDescriptionError(true);
+      setAmountError("Amount should be greater than 0");
     } else {
-      setIsDescriptionError(false)
+      setAmountError(null);
     }
 
-    if (hasError) return toast.error("Adding expense failed");
+    if (trimmedDescription === "" || trimmedDescription === null) {
+      hasError = true;
+      setDescriptionError("Description is required");
+    } else {
+      setDescriptionError(null);
+    }
+
+    if (hasError) return;
 
     toast.loading("Adding expense");
 
@@ -60,34 +71,34 @@ export const AddExpenseModal = ({ isModalOpen, setIsModalOpen, handleSummaryRefe
       body: {
         programId,
         amount: parseFloat(amount),
-        description,
-        name: expenseName
-      }
+        description: trimmedDescription,
+        name: trimmedName,
+      },
     });
 
     if (success) {
-      toast.dismiss()
-      toast.success("Adding expense success")
-      resetModal()
-      setIsModalOpen(false)
-      handleSummaryRefetchCount()
-      handleTransactionRefetchCount()
+      toast.dismiss();
+      toast.success("Adding expense success");
+      resetModal();
+      setIsModalOpen(false);
+      handleSummaryRefetchCount();
+      handleTransactionRefetchCount();
     } else {
-      toast.dismiss()
-      toast.error("Adding expense failed. Please try again")
+      toast.dismiss();
+      toast.error("Adding expense failed. Please try again");
     }
   };
 
   const resetModal = () => {
-    setProgramId("")
-    setExpenseName("")
-    setAmount("")
-    setDescription("")
-    setIsProgramError(false)
-    setIsAmountError(false)
-    setIsNameError(false)
-    setIsDescriptionError(false)
-  }
+    setProgramId("");
+    setExpenseName("");
+    setAmount("");
+    setDescription("");
+    setProgramError(null);
+    setAmountError(null);
+    setNameError(null);
+    setDescriptionError(null);
+  };
 
   if (!isModalOpen) return null;
 
@@ -95,8 +106,8 @@ export const AddExpenseModal = ({ isModalOpen, setIsModalOpen, handleSummaryRefe
     <Modal
       isOpen={isModalOpen}
       onClose={() => {
-        setIsModalOpen(false)
-        resetModal()
+        setIsModalOpen(false);
+        resetModal();
       }}
       icon={<BanknotesIcon className="w-6 stroke-accent" />}
       title="Add Expense"
@@ -115,7 +126,10 @@ export const AddExpenseModal = ({ isModalOpen, setIsModalOpen, handleSummaryRefe
               id="programId"
               className="w-full outline-none"
               value={programId}
-              onChange={(e) => setProgramId(e.target.value)}
+              onChange={(e) => {
+                setProgramId(e.target.value);
+                setProgramError(null);
+              }}
             >
               <option value="" disabled hidden>
                 Select program
@@ -127,8 +141,8 @@ export const AddExpenseModal = ({ isModalOpen, setIsModalOpen, handleSummaryRefe
               ))}
             </select>
           </div>
-          {isProgramError && (
-            <p className="text-xs text-red-500">Program is required</p>
+          {programError && (
+            <p className="text-xs text-red-500">{programError}</p>
           )}
         </div>
 
@@ -142,11 +156,12 @@ export const AddExpenseModal = ({ isModalOpen, setIsModalOpen, handleSummaryRefe
             className="input"
             placeholder="Input expense name here"
             value={expenseName}
-            onChange={(e) => setExpenseName(e.target.value)}
+            onChange={(e) => {
+              setExpenseName(e.target.value);
+              setNameError(null);
+            }}
           />
-          {isNameError && (
-            <p className="text-xs text-red-500">Expense name is required</p>
-          )}
+          {nameError && <p className="text-xs text-red-500">{nameError}</p>}
         </div>
 
         <div className="flex flex-col gap-1">
@@ -160,11 +175,12 @@ export const AddExpenseModal = ({ isModalOpen, setIsModalOpen, handleSummaryRefe
             placeholder="Input amount here"
             min={0}
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            onChange={(e) => {
+              setAmount(e.target.value);
+              setAmountError(null);
+            }}
           />
-          {isAmountError && (
-            <p className="text-xs text-red-500">Amount is required</p>
-          )}
+          {amountError && <p className="text-xs text-red-500">{amountError}</p>}
         </div>
 
         <div className="flex flex-col gap-1">
@@ -177,10 +193,13 @@ export const AddExpenseModal = ({ isModalOpen, setIsModalOpen, handleSummaryRefe
             placeholder="Input a short description for this expense"
             rows={4}
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(e) => {
+              setDescription(e.target.value);
+              setDescriptionError(null);
+            }}
           ></textarea>
-          {isDescriptionError && (
-            <p className="text-xs text-red-500">Description is required</p>
+          {descriptionError && (
+            <p className="text-xs text-red-500">{descriptionError}</p>
           )}
         </div>
       </div>

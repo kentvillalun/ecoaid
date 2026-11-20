@@ -152,6 +152,7 @@ export default function CapturePage() {
       materialId: null,
       isAssorted: false,
     },
+    mode: "onTouched"
   });
 
   const checkCategory = () => {

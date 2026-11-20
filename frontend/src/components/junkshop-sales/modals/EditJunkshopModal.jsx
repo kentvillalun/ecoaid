@@ -9,11 +9,7 @@ import { useFetch } from "@/hooks/useFetch";
 import { useMutation } from "@/hooks/useMutation";
 import { toast } from "sonner";
 
-export function EditJunkshopModal({
-  junkshopId,
-  onClose,
-  handleRefetchCount,
-}) {
+export function EditJunkshopModal({ junkshopId, onClose, handleRefetchCount }) {
   const { data, isError } = useFetch({
     url: `/api/junkshop-sales/junkshop/${junkshopId}`,
   });
@@ -80,7 +76,10 @@ function EditJunkshopForm({
   const { makeRequest, errorMessageRef } = useMutation();
 
   const addPriceItem = () =>
-    setPriceItems((prev) => [...prev, { materialId: "", price: "", unit: "KG" }]);
+    setPriceItems((prev) => [
+      ...prev,
+      { materialId: "", price: "", unit: "KG" },
+    ]);
 
   const removePriceItem = (index) =>
     setPriceItems((prev) => prev.filter((_, i) => i !== index));
@@ -91,10 +90,14 @@ function EditJunkshopForm({
     setPriceItems(updated);
   };
 
+  const trimmedName = name.trim();
+  const trimmedDescription = (description ?? "").trim();
+  const trimmedLocation = (location ?? "").trim();
+
   const handleSubmit = async () => {
     let hasError = false;
 
-    if (!name.trim()) {
+    if (!trimmedName) {
       setNameError("Junkshop name is required");
       hasError = true;
     } else {
@@ -107,13 +110,15 @@ function EditJunkshopForm({
     } else if (
       priceItems.some((row) => !row.materialId || !(parseFloat(row.price) > 0))
     ) {
-      setPriceItemError("Please complete all material rows with a price above 0");
+      setPriceItemError(
+        "Please complete all material rows with a price above 0",
+      );
       hasError = true;
     } else {
       setPriceItemError(null);
     }
 
-    if (hasError) return toast.error("Please check the highlighted fields");
+    if (hasError) return;
 
     toast.loading("Saving junkshop");
 
@@ -121,9 +126,9 @@ function EditJunkshopForm({
       method: "PATCH",
       url: `/api/junkshop-sales/junkshop/${junkshopId}`,
       body: {
-        name,
-        description,
-        location,
+        name: trimmedName,
+        description: trimmedDescription,
+        location: trimmedLocation,
         isAvailable,
         priceItems: priceItems.map((item) => ({
           ...item,
@@ -166,7 +171,10 @@ function EditJunkshopForm({
               id="editJunkshopName"
               className="w-full outline-none"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setName(e.target.value);
+                setNameError(null);
+              }}
             />
           </div>
           {nameError && <p className="text-red-400 text-xs">{nameError}</p>}
@@ -229,7 +237,9 @@ function EditJunkshopForm({
 
         {/* Price Items */}
         <div className="flex flex-col gap-1">
-          <label className="label">Price Items <span className="text-red-500">*</span></label>
+          <label className="label">
+            Price Items <span className="text-red-500">*</span>
+          </label>
           <div className="flex flex-col gap-3">
             {priceItems.map((item, index) => (
               <div key={index} className="new-border bg-surface rounded-xl p-4">
@@ -239,7 +249,10 @@ function EditJunkshopForm({
                   </span>
                   <button
                     type="button"
-                    onClick={() => removePriceItem(index)}
+                    onClick={() => {
+                      removePriceItem(index);
+                      setPriceItemError(null);
+                    }}
                     disabled={priceItems.length <= 1}
                     className="hover:cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                   >
@@ -251,9 +264,10 @@ function EditJunkshopForm({
                   <select
                     className="w-full outline-none"
                     value={item.materialId}
-                    onChange={(e) =>
-                      updatePriceItem(index, "materialId", e.target.value)
-                    }
+                    onChange={(e) => {
+                      updatePriceItem(index, "materialId", e.target.value);
+                      setPriceItemError(null);
+                    }}
                   >
                     <option value="" disabled hidden>
                       Select material
@@ -280,18 +294,20 @@ function EditJunkshopForm({
                       min={0}
                       placeholder="Price, e.g. 15"
                       value={item.price}
-                      onChange={(e) =>
-                        updatePriceItem(index, "price", e.target.value)
-                      }
+                      onChange={(e) => {
+                        updatePriceItem(index, "price", e.target.value);
+                        setPriceItemError(null);
+                      }}
                     />
                   </div>
                   <div className="input w-24 flex items-center mb-0">
                     <select
                       className="w-full outline-none"
                       value={item.unit}
-                      onChange={(e) =>
-                        updatePriceItem(index, "unit", e.target.value)
-                      }
+                      onChange={(e) => {
+                        updatePriceItem(index, "unit", e.target.value);
+                        setPriceItemError(null);
+                      }}
                     >
                       <option value="KG">kg</option>
                       <option value="LBS">lbs</option>

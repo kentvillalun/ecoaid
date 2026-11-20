@@ -38,6 +38,7 @@ export default function BarangayLoginPage() {
       username: "",
       password: "",
     },
+    mode: "onTouched",
   });
 
   const onSubmit = async (data) => {

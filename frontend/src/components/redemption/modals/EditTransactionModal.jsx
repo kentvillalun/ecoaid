@@ -15,6 +15,7 @@ export const EditTransactionModal = ({
   handleRefetchCount,
 }) => {
   const { makeRequest, errorMessageRef } = useMutation();
+  const [materialItemsError, setMaterialItemsError] = useState(null);
 
   const [materialRows, setMaterialRows] = useState(
     transaction.redemptionTransactionItem.map((item) => ({
@@ -38,7 +39,13 @@ export const EditTransactionModal = ({
       materialRows.length === 0 ||
       materialRows.some((row) => !row.programMaterialId || !row.amount)
     ) {
-      return toast.error("Please add at least one material item");
+      return setMaterialItemsError("Please complete all material items");
+    } else if (materialRows.some((row) => !(parseFloat(row.amount) > 0))) {
+      return setMaterialItemsError(
+        "Material item amounts should be greater than 0",
+      );
+    } else {
+      setMaterialItemsError(null);
     }
 
     toast.loading("Updating transaction");
@@ -103,7 +110,10 @@ export const EditTransactionModal = ({
                   </span>
                   <button
                     type="button"
-                    onClick={() => removeRow(index)}
+                    onClick={() => {
+                      removeRow(index);
+                      setMaterialItemsError(null);
+                    }}
                     className="hover:cursor-pointer"
                     disabled={materialRows.length === 1}
                   >
@@ -116,6 +126,7 @@ export const EditTransactionModal = ({
                     className="w-full outline-none"
                     onChange={(e) => {
                       updateRow(index, "programMaterialId", e.target.value);
+                      setMaterialItemsError(null);
                     }}
                     value={material.programMaterialId}
                   >
@@ -138,6 +149,7 @@ export const EditTransactionModal = ({
                     placeholder="e.g. 2"
                     onChange={(e) => {
                       updateRow(index, "amount", e.target.value);
+                      setMaterialItemsError(null);
                     }}
                     value={material.amount}
                   />
@@ -150,6 +162,9 @@ export const EditTransactionModal = ({
               </div>
             ))}
           </div>
+          {materialItemsError && (
+            <p className="text-xs text-red-400">{materialItemsError}</p>
+          )}
 
           <button
             className="py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:cursor-pointer flex flex-row items-center justify-center gap-1 min-w-full mt-3"
