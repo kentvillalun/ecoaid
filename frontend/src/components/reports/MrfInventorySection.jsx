@@ -8,7 +8,8 @@ import { MaterialTag } from "@/components/ui/MaterialTag";
 import { Spinner } from "@/components/ui/Spinner";
 import { Error } from "@/components/ui/Error";
 import { Empty } from "@/components/ui/Empty";
-import { DateRangePicker, getDefaultDateRange } from "./DateRangePicker";
+import { DateRangePicker } from "./DateRangePicker";
+import { FilterDropdown } from "./FilterDropdown";
 import { formatReportDate } from "@/lib/formatReportDate";
 import { useFetch } from "@/hooks/useFetch";
 
@@ -20,13 +21,26 @@ const MATERIAL_STOCK_HEADERS = [
   "Net",
 ];
 
-export const MrfInventorySection = ({dateRange, setDateRange}) => {
+export const MrfInventorySection = ({
+  dateRange,
+  setDateRange,
+  materialId,
+  setMaterialId,
+}) => {
   const [refetchCount, setRefetchCount] = useState(0);
 
   const { data, isLoading, isError } = useFetch({
-    url: `/api/reports?type=mrf-inventory&startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`,
+    url: `/api/reports?type=mrf-inventory&startDate=${dateRange.startDate}&endDate=${dateRange.endDate}${materialId ? `&materialId=${materialId}` : ""}`,
     refetchCount,
   });
+
+  // Every material of the barangay (not just those in stock), already sorted
+  // A to Z by the backend. Open to every role that can see Reports.
+  const { data: materialsData } = useFetch({ url: "/api/reports/materials" });
+  const materialOptions = (materialsData?.materials ?? []).map((m) => ({
+    value: m.id,
+    label: m.name,
+  }));
 
   const handleRefetchCount = () => setRefetchCount((prev) => prev + 1);
 
@@ -35,17 +49,27 @@ export const MrfInventorySection = ({dateRange, setDateRange}) => {
   return (
     <section className="flex flex-col gap-3">
       <SectionHeader
-        title="MRF Inventory"
-        subtitle="Recyclable material movement in and out of the MRF"
+        title="Material Recycling Facility Inventory"
+        subtitle="Recyclable material movement in and out of the Material Recycling Facility"
         icon={<CubeIcon className="w-6 stroke-accent" />}
         noButton
       />
 
-      <DateRangePicker
-        startDate={dateRange.startDate}
-        endDate={dateRange.endDate}
-        onChange={setDateRange}
-      />
+      <div className="flex flex-row flex-wrap items-end md:items-center justify-between gap-2">
+        <DateRangePicker
+          startDate={dateRange.startDate}
+          endDate={dateRange.endDate}
+          mode={dateRange.mode}
+          onChange={setDateRange}
+        />
+        <FilterDropdown
+          icon={<CubeIcon className="w-4" />}
+          allLabel="All materials"
+          options={materialOptions}
+          value={materialId}
+          onChange={setMaterialId}
+        />
+      </div>
 
       {/* Desktop table */}
       <Card className="hidden md:flex md:flex-col px-8 md:gap-3 md:items-start shadow-none! new-border">

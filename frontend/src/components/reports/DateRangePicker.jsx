@@ -3,7 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { CalendarDaysIcon, ChevronDownIcon, FunnelIcon } from "@heroicons/react/24/outline";
 
-const toISODate = (date) => date.toISOString().slice(0, 10);
+// Format from the local date parts. toISOString() converts to UTC first, which in
+// Manila (UTC+8) turns local midnight into the previous day.
+const toISODate = (date) => {
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+};
 
 const getToday = () => toISODate(new Date());
 
@@ -22,16 +27,24 @@ const getStartOfMonth = () => {
 
 const OPTIONS = ["This week", "This month", "Custom range", "Custom date"];
 
+// mode is the dropdown choice. It lives with the dates (not inside the picker)
+// so a page that remounts, or the shared report filters, restore both together.
 export const getDefaultDateRange = () => ({
   startDate: getStartOfMonth(),
   endDate: getToday(),
+  mode: "This month",
 });
 
 // Controlled start/end date range. "This week"/"This month" compute the range
 // internally (no date inputs shown); "Custom range" reveals start+end inputs;
 // "Custom date" reveals a single input and mirrors it into both start and end.
-export const DateRangePicker = ({ startDate, endDate, onChange }) => {
-  const [selected, setSelected] = useState("This month");
+export const DateRangePicker = ({
+  startDate,
+  endDate,
+  mode = "This month",
+  onChange,
+}) => {
+  const selected = mode;
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -44,18 +57,19 @@ export const DateRangePicker = ({ startDate, endDate, onChange }) => {
   }, []);
 
   const handleSelect = (option) => {
-    setSelected(option);
     setShowDropdown(false);
 
     if (option === "This week") {
-      onChange({ startDate: getStartOfWeek(), endDate: getToday() });
+      onChange({ startDate: getStartOfWeek(), endDate: getToday(), mode: option });
     } else if (option === "This month") {
-      onChange({ startDate: getStartOfMonth(), endDate: getToday() });
+      onChange({ startDate: getStartOfMonth(), endDate: getToday(), mode: option });
     } else if (option === "Custom date") {
       const today = getToday();
-      onChange({ startDate: today, endDate: today });
+      onChange({ startDate: today, endDate: today, mode: option });
+    } else {
+      // Custom range keeps whatever start/end is already set and just reveals the inputs.
+      onChange({ startDate, endDate, mode: option });
     }
-    // Custom range keeps whatever start/end is already set and just reveals the inputs.
   };
 
   return (
@@ -100,7 +114,7 @@ export const DateRangePicker = ({ startDate, endDate, onChange }) => {
             type="date"
             value={startDate}
             max={endDate}
-            onChange={(e) => onChange({ startDate: e.target.value, endDate })}
+            onChange={(e) => onChange({ startDate: e.target.value, endDate, mode })}
             className="text-xs px-3 py-1.5 rounded-lg font-medium border bg-surface text-text-secondary border-border outline-none hover:cursor-pointer"
           />
           <span className="text-xs text-gray-400">to</span>
@@ -109,7 +123,7 @@ export const DateRangePicker = ({ startDate, endDate, onChange }) => {
             value={endDate}
             min={startDate}
             max={getToday()}
-            onChange={(e) => onChange({ startDate, endDate: e.target.value })}
+            onChange={(e) => onChange({ startDate, endDate: e.target.value, mode })}
             className="text-xs px-3 py-1.5 rounded-lg font-medium border bg-surface text-text-secondary border-border outline-none hover:cursor-pointer"
           />
         </div>
@@ -120,7 +134,7 @@ export const DateRangePicker = ({ startDate, endDate, onChange }) => {
           type="date"
           value={startDate}
           max={getToday()}
-          onChange={(e) => onChange({ startDate: e.target.value, endDate: e.target.value })}
+          onChange={(e) => onChange({ startDate: e.target.value, endDate: e.target.value, mode })}
           className="text-xs px-3 py-1.5 rounded-lg font-medium border bg-surface text-text-secondary border-border outline-none hover:cursor-pointer"
         />
       )}

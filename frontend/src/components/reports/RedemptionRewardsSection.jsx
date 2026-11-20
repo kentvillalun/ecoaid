@@ -205,6 +205,7 @@ export const RedemptionRewardsSection = ({ dateRange, setDateRange, programId, s
         <DateRangePicker
           startDate={dateRange.startDate}
           endDate={dateRange.endDate}
+          mode={dateRange.mode}
           onChange={setDateRange}
         />
         <ProgramFilter value={programId} onChange={setProgramId} />

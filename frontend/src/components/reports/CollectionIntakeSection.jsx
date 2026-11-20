@@ -82,6 +82,7 @@ export const CollectionIntakeSection = ({dateRange, setDateRange}) => {
       <DateRangePicker
         startDate={dateRange.startDate}
         endDate={dateRange.endDate}
+        mode={dateRange.mode}
         onChange={setDateRange}
       />
 
