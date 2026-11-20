@@ -53,12 +53,12 @@ export function EditResidentModal({
     isVerified !== currentResidentData.isVerified;
 
   const handleSubmit = async () => {
-    if (!hasChanges) return;
-    if (!first || !middle || !last || !phone) {
+    if (!first || !middle || !last || !phone ) {
       return toast.error(
         "First name, middle name, last name and phone number are required",
       );
     }
+    if (!hasChanges) return toast.error("There are no changes")
     toast.loading("Saving changes...");
     const success = await makeRequest({
       method: "PATCH",
