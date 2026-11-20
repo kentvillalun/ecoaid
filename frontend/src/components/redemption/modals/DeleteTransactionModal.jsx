@@ -44,7 +44,7 @@ export const DeleteTransactionModal = ({ isOpen, setIsOpen, transaction }) => {
       <div className="p-6">
         <p className="text-gray-600 text-sm">
           Delete this transaction for {transaction.residentName}? The materials
-          will be removed from the MRF inventory and the resident will lose the
+          will be removed from the inventory and the resident will lose the
           points from it. Use this when the transaction was given to the wrong
           person.
         </p>

@@ -227,6 +227,8 @@ function CategoryCard({ cat, displayUnit }) {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
+const EMPTY_ERRORS = { material: null, quantity: null };
+
 export default function MaterialStockPage() {
   const [displayUnit, setDisplayUnit] = useState("kg");
   const [activeView, setActiveView] = useState("log");
@@ -251,11 +253,11 @@ export default function MaterialStockPage() {
   // stock is kept per material and unit, so a stock out picks one of those
   // buckets, e.g. "<materialId>_PIECE"
   const [selectedStockKey, setSelectedStockKey] = useState("");
-  const [quantity, setQuantity] = useState(0);
-  const [isSelectedMaterialIdError, setIsSelectedMaterialIdError] =
-    useState(false);
-  const [isQuantityError, setIsQuantityError] = useState(false);
-  const { makeRequest } = useMutation();
+  // the input holds the raw string, it is converted to a number on submit
+  const [quantity, setQuantity] = useState("");
+  const [errors, setErrors] = useState(EMPTY_ERRORS);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { makeRequest, errorMessageRef } = useMutation();
 
   const selectedMaterial = data?.enrichedResults?.find(
     (e) => `${e.materialId}_${e.unit}` === selectedStockKey,
@@ -325,52 +327,75 @@ export default function MaterialStockPage() {
       : `${TOTAL_WEIGHT_KG?.toFixed(3)} kg`;
 
   const onSubmit = async () => {
-    if (!selectedMaterial) {
-      return setIsSelectedMaterialIdError(true);
+    if (isSubmitting) return;
+
+    const value = Number(quantity);
+    const isPiece = selectedMaterial?.unit === "PIECE";
+    const noun = isPiece ? "quantity" : "amount";
+
+    let quantityError = null;
+    if (!String(quantity).trim()) {
+      quantityError = `Enter the ${noun} to deduct`;
+    } else if (!Number.isFinite(value) || value <= 0) {
+      quantityError = `Enter a ${noun} greater than 0`;
+    } else if (isPiece && !Number.isInteger(value)) {
+      quantityError = "Pieces must be a whole number";
+    } else if (
+      selectedMaterial &&
+      Number(value.toFixed(3)) > Number(selectedMaterial.balance.toFixed(3))
+    ) {
+      // the server rejects this too, but the user can fix it without a trip
+      quantityError = `Only ${Number(selectedMaterial.balance.toFixed(3))} ${isPiece ? "pcs" : "kg"} in stock`;
     }
 
-    if (!quantity) {
-      return setIsQuantityError(true);
-    }
+    const nextErrors = {
+      material: selectedMaterial ? null : "Select a material",
+      quantity: quantityError,
+    };
+    setErrors(nextErrors);
+    if (Object.values(nextErrors).some(Boolean)) return;
 
+    setIsSubmitting(true);
     toast.loading("Creating stock out transaction");
 
     const success = await makeRequest({
       url: "/api/mrf-inventory/transaction-logs/out",
       body: {
         materialId: selectedMaterial.materialId,
-        quantity: parseFloat(quantity),
+        quantity: value,
         unit: selectedMaterial?.unit === "PIECE" ? "PIECE" : "KG",
       },
     });
 
+    setIsSubmitting(false);
+    toast.dismiss();
+
     if (success) {
-      toast.dismiss();
       toast.success("Stock out transaction created");
       handleTransactionRefetchCount();
       handleRefetchCount();
       resetModal();
     } else {
-      toast.dismiss();
-      toast.error("Creating stock out transaction failed");
+      toast.error(
+        errorMessageRef.current ?? "Creating stock out transaction failed",
+      );
     }
   };
 
   const resetModal = () => {
     setSelectedStockKey("");
-    setQuantity(0);
-    setIsSelectedMaterialIdError(false);
-    setIsQuantityError(false);
+    setQuantity("");
+    setErrors(EMPTY_ERRORS);
     setIsModalOpen(false);
   };
 
   return (
     <Page className="bg-bg!">
-      <BarangayTopBar title="MRF Inventory" />
+      <BarangayTopBar title="Material Recycling Facility Inventory" />
       <PageContent className="md:pl-70! md:p-6 md:gap-7">
         {/* Header */}
         <BarangayHeaderCard
-          title="MRF Inventory"
+          title="Material Recycling Facility Inventory"
           subtitle="Overview of collected recyclable materials"
         />
 
@@ -378,7 +403,7 @@ export default function MaterialStockPage() {
           createPortal(
             <Modal
               isOpen={isModalOpen}
-              onClose={() => setIsModalOpen(false)}
+              onClose={resetModal}
               icon={<ArrowUpTrayIcon className="w-6 stroke-accent" />}
               title={"Record stock out"}
               subtitle={"Please input details for your stock out transaction"}
@@ -393,11 +418,14 @@ export default function MaterialStockPage() {
                   </label>
                   <div className="input">
                     <select
-                      name=""
-                      id=""
+                      id="materialId"
                       className="w-full outline-none"
-                      defaultValue=""
-                      onChange={(e) => setSelectedStockKey(e.target.value)}
+                      value={selectedStockKey}
+                      onChange={(e) => {
+                        setSelectedStockKey(e.target.value);
+                        // the stock limit and unit depend on the material
+                        setErrors(EMPTY_ERRORS);
+                      }}
                     >
                       <option value="" className="" disabled hidden>
                         Select material
@@ -421,8 +449,8 @@ export default function MaterialStockPage() {
                       })}
                     </select>
                   </div>
-                  {isSelectedMaterialIdError && (
-                    <p className="text-xs text-red-500">Material is required</p>
+                  {errors.material && (
+                    <p className="text-xs text-red-400">{errors.material}</p>
                   )}
                 </div>
 
@@ -439,16 +467,15 @@ export default function MaterialStockPage() {
                       className="input"
                       id="quantity"
                       placeholder={`Enter ${selectedMaterial?.unit === "PIECE" ? "quantity" : "amount"} to deduct`}
-                      onChange={(e) => setQuantity(e.target.value)}
+                      value={quantity}
+                      onChange={(e) => {
+                        setQuantity(e.target.value);
+                        setErrors((prev) => ({ ...prev, quantity: null }));
+                      }}
                       min={0}
                     />
-                    {isQuantityError && (
-                      <p className="text-xs text-red-500">
-                        {selectedMaterial?.unit === "PIECE"
-                          ? "Quantity"
-                          : "Amount"}{" "}
-                        is required
-                      </p>
+                    {errors.quantity && (
+                      <p className="text-xs text-red-400">{errors.quantity}</p>
                     )}
                   </div>
 
