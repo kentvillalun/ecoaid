@@ -1,7 +1,24 @@
 import { prisma } from "../config/db.js";
 import { formatFullName } from "./formatFullName.js";
 
-export const getMrfInventoryReport = async (barangayId, startDate, endDate) => {
+// Every material of the barangay, for the report's material filter. Not limited
+// to materials in stock, and not tied to the Inventory page's roles.
+export const getReportMaterials = async (barangayId) => {
+  const materials = await prisma.material.findMany({
+    where: { barangayId },
+    select: { id: true, name: true },
+    orderBy: { name: "asc" },
+  });
+
+  return { materials };
+};
+
+export const getMrfInventoryReport = async (
+  barangayId,
+  startDate,
+  endDate,
+  materialId,
+) => {
   const end = new Date(endDate);
   end.setDate(end.getDate() + 1);
   const materials = await prisma.stockTransactionLog.findMany({
@@ -11,6 +28,7 @@ export const getMrfInventoryReport = async (barangayId, startDate, endDate) => {
         gte: new Date(startDate),
         lt: end,
       },
+      ...(materialId && { materialId }),
     },
     select: {
       createdAt: true,

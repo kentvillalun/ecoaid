@@ -5,13 +5,14 @@ import {
   getMrfInventoryReport,
   getProgramFundsReport,
   getRedemptionReports,
+  getReportMaterials,
 } from "../utils/reportHelpers.js";
 
 
 const filterReports = async (req, res) => {
   try {
     const { barangayId } = req.user;
-    const { startDate, endDate, type, programId } = req.query;
+    const { startDate, endDate, type, programId, materialId } = req.query;
 
     if (!startDate || !endDate || !type) {
       return res.status(400).json({ error: "Missing required parameters" });
@@ -36,6 +37,7 @@ const filterReports = async (req, res) => {
           barangayId,
           startDate,
           endDate,
+          materialId,
         );
 
         return res.status(200).json({
@@ -87,46 +89,87 @@ const filterReports = async (req, res) => {
   }
 };
 
+const listReportMaterials = async (req, res) => {
+  try {
+    const { barangayId } = req.user;
+    const { materials } = await getReportMaterials(barangayId);
+
+    return res.status(200).json({
+      message: "Fetch report materials successful",
+      materials,
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 const exportReports = async (req, res) => {
   try {
     const { mrfInventory, collectionIntake, redemption, programFunds } =
       req.body ?? {};
     const { barangayId } = req.user;
 
-    const { startDate: mrfStart, endDate: mrfEnd } = mrfInventory;
+    // A section is exported only if the request includes it, so one report
+    // page can export just its own sheet. Sending all four still works.
+    const wants = {
+      mrf: Boolean(mrfInventory),
+      collection: Boolean(collectionIntake),
+      redemption: Boolean(redemption),
+      funds: Boolean(programFunds),
+    };
+
+    if (!Object.values(wants).some(Boolean)) {
+      return res.status(400).json({ error: "No report section requested" });
+    }
+
+    const {
+      startDate: mrfStart,
+      endDate: mrfEnd,
+      materialId: mrfMaterialId,
+    } = mrfInventory ?? {};
     const { startDate: collectionStart, endDate: collectionEnd } =
-      collectionIntake;
+      collectionIntake ?? {};
     const {
       startDate: redemptionStart,
       endDate: redemptionEnd,
       programId,
-    } = redemption;
-    const { startDate: fundsStart, endDate: fundsEnd } = programFunds;
+    } = redemption ?? {};
+    const { startDate: fundsStart, endDate: fundsEnd } = programFunds ?? {};
+
+    const missingDates = (isWanted, start, end) => isWanted && (!start || !end);
 
     if (
-      !mrfStart ||
-      !mrfEnd ||
-      !collectionStart ||
-      !collectionEnd ||
-      !redemptionStart ||
-      !redemptionEnd ||
-      !fundsStart ||
-      !fundsEnd
+      missingDates(wants.mrf, mrfStart, mrfEnd) ||
+      missingDates(wants.collection, collectionStart, collectionEnd) ||
+      missingDates(wants.redemption, redemptionStart, redemptionEnd) ||
+      missingDates(wants.funds, fundsStart, fundsEnd)
     ) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
     const [mrfResult, collectionResult, redemptionResult, fundsResult] =
       await Promise.all([
-        getMrfInventoryReport(barangayId, mrfStart, mrfEnd),
-        getCollectionIntakeReports(barangayId, collectionStart, collectionEnd),
-        getRedemptionReports(
-          barangayId,
-          redemptionStart,
-          redemptionEnd,
-          programId,
-        ),
-        getProgramFundsReport(barangayId, fundsStart, fundsEnd),
+        wants.mrf
+          ? getMrfInventoryReport(barangayId, mrfStart, mrfEnd, mrfMaterialId)
+          : { results: [] },
+        wants.collection
+          ? getCollectionIntakeReports(
+              barangayId,
+              collectionStart,
+              collectionEnd,
+            )
+          : { mergedRecords: [] },
+        wants.redemption
+          ? getRedemptionReports(
+              barangayId,
+              redemptionStart,
+              redemptionEnd,
+              programId,
+            )
+          : { merged: [] },
+        wants.funds
+          ? getProgramFundsReport(barangayId, fundsStart, fundsEnd)
+          : { mergedRows: [], totalIncome: 0, totalExpense: 0, net: 0 },
       ]);
 
     const { results } = mrfResult;
@@ -463,6 +506,12 @@ const exportReports = async (req, res) => {
       })
     });
 
+    // The sheets above are built for every section; drop the ones not requested.
+    if (!wants.mrf) workbook.removeWorksheet(mrfInventorySheet.id);
+    if (!wants.collection) workbook.removeWorksheet(collectionIntakeSheet.id);
+    if (!wants.redemption) workbook.removeWorksheet(redemptionRewardsSheet.id);
+    if (!wants.funds) workbook.removeWorksheet(fundsSheet.id);
+
     res.setHeader(
       "Content-Type",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -479,4 +528,4 @@ const exportReports = async (req, res) => {
   }
 };
 
-export { filterReports, exportReports };
+export { filterReports, exportReports, listReportMaterials };
