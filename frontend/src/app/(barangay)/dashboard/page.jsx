@@ -67,7 +67,7 @@ export default function BarangayDashboardPage() {
                 <div className="flex flex-col items-start justify-between gap-2 z-40 h-full">
                   <div className="flex flex-col gap-1 items-start justify-start w-full">
                     <p className="text-xs text-[rgba(255,255,255,0.6)] font-medium uppercase">
-                      Total Recyclables Collected
+                      Recyclables Collected
                     </p>
                     <p className="text-white font-bold text-3xl md:text-5xl">
                       0 kg
@@ -187,7 +187,7 @@ export default function BarangayDashboardPage() {
                 <div className="flex flex-col items-start justify-between gap-2 z-40 h-full">
                   <div className="flex flex-col gap-1 items-start justify-start w-full">
                     <p className="text-xs text-[rgba(255,255,255,0.6)] font-medium uppercase">
-                      Total Recyclables Collected
+                      Recyclables Collected
                     </p>
                     <p className="text-white font-bold text-3xl md:text-5xl">
                       {(data?.totalCollectedKg ?? 0).toLocaleString()} kg
