@@ -61,10 +61,10 @@ Items 14 and 15 were raised verbally by the panel (panelist not recorded) and ar
 **Item 5, account ban (decided 2026-11-19).**
 
 *Phase A: deactivate and lift*
-- Captain and Secretary can deactivate a resident with a required reason. A ban is just a deactivation with a reason.
+- Captain, Secretary and Collector can deactivate a resident (updated 2026-11-21: the collector is included because the record stores who and when, so it is accountable). There is no reason field, because the feature exists for photo mismatches and we do not want staff typing a reason every time.
 - No expiry. Staff can lift it at any time (for example after an appeal).
-- A deactivated resident is signed out on their next request (the auth middleware already rejects inactive users). At login they see the reason plus the helper text "Contact your barangay staff to appeal."
-- Store who, when and why on the user record. There is no audit table, so a second ban overwrites the first.
+- A deactivated resident is signed out on their next request (the auth middleware already rejects inactive users). At login they see one fixed message (hard-coded, the same for everyone) saying the account is deactivated, plus "Contact your barangay staff to appeal."
+- Store who and when on the user record. There is no audit table, so a second ban overwrites the first.
 - Show it in the Edit Resident modal (read-only block with a "Lift ban" button) and a "Banned" status on the Residents list. `getResidents` must also return `isActive`. No new detail page.
 
 *Phase B: three mismatches flag a resident*
