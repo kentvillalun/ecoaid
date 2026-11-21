@@ -14,6 +14,14 @@ import { FilterDropdown } from "./FilterDropdown";
 import { formatReportDate } from "@/lib/formatReportDate";
 import { useFetch } from "@/hooks/useFetch";
 
+// Show a +/- sign only when the rounded value is not zero ("-0.00 kg" reads wrong).
+// Negative values already carry their own minus from formatQty.
+const signedQty = (value, unit, sign) => {
+  const text = formatQty(value, unit);
+  const isZero = Number(text.replace(/,/g, "")) === 0;
+  return isZero ? text : `${Number(value) < 0 ? "" : sign}${text}`;
+};
+
 const MATERIAL_STOCK_HEADERS = [
   "Date",
   "Material",
@@ -128,16 +136,15 @@ export const MrfInventorySection = ({
                       />
                     </td>
                     <td className="p-4 text-green-600 font-medium tabular-nums text-nowrap">
-                      +{formatQty(row.quantityIn, row.unit)} {row.unit === "PIECE" ? "pcs" : "kg"}
+                      {signedQty(row.quantityIn, row.unit, "+")} {row.unit === "PIECE" ? "pcs" : "kg"}
                     </td>
                     <td className="p-4 text-red-600 font-medium tabular-nums text-nowrap">
-                      -{formatQty(row.quantityOut, row.unit)} {row.unit === "PIECE" ? "pcs" : "kg"}
+                      {signedQty(row.quantityOut, row.unit, "-")} {row.unit === "PIECE" ? "pcs" : "kg"}
                     </td>
                     <td
                       className={`p-4 font-bold tabular-nums text-nowrap ${row.net >= 0 ? "text-green-600" : "text-red-600"}`}
                     >
-                      {row.net >= 0 ? "+" : ""}
-                      {formatQty(row.net, row.unit)} {row.unit === "PIECE" ? "pcs" : "kg"}
+                      {signedQty(row.net, row.unit, row.net >= 0 ? "+" : "")} {row.unit === "PIECE" ? "pcs" : "kg"}
                     </td>
                   </tr>
                 ))
@@ -178,13 +185,13 @@ export const MrfInventorySection = ({
                 <div className="flex flex-col gap-0.5">
                   <p className="text-xs text-gray-400">In</p>
                   <p className="text-sm font-semibold text-green-600 tabular-nums">
-                    +{formatQty(row.quantityIn, row.unit)} {row.unit === "PIECE" ? "pcs" : "kg"}
+                    {signedQty(row.quantityIn, row.unit, "+")} {row.unit === "PIECE" ? "pcs" : "kg"}
                   </p>
                 </div>
                 <div className="flex flex-col gap-0.5">
                   <p className="text-xs text-gray-400">Out</p>
                   <p className="text-sm font-semibold text-red-600 tabular-nums">
-                    -{formatQty(row.quantityOut, row.unit)} {row.unit === "PIECE" ? "pcs" : "kg"}
+                    {signedQty(row.quantityOut, row.unit, "-")} {row.unit === "PIECE" ? "pcs" : "kg"}
                   </p>
                 </div>
                 <div className="flex flex-col gap-0.5">
@@ -192,8 +199,7 @@ export const MrfInventorySection = ({
                   <p
                     className={`text-sm font-bold tabular-nums ${row.net >= 0 ? "text-green-600" : "text-red-600"}`}
                   >
-                    {row.net >= 0 ? "+" : ""}
-                    {formatQty(row.net, row.unit)} {row.unit === "PIECE" ? "pcs" : "kg"}
+                    {signedQty(row.net, row.unit, row.net >= 0 ? "+" : "")} {row.unit === "PIECE" ? "pcs" : "kg"}
                   </p>
                 </div>
               </div>
