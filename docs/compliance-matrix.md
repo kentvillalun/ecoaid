@@ -12,13 +12,13 @@ Legend: `[x]` done, `[~]` partly done, `[ ]` not started, `[?]` waiting on a dec
 
 ## 1. At a glance
 
-**7 done, 3 partly done, 4 not started, 1 waiting** (15 items).
+**8 done, 2 partly done, 4 not started, 1 waiting** (15 items).
 
 | # | Item | Status | Next step |
 |---|------|--------|-----------|
 | 1 | Uniform text inputs, asterisks on required fields | `[x]` | Click-through in the browser |
 | 2 | Remove sitio from resident registration | `[x]` | None |
-| 3 | Real-time form validation | `[~]` | Scoped: real-time only on the high-stakes forms (signup, barangay onboarding, login, staff). Other forms keep simple submit validation |
+| 3 | Real-time form validation | `[x]` | Done Nov 21: `mode: "onTouched"` on every react-hook-form form, so errors show when a field is left; the other forms keep inline messages on submit |
 | 4 | OTP message masks the number | `[x]` | Include in the push test |
 | 5 | Activate and ban resident accounts | `[~]` | Phase A: deactivate/reactivate UI (section 3) |
 | 6 | Parents as primary users, children as beneficiaries | `[~]` | Brainstorm: framing only or a "released to" name |
@@ -160,7 +160,7 @@ Not from the panel. Do these only after items 1 to 15, and build once on the Res
 **Next session (evening, 2026-11-19):**
 1. [ ] Push-test `3e2893e` on local `ecoaid_demo` (checklist below).
 2. [x] Item 10: rename the visible "MRF" text (done Nov 21, see section 3).
-3. [ ] Item 3: add `mode: "onTouched"` to the signup, barangay onboarding, login and staff forms, then check each shows its errors on leaving a field.
+3. [x] Item 3 (done): add `mode: "onTouched"` to the signup, barangay onboarding, login and staff forms, then check each shows its errors on leaving a field.
 
 Item 8 was finished on Nov 21.
 
