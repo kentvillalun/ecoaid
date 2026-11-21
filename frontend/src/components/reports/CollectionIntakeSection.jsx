@@ -1,5 +1,6 @@
 "use client";
 
+import { formatQty } from "@/lib/formatQty";
 import { useState } from "react";
 import { ArrowsRightLeftIcon } from "@heroicons/react/24/outline";
 import { Card } from "@/components/ui/Card";
@@ -20,7 +21,7 @@ const COLLECTION_INTAKE_HEADERS = [
   "Quantity",
 ];
 
-const formatQuantity = (m) => `${m.quantity}${m.unit === "PIECE" ? "pcs" : m.unit}`;
+const formatQuantity = (m) => `${formatQty(m.quantity, m.unit)}${m.unit === "PIECE" ? "pcs" : m.unit}`;
 
 // Desktop table: materials and their quantities are two separate columns, so
 // each list renders one line per material with matching spacing to stay aligned.

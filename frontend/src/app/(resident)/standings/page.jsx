@@ -1,5 +1,6 @@
 "use client";
 
+import { formatQty } from "@/lib/formatQty";
 import { useEffect, useRef, useState } from "react";
 import { Page } from "@/components/layout/Page";
 import { PageContent } from "@/components/layout/PageContent";
@@ -257,7 +258,7 @@ export default function StandingsPage() {
                         <span
                           className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${config.bg} ${config.text} border ${config.border}`}
                         >
-                          {(resident.total).toFixed(4)} {unitLabel}
+                          {formatQty(resident.total, unitLabel)} {unitLabel}
                         </span>
                       </Card>
                     );
@@ -292,7 +293,7 @@ export default function StandingsPage() {
                       </div>
                       <div className="flex flex-col items-end shrink-0">
                         <p className="font-bold text-text-primary text-sm">
-                          {r.total} {unitLabel}
+                          {formatQty(r.total, unitLabel)} {unitLabel}
                         </p>
                       </div>
                     </Card>

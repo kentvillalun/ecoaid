@@ -1,5 +1,6 @@
 "use client";
 
+import { formatQty } from "@/lib/formatQty";
 import { useEffect, useRef, useState } from "react";
 import { Inter } from "next/font/google";
 import { Page } from "@/components/layout/Page";
@@ -153,7 +154,7 @@ export default function LeaderboardPage() {
                 </p>
               ) : (
                 <p className="md:text-2xl font-bold text-text-primary text-lg">
-                  {topThree?.[0] ? `${topThree[0].total} ${unitLabel}` : "—"}
+                  {topThree?.[0] ? `${formatQty(topThree[0].total, unitLabel)} ${unitLabel}` : "—"}
                 </p>
               )}
               <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
@@ -296,7 +297,7 @@ export default function LeaderboardPage() {
                         {config.label} Place
                       </span>
                       <p className="text-xs text-text-secondary font-medium">
-                        {resident.total} {unitLabel}
+                        {formatQty(resident.total, unitLabel)} {unitLabel}
                       </p>
                     </div>
                   </Card>
@@ -379,7 +380,7 @@ export default function LeaderboardPage() {
                       )}
                       <td className="p-4">
                         <p className="font-bold text-text-primary">
-                          {r.total} {unitLabel}
+                          {formatQty(r.total, unitLabel)} {unitLabel}
                         </p>
                       </td>
                     </tr>
@@ -431,7 +432,7 @@ export default function LeaderboardPage() {
                   </div>
                   <div className="flex flex-col items-end shrink-0">
                     <p className="font-bold text-text-primary text-sm">
-                      {r.total} {unitLabel}
+                      {formatQty(r.total, unitLabel)} {unitLabel}
                     </p>
                   </div>
                 </Card>

@@ -1,5 +1,6 @@
 "use client";
 
+import { formatQty } from "@/lib/formatQty";
 import Image from "next/image";
 import {
   ChevronUpDownIcon,
@@ -272,7 +273,7 @@ export default function HomePage() {
                 ) : leaderboardError ? (
                   "—"
                 ) : (
-                  `${(myStanding?.total ?? 0).toFixed(1)} kg`
+                  `${formatQty(myStanding?.total, "kg")} kg`
                 )}
               </p>
               <p className="text-xs text-[rgba(255,255,255,0.6)]">

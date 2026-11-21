@@ -1,5 +1,6 @@
 "use client";
 
+import { formatQty } from "@/lib/formatQty";
 import { formatFullName } from "@/lib/formatFullName";
 import { Page } from "@/components/layout/Page";
 import { PageContent } from "@/components/layout/PageContent";
@@ -702,7 +703,7 @@ export default function ManualIntakePage() {
                                       textOnly
                                     />
                                     <span className="text-xs text-gray-500 text-nowrap lowercase">
-                                      {m?.quantity}{" "}
+                                      {formatQty(m?.quantity, m?.unit)}{" "}
                                       {m?.unit === "PIECE" ? "pcs" : m?.unit}
                                     </span>
                                   </div>
@@ -802,7 +803,7 @@ export default function ManualIntakePage() {
                             textOnly
                           />
                           <span className="text-xs text-gray-500 text-nowrap lowercase">
-                            {m?.quantity}{" "}
+                            {formatQty(m?.quantity, m?.unit)}{" "}
                             {m?.unit === "PIECE" ? "pcs" : m?.unit}
                           </span>
                         </div>

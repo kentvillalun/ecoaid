@@ -1,5 +1,6 @@
 "use client";
 
+import { formatQty } from "@/lib/formatQty";
 import { formatCurrency } from "@/lib/formatCurrency";
 import { Page } from "@/components/layout/Page";
 import { PageContent } from "@/components/layout/PageContent";
@@ -200,7 +201,10 @@ export default function TransactionDetailPage() {
                       </div>
                       <div className="flex flex-row gap-5">
                         <p className="">
-                          {t?.amount}{" "}
+                          {formatQty(
+                            t?.amount,
+                            t?.programMaterial?.material?.defaultUnit,
+                          )}{" "}
                           {t?.programMaterial?.material?.defaultUnit.toLowerCase()}
                         </p>
                         <p className="">

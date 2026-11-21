@@ -1,3 +1,4 @@
+import { formatQty } from "@/lib/formatQty";
 import { formatFullName } from "@/lib/formatFullName";
 import { Card } from "../ui/Card";
 import { Spinner } from "../ui/Spinner";
@@ -49,7 +50,7 @@ export const RecentTransactionTable = ({
       header: "Actual values",
       render: (data) => (
         <span className="lowercase">
-          {data?.actualValue}{" "}
+          {formatQty(data?.actualValue, data?.actualUnit)}{" "}
           {data?.actualUnit === "PIECE" ? "pcs" : data?.actualUnit}
         </span>
       ),

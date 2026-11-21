@@ -1,5 +1,6 @@
 "use client";
 
+import { formatQty } from "@/lib/formatQty";
 import { Page } from "@/components/layout/Page";
 import { BarangayTopBar } from "@/components/navigation/BarangayTopBar";
 import { PageContent } from "@/components/layout/PageContent";
@@ -190,7 +191,7 @@ export default function BarangayDashboardPage() {
                       Recyclables Collected
                     </p>
                     <p className="text-white font-bold text-3xl md:text-5xl">
-                      {(data?.totalCollectedKg ?? 0).toLocaleString()} kg
+                      {formatQty(data?.totalCollectedKg, "kg")} kg
                     </p>
                     <p className="text-xs text-[rgba(255,255,255,0.6)]">
                       Across all collection sources

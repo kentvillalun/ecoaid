@@ -1,5 +1,6 @@
 "use client";
 
+import { formatQty } from "@/lib/formatQty";
 import { useState } from "react";
 import { Inter } from "next/font/google";
 import { Page } from "@/components/layout/Page";
@@ -88,10 +89,10 @@ const VIEW_OPTIONS = [
 const KG_TO_LBS = 2.20462;
 
 function applyUnit(quantity, unit, displayUnit) {
-  if (unit === "PIECE") return { qty: quantity, label: "pcs" };
+  if (unit === "PIECE") return { qty: formatQty(quantity, "PIECE"), label: "pcs" };
   if (displayUnit === "lbs")
-    return { qty: (quantity * KG_TO_LBS).toFixed(2), label: "lbs" };
-  return { qty: quantity.toFixed(3), label: "kg" };
+    return { qty: formatQty(quantity * KG_TO_LBS, "lbs"), label: "lbs" };
+  return { qty: formatQty(quantity, "kg"), label: "kg" };
 }
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
@@ -323,8 +324,8 @@ export default function MaterialStockPage() {
 
   const totalWeightDisplay =
     displayUnit === "lbs"
-      ? `${(TOTAL_WEIGHT_KG * KG_TO_LBS).toFixed(3)} lbs`
-      : `${TOTAL_WEIGHT_KG?.toFixed(3)} kg`;
+      ? `${formatQty(TOTAL_WEIGHT_KG * KG_TO_LBS, "lbs")} lbs`
+      : `${formatQty(TOTAL_WEIGHT_KG, "kg")} kg`;
 
   const onSubmit = async () => {
     if (isSubmitting) return;
@@ -345,7 +346,7 @@ export default function MaterialStockPage() {
       Number(value.toFixed(3)) > Number(selectedMaterial.balance.toFixed(3))
     ) {
       // the server rejects this too, but the user can fix it without a trip
-      quantityError = `Only ${Number(selectedMaterial.balance.toFixed(3))} ${isPiece ? "pcs" : "kg"} in stock`;
+      quantityError = `Only ${formatQty(isPiece ? selectedMaterial.balance : Math.floor(selectedMaterial.balance * 100) / 100, isPiece ? "PIECE" : "kg")} ${isPiece ? "pcs" : "kg"} in stock`;
     }
 
     const nextErrors = {

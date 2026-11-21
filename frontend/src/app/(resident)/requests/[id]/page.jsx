@@ -1,5 +1,6 @@
 "use client";
 
+import { formatQty } from "@/lib/formatQty";
 import { Page } from "@/components/layout/Page";
 import { PageContent } from "@/components/layout/PageContent";
 import { ResidentHeader } from "@/components/navigation/ResidentHeader";
@@ -213,7 +214,10 @@ export default function RequestDetailPage() {
                     Estimated value and unit
                   </p>
                   <p className={`text-sm text-text-primary lowercase`}>
-                    {data?.request?.estimatedValue}{" "}
+                    {formatQty(
+                      data?.request?.estimatedValue,
+                      data?.request?.estimatedUnit,
+                    )}{" "}
                     {data?.request?.estimatedUnit === "PIECE"
                       ? "pcs"
                       : data?.request?.estimatedUnit}
@@ -312,7 +316,7 @@ export default function RequestDetailPage() {
                         {item?.material?.name}
                       </p>
                       <p className="text-sm text-text-primary lowercase">
-                        {item.actualValue}{" "}
+                        {formatQty(item.actualValue, item.actualUnit)}{" "}
                         {item.actualUnit === "PIECE" ? "pcs" : item.actualUnit}
                       </p>
                     </div>

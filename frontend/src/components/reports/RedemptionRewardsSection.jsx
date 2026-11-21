@@ -1,5 +1,6 @@
 "use client";
 
+import { formatQty } from "@/lib/formatQty";
 import { useEffect, useRef, useState } from "react";
 import {
   ChevronDownIcon,
@@ -35,7 +36,7 @@ const formatEarnedSpent = (value, isCashMode) =>
   isCashMode ? formatCurrency(value) : `${value} pts`;
 
 // Matches the Collection & Intake section's quantity formatting convention
-const formatMaterialAmount = (m) => `${m.amount}${m.unit === "PIECE" ? "pcs" : m.unit}`;
+const formatMaterialAmount = (m) => `${formatQty(m.amount, m.unit)}${m.unit === "PIECE" ? "pcs" : m.unit}`;
 
 // Desktop table: materials and their quantities are two separate columns, so
 // each list renders one line per material with matching spacing to stay aligned.

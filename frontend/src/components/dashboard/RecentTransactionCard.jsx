@@ -1,3 +1,4 @@
+import { formatQty } from "@/lib/formatQty";
 import { formatFullName } from "@/lib/formatFullName";
 import Skeleton from "react-loading-skeleton";
 import { Card } from "../ui/Card";
@@ -81,7 +82,7 @@ export const RecentTransactionCard = ({
                 {formatDate(d?.request?.createdAt)}
               </p>
               <p className="text-xs text-gray-500 font-medium">
-                Actual value: {d?.actualValue}{" "}
+                Actual value: {formatQty(d?.actualValue, d?.actualUnit)}{" "}
                 <span className="">
                   {d?.actualUnit === "PIECE"
                     ? "pcs"

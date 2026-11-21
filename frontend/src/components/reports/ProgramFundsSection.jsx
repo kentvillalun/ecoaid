@@ -1,5 +1,6 @@
 "use client";
 
+import { formatQty } from "@/lib/formatQty";
 import { useState } from "react";
 import {
   WalletIcon,
@@ -52,7 +53,7 @@ const MaterialsBreakdown = ({ materials }) => (
             <MaterialTag type={m?.category} materialName={m?.name} textOnly />
           </td>
           <td className="text-start py-2 pr-1 text-gray-600 tabular-nums text-nowrap lowercase">
-            {m.quantity}
+            {formatQty(m.quantity, m.unit)}
             {m.unit === "PIECE" ? "pcs" : m.unit}
           </td>
           <td className="text-right py-2 pr-1 text-gray-400 tabular-nums text-nowrap">

@@ -1,5 +1,6 @@
 "use client";
 
+import { formatQty } from "@/lib/formatQty";
 import { formatDate } from "@/lib/formatDate";
 import { formatCurrency } from "@/lib/formatCurrency";
 import { Card } from "../ui/Card";
@@ -51,7 +52,10 @@ export function TransactionMaterialsBreakdown({ items, isCashMode }) {
               />
             </td>
             <td className="text-start py-2 pr-1 text-gray-600 tabular-nums text-nowrap lowercase">
-              {item?.amount}{" "}
+              {formatQty(
+                item?.amount,
+                item?.programMaterial?.material?.defaultUnit,
+              )}{" "}
               {item?.programMaterial?.material?.defaultUnit === "PIECE"
                 ? "pcs"
                 : item?.programMaterial?.material?.defaultUnit}

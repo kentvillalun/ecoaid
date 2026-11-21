@@ -1,5 +1,6 @@
 "use client";
 
+import { formatQty } from "@/lib/formatQty";
 import { formatFullName } from "@/lib/formatFullName";
 import { Page } from "@/components/layout/Page";
 import { PageContent } from "@/components/layout/PageContent";
@@ -173,7 +174,7 @@ export default function RequestDetails() {
                           className="col-span-2"
                         />
                         <p className="text-sm text-text-primary">
-                          {item?.actualValue}
+                          {formatQty(item?.actualValue, item?.actualUnit)}
                         </p>
                         <p className="text-sm text-test-primary">
                           {item.actualUnit === "PIECE"

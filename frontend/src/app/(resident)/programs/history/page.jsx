@@ -1,5 +1,6 @@
 "use client";
 
+import { formatQty } from "@/lib/formatQty";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Skeleton from "react-loading-skeleton";
@@ -17,7 +18,7 @@ import { formatDate } from "@/lib/formatDate";
 import { formatCurrency } from "@/lib/formatCurrency";
 
 const formatMaterialAmount = (m) =>
-  `${m.amount} ${m.unit === "PIECE" ? "pcs" : m.unit.toLowerCase()}`;
+  `${formatQty(m.amount, m.unit)} ${m.unit === "PIECE" ? "pcs" : m.unit.toLowerCase()}`;
 
 // "+40 pts" for what was earned, "-30 pts" for what was spent on a reward
 const formatEntryPoints = (entry) => {
