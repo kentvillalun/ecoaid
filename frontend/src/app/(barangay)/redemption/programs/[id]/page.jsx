@@ -1,5 +1,6 @@
 "use client";
 
+import { formatCurrency } from "@/lib/formatCurrency";
 import { Page } from "@/components/layout/Page";
 import { PageContent } from "@/components/layout/PageContent";
 import { BarangayTopBar } from "@/components/navigation/BarangayTopBar";
@@ -83,7 +84,7 @@ const TABLE_COLUMNS = [
     render: (t, isCashMode) => (
       <span className="">
         {isCashMode
-          ? `₱ ${t?.redemptionTransactionItem?.reduce((sum, item) => sum + item.amount * item.currentValue, 0)}`
+          ? formatCurrency(t?.redemptionTransactionItem?.reduce((sum, item) => sum + item.amount * item.currentValue, 0))
           : `${t?.redemptionTransactionItem?.reduce((sum, item) => sum + item.amount * item.currentValue, 0)} pts `}
       </span>
     ),
@@ -239,7 +240,7 @@ export default function ProgramDetails() {
                   />
                   <LabelValue
                     name="Allocated Budget"
-                    value={`₱ ${data?.program?.allotedBudget.toLocaleString()}`}
+                    value={formatCurrency(data?.program?.allotedBudget)}
                   />
 
                   <LabelValue
@@ -278,7 +279,7 @@ export default function ProgramDetails() {
                       <div className="flex flex-col items-end">
                         <p className="text-sm font-semibold text-gray-700">
                           {data?.program?.isCashMode
-                            ? `₱${m?.cashValue}`
+                            ? formatCurrency(m?.cashValue)
                             : `${m?.pointValue} pts`}
                         </p>
                         <p className="text-xs text-gray-400">

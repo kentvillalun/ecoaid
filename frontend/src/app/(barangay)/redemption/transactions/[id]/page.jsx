@@ -1,5 +1,6 @@
 "use client";
 
+import { formatCurrency } from "@/lib/formatCurrency";
 import { Page } from "@/components/layout/Page";
 import { PageContent } from "@/components/layout/PageContent";
 import { BarangayTopBar } from "@/components/navigation/BarangayTopBar";
@@ -204,12 +205,9 @@ export default function TransactionDetailPage() {
                         </p>
                         <p className="">
                           {data?.transaction?.program?.isCashMode
-                            ? `₱ ${
-                                t?.amount *
-                                (data?.transaction?.program?.isCashMode
-                                  ? t?.programMaterial?.cashValue
-                                  : t?.programMaterial?.pointValue)
-                              }`
+                            ? formatCurrency(
+                                t?.amount * t?.programMaterial?.cashValue,
+                              )
                             : `${
                                 t?.amount *
                                 (data?.transaction?.program?.isCashMode
@@ -223,12 +221,16 @@ export default function TransactionDetailPage() {
                   <div className="p-3 text-sm text-gray-700 flex flex-row items-center justify-between">
                     <p className="font-medium">Total</p>
                     <p className="">
-                      {data?.transaction?.program?.isCashMode && "₱"}{" "}
-                      {data?.transaction?.redemptionTransactionItem?.reduce(
-                        (sum, item) => sum + item.amount * item.currentValue,
-                        0,
-                      )}{" "}
-                      {!data?.transaction?.program?.isCashMode && "pts"}
+                      {(() => {
+                        const total =
+                          data?.transaction?.redemptionTransactionItem?.reduce(
+                            (sum, item) => sum + item.amount * item.currentValue,
+                            0,
+                          ) ?? 0;
+                        return data?.transaction?.program?.isCashMode
+                          ? formatCurrency(total)
+                          : `${total} pts`;
+                      })()}
                     </p>
                   </div>
                 </div>

@@ -54,7 +54,7 @@ const MaterialsBreakdown = ({ materials }) => (
             {m.unit === "PIECE" ? "pcs" : m.unit}
           </td>
           <td className="text-start py-2 pr-1 text-gray-400 tabular-nums text-nowrap">
-            ₱{m.cost}/{m.unit === "PIECE" ? "pcs" : m.unit}
+            {formatCurrency(m.cost)}/{m.unit === "PIECE" ? "pcs" : m.unit}
           </td>
           <td className="text-start py-2 pr-1 font-semibold text-text-primary tabular-nums text-nowrap">
             {formatCurrency(m.quantity * m.cost)}

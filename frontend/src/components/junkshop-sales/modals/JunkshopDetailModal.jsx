@@ -1,5 +1,6 @@
 "use client";
 
+import { formatCurrency } from "@/lib/formatCurrency";
 import { createPortal } from "react-dom";
 import { BuildingStorefrontIcon } from "@heroicons/react/24/outline";
 import { Modal } from "@/components/ui/Modal";
@@ -139,7 +140,7 @@ export function JunkshopDetailModal({
                         />
                       </td>
                       <td className="py-2.5 px-4 text-gray-700 font-medium tabular-nums text-nowrap">
-                        ₱{item.price}
+                        {formatCurrency(item.price)}
                       </td>
                       <td className="py-2.5 px-4 text-gray-500 text-nowrap">
                         {formatUnit(item.unit)}

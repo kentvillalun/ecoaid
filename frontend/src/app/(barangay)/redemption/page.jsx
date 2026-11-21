@@ -1,5 +1,6 @@
 "use client";
 
+import { formatCurrency } from "@/lib/formatCurrency";
 import { Page } from "@/components/layout/Page";
 import { PageContent } from "@/components/layout/PageContent";
 import { BarangayTopBar } from "@/components/navigation/BarangayTopBar";
@@ -157,7 +158,7 @@ export default function RedemptionProgramPage() {
                   <div className="flex flex-row gap-6 ">
                     <LabelValue
                       name="Budget"
-                      value={`₱ ${p.allotedBudget.toLocaleString()}`}
+                      value={formatCurrency(p.allotedBudget)}
                     />
                     <LabelValue
                       className="text-nowrap"

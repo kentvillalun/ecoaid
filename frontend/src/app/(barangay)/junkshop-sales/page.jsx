@@ -74,7 +74,7 @@ function BreakdownTable({ materials }) {
               {m.unit === "PIECE" ? "pcs" : m.unit}
             </td>
             <td className="text-start py-2 pr-1 text-gray-400 tabular-nums text-nowrap">
-              ₱{m.cost}/{m.unit === "PIECE" ? "pcs" : m.unit}
+              {formatCurrency(m.cost)}/{m.unit === "PIECE" ? "pcs" : m.unit}
             </td>
             <td className="text-start py-2 pr-1 font-semibold text-text-primary tabular-nums text-nowrap">
               {formatCurrency(m.quantity * m.cost)}
@@ -270,7 +270,7 @@ export default function JunkshopSalesPage() {
             <div className="flex flex-col items-start gap-1">
               {isPricesLoading ? (
                 <p className="md:text-2xl font-bold text-text-primary text-base">
-                  ₱0
+                  ₱0.00
                 </p>
               ) : isPricesError ? (
                 <p className="md:text-2xl font-bold text-text-primary text-sm">
@@ -280,7 +280,7 @@ export default function JunkshopSalesPage() {
                 <p className="md:text-2xl font-bold text-lg select-none">
                   {highestPrices === "Infinity"
                     ? formatCurrency(highestPrices)
-                    : "₱0"}
+                    : "₱0.00"}
                 </p>
               )}
 
@@ -418,7 +418,7 @@ export default function JunkshopSalesPage() {
                                     className={`font-semibold tabular-nums ${i === bestIdx ? "text-green-800 text-base" : "text-text-primary"}`}
                                   >
                                     {priceItem?.price
-                                      ? `₱${priceItem.price}`
+                                      ? formatCurrency(priceItem.price)
                                       : "—"}
                                   </span>
                                   {i === bestIdx && (
@@ -434,7 +434,7 @@ export default function JunkshopSalesPage() {
                           <td className="p-4 text-center bg-accent/2">
                             <div className="flex flex-col items-center gap-0.5">
                               <span className="font-bold text-accent text-base tabular-nums">
-                                ₱{bestPrice}
+                                {formatCurrency(bestPrice)}
                               </span>
                               <span className="text-xs text-text-secondary">
                                 {
@@ -546,7 +546,7 @@ export default function JunkshopSalesPage() {
                             >
                               {prices[i]?.price ? (
                                 <div>
-                                  ₱{prices[i].price}
+                                  {formatCurrency(prices[i].price)}
                                   <span className="font-normal text-xs lowercase">
                                     /
                                     {prices[i].unit === "PIECE"

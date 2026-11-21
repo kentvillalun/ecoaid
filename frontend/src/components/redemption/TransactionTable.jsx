@@ -149,7 +149,7 @@ export const TransactionTable = ({
       render: (data) => (
         <span className="">
           {data?.isCashMode
-            ? `₱ ${data?.redemptionTransactionItem?.reduce((sum, item) => sum + item.amount * item.currentValue, 0)}`
+            ? formatCurrency(data?.redemptionTransactionItem?.reduce((sum, item) => sum + item.amount * item.currentValue, 0))
             : `${data?.redemptionTransactionItem?.reduce((sum, item) => sum + item.amount * item.currentValue, 0)} pts `}
         </span>
       ),
