@@ -72,8 +72,6 @@ const CATEGORY_STYLES = {
   },
 };
 
-const NUMBER_HEADERS = ["Quantity", "Current Total"];
-
 const TABLE_HEADERS = [
   "Material",
   "Quantity",
@@ -619,7 +617,7 @@ export default function MaterialStockPage() {
                       {TABLE_HEADERS.map((h) => (
                         <th
                           key={h}
-                          className={`font-medium p-4 text-nowrap ${NUMBER_HEADERS.includes(h) ? "text-right" : "text-start"}`}
+                          className="font-medium text-start p-4 text-nowrap"
                         >
                           {h}
                         </th>
@@ -703,13 +701,13 @@ export default function MaterialStockPage() {
                                 materialName={row?.material?.name}
                               />
                             </td>
-                            <td className="p-4 text-right font-semibold text-text-primary tabular-nums">
+                            <td className="p-4 font-semibold text-text-primary tabular-nums">
                               {qty}
                               <span className="text-xs font-normal text-gray-400 ml-1">
                                 {label}
                               </span>
                             </td>
-                            <td className="p-4 text-right font-semibold text-text-primary tabular-nums">
+                            <td className="p-4 font-semibold text-text-primary tabular-nums">
                               {totalQty}
                               <span className="text-xs font-normal text-gray-400 ml-1">
                                 {totalLabel}
