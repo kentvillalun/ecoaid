@@ -23,7 +23,7 @@ Legend: `[x]` done, `[~]` partly done, `[ ]` not started, `[?]` waiting on a dec
 | 5 | Activate and ban resident accounts | `[~]` | Phase A: deactivate/reactivate UI (section 3) |
 | 6 | Parents as primary users, children as beneficiaries | `[~]` | Brainstorm: framing only or a "released to" name |
 | 7 | SMS for points and announcements (panel: optional) | `[?]` | Waiting on the SMS provider (email in section 8) |
-| 8 | Prices always 2 decimals, right-aligned | `[~]` | Audit the 15 files that bypass `formatCurrency` (format decided: `₱10.00`) |
+| 8 | Prices always 2 decimals, right-aligned | `[~]` | Code done Nov 21 (two decimals everywhere through `formatCurrency`; money columns right-aligned in Program Funds, Junkshop Sales and the report ledger). Still to do: look at it in the browser, and decide about the redemption tables that mix points and pesos |
 | 9 | Reward for the monthly leaderboard winner | `[ ]` | Brainstorm |
 | 10 | Expand "MRF" to "Material Recycling Facility" | `[x]` | Done Nov 21: sidebar says "Inventory", the page title says "Material Recycling Facility Inventory". The backend Excel sheet name still says "MRF Inventory Report" |
 | 11 | System-wide warning before critical actions | `[ ]` | Brainstorm |
