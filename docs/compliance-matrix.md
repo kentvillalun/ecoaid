@@ -12,7 +12,7 @@ Legend: `[x]` done, `[~]` partly done, `[ ]` not started, `[?]` waiting on a dec
 
 ## 1. At a glance
 
-**6 done, 3 partly done, 5 not started, 1 waiting** (15 items).
+**7 done, 3 partly done, 4 not started, 1 waiting** (15 items).
 
 | # | Item | Status | Next step |
 |---|------|--------|-----------|
@@ -23,7 +23,7 @@ Legend: `[x]` done, `[~]` partly done, `[ ]` not started, `[?]` waiting on a dec
 | 5 | Activate and ban resident accounts | `[~]` | Phase A: deactivate/reactivate UI (section 3) |
 | 6 | Parents as primary users, children as beneficiaries | `[~]` | Brainstorm: framing only or a "released to" name |
 | 7 | SMS for points and announcements (panel: optional) | `[?]` | Waiting on the SMS provider (email in section 8) |
-| 8 | Prices always 2 decimals, right-aligned | `[~]` | Code done Nov 21 (two decimals everywhere through `formatCurrency`; money columns right-aligned in Program Funds, Junkshop Sales and the report ledger). Still to do: look at it in the browser, and decide about the redemption tables that mix points and pesos |
+| 8 | Prices always 2 decimals, right-aligned | `[x]` | Done Nov 21: peso amounts use `formatCurrency` and are right-aligned; pieces show as whole numbers and other units with 2 decimals (`formatQty`). Left as they are: reward counts, input fields, the Excel sheets other than MRF inventory, and the redemption tables that mix points and pesos |
 | 9 | Reward for the monthly leaderboard winner | `[ ]` | Brainstorm |
 | 10 | Expand "MRF" to "Material Recycling Facility" | `[x]` | Done Nov 21: sidebar says "Inventory", the page title says "Material Recycling Facility Inventory". The backend Excel sheet name still says "MRF Inventory Report" |
 | 11 | System-wide warning before critical actions | `[ ]` | Brainstorm |
@@ -162,12 +162,12 @@ Not from the panel. Do these only after items 1 to 15, and build once on the Res
 2. [x] Item 10: rename the visible "MRF" text (done Nov 21, see section 3).
 3. [ ] Item 3: add `mode: "onTouched"` to the signup, barangay onboarding, login and staff forms, then check each shows its errors on leaving a field.
 
-Item 8 is not part of this session.
+Item 8 was finished on Nov 21.
 
 The earlier day-by-day schedule predates items 14 and 15. Kent is drafting a new week-by-week order. Fixed points until then:
 
 1. Push-test `3e2893e` on `ecoaid_demo` (`DATABASE_URL` was checked on 2026-11-19 and points to local `ecoaid_demo`; never Neon; for phone testing, run both servers locally and expose only the frontend through a tunnel; use the blank-SMS-key guard when testing signup). Test list: middle name on every screen, Edit Resident (no change, sitio only, no middle name, no sitio), resident profile edit, decline modal, approve and schedule, name search, OTP screen.
-2. Item 8, then the quick wins (10).
+2. [x] Item 8 and the quick wins (10).
 3. Dark mode (12) starts early because it is the largest risk.
 4. Send the SMS provider email (section 8); item 7 depends on the reply.
 
