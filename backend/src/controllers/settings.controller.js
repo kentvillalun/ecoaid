@@ -111,14 +111,34 @@ const updateMaterialUnit = async (req, res) => {
       return res.status(400).json({ error: "Invalid unit" });
     }
 
-    const result = await prisma.material.updateMany({
+    const material = await prisma.material.findFirst({
       where: { id, barangayId },
-      data: { defaultUnit },
+      select: { defaultUnit: true },
     });
 
-    if (result.count === 0) {
+    if (!material) {
       return res.status(404).json({ error: "Material not found" });
     }
+
+    // switching between pieces and weight would split the existing stock into
+    // two balances, so it is only allowed while the material has no stock records
+    if ((material.defaultUnit === "PIECE") !== (defaultUnit === "PIECE")) {
+      const hasStock = await prisma.stockTransactionLog.count({
+        where: { materialId: id, barangayId },
+      });
+
+      if (hasStock > 0) {
+        return res.status(409).json({
+          error:
+            "This material already has stock records, so it cannot switch between pieces and weight",
+        });
+      }
+    }
+
+    await prisma.material.update({
+      where: { id },
+      data: { defaultUnit },
+    });
 
     return res.status(200).json({ message: "Material unit updated" });
   } catch (error) {

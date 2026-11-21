@@ -1,6 +1,7 @@
 import { prisma } from "../config/db.js";
 import { formatFullName } from "../utils/formatFullName.js";
 import { convertToKg } from "../utils/covertToKg.js";
+import { findUnitMismatch } from "../utils/unitMismatch.js";
 
 const recordIntake = async (req, res) => {
   try {
@@ -20,8 +21,24 @@ const recordIntake = async (req, res) => {
       return res.status(400).json({ error: "Collector does not exist." });
     }
 
-    if (!items) {
+    if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ error: "Required fields are missing." });
+    }
+
+    const materialIds = [...new Set(items.map((item) => item.materialId))];
+    const materials = await prisma.material.findMany({
+      where: { id: { in: materialIds }, barangayId },
+      select: { id: true, name: true, defaultUnit: true },
+    });
+
+    if (materials.length !== materialIds.length) {
+      return res.status(400).json({ error: "Invalid material" });
+    }
+
+    const unitError = findUnitMismatch(items, materials, "unit");
+
+    if (unitError) {
+      return res.status(400).json({ error: unitError });
     }
 
     const hasHousehold = Boolean(householdName?.trim());

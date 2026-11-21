@@ -1,5 +1,6 @@
 import { prisma } from "../config/db.js";
 import { convertToKg } from "../utils/covertToKg.js";
+import { findUnitMismatch } from "../utils/unitMismatch.js";
 
 const pickupRequest = async (req, res) => {
   try {
@@ -235,12 +236,19 @@ const updateStatus = async (req, res) => {
       }
 
       const materialIds = [...new Set(items.map((item) => item.materialId))];
-      const ownMaterials = await prisma.material.count({
+      const ownMaterials = await prisma.material.findMany({
         where: { id: { in: materialIds }, barangayId },
+        select: { id: true, name: true, defaultUnit: true },
       });
 
-      if (ownMaterials !== materialIds.length) {
+      if (ownMaterials.length !== materialIds.length) {
         return res.status(400).json({ error: "Invalid material" });
+      }
+
+      const unitError = findUnitMismatch(items, ownMaterials, "actualUnit");
+
+      if (unitError) {
+        return res.status(400).json({ error: unitError });
       }
 
       await prisma.$transaction(async (tx) => {
