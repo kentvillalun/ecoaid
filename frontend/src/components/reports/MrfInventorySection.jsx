@@ -1,5 +1,6 @@
 "use client";
 
+import { formatQty } from "@/lib/formatQty";
 import { useState } from "react";
 import { CubeIcon } from "@heroicons/react/24/outline";
 import { Card } from "@/components/ui/Card";
@@ -127,16 +128,16 @@ export const MrfInventorySection = ({
                       />
                     </td>
                     <td className="p-4 text-green-600 font-medium tabular-nums text-nowrap">
-                      +{row.quantityIn}
+                      +{formatQty(row.quantityIn, row.unit)} {row.unit === "PIECE" ? "pcs" : "kg"}
                     </td>
                     <td className="p-4 text-red-600 font-medium tabular-nums text-nowrap">
-                      -{row.quantityOut}
+                      -{formatQty(row.quantityOut, row.unit)} {row.unit === "PIECE" ? "pcs" : "kg"}
                     </td>
                     <td
                       className={`p-4 font-bold tabular-nums text-nowrap ${row.net >= 0 ? "text-green-600" : "text-red-600"}`}
                     >
                       {row.net >= 0 ? "+" : ""}
-                      {row.net}
+                      {formatQty(row.net, row.unit)} {row.unit === "PIECE" ? "pcs" : "kg"}
                     </td>
                   </tr>
                 ))
@@ -177,13 +178,13 @@ export const MrfInventorySection = ({
                 <div className="flex flex-col gap-0.5">
                   <p className="text-xs text-gray-400">In</p>
                   <p className="text-sm font-semibold text-green-600 tabular-nums">
-                    +{row.quantityIn}
+                    +{formatQty(row.quantityIn, row.unit)} {row.unit === "PIECE" ? "pcs" : "kg"}
                   </p>
                 </div>
                 <div className="flex flex-col gap-0.5">
                   <p className="text-xs text-gray-400">Out</p>
                   <p className="text-sm font-semibold text-red-600 tabular-nums">
-                    -{row.quantityOut}
+                    -{formatQty(row.quantityOut, row.unit)} {row.unit === "PIECE" ? "pcs" : "kg"}
                   </p>
                 </div>
                 <div className="flex flex-col gap-0.5">
@@ -192,7 +193,7 @@ export const MrfInventorySection = ({
                     className={`text-sm font-bold tabular-nums ${row.net >= 0 ? "text-green-600" : "text-red-600"}`}
                   >
                     {row.net >= 0 ? "+" : ""}
-                    {row.net}
+                    {formatQty(row.net, row.unit)} {row.unit === "PIECE" ? "pcs" : "kg"}
                   </p>
                 </div>
               </div>

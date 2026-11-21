@@ -217,7 +217,7 @@ const exportReports = async (req, res) => {
       "MRF Inventory Report",
       mrfStart,
       mrfEnd,
-      "F",
+      "G",
     );
 
     mrfInventorySheet.addRow([]);
@@ -228,6 +228,7 @@ const exportReports = async (req, res) => {
       "Quantity In",
       "Quantity Out",
       "Net",
+      "Unit",
     ];
     mrfInventorySheet.getRow(3).eachCell((cell) => {
       cell.border = {
@@ -253,7 +254,12 @@ const exportReports = async (req, res) => {
         row.quantityIn,
         row.quantityOut,
         row.net,
+        row.unit === "PIECE" ? "pcs" : "kg",
       ]);
+      // pieces are whole numbers, kg shows 2 decimals
+      [4, 5, 6].forEach((col) => {
+        newRow.getCell(col).numFmt = row.unit === "PIECE" ? "0" : "0.00";
+      });
       newRow.eachCell((cell) => {
         cell.border = {
           top: { style: "thin" },

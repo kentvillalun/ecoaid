@@ -51,13 +51,15 @@ export const getMrfInventoryReport = async (
   const enrichedMaterials = materials.reduce((acc, transaction) => {
     const date = transaction.createdAt.toISOString().slice(0, 10);
 
-    const key = `${transaction.material.name}_${date}`;
+    // kg and pieces of one material are kept apart, they cannot be added
+    const key = `${transaction.material.name}_${date}_${transaction.unit}`;
 
     if (!acc[key]) {
       acc[key] = {
         date,
         material: transaction.material.name,
         category: transaction.material.category.name,
+        unit: transaction.unit,
         quantityIn: 0,
         quantityOut: 0,
         net: 0,
