@@ -23,6 +23,8 @@ import { formatReportDate } from "@/lib/formatReportDate";
 import { useFetch } from "@/hooks/useFetch";
 import { formatCurrency } from "@/lib/formatCurrency";
 
+const MONEY_HEADERS = ["Amount"];
+
 const LEDGER_HEADERS = [
   "Type",
   "Name",
@@ -39,8 +41,8 @@ const MaterialsBreakdown = ({ materials }) => (
       <tr className="border-b border-gray-100">
         <th className="text-left pb-2 pr-2 font-medium text-gray-400 text-nowrap">Material</th>
         <th className="text-start pb-2 pr-1 font-medium text-gray-400 text-nowrap">Qty</th>
-        <th className="text-start pb-2 pr-1 font-medium text-gray-400 text-nowrap">Price</th>
-        <th className="text-start pb-2 pr-1 font-medium text-gray-400 text-nowrap">Subtotal</th>
+        <th className="text-right pb-2 pr-1 font-medium text-gray-400 text-nowrap">Price</th>
+        <th className="text-right pb-2 pr-1 font-medium text-gray-400 text-nowrap">Subtotal</th>
       </tr>
     </thead>
     <tbody className="divide-y divide-gray-50">
@@ -53,10 +55,10 @@ const MaterialsBreakdown = ({ materials }) => (
             {m.quantity}
             {m.unit === "PIECE" ? "pcs" : m.unit}
           </td>
-          <td className="text-start py-2 pr-1 text-gray-400 tabular-nums text-nowrap">
+          <td className="text-right py-2 pr-1 text-gray-400 tabular-nums text-nowrap">
             {formatCurrency(m.cost)}/{m.unit === "PIECE" ? "pcs" : m.unit}
           </td>
-          <td className="text-start py-2 pr-1 font-semibold text-text-primary tabular-nums text-nowrap">
+          <td className="text-right py-2 pr-1 font-semibold text-text-primary tabular-nums text-nowrap">
             {formatCurrency(m.quantity * m.cost)}
           </td>
         </tr>
@@ -189,7 +191,10 @@ export const ProgramFundsSection = ({ dateRange, setDateRange }) => {
             <thead className="border-b border-border">
               <tr>
                 {LEDGER_HEADERS.map((h) => (
-                  <th key={h} className="font-medium text-start p-4 text-nowrap">
+                  <th
+                    key={h}
+                    className={`font-medium p-4 text-nowrap ${MONEY_HEADERS.includes(h) ? "text-right" : "text-start"}`}
+                  >
                     {h}
                   </th>
                 ))}
@@ -240,7 +245,7 @@ export const ProgramFundsSection = ({ dateRange, setDateRange }) => {
                     <td className="p-4 text-gray-500 text-nowrap">{row.description}</td>
                     <td className="p-4 text-gray-500 text-nowrap">{row.program}</td>
                     <td
-                      className={`p-4 font-bold text-nowrap tabular-nums ${row.type === "income" ? "text-green-600" : "text-red-600"}`}
+                      className={`p-4 text-right font-bold text-nowrap tabular-nums ${row.type === "income" ? "text-green-600" : "text-red-600"}`}
                     >
                       {row.type === "income" ? "+" : "-"}
                       {formatCurrency(row.amount)}

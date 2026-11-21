@@ -51,10 +51,10 @@ function BreakdownTable({ materials }) {
           <th className="text-start pb-2 pr-1 font-medium text-gray-400 text-nowrap">
             Qty / Weight
           </th>
-          <th className="text-start pb-2 pr-1 font-medium text-gray-400 text-nowrap">
+          <th className="text-right pb-2 pr-1 font-medium text-gray-400 text-nowrap">
             Price
           </th>
-          <th className="text-start pb-2 pr-1 font-medium text-gray-400 text-nowrap">
+          <th className="text-right pb-2 pr-1 font-medium text-gray-400 text-nowrap">
             Subtotal
           </th>
         </tr>
@@ -73,10 +73,10 @@ function BreakdownTable({ materials }) {
               {m.quantity}
               {m.unit === "PIECE" ? "pcs" : m.unit}
             </td>
-            <td className="text-start py-2 pr-1 text-gray-400 tabular-nums text-nowrap">
+            <td className="text-right py-2 pr-1 text-gray-400 tabular-nums text-nowrap">
               {formatCurrency(m.cost)}/{m.unit === "PIECE" ? "pcs" : m.unit}
             </td>
-            <td className="text-start py-2 pr-1 font-semibold text-text-primary tabular-nums text-nowrap">
+            <td className="text-right py-2 pr-1 font-semibold text-text-primary tabular-nums text-nowrap">
               {formatCurrency(m.quantity * m.cost)}
             </td>
           </tr>
@@ -87,6 +87,8 @@ function BreakdownTable({ materials }) {
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
+
+const MONEY_HEADERS = ["Total Amount"];
 
 const HISTORY_HEADERS = [
   "Junkshop",
@@ -604,7 +606,7 @@ export default function JunkshopSalesPage() {
                     {HISTORY_HEADERS.map((h) => (
                       <th
                         key={h}
-                        className="font-medium text-start p-4 text-nowrap"
+                        className={`font-medium p-4 text-nowrap ${MONEY_HEADERS.includes(h) ? "text-right" : "text-start"}`}
                       >
                         {h}
                       </th>
@@ -671,7 +673,7 @@ export default function JunkshopSalesPage() {
                               )}
                             </HoverPortal>
                           </td>
-                          <td className="p-4 font-bold text-text-primary tabular-nums text-nowrap">
+                          <td className="p-4 text-right font-bold text-text-primary tabular-nums text-nowrap">
                             {formatCurrency(row.totalAmount)}
                           </td>
                           <td className="p-4 text-nowrap">

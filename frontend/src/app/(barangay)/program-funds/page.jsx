@@ -42,6 +42,8 @@ const FILTER_TABS = [
   { key: ["expense"], label: "Expenses" },
 ];
 
+const MONEY_HEADERS = ["Allocated Budget", "Total Spent", "Remaining", "Amount"];
+
 const PROGRAM_TABLE_HEADERS = [
   "Program",
   "Allocated Budget",
@@ -210,7 +212,7 @@ export default function ProgramFundsPage() {
                       {PROGRAM_TABLE_HEADERS.map((h) => (
                         <th
                           key={h}
-                          className="font-medium text-start p-4 text-nowrap"
+                          className={`font-medium p-4 text-nowrap ${MONEY_HEADERS.includes(h) ? "text-right" : "text-start"}`}
                         >
                           {h}
                         </th>
@@ -267,14 +269,14 @@ export default function ProgramFundsPage() {
                             <td className="p-4 font-semibold text-text-primary text-nowrap">
                               {p.name}
                             </td>
-                            <td className="p-4 text-nowrap tabular-nums">
+                            <td className="p-4 text-right text-nowrap tabular-nums">
                               {formatCurrency(p.allotedBudget ?? 0)}
                             </td>
-                            <td className="p-4 text-nowrap tabular-nums">
+                            <td className="p-4 text-right text-nowrap tabular-nums">
                               {formatCurrency(p.totalSpent ?? 0)}
                             </td>
                             <td
-                              className={`p-4 text-nowrap font-semibold tabular-nums ${isOverBudget ? "text-red-600" : "text-green-600"}`}
+                              className={`p-4 text-right text-nowrap font-semibold tabular-nums ${isOverBudget ? "text-red-600" : "text-green-600"}`}
                             >
                               {formatCurrency(p.remaining ?? 0)}
                             </td>
@@ -426,7 +428,7 @@ export default function ProgramFundsPage() {
                     {TRANSACTION_TABLE_HEADERS.map((h) => (
                       <th
                         key={h}
-                        className="font-medium text-start p-4 text-nowrap"
+                        className={`font-medium p-4 text-nowrap ${MONEY_HEADERS.includes(h) ? "text-right" : "text-start"}`}
                       >
                         {h}
                       </th>
@@ -496,7 +498,7 @@ export default function ProgramFundsPage() {
                           {t.type === "income" ? "—" : t?.program?.name}
                         </td>
                         <td
-                          className={`p-4 font-bold text-nowrap tabular-nums ${t.type === "income" ? "text-green-600" : "text-red-600"}`}
+                          className={`p-4 text-right font-bold text-nowrap tabular-nums ${t.type === "income" ? "text-green-600" : "text-red-600"}`}
                         >
                           {t.type === "income" ? "+" : "-"}
                           {formatCurrency(t?.totalAmount ?? t?.amount)}

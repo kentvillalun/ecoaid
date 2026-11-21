@@ -120,7 +120,7 @@ export function JunkshopDetailModal({
                   <th className="text-left py-2.5 px-4 font-medium text-gray-400 text-nowrap">
                     Material
                   </th>
-                  <th className="text-left py-2.5 px-4 font-medium text-gray-400 text-nowrap">
+                  <th className="text-right py-2.5 px-4 font-medium text-gray-400 text-nowrap">
                     Price
                   </th>
                   <th className="text-left py-2.5 px-4 font-medium text-gray-400 text-nowrap">
@@ -139,7 +139,7 @@ export function JunkshopDetailModal({
                           textOnly={true}
                         />
                       </td>
-                      <td className="py-2.5 px-4 text-gray-700 font-medium tabular-nums text-nowrap">
+                      <td className="py-2.5 px-4 text-right text-gray-700 font-medium tabular-nums text-nowrap">
                         {formatCurrency(item.price)}
                       </td>
                       <td className="py-2.5 px-4 text-gray-500 text-nowrap">
