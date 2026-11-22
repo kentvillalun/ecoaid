@@ -93,7 +93,8 @@ const findBlankField = (fields) => {
 const updateResidentProfile = async (req, res) => {
   try {
     const id = req.user.id;
-    const { firstName, middleName, lastName, phoneNumber, address } = req.body ?? {};
+    const { firstName, middleName, lastName, phoneNumber, address } =
+      req.body ?? {};
 
     const blankField = findBlankField({ firstName, lastName, phoneNumber });
     if (blankField) {
@@ -189,8 +190,14 @@ const getResidents = async (req, res) => {
 const editResident = async (req, res) => {
   try {
     const { id } = req.params;
-    const { firstName, middleName, lastName, phoneNumber, sitioId, isVerified } =
-      req.body ?? {};
+    const {
+      firstName,
+      middleName,
+      lastName,
+      phoneNumber,
+      sitioId,
+      isVerified,
+    } = req.body ?? {};
     const { barangayId } = req.user;
 
     // the name and phone number can be changed but never left blank
@@ -223,17 +230,17 @@ const editResident = async (req, res) => {
           name: true,
         },
       });
-      
+
       if (!sitio) {
-        return res.status(400).json({ error: "Invalid sitio"})
+        return res.status(400).json({ error: "Invalid sitio" });
       }
 
-      data.purok = sitio.name
+      data.purok = sitio.name;
     }
 
     const result = await prisma.user.updateMany({
       where: { id, barangayId },
-      data
+      data,
     });
 
     if (result.count === 0) {
@@ -248,6 +255,108 @@ const editResident = async (req, res) => {
   }
 };
 
+const deactivateResident = async (req, res) => {
+  try {
+    const { id, role, barangayId } = req.user;
+    const residentId = req.params.id;
+
+    const target = await prisma.user.findUnique({
+      where: { barangayId, id: residentId, role: "RESIDENT" },
+      select: {
+        id: true,
+        isActive: true,
+        deactivatedAt: true,
+      },
+    });
+
+    if (!target) {
+      return res.status(404).json({ error: "Resident not found" });
+    }
+
+    if (!target.isActive) {
+      return res.status(400).json({ error: "Already deactivated" });
+    }
+
+    const staff = await prisma.user.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        firstName: true,
+        middleName: true,
+        lastName: true,
+        role: true,
+      },
+    });
+
+    if (!staff) {
+      return res.status(404).json({ error: "Staff not found" })
+    }
+
+    await prisma.user.update({
+      where: { id: target.id },
+      data: {
+        isActive: false,
+        deactivatedAt: new Date(),
+        deactivatedById: id,
+        deactivatedByName: staff.middleName
+          ? `${staff.firstName} ${staff.middleName} ${staff.lastName}`
+          : `${staff.firstName} ${staff.lastName}`,
+        deactivatedByRole: role,
+      },
+    });
+
+    return res.status(200).json({ message: "Resident deactivated" });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+const reactivateResident = async (req, res) => {
+  try {
+    const residentId = req.params.id;
+    const { barangayId } = req.user;
+
+    const target = await prisma.user.findUnique({ 
+      where: {
+        id: residentId,
+        role: "RESIDENT",
+        barangayId
+      },
+      select: {
+        isActive: true,
+        id: true
+      }
+    })
+
+    if (!target) {
+      return res.status(404).json({ error: "Resident not found" })
+    }
+
+    if (target.isActive) {
+      return res.status(400).json({ error: "Resident is not deactivated" })
+    }
+
+    await prisma.user.update({
+      where: {
+        id: target.id,
+      },
+      data: {
+        isActive: true,
+        reactivatedAt: new Date(),
+        deactivatedAt: null,
+        deactivatedById: null,
+        deactivatedByName: null,
+        deactivatedByRole: null,
+      }
+    })
+
+    return res.status(200).json({ message: "Resident reactivated" })
+  } catch (error) {
+    return res.status(500).json({ error: error.message })
+  }
+}
+
 export {
   getResidentProfile,
   getBarangayInfo,
@@ -255,4 +364,6 @@ export {
   searchResident,
   getResidents,
   editResident,
+  deactivateResident,
+  reactivateResident
 };

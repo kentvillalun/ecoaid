@@ -127,6 +127,9 @@ model User {
   sitioId    String?   @db.Uuid
   sitio      Sitio?    @relation(fields: [sitioId], references: [id])
 
+  deactivatedById String? @db.Uuid
+  deactivatedBy User? @relation("UserDeactivatedBy", fields: [deactivatedById], references: [id])
+
   role Role @default(RESIDENT)
 
   phoneNumber String @unique @db.VarChar(20)
@@ -135,6 +138,9 @@ model User {
   firstName String?
   middleName String?
   lastName String?
+
+  deactivatedByName String?
+  deactivatedByRole String?
 
   address String?
   purok String?
@@ -152,6 +158,9 @@ model User {
 
   lastSeenAnnouncementAt DateTime?
 
+  deactivatedAt DateTime?
+  reactivatedAt DateTime?
+
   pickupRequest PickupRequests[]
   manualIntakeTransaction ManualIntakeTransaction[] @relation("ResidentIntakes")
   collectedIntakeTransaction ManualIntakeTransaction[] @relation("CollectorIntakes")
@@ -162,6 +171,7 @@ model User {
   rewardReleases RewardRelease[]
   notification Notifications[]
   redemptionTransaction RedemptionTransaction[]
+  deactivatedUsers User[] @relation("UserDeactivatedBy")
   
   @@index([barangayId])
   @@index([sitioId])
@@ -197,6 +207,7 @@ model PickupRequests {
   closedAt DateTime?
   
   isAssorted Boolean @default(false)
+  photoMismatch Boolean @default(false)
 
 
   collectionItems CollectionItem[]
