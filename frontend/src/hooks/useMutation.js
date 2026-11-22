@@ -29,14 +29,14 @@ export const useMutation = () => {
             if (!result.ok) {
                 // only client errors (4xx) carry a message meant for the user;
                 // 5xx messages are internal, and 401 just redirects to login
+                const errorBody = await result.json().catch(() => null)
                 if (result.status >= 400 && result.status < 500 && result.status !== 401) {
-                    const errorBody = await result.json().catch(() => null)
                     errorMessageRef.current = errorBody?.error ?? null
                 }
                 setIsError(true)
                 setError("There is a problem making request")
                 setIsLoading(false)
-                if (result.status === 401) handleUnauthorized()
+                if (result.status === 401) handleUnauthorized(errorBody)
                 return
             }
 

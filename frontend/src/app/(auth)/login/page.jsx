@@ -57,6 +57,14 @@ export default function LoginPage() {
       setSuccessMessage(message);
       window.sessionStorage.removeItem("authSuccessMessage");
     }
+
+    // set by handleUnauthorized when a ban ended the session mid-use
+    const errorMessage = window.sessionStorage.getItem("authErrorMessage");
+
+    if (errorMessage) {
+      setSubmitError(errorMessage);
+      window.sessionStorage.removeItem("authErrorMessage");
+    }
   }, []);
 
   const onSubmit = async (data) => {

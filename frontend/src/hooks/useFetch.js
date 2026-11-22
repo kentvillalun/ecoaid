@@ -29,7 +29,7 @@ export const useFetch = ({ url, refetchCount }) => {
                 if (!response.ok) {
                     setError("There is an error fetching data")
                     setIsError(true)
-                    if (response.status === 401) handleUnauthorized()
+                    if (response.status === 401) handleUnauthorized(result)
                     return;
                 }
 

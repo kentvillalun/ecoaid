@@ -1,5 +1,10 @@
 import jwt from "jsonwebtoken";
 import { prisma } from "../config/db.js";
+import {
+  ACCOUNT_DEACTIVATED_CODE,
+  RESIDENT_DEACTIVATED_MESSAGE,
+  STAFF_DEACTIVATED_MESSAGE,
+} from "../utils/accountBan.js";
 
 // The token can outlive the account: make sure the user still exists and is active.
 // Sends the 401 itself and returns null when the session must be rejected.
@@ -9,9 +14,21 @@ const loadActiveUser = async (id, cookieName, res) => {
     select: { id: true, role: true, barangayId: true, isActive: true },
   });
 
-  if (!user || !user.isActive) {
+  if (!user) {
     res.clearCookie(cookieName);
-    res.status(401).json({ error: "Account not found", code: "ACCOUNT_NOT_FOUND" });
+    res
+      .status(401)
+      .json({ error: "Account not found", code: "ACCOUNT_NOT_FOUND" });
+    return null;
+  } else if (!user.isActive) {
+    res.clearCookie(cookieName);
+    res.status(401).json({
+      error:
+        user.role !== "RESIDENT"
+          ? STAFF_DEACTIVATED_MESSAGE
+          : RESIDENT_DEACTIVATED_MESSAGE,
+      code: ACCOUNT_DEACTIVATED_CODE,
+    });
     return null;
   }
 
@@ -145,4 +162,9 @@ const authenticateSuperAdmin = async (req, res, next) => {
   }
 };
 
-export { authenticateResident, requireRoles, authenticateBarangay, authenticateSuperAdmin };
+export {
+  authenticateResident,
+  requireRoles,
+  authenticateBarangay,
+  authenticateSuperAdmin,
+};

@@ -18,6 +18,7 @@ import {
   ArrowUpRightIcon,
   CheckBadgeIcon,
   ExclamationCircleIcon,
+  NoSymbolIcon,
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { useFetch } from "@/hooks/useFetch";
@@ -38,11 +39,22 @@ const inter = Inter({
 const STATUS_COLORS = {
   VERIFIED: "bg-green-50 text-green-700",
   UNVERIFIED: "bg-yellow-50 text-yellow-700",
+  BANNED: "bg-red-50 text-red-700",
+  BLOCKED: "bg-gray-100 text-gray-700"
 };
 
 const STATUS_LABELS = {
   VERIFIED: "Verified",
   UNVERIFIED: "Unverified",
+  BANNED: "Banned",
+  BLOCKED: "Blocked"
+};
+
+// One status per resident. Deactivated accounts win over verification:
+// BANNED = was verified, BLOCKED = never got verified.
+const getResidentStatus = (resident) => {
+  if (!resident.isActive) return resident.isVerified ? "BANNED" : "BLOCKED";
+  return resident.isVerified ? "VERIFIED" : "UNVERIFIED";
 };
 
 const TABLE_HEADERS = [
@@ -110,11 +122,13 @@ export default function ResidentsPage() {
 
   const totalCount = data?.residents?.length;
   const verifiedCount = data?.residents?.filter(
-    (r) => r.isVerified === true,
+    (r) => getResidentStatus(r) === "VERIFIED",
   ).length;
   const unverifiedCount = data?.residents?.filter(
-    (r) => r.isVerified === false,
+    (r) => getResidentStatus(r) === "UNVERIFIED",
   ).length;
+  // banned + blocked, so verified + unverified + deactivated = total
+  const deactivatedCount = data?.residents?.filter((r) => !r.isActive).length;
 
   return (
     <Page className="bg-bg!">
@@ -127,7 +141,7 @@ export default function ResidentsPage() {
         />
 
         {/* Summary Cards */}
-        <section className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+        <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <Card className="shadow-none! new-border flex flex-col items-start gap-3">
             <p className="text-xs font-medium text-text-secondary">
               Total Residents
@@ -189,7 +203,7 @@ export default function ResidentsPage() {
             </div>
           </Card>
 
-          <Card className="shadow-none! new-border flex flex-col items-start col-span-2 lg:col-span-1 gap-3">
+          <Card className="shadow-none! new-border flex flex-col items-start gap-3">
             <p className="text-xs font-medium text-text-secondary">
               Unverified
             </p>
@@ -213,6 +227,31 @@ export default function ResidentsPage() {
                 <p className="text-accent font-medium">
                   No completed transactions yet
                 </p>
+              </div>
+            </div>
+          </Card>
+          <Card className="shadow-none! new-border flex flex-col items-start gap-3">
+            <p className="text-xs font-medium text-text-secondary">
+              Deactivated
+            </p>
+
+            <div className="flex flex-col gap-1 items-start">
+              {isLoading ? (
+                <p className="md:text-2xl font-bold text-text-primary text-base">
+                  0
+                </p>
+              ) : isError ? (
+                <p className="font-bold text-text-primary text-sm">
+                  Data not available
+                </p>
+              ) : (
+                <p className="md:text-2xl font-bold text-text-primary text-base">
+                  {deactivatedCount ?? 0}
+                </p>
+              )}
+              <div className="flex flex-row items-center w-auto bg-accent/10 px-3 py-1 rounded-xl text-xs gap-1">
+                <NoSymbolIcon className="w-3 stroke-accent" />
+                <p className="text-accent font-medium">Banned or blocked</p>
               </div>
             </div>
           </Card>
@@ -303,12 +342,12 @@ export default function ResidentsPage() {
                           <Badge
                             label={
                               STATUS_LABELS[
-                                resident.isVerified ? "VERIFIED" : "UNVERIFIED"
+                                getResidentStatus(resident)
                               ]
                             }
                             color={
                               STATUS_COLORS[
-                                resident.isVerified ? "VERIFIED" : "UNVERIFIED"
+                                getResidentStatus(resident)
                               ]
                             }
                           />
@@ -318,7 +357,7 @@ export default function ResidentsPage() {
                         </td>
                         <td className="p-4">
                           <div className="flex flex-row items-center gap-3">
-                            {!resident.isVerified && (
+                            {!resident.isVerified && resident.isActive && (
                               <button
                                 className="text-green-600 hover:underline disabled:opacity-50"
                                 disabled={verifyingId === resident.id}
@@ -386,12 +425,12 @@ export default function ResidentsPage() {
                     <Badge
                       label={
                         STATUS_LABELS[
-                          resident.isVerified ? "VERIFIED" : "UNVERIFIED"
+                          getResidentStatus(resident)
                         ]
                       }
                       color={
                         STATUS_COLORS[
-                          resident.isVerified ? "VERIFIED" : "UNVERIFIED"
+                          getResidentStatus(resident)
                         ]
                       }
                     />
@@ -411,7 +450,7 @@ export default function ResidentsPage() {
                       {formatDate(resident.createdAt)}
                     </p>
                     <div className="flex flex-row items-center gap-2">
-                      {!resident.isVerified && (
+                      {!resident.isVerified && resident.isActive && (
                         <button
                           className="text-xs text-green-600 font-medium new-border px-3 py-1.5 rounded-xl disabled:opacity-50"
                           disabled={verifyingId === resident.id}

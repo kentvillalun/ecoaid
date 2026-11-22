@@ -6,6 +6,7 @@ import { prisma } from "../config/db.js";
 import { sendOtp } from "../utils/sms.js";
 import jwt from "jsonwebtoken";
 import { generateToken } from "../utils/generateToken.js";
+import { ACCOUNT_DEACTIVATED_CODE, RESIDENT_DEACTIVATED_MESSAGE } from "../utils/accountBan.js";
 
 const UUID_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -399,7 +400,7 @@ const login = async (req, res) => {
     }
 
     if (!user.isActive) {
-      return res.status(403).json({ error: "This account is inactive" });
+      return res.status(403).json({ error: RESIDENT_DEACTIVATED_MESSAGE, code: ACCOUNT_DEACTIVATED_CODE });
     }
 
     if (!process.env.JWT_SECRET) {

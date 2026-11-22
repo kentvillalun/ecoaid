@@ -35,7 +35,7 @@ export const useUpdate = () => {
                 setIsError(true)
                 setError("There is a problem fetching data")
                 setIsLoading(false)
-                if (response.status === 401) handleUnauthorized()
+                if (response.status === 401) handleUnauthorized(result)
                 return false
             }
             

@@ -176,6 +176,12 @@ const getResidents = async (req, res) => {
         sitioId: true,
         isVerified: true,
         createdAt: true,
+        isActive: true,
+        deactivatedAt: true,
+        deactivatedById: true,
+        deactivatedByName: true,
+        deactivatedByRole: true,
+        reactivatedAt: true,
       },
     });
 
