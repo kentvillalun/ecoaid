@@ -1,4 +1,5 @@
 import { prisma } from "../config/db.js";
+import { getMismatchStats } from "../utils/photoMismatch.js";
 
 const getResidentProfile = async (req, res) => {
   try {
@@ -185,9 +186,16 @@ const getResidents = async (req, res) => {
       },
     });
 
-    return res
-      .status(200)
-      .json({ message: "Fetching residents successful", residents });
+    const stats = await getMismatchStats(prisma, barangayId, residents);
+    const residentsWithMismatch = residents.map((resident) => ({
+      ...resident,
+      ...stats.get(resident.id),
+    }));
+
+    return res.status(200).json({
+      message: "Fetching residents successful",
+      residents: residentsWithMismatch,
+    });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }

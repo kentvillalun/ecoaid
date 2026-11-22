@@ -1,6 +1,7 @@
 import { prisma } from "../config/db.js";
 import { convertToKg } from "../utils/covertToKg.js";
 import { findUnitMismatch } from "../utils/unitMismatch.js";
+import { getMismatchAlert } from "../utils/photoMismatch.js";
 
 const pickupRequest = async (req, res) => {
   try {
@@ -98,6 +99,12 @@ const listRequests = async (req, res) => {
       const requests = await tx.pickupRequests.findMany({
         where: {
           barangayId,
+          // a banned resident's open requests are not collected, so hide them;
+          // their collected and rejected history stays for the records
+          NOT: {
+            status: { in: ["REQUESTED", "APPROVED", "IN_PROGRESS"] },
+            user: { isActive: false },
+          },
         },
         orderBy: {
           createdAt: "asc",
@@ -154,8 +161,17 @@ const listRequests = async (req, res) => {
 const updateStatus = async (req, res) => {
   try {
     const { id } = req.params;
-    const { status, rejectionReason, items, isAssorted } = req.body ?? {};
+    const { status, rejectionReason, items, isAssorted, photoMismatch } =
+      req.body ?? {};
     const { barangayId } = req.user;
+
+    // the collector's photo-mismatch flag is optional (a normal request omits
+    // it), but when it is sent it must be a real boolean
+    if (photoMismatch !== undefined && typeof photoMismatch !== "boolean") {
+      return res
+        .status(400)
+        .json({ error: "photoMismatch must be true or false" });
+    }
 
     if (status === "APPROVED") {
       const request = await prisma.pickupRequests.update({
@@ -282,6 +298,7 @@ const updateStatus = async (req, res) => {
             status: "COLLECTED",
             collectedAt: new Date(),
             isAssorted: finalIsAssorted,
+            photoMismatch: photoMismatch === true,
           },
         });
 
@@ -301,7 +318,15 @@ const updateStatus = async (req, res) => {
         });
       });
 
-      return res.status(200).json({ message: "Request Collected " });
+      // only when a mismatch was reported: tells the collector if this one
+      // brought the resident to the limit. The request is already saved, so a
+      // failure here must not turn into an error (.catch gives null instead)
+      const mismatch =
+        photoMismatch === true
+          ? await getMismatchAlert(prisma, barangayId, userId).catch(() => null)
+          : null;
+
+      return res.status(200).json({ message: "Request Collected ", mismatch });
     }
 
     if (status === "REJECTED") {
@@ -320,6 +345,9 @@ const updateStatus = async (req, res) => {
           status: "REJECTED",
           rejectedAt: new Date(),
           rejectionReason: reason,
+          // a collector who finds nothing to collect can still report that
+          // the photo did not match
+          photoMismatch: photoMismatch === true,
         },
       });
 
@@ -331,7 +359,14 @@ const updateStatus = async (req, res) => {
         },
       });
 
-      return res.status(200).json({ message: "Request Rejected" });
+      const mismatch =
+        photoMismatch === true
+          ? await getMismatchAlert(prisma, barangayId, request.userId).catch(
+              () => null,
+            )
+          : null;
+
+      return res.status(200).json({ message: "Request Rejected", mismatch });
     }
 
     return res.status(400).json({ error: "Invalid request" });
@@ -386,6 +421,7 @@ const getRequest = async (req, res) => {
         status: true,
         rejectionReason: true,
         isAssorted: true,
+        photoMismatch: true,
         collectionItems: {
           select: {
             material: {
@@ -552,7 +588,40 @@ const cancelRequest = async (req, res) => {
   }
 };
 
+// Staff can correct the photo-mismatch flag after the request is closed.
+// There is no history of who changed it (shortcut: add an audit log if needed).
+const updatePhotoMismatch = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { photoMismatch } = req.body ?? {};
+    const { barangayId } = req.user;
+
+    if (typeof photoMismatch !== "boolean") {
+      return res
+        .status(400)
+        .json({ error: "photoMismatch must be true or false" });
+    }
+
+    // only collected or rejected requests count toward a resident's mismatches
+    const result = await prisma.pickupRequests.updateMany({
+      where: { id, barangayId, status: { in: ["COLLECTED", "REJECTED"] } },
+      data: { photoMismatch },
+    });
+
+    if (result.count === 0) {
+      return res
+        .status(400)
+        .json({ error: "Only collected or rejected requests can be changed" });
+    }
+
+    return res.status(200).json({ message: "Photo mismatch updated" });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 export {
+  updatePhotoMismatch,
   pickupRequest,
   listRequests,
   updateStatus,

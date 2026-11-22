@@ -1,6 +1,6 @@
 import express from "express"
 import { authenticateResident, authenticateBarangay, requireRoles } from "../middlewares/authMiddleware.js"
-import { listRequests, pickupRequest, updateStatus, getRequest, getMyRequest, getMyRequestsById, cancelRequest } from "../controllers/pickup-request.controller.js"
+import { listRequests, pickupRequest, updateStatus, updatePhotoMismatch, getRequest, getMyRequest, getMyRequestsById, cancelRequest } from "../controllers/pickup-request.controller.js"
 import { classifyRecyclable } from "../controllers/image-recognition.controller.js"
 import rateLimit from "express-rate-limit"
 
@@ -17,6 +17,7 @@ router.post("/", authenticateResident, requireRoles(["RESIDENT"]), pickupRequest
 router.get("/collection-requests", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY", "COLLECTOR"]), listRequests)
 router.get("/collection-requests/:id", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY", "COLLECTOR"]), getRequest)
 router.patch("/collection-requests/:id", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY", "COLLECTOR"]), updateStatus)
+router.patch("/collection-requests/:id/mismatch", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY", "COLLECTOR"]), updatePhotoMismatch)
 router.get("/my-requests", authenticateResident, getMyRequest)
 router.get("/my-requests/:id", authenticateResident, getMyRequestsById)
 router.patch("/:id/cancel", authenticateResident, requireRoles(["RESIDENT"]), cancelRequest)

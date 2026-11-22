@@ -6,7 +6,11 @@ import { prisma } from "../config/db.js";
 import { sendOtp } from "../utils/sms.js";
 import jwt from "jsonwebtoken";
 import { generateToken } from "../utils/generateToken.js";
-import { ACCOUNT_DEACTIVATED_CODE, RESIDENT_DEACTIVATED_MESSAGE } from "../utils/accountBan.js";
+import {
+  ACCOUNT_DEACTIVATED_CODE,
+  RESIDENT_DEACTIVATED_MESSAGE,
+  STAFF_DEACTIVATED_MESSAGE,
+} from "../utils/accountBan.js";
 
 const UUID_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -456,7 +460,7 @@ const forgotPassword = async (req, res) => {
     // Only registered users can reset their password
     const user = await prisma.user.findUnique({
       where: { phoneNumber },
-      select: { id: true, isActive: true },
+      select: { id: true, isActive: true, role: true },
     });
 
     if (!user) {
@@ -469,8 +473,15 @@ const forgotPassword = async (req, res) => {
       });
     }
 
+    // a deactivated account gets the ban message and no SMS is sent
     if (!user.isActive) {
-      return res.status(403).json({ error: "This account is inactive" });
+      return res.status(403).json({
+        error:
+          user.role === "RESIDENT"
+            ? RESIDENT_DEACTIVATED_MESSAGE
+            : STAFF_DEACTIVATED_MESSAGE,
+        code: ACCOUNT_DEACTIVATED_CODE,
+      });
     }
 
     // Clear any existing OTPs for this number before sending a new one
