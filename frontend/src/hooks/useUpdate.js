@@ -11,17 +11,20 @@ export const useUpdate = () => {
     // the server's own message for a rejected request, readable right after
     // `await updateStatus(...)` returns
     const errorMessageRef = useRef(null)
+    // the last successful response body, readable right after `await updateStatus(...)`
+    const resultRef = useRef(null)
 
-    const updateStatus = async ({id, status, rejectionReason, items, isAssorted}) => {
+    const updateStatus = async ({id, status, rejectionReason, items, isAssorted, photoMismatch}) => {
         try {
             errorMessageRef.current = null
+            resultRef.current = null
             setIsLoading(true)
             const response = await fetch(`/api/pickup-requests/collection-requests/${id}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({status, rejectionReason, items, isAssorted}),
+                body: JSON.stringify({status, rejectionReason, items, isAssorted, photoMismatch}),
                 credentials: "include"
             })
 
@@ -41,6 +44,7 @@ export const useUpdate = () => {
             
             setIsLoading(false)
             setData(result)
+            resultRef.current = result
             return true
         } catch (error) {
             setIsError(true)
@@ -50,5 +54,5 @@ export const useUpdate = () => {
         }
     }
 
-    return { data, isLoading, error, isError, updateStatus, errorMessageRef}
+    return { data, isLoading, error, isError, updateStatus, errorMessageRef, resultRef}
 }

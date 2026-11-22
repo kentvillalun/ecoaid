@@ -19,6 +19,7 @@ import {
   CheckBadgeIcon,
   ExclamationCircleIcon,
   NoSymbolIcon,
+  ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { useFetch } from "@/hooks/useFetch";
@@ -129,6 +130,8 @@ export default function ResidentsPage() {
   ).length;
   // banned + blocked, so verified + unverified + deactivated = total
   const deactivatedCount = data?.residents?.filter((r) => !r.isActive).length;
+  // residents who reached the photo-mismatch limit, computed by the backend
+  const flaggedResidents = data?.residents?.filter((r) => r.isFlagged) ?? [];
 
   return (
     <Page className="bg-bg!">
@@ -256,6 +259,50 @@ export default function ResidentsPage() {
             </div>
           </Card>
         </section>
+
+        {/* Residents who reached the mismatch limit: staff review, then decide */}
+        {flaggedResidents.length > 0 && (
+          <Card className="shadow-none! new-border flex flex-col items-start gap-3">
+            <div className="flex flex-row items-center gap-2">
+              <ExclamationTriangleIcon className="w-5 stroke-accent" />
+              <p className="text-sm font-semibold text-text-primary">
+                Needs review ({flaggedResidents.length})
+              </p>
+            </div>
+            <p className="text-xs text-text-secondary">
+              These residents reached the photo mismatch limit. Open a resident
+              to deactivate the account if needed.
+            </p>
+            <div className="flex flex-col w-full divide-y divide-gray-200">
+              {flaggedResidents.map((resident) => (
+                <div
+                  key={resident.id}
+                  className="flex flex-row items-center justify-between gap-3 py-2"
+                >
+                  <div className="flex flex-col">
+                    <p className="text-sm font-medium text-text-primary">
+                      {formatFullName(resident)}
+                    </p>
+                    <p className="text-xs text-text-secondary">
+                      {resident.mismatchCount} photo{" "}
+                      {resident.mismatchCount === 1 ? "mismatch" : "mismatches"}
+                      {resident.reactivatedAt && " since the ban was lifted"}
+                    </p>
+                  </div>
+                  <button
+                    className="text-xs text-accent font-medium new-border px-3 py-1.5 rounded-xl"
+                    onClick={() => {
+                      setIsEditModalOpen(true);
+                      setCurrentResidentData(resident);
+                    }}
+                  >
+                    Review
+                  </button>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
 
         {/* <SearchInput /> */}
 

@@ -1,10 +1,16 @@
 import { Modal } from "@/components/ui/Modal";
 import { useState } from "react";
 import { createPortal } from "react-dom";
-import { ScaleIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  ScaleIcon,
+  XMarkIcon,
+  ExclamationTriangleIcon,
+} from "@heroicons/react/24/outline";
 import { useUpdate } from "@/hooks/useUpdate";
 import { toast } from "sonner";
 import { useFetch } from "@/hooks/useFetch";
+import { useMutation } from "@/hooks/useMutation";
+import { formatFullName } from "@/lib/formatFullName";
 import { handleUnauthorized } from "@/lib/handleUnauthorized";
 
 const emptyRow = () => ({
@@ -20,6 +26,31 @@ const emptyRowErrors = () => ({
   actualValue: null,
   actualUnit: null,
 });
+
+// "Photo does not match" switch, shared by Complete and Reject: the collector
+// only sees the mismatch in person, so both outcomes can report it
+const PhotoMismatchSwitch = ({ checked, onChange }) => (
+  <div className="mx-6 mb-6 border-t border-gray-200 pt-4 flex flex-row items-center justify-between gap-4">
+    <div className="flex flex-col gap-1">
+      <p className="text-sm font-medium text-gray-700">Photo does not match</p>
+      <p className="text-xs text-text-secondary">
+        Turn on if what you found is different from the resident&apos;s photo.
+        Repeated mismatches can lead to the account being banned.
+      </p>
+    </div>
+    <button
+      className={`flex items-start shrink-0 ${
+        checked ? "justify-end bg-red-500/70" : "justify-start bg-[#EFEFEF]"
+      } min-w-12 p-1 rounded-full shadow-inner duration-200 transition-all ease-out`}
+      role="switch"
+      type="button"
+      aria-checked={checked}
+      onClick={() => onChange(!checked)}
+    >
+      <span className="h-5 w-5 shadow rounded-full bg-white"></span>
+    </button>
+  </div>
+);
 
 export const InProgressActions = ({
   id,
@@ -38,8 +69,93 @@ export const InProgressActions = ({
   const [actualValue, setActualValue] = useState("");
   // starts from the unit the barangay set for the requested material
   const [actualUnit, setActualUnit] = useState(material?.defaultUnit ?? "");
-  const { updateStatus } = useUpdate();
+  const { updateStatus, errorMessageRef, resultRef } = useUpdate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // the collector's call: the photo did not match what was really collected
+  const [photoMismatch, setPhotoMismatch] = useState(false);
+
+  // Ban prompt: shown after a reported mismatch brings the resident to the
+  // limit. onSuccess is held back until it closes, because it usually moves
+  // the page away and would unmount the prompt.
+  const [banPrompt, setBanPrompt] = useState(null);
+  const {
+    makeRequest: banRequest,
+    isLoading: isBanning,
+    errorMessageRef: banErrorRef,
+  } = useMutation();
+
+  const finishAfterAction = () => {
+    const mismatch = resultRef.current?.mismatch;
+    if (mismatch?.isFlagged) {
+      setBanPrompt(mismatch);
+      return;
+    }
+    onSuccess();
+  };
+
+  const closeBanPrompt = () => {
+    setBanPrompt(null);
+    onSuccess();
+  };
+
+  const handleBan = async () => {
+    if (isBanning) return;
+
+    const success = await banRequest({
+      method: "PATCH",
+      url: `/api/resident/deactivate/${banPrompt.resident.id}`,
+    });
+
+    if (success) {
+      toast.success("Resident account deactivated");
+      closeBanPrompt();
+    } else {
+      toast.error(banErrorRef.current ?? "Could not deactivate the account");
+    }
+  };
+
+  // Reject: the collector found nothing to collect. Its own modal, its own
+  // state, so it never mixes with the weight form
+  const [isRejectOpen, setIsRejectOpen] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState("");
+  const [rejectionReasonError, setRejectionReasonError] = useState(null);
+  const [rejectMismatch, setRejectMismatch] = useState(false);
+
+  const resetRejectForm = () => {
+    setRejectionReason("");
+    setRejectionReasonError(null);
+    setRejectMismatch(false);
+  };
+
+  // one request saves the reason and the mismatch flag together
+  const handleReject = async () => {
+    if (isSubmitting) return;
+
+    if (!rejectionReason.trim()) {
+      setRejectionReasonError("Rejection reason is required");
+      return;
+    }
+
+    setIsSubmitting(true);
+    toast.loading("Rejecting request...");
+    const success = await updateStatus({
+      id,
+      status: "REJECTED",
+      rejectionReason: rejectionReason.trim(),
+      photoMismatch: rejectMismatch,
+    });
+    setIsSubmitting(false);
+    toast.dismiss();
+
+    if (success) {
+      toast.success("Request rejected");
+      setIsRejectOpen(false);
+      resetRejectForm();
+      finishAfterAction();
+    } else {
+      toast.error(errorMessageRef.current ?? "Something went wrong");
+    }
+  };
   const [materialOptions, setMaterialOptions] = useState([[], []]);
 
   const [items, setItems] = useState([emptyRow(), emptyRow()]);
@@ -126,6 +242,7 @@ export const InProgressActions = ({
     setMaterialOptions([[], []]);
     setItemErrors([emptyRowErrors(), emptyRowErrors()]);
     setSingleErrors(emptyRowErrors());
+    setPhotoMismatch(false);
   };
 
   // starts the form from the material the resident requested (still editable).
@@ -182,6 +299,7 @@ export const InProgressActions = ({
         actualValue: Number(item.actualValue),
       })),
       isAssorted: true,
+      photoMismatch,
     });
     setIsSubmitting(false);
     toast.dismiss();
@@ -190,7 +308,7 @@ export const InProgressActions = ({
       toast.success("Record finalized! Request collected!");
       setIsOpen(false);
       resetForm();
-      onSuccess();
+      finishAfterAction();
     } else {
       toast.error("Something went wrong");
     }
@@ -220,6 +338,7 @@ export const InProgressActions = ({
       status: "COLLECTED",
       items: [{ materialId, actualValue: Number(actualValue), actualUnit }],
       isAssorted: false,
+      photoMismatch,
     });
     setIsSubmitting(false);
     toast.dismiss();
@@ -228,7 +347,7 @@ export const InProgressActions = ({
       toast.success("Record finalized! Request collected!");
       setIsOpen(false);
       resetForm();
-      onSuccess();
+      finishAfterAction();
     } else {
       toast.error("Something went wrong");
     }
@@ -276,8 +395,80 @@ export const InProgressActions = ({
 
   return (
     <div
-      className={` ${variant === "detail" ? "grid grid-cols-1 w-full" : "flex items-center gap-3 text-sm"}`}
+      className={` ${variant === "detail" ? "grid grid-cols-2 gap-3 w-full" : "flex items-center gap-3 text-sm"}`}
     >
+      {banPrompt &&
+        createPortal(
+          <Modal
+            isOpen={true}
+            title={"Mismatch limit reached"}
+            subtitle={formatFullName(banPrompt.resident)}
+            icon={<ExclamationTriangleIcon className="w-6 stroke-accent" />}
+            cancelLabel={"Not now"}
+            confirmLabel={isBanning ? "Please wait..." : "Deactivate account"}
+            confirmClassName={"gradient-button-red duration-300 ease-in-out transition-all"}
+            onClose={() => !isBanning && closeBanPrompt()}
+            onConfirm={handleBan}
+          >
+            <div className="p-6 text-sm text-gray-600 flex flex-col gap-2">
+              <p>
+                This resident now has {banPrompt.mismatchCount} photo{" "}
+                {banPrompt.mismatchCount === 1 ? "mismatch" : "mismatches"}{" "}
+                (limit {banPrompt.mismatchLimit}).
+              </p>
+              <p>
+                Do you want to deactivate their account now? If you choose Not
+                now, they stay on the Residents page under Needs review, where
+                the Captain or Secretary can decide.
+              </p>
+            </div>
+          </Modal>,
+          document.body,
+        )}
+
+      {isRejectOpen &&
+        createPortal(
+          <Modal
+            isOpen={isRejectOpen}
+            title={"Reject Request"}
+            subtitle={"Nothing to collect? State the reason"}
+            status={"IN_PROGRESS"}
+            icon={<ExclamationTriangleIcon className="w-6 stroke-accent" />}
+            confirmLabel={"Reject"}
+            confirmClassName={"gradient-button-red duration-300 ease-in-out transition-all"}
+            onClose={() => {
+              setIsRejectOpen(false);
+              resetRejectForm();
+            }}
+            onConfirm={handleReject}
+            isPill={true}
+          >
+            <div className="flex flex-col gap-1 p-6">
+              <label className="label">
+                Rejection Reason <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                className="input mb-0 max-h-none"
+                rows={4}
+                placeholder="Input the reason here"
+                value={rejectionReason}
+                onChange={(event) => {
+                  setRejectionReason(event.target.value);
+                  setRejectionReasonError(null);
+                }}
+              />
+              {rejectionReasonError && (
+                <p className="text-xs text-red-400">{rejectionReasonError}</p>
+              )}
+            </div>
+            <PhotoMismatchSwitch
+              checked={rejectMismatch}
+              onChange={setRejectMismatch}
+            />
+          </Modal>,
+          document.body,
+        )}
+
       {isOpen &&
         createPortal(
           <Modal
@@ -531,10 +722,21 @@ export const InProgressActions = ({
                 )}
               </div>
             )}
+
+            <PhotoMismatchSwitch
+              checked={photoMismatch}
+              onChange={setPhotoMismatch}
+            />
           </Modal>,
           document.body,
         )}
 
+      <button
+        className={` ${variant === "detail" ? "py-2.5 text-white rounded-xl hover:cursor-pointer gradient-button-red transition-all duration-200 ease-in-out" : "text-red-500 hover:underline"}`}
+        onClick={() => setIsRejectOpen((prev) => !prev)}
+      >
+        Reject
+      </button>
       <button
         className={` ${variant === "detail" ? "py-2.5 text-white rounded-xl hover:cursor-pointer gradient-button transition-all duration-200 ease-in-out" : "text-green-600 hover:underline"}`}
         onClick={() => {

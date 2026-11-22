@@ -11,6 +11,8 @@ import { LabelValue } from "@/components/ui/LabelValue";
 import { formatDate } from "@/lib/formatDate";
 import { useParams } from "next/navigation";
 import { useFetch } from "@/hooks/useFetch";
+import { useMutation } from "@/hooks/useMutation";
+import { toast } from "sonner";
 import { PendingActions } from "@/components/requests/actions/PendingActions";
 import { ApprovedActions } from "@/components/requests/actions/ApprovedActions";
 import { InProgressActions } from "@/components/requests/actions/InProgressActions";
@@ -29,6 +31,25 @@ export default function RequestDetails() {
 
   const handleRefetchCount = () => setRefetchCount((prev) => prev + 1);
 
+  // staff can correct the photo-mismatch flag once the request is closed
+  const { makeRequest, isLoading: isSavingMismatch, errorMessageRef } = useMutation();
+  // set after a save, so the switch updates without reloading the whole page
+  const [savedMismatch, setSavedMismatch] = useState(null);
+  const handleMismatchToggle = async (next) => {
+    const success = await makeRequest({
+      method: "PATCH",
+      url: `${url}/mismatch`,
+      body: { photoMismatch: next },
+    });
+
+    if (success) {
+      toast.success(next ? "Marked as photo mismatch" : "Mismatch removed");
+      setSavedMismatch(next);
+    } else {
+      toast.error(errorMessageRef.current ?? "Something went wrong");
+    }
+  };
+
   const [categoriesRefetchCount, setCategotiesRefetchCount] = useState(0);
   const { data: categoriesData } = useFetch({
     url: `/api/material/categories/barangay`,
@@ -38,6 +59,7 @@ export default function RequestDetails() {
   const router = useRouter();
   const req = data?.request;
   const status = req?.status;
+  const photoMismatch = savedMismatch ?? req?.photoMismatch === true;
 
   // Build timeline events based on status
   const timelineEvents = [
@@ -236,6 +258,35 @@ export default function RequestDetails() {
                 })}
               </div>
             </Card>
+
+            {/* Photo mismatch: only for closed requests that were visited */}
+            {(status === "COLLECTED" || status === "REJECTED") && (
+              <Card className="flex flex-row items-center justify-between gap-4 shadow-none! new-border">
+                <div className="flex flex-col gap-1">
+                  <p className="text-sm font-medium text-gray-700">
+                    Photo does not match
+                  </p>
+                  <p className="text-xs text-text-secondary">
+                    Counts toward the resident&apos;s mismatches. You can
+                    correct it if it was set by mistake.
+                  </p>
+                </div>
+                <button
+                  className={`flex items-start shrink-0 ${
+                    photoMismatch
+                      ? "justify-end bg-red-500/70"
+                      : "justify-start bg-[#EFEFEF]"
+                  } min-w-12 p-1 rounded-full shadow-inner duration-200 transition-all ease-out disabled:opacity-50`}
+                  role="switch"
+                  type="button"
+                  aria-checked={photoMismatch}
+                  disabled={isSavingMismatch}
+                  onClick={() => handleMismatchToggle(!photoMismatch)}
+                >
+                  <span className="h-5 w-5 shadow rounded-full bg-white"></span>
+                </button>
+              </Card>
+            )}
 
             {/* Actions */}
             {status === "REQUESTED" ? (
