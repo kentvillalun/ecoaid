@@ -2,7 +2,7 @@
 
 Post-defense panel revisions. This file is the single place to see what is done and what is next, so a new chat can pick up from here without the old conversations.
 
-> Last updated: 2026-11-21. Goal: 100% of the panel's recommendations, ideally before the December Christmas break, because the finished system is needed for the internship paperwork. No exact deadline has been given. Ask the adviser for the revision deadline and what "100%" means for the paperwork.
+> Last updated: 2026-11-22. Goal: 100% of the panel's recommendations, ideally before the December Christmas break, because the finished system is needed for the internship paperwork. No exact deadline has been given. Ask the adviser for the revision deadline and what "100%" means for the paperwork.
 
 **Working style:** the maintainer writes the code. The AI assistant acts as a senior developer (review, risks, explanations, plans) and writes code only for repetitive work when the maintainer asks. Nothing is committed unless asked. One item at a time, planned only as deep as needed right before building it.
 
@@ -12,7 +12,7 @@ Legend: `[x]` done, `[~]` partly done, `[ ]` not started, `[?]` waiting on a dec
 
 ## 1. At a glance
 
-**8 done, 2 partly done, 4 not started, 1 waiting** (15 items).
+**9 done, 1 partly done, 4 not started, 1 waiting** (15 items).
 
 | # | Item | Status | Next step |
 |---|------|--------|-----------|
@@ -20,7 +20,7 @@ Legend: `[x]` done, `[~]` partly done, `[ ]` not started, `[?]` waiting on a dec
 | 2 | Remove sitio from resident registration | `[x]` | None |
 | 3 | Real-time form validation | `[x]` | Done Nov 21: `mode: "onTouched"` on every react-hook-form form, so errors show when a field is left; the other forms keep inline messages on submit |
 | 4 | OTP message masks the number | `[x]` | Include in the push test |
-| 5 | Activate and ban resident accounts | `[~]` | Phase A: deactivate/reactivate UI (section 3) |
+| 5 | Activate and ban resident accounts | `[x]` | Done Nov 22: ban and lift, photo-mismatch flag, Needs review card (section 2). Include in the push test |
 | 6 | Parents as primary users, children as beneficiaries | `[~]` | Brainstorm: framing only or a "released to" name |
 | 7 | SMS for points and announcements (panel: optional) | `[?]` | Waiting on the SMS provider (email in section 8) |
 | 8 | Prices always 2 decimals, right-aligned | `[x]` | Done Nov 21: peso amounts use `formatCurrency` and are right-aligned; pieces show as whole numbers and other units with 2 decimals (`formatQty`). Left as they are: reward counts, input fields, the Excel sheets other than MRF inventory, and the redemption tables that mix points and pesos |
@@ -60,20 +60,20 @@ Items 14 and 15 were raised verbally by the panel (panelist not recorded) and ar
 
 **Item 5, account ban (decided 2026-11-19).**
 
-*Phase A: deactivate and lift*
-- Captain, Secretary and Collector can deactivate a resident (updated 2026-11-21: the collector is included because the record stores who and when, so it is accountable). There is no reason field, because the feature exists for photo mismatches and we do not want staff typing a reason every time.
+*Phase A: deactivate and lift (built 2026-11-22)*
+- Captain, Secretary and Collector can deactivate a resident through `PATCH /resident/deactivate/:id` and lift it through `/reactivate/:id`. The collector gets the option from the ban prompt at Finalize or Reject (see Phase B), because the Residents page is Captain and Secretary only. There is no reason field.
 - No expiry. Staff can lift it at any time (for example after an appeal).
-- A deactivated resident is signed out on their next request (the auth middleware already rejects inactive users). At login they see one fixed message (hard-coded, the same for everyone) saying the account is deactivated, plus "Contact your barangay staff to appeal."
-- Store who and when on the user record. There is no audit table, so a second ban overwrites the first.
-- Show it in the Edit Resident modal (read-only block with a "Lift ban" button) and a "Banned" status on the Residents list. `getResidents` must also return `isActive`. No new detail page.
+- A deactivated resident is signed out on their next request: the auth middleware answers 401 with the code `ACCOUNT_DEACTIVATED` (it has to be 401, because the frontend hooks only sign out on 401). The login page, the forgot-password reply and the capture page show one fixed generic message (the same for every ban reason, including a resident who does not belong to the barangay): "Your account has been deactivated for violating barangay program rules. Contact your barangay staff to appeal." Staff accounts get their own message, "Contact the system administrator". Forgot-password sends no SMS for a deactivated account.
+- Store who, their role and when on the user record (`deactivatedById`, `deactivatedByName`, `deactivatedByRole`, `deactivatedAt`) plus `reactivatedAt`. There is no audit table, so a second ban overwrites the first. Lifting clears the ban fields and sets `reactivatedAt`.
+- Residents list: status "Banned" (deactivated and verified) or "Blocked" (deactivated and never verified, usually someone who does not belong to the barangay), a "Deactivated" summary card, and no Verify button for deactivated residents. The Edit Resident modal has a separate section with its own request (not part of Save Changes): a read-only block (who, role, when, previous reactivation) with "Lift ban", or "Deactivate account" on an active resident. Both ask for confirmation. They are disabled while the form has unsaved changes.
+- A deactivated resident's open requests (requested, approved, in progress) are hidden from the collector list; collected and rejected history stays.
 
-*Phase B: three mismatches flag a resident*
-- A "photo doesn't match" toggle in the Finalize modal, saved with Finalize. A confirmation modal shows only when the toggle is on (reuse the existing `Modal`).
-- Mismatches are counted in total, never reset by good pickups.
-- At 3, a flag card appears on the Residents page for Captain and Secretary. Staff decide; there is no automatic ban. The card also covers the case where a collector cancels the modal by accident.
-- After a ban is lifted, only mismatches after the lift count, and the limit drops to 1 (probation). Old flags are never deleted.
-- Keep the numbers 3 and 1 as constants in one file.
-- Needs a migration, tested on a local database first.
+*Phase B: photo mismatch flags a resident (built 2026-11-22)*
+- A "Photo does not match" switch in the Finalize modal, off by default, saved with Finalize. A collector who finds nothing to collect uses the new Reject button in the same modal (required reason plus the same switch). One request saves everything. There is no extra confirmation and no undo snackbar: the switch is a draft until Confirm.
+- `PickupRequests.photoMismatch` is the only stored value. The count is computed (`getMismatchStats` in `utils/photoMismatch.js`): collected and rejected pickups with the flag, closed after the resident's `reactivatedAt`. Mismatches are never reset by good pickups.
+- Limit 3, and 1 after a ban was lifted (probation). Both are constants in `utils/photoMismatch.js`. Old flags are never deleted.
+- When a mismatch brings the resident to the limit, the Finalize or Reject response says so and the collector sees a "Mismatch limit reached" prompt: "Deactivate account" or "Not now". Staff decide; there is no automatic ban. If the prompt is dismissed, the resident stays on the "Needs review" card at the top of the Residents page (Captain and Secretary). Deactivated residents are never flagged.
+- Staff can correct a flag later: a "Photo does not match" switch on the detail page of a collected or rejected request (`PATCH /pickup-requests/collection-requests/:id/mismatch`). There is no record of who changed it.
 
 **Decided 2026-11-19 (closing the open questions)**
 - **Item 5 storage:** one `photoMismatch` flag on each pickup request plus one nullable `reactivatedAt` on the user. The count is computed, never stored (project rule).
@@ -97,7 +97,7 @@ Items 14 and 15 were raised verbally by the panel (panelist not recorded) and ar
 
 ### Still open
 
-- **Item 5:** can staff clear a mismatch flag after Finalize? (Leaning no, for now. Decide when building Phase B.)
+- **Item 5:** nothing open. Staff can correct a flag from the request detail page. Known limits are in section 7.
 
 ---
 
@@ -110,7 +110,7 @@ Keep these short. Go deeper right before building each one.
 - All other forms and `useState` modals keep simple submit validation. No new machinery.
 
 **5. Activate and ban accounts**
-- Build Phase A first (no migration beyond the ban fields), then Phase B. Design is in section 2.
+- Done Nov 22 (Phase A and B). What was built is in section 2.
 
 **6. Parents and children**
 - Choose between (a) framing only, such as "household account" wording in the UI and docs, or (b) an optional "released to" name on a reward release.
@@ -203,6 +203,7 @@ All of it is committed and on `origin/main` (checked 2026-11-18).
 - A `react-hooks/set-state-in-effect` lint error on the resident personal information page (existed before).
 - No build, browser click-through or end-to-end test has been run on `3e2893e` yet (the push test covers it).
 - **Production:** before the deployed backend runs this code (it now selects `middleName`), check that the production database has the middle name migration applied (`prisma migrate deploy`).
+- **Item 5 limits:** (1) nobody is recorded when a mismatch flag is corrected from the detail page. (2) The reject endpoint has no status guard, so a direct API call can reject a collected request (the pickup-request status guard is already an accepted risk above). (3) The forgot-password reply now tells anyone who types a phone number that the account is banned, which the old generic reply avoided on purpose. (4) Banned residents' open requests are hidden only from the collector request list. The dashboard and reports were not checked for them. (5) The Reject link in the request list rows (the plain-link version) has not been looked at in the browser.
 - **Line endings:** working files are CRLF but the repo stores LF, so `git status` lists about 31 files as modified while `git diff --ignore-space-at-eol` shows nothing. Settle `.gitattributes` or `core.autocrlf` before the next commit.
 
 ---
