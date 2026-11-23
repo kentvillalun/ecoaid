@@ -155,6 +155,9 @@ const getIntakeTransactions = async (req, res) => {
           },
         },
       },
+      orderBy: {
+        createdAt: "desc"
+      }
     });
 
     return res

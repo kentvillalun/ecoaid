@@ -60,6 +60,9 @@ const getRewardItems = async (req, res) => {
           },
         },
       },
+      orderBy: {
+        createdAt: "desc"
+      }
     });
 
     const rewardItems = items.map((r) => {
@@ -301,6 +304,9 @@ const getRewardReleases = async (req, res) => {
         performedByRole: true,
         createdAt: true,
       },
+      orderBy: {
+        createdAt: "desc"
+      }
     });
 
     return res

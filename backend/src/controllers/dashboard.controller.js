@@ -72,6 +72,7 @@ const getRecentTransactions = async (req, res) => {
           select: {
             createdAt: true,
             isAssorted: true,
+            photoUrl: true,
             user: {
               select: {
                 firstName: true,
@@ -94,7 +95,7 @@ const getRecentTransactions = async (req, res) => {
       },
       orderBy: {
         request: {
-          createdAt: "desc",
+          collectedAt: "desc",
         },
       },
     });

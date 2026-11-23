@@ -7,6 +7,8 @@ import { Empty } from "../ui/Empty";
 import { formatDate } from "@/lib/formatDate";
 import { MaterialTag } from "../ui/MaterialTag";
 import { useRouter } from "next/navigation";
+import { HoverPortal } from "../ui/HoverReveal";
+import Image from "next/image";
 
 export const RecentTransactionTable = ({
   data,
@@ -29,7 +31,19 @@ export const RecentTransactionTable = ({
     {
       header: "Materials",
       render: (data) => (
-        <div className="flex  items-center">
+        <HoverPortal
+          content={
+            <Image
+              src={data?.request?.photoUrl}
+              width={200}
+              height={250}
+              alt="Recyclable materials"
+              priority
+              className="rounded-xl"
+            />
+          }
+        >
+          <div className="flex items-center">
             {data?.request?.isAssorted === true ? (
               <MaterialTag
                 materialName={"Assorted"}
@@ -44,6 +58,7 @@ export const RecentTransactionTable = ({
               />
             )}
           </div>
+        </HoverPortal>
       ),
     },
     {
@@ -88,7 +103,10 @@ export const RecentTransactionTable = ({
         <thead className="border-b border-[#E6EFF5]">
           <tr className="">
             {tableConfig.map((col) => (
-              <th className="font-medium p-4 text-start text-gray-500" key={col.header}>
+              <th
+                className="font-medium p-4 text-start text-gray-500"
+                key={col.header}
+              >
                 {col.header}
               </th>
             ))}
@@ -121,7 +139,6 @@ export const RecentTransactionTable = ({
             </tr>
           ) : (
             data?.recentTransactions?.map((t) => {
-           
               return (
                 <tr
                   className="text-start hover:bg-bg transition-all transform"

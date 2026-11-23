@@ -164,6 +164,9 @@ const getJunkshopSales = async (req, res) => {
           },
         },
       },
+      orderBy: {
+        createdAt: "desc"
+      }
     });
 
     const enrichedSales = sales.map((sale) => {

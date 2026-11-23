@@ -154,6 +154,9 @@ const getTransactionLogs = async (req, res) => {
         performedByRole: true,
         createdAt: true,
       },
+      orderBy: {
+        createdAt: "desc"
+      }
     });
 
     const sales = await prisma.junkshopSale.findMany({
@@ -179,6 +182,9 @@ const getTransactionLogs = async (req, res) => {
         performedByRole: true,
         createdAt: true,
       },
+      orderBy: {
+        createdAt: "desc"
+      }
     });
 
     const transactions = [

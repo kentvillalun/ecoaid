@@ -66,7 +66,7 @@ const getAnnouncements = async (req, res) => {
 const deleteAnnouncement = async (req, res) => {
   try {
     const { announcementId } = req.params;
-    const { barangayId } = req.user
+    const { barangayId } = req.user;
 
     const announcement = await prisma.announcement.findUnique({
       where: {
@@ -122,7 +122,7 @@ const getLatestAnnouncements = async (req, res) => {
 
     const latestAnnouncements = await prisma.announcement.findMany({
       where: { barangayId },
-      orderBy: { createdAt: 'desc' }, 
+      orderBy: { createdAt: "desc" },
       take: 2,
       select: {
         id: true,
@@ -130,19 +130,24 @@ const getLatestAnnouncements = async (req, res) => {
         content: true,
         category: true,
         createdAt: true,
-      }
-    })
+      },
+    });
 
-    return res.status(200).json({ message: "Fetching latest announcements successful", latestAnnouncements})
+    return res
+      .status(200)
+      .json({
+        message: "Fetching latest announcements successful",
+        latestAnnouncements,
+      });
   } catch (error) {
-    return res.status(500).json({ error: error.message })
+    return res.status(500).json({ error: error.message });
   }
-}
+};
 
 export {
   createAnnouncement,
   getAnnouncements,
   deleteAnnouncement,
   getResidentAnnouncements,
-  getLatestAnnouncements
+  getLatestAnnouncements,
 };

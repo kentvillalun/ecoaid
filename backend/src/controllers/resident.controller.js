@@ -304,7 +304,7 @@ const deactivateResident = async (req, res) => {
     });
 
     if (!staff) {
-      return res.status(404).json({ error: "Staff not found" })
+      return res.status(404).json({ error: "Staff not found" });
     }
 
     await prisma.user.update({
@@ -331,24 +331,24 @@ const reactivateResident = async (req, res) => {
     const residentId = req.params.id;
     const { barangayId } = req.user;
 
-    const target = await prisma.user.findUnique({ 
+    const target = await prisma.user.findUnique({
       where: {
         id: residentId,
         role: "RESIDENT",
-        barangayId
+        barangayId,
       },
       select: {
         isActive: true,
-        id: true
-      }
-    })
+        id: true,
+      },
+    });
 
     if (!target) {
-      return res.status(404).json({ error: "Resident not found" })
+      return res.status(404).json({ error: "Resident not found" });
     }
 
     if (target.isActive) {
-      return res.status(400).json({ error: "Resident is not deactivated" })
+      return res.status(400).json({ error: "Resident is not deactivated" });
     }
 
     await prisma.user.update({
@@ -362,14 +362,14 @@ const reactivateResident = async (req, res) => {
         deactivatedById: null,
         deactivatedByName: null,
         deactivatedByRole: null,
-      }
-    })
+      },
+    });
 
-    return res.status(200).json({ message: "Resident reactivated" })
+    return res.status(200).json({ message: "Resident reactivated" });
   } catch (error) {
-    return res.status(500).json({ error: error.message })
+    return res.status(500).json({ error: error.message });
   }
-}
+};
 
 export {
   getResidentProfile,
@@ -379,5 +379,5 @@ export {
   getResidents,
   editResident,
   deactivateResident,
-  reactivateResident
+  reactivateResident,
 };

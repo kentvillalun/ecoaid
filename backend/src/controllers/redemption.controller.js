@@ -220,6 +220,9 @@ const getProgram = async (req, res) => {
               },
             },
           },
+          orderBy: {
+            createdAt: "desc"
+          }
         },
       },
     });
@@ -533,6 +536,9 @@ const getTransactions = async (req, res) => {
           },
         },
       },
+      orderBy: {
+        createdAt: "desc"
+      }
     });
 
     return res.status(200).json({

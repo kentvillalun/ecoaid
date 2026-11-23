@@ -41,14 +41,14 @@ const STATUS_COLORS = {
   VERIFIED: "bg-green-50 text-green-700",
   UNVERIFIED: "bg-yellow-50 text-yellow-700",
   BANNED: "bg-red-50 text-red-700",
-  BLOCKED: "bg-gray-100 text-gray-700"
+  BLOCKED: "bg-gray-100 text-gray-700",
 };
 
 const STATUS_LABELS = {
   VERIFIED: "Verified",
   UNVERIFIED: "Unverified",
   BANNED: "Banned",
-  BLOCKED: "Blocked"
+  BLOCKED: "Blocked",
 };
 
 // One status per resident. Deactivated accounts win over verification:
@@ -58,9 +58,9 @@ const getResidentStatus = (resident) => {
   return resident.isVerified ? "VERIFIED" : "UNVERIFIED";
 };
 
-const TABLE_HEADERS = [
+ const TABLE_HEADERS = [
   "Name",
-  "Location",
+  "Sitio",
   "Contact",
   "Status",
   "Registered",
@@ -74,6 +74,8 @@ export default function ResidentsPage() {
     url: "/api/resident/",
     refetchCount,
   });
+
+ 
 
   const [currentResidentData, setCurrentResidentData] = useState([]);
 
@@ -112,13 +114,17 @@ export default function ResidentsPage() {
     ...(sitioData?.sitios ?? []).map((s) => ({
       value: s.id,
       label: s.name,
-      count:
-        data?.residents?.filter((r) => r.sitioId === s.id).length ?? 0,
+      count: data?.residents?.filter((r) => r.sitioId === s.id).length ?? 0,
     })),
+    {
+      value: "NO_SITIO",
+      label: "No sitios",
+      count: data?.residents?.filter((r) => !r.sitioId).length,
+    },
   ];
 
   const filteredResidents = data?.residents?.filter(
-    (r) => sitioFilter === "ALL" || r.sitioId === sitioFilter,
+    (r) => sitioFilter === "ALL" || r.sitioId === sitioFilter || !r.sitioId ,
   );
 
   const totalCount = data?.residents?.length;
@@ -378,25 +384,15 @@ export default function ResidentsPage() {
                           {formatFullName(resident)}
                         </td>
                         <td className="p-4 text-gray-500 text-xs text-nowrap">
-                          {[resident.address, resident.purok]
-                            .filter(Boolean)
-                            .join(", ") || "—"}
+                          {[resident.purok].filter(Boolean).join(", ") || "—"}
                         </td>
                         <td className="p-4 text-gray-500 text-nowrap">
                           {resident.phoneNumber}
                         </td>
                         <td className="p-4">
                           <Badge
-                            label={
-                              STATUS_LABELS[
-                                getResidentStatus(resident)
-                              ]
-                            }
-                            color={
-                              STATUS_COLORS[
-                                getResidentStatus(resident)
-                              ]
-                            }
+                            label={STATUS_LABELS[getResidentStatus(resident)]}
+                            color={STATUS_COLORS[getResidentStatus(resident)]}
                           />
                         </td>
                         <td className="p-4 text-nowrap text-gray-400 text-xs">
@@ -470,16 +466,8 @@ export default function ResidentsPage() {
                       {formatFullName(resident)}
                     </p>
                     <Badge
-                      label={
-                        STATUS_LABELS[
-                          getResidentStatus(resident)
-                        ]
-                      }
-                      color={
-                        STATUS_COLORS[
-                          getResidentStatus(resident)
-                        ]
-                      }
+                      label={STATUS_LABELS[getResidentStatus(resident)]}
+                      color={STATUS_COLORS[getResidentStatus(resident)]}
                     />
                   </div>
                   <div className="flex flex-row items-center gap-2">
