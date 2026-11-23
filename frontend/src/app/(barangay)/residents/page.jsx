@@ -58,7 +58,7 @@ const getResidentStatus = (resident) => {
   return resident.isVerified ? "VERIFIED" : "UNVERIFIED";
 };
 
- const TABLE_HEADERS = [
+const TABLE_HEADERS = [
   "Name",
   "Sitio",
   "Contact",
@@ -74,8 +74,6 @@ export default function ResidentsPage() {
     url: "/api/resident/",
     refetchCount,
   });
-
- 
 
   const [currentResidentData, setCurrentResidentData] = useState([]);
 
@@ -124,7 +122,10 @@ export default function ResidentsPage() {
   ];
 
   const filteredResidents = data?.residents?.filter(
-    (r) => sitioFilter === "ALL" || r.sitioId === sitioFilter || !r.sitioId ,
+    (r) =>
+      sitioFilter === "ALL" ||
+      (sitioFilter === "NO_SITIO" && !r.sitioId) ||
+      r.sitioId === sitioFilter,
   );
 
   const totalCount = data?.residents?.length;
