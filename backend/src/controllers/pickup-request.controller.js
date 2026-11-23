@@ -107,7 +107,7 @@ const listRequests = async (req, res) => {
           },
         },
         orderBy: {
-          createdAt: "asc",
+          createdAt: "desc",
         },
         select: {
           user: {
@@ -146,7 +146,7 @@ const listRequests = async (req, res) => {
           isAssorted: true,
         },
       });
-      
+
       return requests;
     });
     return res.status(200).json({
@@ -217,10 +217,10 @@ const updateStatus = async (req, res) => {
       });
 
       if (!requestData) {
-        return res.status(400).json({ error: "Request not found"})
+        return res.status(400).json({ error: "Request not found" });
       }
 
-      const { userId } = requestData
+      const { userId } = requestData;
 
       // the collector has the final say on what was collected, so the
       // resident's single/assorted choice can be overridden here; without a
@@ -379,7 +379,6 @@ const getRequest = async (req, res) => {
   try {
     const { id } = req.params;
     const { barangayId } = req.user;
-    
 
     const request = await prisma.pickupRequests.findUnique({
       where: { id, barangayId },
