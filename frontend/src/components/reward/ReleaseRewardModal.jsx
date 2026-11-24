@@ -10,6 +10,14 @@ import { toast } from "sonner";
 import { formatCurrency } from "@/lib/formatCurrency";
 import { handleUnauthorized } from "@/lib/handleUnauthorized";
 
+const emptyBeneficiary = { firstName: "", middleName: "", lastName: "" };
+
+const beneficiaryFields = [
+  { name: "firstName", placeholder: "First name" },
+  { name: "middleName", placeholder: "Middle name (NA if none)" },
+  { name: "lastName", placeholder: "Last name" },
+];
+
 export const ReleaseRewardModal = ({
   isOpen,
   onClose,
@@ -21,6 +29,8 @@ export const ReleaseRewardModal = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [selectedResident, setSelectedResident] = useState(null);
+  const [beneficiary, setBeneficiary] = useState(emptyBeneficiary);
+  const [beneficiaryError, setBeneficiaryError] = useState(null);
 
   const [items, setItems] = useState([{ rewardItemId: "", quantity: "" }]);
 
@@ -44,6 +54,11 @@ export const ReleaseRewardModal = ({
   // whether it means points or pesos depends on the program it belongs to
   const isCashMode =
     activePrograms.find((p) => p.id === programId)?.isCashMode ?? false;
+
+  // a program that is not continuous gives one reward per beneficiary,
+  // so staff have to say who the reward is for
+  const isOneTime =
+    activePrograms.find((p) => p.id === programId)?.allowDuplicates === false;
 
   // reward items belong to a single program, so once a program is picked
   // only its own items can be released against it
@@ -83,6 +98,8 @@ export const ReleaseRewardModal = ({
     setSearchResults([]);
     setItemsError(null);
     setItems([{ rewardItemId: "", quantity: "" }]);
+    setBeneficiary(emptyBeneficiary);
+    setBeneficiaryError(null);
   };
 
   const handleSearchChange = (e) => {
@@ -102,6 +119,8 @@ export const ReleaseRewardModal = ({
     setProgramError(null);
     setResidentError(null);
     setItemsError(null);
+    setBeneficiary(emptyBeneficiary);
+    setBeneficiaryError(null);
   };
 
   const removeRow = (index) => {
@@ -137,6 +156,13 @@ export const ReleaseRewardModal = ({
       hasError = true;
     } else {
       setResidentError(null);
+    }
+
+    if (isOneTime && Object.values(beneficiary).some((n) => !n.trim())) {
+      setBeneficiaryError("Enter the beneficiary's first, middle and last name");
+      hasError = true;
+    } else {
+      setBeneficiaryError(null);
     }
 
     // the first row asking for more than what is left in stock
@@ -189,6 +215,7 @@ export const ReleaseRewardModal = ({
       body: {
         residentId: selectedResident.id,
         programId,
+        ...(isOneTime ? beneficiary : {}),
         items: items.map((row) => ({
           rewardItemId: row.rewardItemId,
           quantity: parseFloat(row.quantity),
@@ -328,6 +355,41 @@ export const ReleaseRewardModal = ({
             <p className="text-xs text-red-500 text-start">{residentError}</p>
           )}
         </div>
+
+        {isOneTime && (
+          <div className="flex flex-col gap-1">
+            <label className="label">
+              Beneficiary <span className="text-red-500">*</span>
+            </label>
+            <div className="flex flex-col gap-2">
+              {beneficiaryFields.map((field) => (
+                <div key={field.name} className="input mb-0">
+                  <input
+                    type="text"
+                    className="w-full outline-none"
+                    placeholder={field.placeholder}
+                    value={beneficiary[field.name]}
+                    onChange={(e) => {
+                      setBeneficiary({
+                        ...beneficiary,
+                        [field.name]: e.target.value,
+                      });
+                      setBeneficiaryError(null);
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-text-secondary text-start">
+              This program gives one reward per beneficiary.
+            </p>
+            {beneficiaryError && (
+              <p className="text-xs text-red-500 text-start">
+                {beneficiaryError}
+              </p>
+            )}
+          </div>
+        )}
 
         <div className="flex flex-col gap-1">
           <label className="label">

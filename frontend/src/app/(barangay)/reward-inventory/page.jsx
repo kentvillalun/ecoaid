@@ -12,8 +12,10 @@ import { DropdownFilter } from "@/components/ui/DropdownFilter";
 import { Badge } from "@/components/ui/Badge";
 import { IconContainer } from "@/components/ui/IconContainer";
 import { formatDate } from "@/lib/formatDate";
+import { formatFullName } from "@/lib/formatFullName";
 import { AddRewardItemModal } from "@/components/reward/AddRewardItemModal";
 import { ReleaseRewardModal } from "@/components/reward/ReleaseRewardModal";
+import { DeleteReleaseModal } from "@/components/reward/DeleteReleaseModal";
 import {
   ArrowUpRightIcon,
   ArchiveBoxIcon,
@@ -59,11 +61,17 @@ const HISTORY_HEADERS = [
   "Resident",
   "Released By",
   "Date",
+  "Action",
 ];
+
+// "NA" is saved when there is no middle name, so it is not shown
+const formatBeneficiary = (b) =>
+  formatFullName({ ...b, middleName: b.middleName === "NA" ? "" : b.middleName });
 
 export default function RewardInventoryPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isReleaseModalOpen, setIsReleaseModalOpen] = useState(false);
+  const [releaseToDelete, setReleaseToDelete] = useState(null);
   const [summaryRefetchCount, setSummaryRefetchCount] = useState(0);
   const {
     isLoading: isSummaryLoading,
@@ -499,7 +507,12 @@ export default function RewardInventoryPage() {
                           {entry.quantity}
                         </td>
                         <td className="p-4 text-nowrap">
-                          {entry.residentName}
+                          <p>{entry.residentName}</p>
+                          {entry.beneficiary && (
+                            <p className="text-xs text-gray-400">
+                              For: {formatBeneficiary(entry.beneficiary)}
+                            </p>
+                          )}
                         </td>
                         <td className="p-4 text-nowrap">
                           <p className="font-semibold text-text-primary">
@@ -511,6 +524,15 @@ export default function RewardInventoryPage() {
                         </td>
                         <td className="p-4 text-nowrap text-gray-400 text-xs">
                           {formatDate(entry.createdAt)}
+                        </td>
+                        <td className="p-4 text-nowrap">
+                          <button
+                            type="button"
+                            onClick={() => setReleaseToDelete(entry)}
+                            className="text-sm font-medium text-red-600 hover:underline cursor-pointer"
+                          >
+                            Delete
+                          </button>
                         </td>
                       </tr>
                     ))
@@ -569,9 +591,19 @@ export default function RewardInventoryPage() {
                       x{entry.quantity}
                     </p>
                   </div>
-                  <p className="text-sm text-gray-600">
-                    {entry.residentName}
-                  </p>
+                  <div>
+                    <p className="text-sm text-gray-600">
+                      {entry.residentName}
+                    </p>
+                    {entry.beneficiary && (
+                      <p className="text-sm text-gray-600">
+                        Beneficiary:{" "}
+                        <span className="font-semibold text-text-primary">
+                          {formatBeneficiary(entry.beneficiary)}
+                        </span>
+                      </p>
+                    )}
+                  </div>
                   <div className="flex flex-row items-center justify-between w-full pt-2 border-t border-gray-100">
                     <div>
                       <p className="text-xs font-semibold text-text-primary">
@@ -581,9 +613,18 @@ export default function RewardInventoryPage() {
                         {entry.performedByRole.toLowerCase()}
                       </p>
                     </div>
-                    <p className="text-xs text-gray-400">
-                      {formatDate(entry.createdAt)}
-                    </p>
+                    <div className="flex flex-col items-end gap-2">
+                      <p className="text-xs text-gray-400">
+                        {formatDate(entry.createdAt)}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setReleaseToDelete(entry)}
+                        className="text-xs font-medium text-red-600 border border-red-200 rounded-md px-3 py-1 cursor-pointer"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 </Card>
               ))
@@ -602,6 +643,19 @@ export default function RewardInventoryPage() {
         <ReleaseRewardModal
           isOpen={isReleaseModalOpen}
           onClose={() => setIsReleaseModalOpen(false)}
+          handleReleasesRefetchCount={handleReleaseRefetchCount}
+          handleSummaryRefetchCount={handleSummaryRefetchCount}
+          handleItemsRefetchCount={handleRewardItemsRefetchCount}
+        />
+
+        <DeleteReleaseModal
+          isOpen={!!releaseToDelete}
+          setIsOpen={() => setReleaseToDelete(null)}
+          release={releaseToDelete}
+          beneficiaryName={
+            releaseToDelete?.beneficiary &&
+            formatBeneficiary(releaseToDelete.beneficiary)
+          }
           handleReleasesRefetchCount={handleReleaseRefetchCount}
           handleSummaryRefetchCount={handleSummaryRefetchCount}
           handleItemsRefetchCount={handleRewardItemsRefetchCount}
