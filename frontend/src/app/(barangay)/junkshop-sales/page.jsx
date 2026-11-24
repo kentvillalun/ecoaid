@@ -203,7 +203,7 @@ export default function JunkshopSalesPage() {
       ? "No sales yet. You can press the record sale button above to add sale transaction."
       : `No sales recorded for ${selectedSalesJunkshopName ?? "this junkshop"} yet.`;
 
-  console.log(highestPrices);
+
   return (
     <Page className="bg-bg! ">
       <BarangayTopBar title="Junkshop Sales" />

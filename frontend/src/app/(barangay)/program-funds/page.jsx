@@ -110,7 +110,7 @@ export default function ProgramFundsPage() {
       ? "No income records yet."
       : "No expense records yet.";
 
-  console.log(modules);
+
   return (
     <Page className="bg-bg!">
       <BarangayTopBar title="Program Funds" />
