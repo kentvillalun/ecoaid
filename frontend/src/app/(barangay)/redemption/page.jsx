@@ -1,6 +1,7 @@
 "use client";
 
 import { formatCurrency } from "@/lib/formatCurrency";
+import { formatDate } from "@/lib/formatDate";
 import { Page } from "@/components/layout/Page";
 import { PageContent } from "@/components/layout/PageContent";
 import { BarangayTopBar } from "@/components/navigation/BarangayTopBar";
@@ -122,22 +123,23 @@ export default function RedemptionProgramPage() {
             buttonLabel={"Add Program"}
             onAction={() => setIsProgramModalOpen(true)}
           />
-          <div
-            className={`grid gap-3 ${data?.programs.length === 1 && "grid-cols-1"} ${data?.programs.length === 2 && "md:grid-cols-2"} ${data?.programs.length >= 3 && "md:grid-cols-2 lg:grid-cols-3"}`}
-          >
-            {isLoading ? (
-              <Spinner className="p-7!" />
-            ) : isError ? (
-              <Error handleRefetchCount={handleProgramRefetch} />
-            ) : data?.programs?.length === 0 ? (
-              <Empty
-                text={"No redemption programs yet"}
-                subtext={
-                  "Please register a new redemption program by tapping the Add Program button above."
-                }
-              />
-            ) : (
-              data?.programs.map((p) => (
+
+          {isLoading ? (
+            <Spinner className="p-7!" />
+          ) : isError ? (
+            <Error handleRefetchCount={handleProgramRefetch} />
+          ) : data?.programs?.length === 0 ? (
+            <Empty
+              text={"No redemption programs yet"}
+              subtext={
+                "Please register a new redemption program by tapping the Add Program button above."
+              }
+            />
+          ) : (
+            <div
+              className={`grid gap-3 ${data?.programs.length === 1 && "grid-cols-1"} ${data?.programs.length === 2 && "md:grid-cols-2"} ${data?.programs.length >= 3 && "md:grid-cols-2 lg:grid-cols-3"}`}
+            >
+              {data?.programs.map((p) => (
                 <Card
                   className={`flex shadow-none! new-border flex-col gap-2 p-5! hover:-translate-y-0.5 transition-all duration-200 ease-in-out hover:cursor-pointer ${data?.programs?.length === 1 ? "items-center" : "items-start"}`}
                   key={p.id}
@@ -155,7 +157,7 @@ export default function RedemptionProgramPage() {
                       {p.isActive ? "Active" : "Inactive"}
                     </span>
                   </div>
-                  <div className="flex flex-row gap-6 ">
+                  <div className="grid md:grid-cols-2 gap-y-2 grid-cols-3 ">
                     <LabelValue
                       name="Budget"
                       value={formatCurrency(p.allotedBudget)}
@@ -164,6 +166,16 @@ export default function RedemptionProgramPage() {
                       className="text-nowrap"
                       name="Redemption Mode"
                       value={p.isCashMode ? "Cash" : "Points"}
+                    />
+                    <LabelValue
+                      className="text-nowrap md:col-span-2"
+                      name="Redemption Type"
+                      value={p.allowDuplicates ? "Continuous" : "One-time"}
+                    />
+                    <LabelValue
+                      className="text-nowrap"
+                      name="Created"
+                      value={formatDate(p.createdAt)}
                     />
                   </div>
 
@@ -180,9 +192,9 @@ export default function RedemptionProgramPage() {
                     ))}
                   </div>
                 </Card>
-              ))
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </section>
 
         <section className="flex flex-col gap-3">

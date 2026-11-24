@@ -39,6 +39,7 @@ const schema = yup.object().shape({
   description: yup.string().required("Decription is required"),
   isCashMode: yup.boolean().required(),
   announce: yup.boolean(),
+  allowDuplicates: yup.boolean()
 });
 
 export const AddProgramModal = ({
@@ -98,12 +99,14 @@ export const AddProgramModal = ({
       description: program?.description ?? "",
       isCashMode: program?.isCashMode ?? false,
       announce: false,
+      allowDuplicates: program?.allowDuplicates ?? true,
     },
     mode: "onTouched"
   });
 
   const isCashMode = watch("isCashMode");
   const announce = watch("announce");
+  const allowDuplicates = watch("allowDuplicates");
 
   // a program with transactions can't switch between points and cash: its
   // records are valued in the old mode (the server enforces this too)
@@ -149,6 +152,7 @@ export const AddProgramModal = ({
         description: formData.description,
         isCashMode:
           formData.isCashMode === true || formData.isCashMode === "true",
+        allowDuplicates: formData.allowDuplicates,
         ...(program
           ? { materials }
           : { programMaterial, announce: canAnnounce && !!formData.announce }),
@@ -184,6 +188,7 @@ export const AddProgramModal = ({
       description: program.description,
       allotedBudget: program.allotedBudget,
       isCashMode: program.isCashMode,
+      allowDuplicates: program.allowDuplicates,
     });
   }, [program]);
 
@@ -481,6 +486,35 @@ export const AddProgramModal = ({
             </div>
           </button>
         )}
+
+        <button
+          type="button"
+          role="switch"
+          aria-checked={!!allowDuplicates}
+          onClick={() => setValue("allowDuplicates", !allowDuplicates)}
+          className="flex flex-row items-center justify-between gap-3 rounded-lg border border-border bg-white p-3 w-full text-left hover:cursor-pointer mt-3"
+        >
+          <div className="flex flex-col gap-0.5">
+            <p className="text-sm font-medium text-text-primary">
+              Continuous redemption
+            </p>
+            <p className="text-xs text-text-secondary">
+              On: the same person can receive rewards again, such as monthly or
+              weekly rewards. No beneficiary name needed.
+            </p>
+            <p className="text-xs text-text-secondary">
+              Off: one-time reward only. Staff enter the beneficiary's name so
+              they can't receive it twice.
+            </p>
+          </div>
+          <div
+            className={`w-11 h-6 rounded-full relative shrink-0 transition-colors ${allowDuplicates ? "gradient-button" : "bg-gray-200"}`}
+          >
+            <div
+              className={`w-5 h-5 rounded-full bg-white absolute top-0.5 shadow-sm transition-all ${allowDuplicates ? "left-5" : "left-0.5"}`}
+            />
+          </div>
+        </button>
 
         {program && (
           <div className="w-full flex flex-col gap-2 mt-5">

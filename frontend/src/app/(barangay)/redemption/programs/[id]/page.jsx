@@ -247,6 +247,14 @@ export default function ProgramDetails() {
                     name="Redemption Mode"
                     value={data?.program?.isCashMode ? "Cash" : "Point"}
                   />
+                  <LabelValue
+                    name="Redemption Type"
+                    value={data?.program?.allowDuplicates ? "Continuous" : "One-time"}
+                  />
+                  <LabelValue
+                    name="Created"
+                    value={formatDate(data?.program?.createdAt)}
+                  />
                 </div>
                 <LabelValue
                   name="Description"
