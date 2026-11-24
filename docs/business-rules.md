@@ -79,10 +79,12 @@ Each redemption line item stores the value in force at the time (`currentValue`)
 
 ## 11. Redemption Beneficiary and Points
 
-- The beneficiary of a redemption transaction is a **registered resident** (`residentId`); there is no separate beneficiary record. A resident without an account cannot take part.
+- The beneficiary of a redemption transaction is a **registered resident** (`residentId`), the account holder (the household). A resident without an account cannot take part.
+- A program is either **continuous** (`allowDuplicates` true, the default) or **one-time**. The type is fixed once the program has a reward release.
 - Recording a redemption transaction marks the resident as verified, like a completed pickup or manual intake, so they can see programs and points in the resident app. Staff who witness a real registration can also verify a resident with one tap from the Residents list, without waiting for a transaction.
 - Points belong to one resident **in one program**. Nothing stores the number: the balance is computed as *points earned in that program* minus *points spent on rewards in that program*, so it can never disagree with the records.
 - Points earned in one program cannot be spent on another program's rewards.
+- In a one-time program a reward release also names the household member who received it. That name is kept in a names-only `Beneficiary` table (unique per program and cleaned name) and is not a person record. One beneficiary can receive a reward once per program.
 
 ---
 
@@ -95,6 +97,9 @@ Releasing of rewards happens in the Reward Inventory module, not in Redemption P
 - the resident's balance in that program covers the total point cost.
 
 The same item listed twice in one release is treated as one line.
+
+- In a one-time program the release must carry the beneficiary's first, middle and last name, and it is rejected if that beneficiary already received a reward in the program. A continuous program asks for no beneficiary and never blocks.
+- A release recorded by mistake can be deleted (`DELETE /rewards/release/:id`, scoped to the barangay). Stock and points are computed from the rows, so both come back. A one-time beneficiary can receive again only after every release row of theirs in that program is deleted.
 
 ---
 

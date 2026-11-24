@@ -2,7 +2,7 @@
 
 Post-defense panel revisions. This file is the single place to see what is done and what is next, so a new chat can pick up from here without the old conversations.
 
-> Last updated: 2026-11-22. Goal: 100% of the panel's recommendations, ideally before the December Christmas break, because the finished system is needed for the internship paperwork. No exact deadline has been given. Ask the adviser for the revision deadline and what "100%" means for the paperwork.
+> Last updated: 2026-11-25. Goal: 100% of the panel's recommendations, ideally before the December Christmas break, because the finished system is needed for the internship paperwork. No exact deadline has been given. Ask the adviser for the revision deadline and what "100%" means for the paperwork.
 
 **Working style:** the maintainer writes the code. The AI assistant acts as a senior developer (review, risks, explanations, plans) and writes code only for repetitive work when the maintainer asks. Nothing is committed unless asked. One item at a time, planned only as deep as needed right before building it.
 
@@ -12,7 +12,7 @@ Legend: `[x]` done, `[~]` partly done, `[ ]` not started, `[?]` waiting on a dec
 
 ## 1. At a glance
 
-**9 done, 1 partly done, 4 not started, 1 waiting** (15 items).
+**10 done, 0 partly done, 4 not started, 1 waiting** (15 items).
 
 | # | Item | Status | Next step |
 |---|------|--------|-----------|
@@ -21,7 +21,7 @@ Legend: `[x]` done, `[~]` partly done, `[ ]` not started, `[?]` waiting on a dec
 | 3 | Real-time form validation | `[x]` | Done Nov 21: `mode: "onTouched"` on every react-hook-form form, so errors show when a field is left; the other forms keep inline messages on submit |
 | 4 | OTP message masks the number | `[x]` | Include in the push test |
 | 5 | Activate and ban resident accounts | `[x]` | Done Nov 22: ban and lift, photo-mismatch flag, Needs review card (section 2). Include in the push test |
-| 6 | Parents as primary users, children as beneficiaries | `[~]` | Brainstorm: framing only or a "released to" name |
+| 6 | Parents as primary users, children as beneficiaries | `[x]` | Done Nov 25: household account with an optional beneficiary name on rewards, a duplicate guard for one-time programs, and delete release (section 2). Tested end to end on the demo database; production QA guide sent to the team. Bugs found there are separate fixes, not part of this item. Deploy migration `20261124105401_add_beneficiary_and_allow_duplicates` to production first |
 | 7 | SMS for points and announcements (panel: optional) | `[?]` | Waiting on the SMS provider (email in section 8) |
 | 8 | Prices always 2 decimals, right-aligned | `[x]` | Done Nov 21: peso amounts use `formatCurrency` and are right-aligned; pieces show as whole numbers and other units with 2 decimals (`formatQty`). Left as they are: reward counts, input fields, the Excel sheets other than MRF inventory, and the redemption tables that mix points and pesos |
 | 9 | Reward for the monthly leaderboard winner | `[ ]` | Brainstorm |
@@ -75,6 +75,14 @@ Items 14 and 15 were raised verbally by the panel (panelist not recorded) and ar
 - When a mismatch brings the resident to the limit, the Finalize or Reject response says so and the collector sees a "Mismatch limit reached" prompt: "Deactivate account" or "Not now". Staff decide; there is no automatic ban. If the prompt is dismissed, the resident stays on the "Needs review" card at the top of the Residents page (Captain and Secretary). Deactivated residents are never flagged.
 - Staff can correct a flag later: a "Photo does not match" switch on the detail page of a collected or rejected request (`PATCH /pickup-requests/collection-requests/:id/mismatch`). There is no record of who changed it.
 
+**Item 6, parents as primary users, children as beneficiaries (decided 2026-11-24, built 2026-11-25)**
+- The resident account is a household. The account holder earns the points and the redemption transactions stay on the account. Only the reward release can name who in the household received the reward.
+- `Program.allowDuplicates` (screen label "Continuous redemption", default on). Continuous: no beneficiary is asked for and nothing is blocked. One-time: the release form asks for the beneficiary's first, middle and last name (all required; "NA" when there is no middle name) and one beneficiary can receive a reward only once in that program.
+- The guard is a names-only `Beneficiary` table, unique on program plus cleaned first, middle and last name, linked from `RewardRelease.beneficiaryId` (nullable). It is not a person record and has no link to the `User` table. The names go through `cleanName` / `cleanMiddleName` in `utils/cleanInput.js` (trim, collapse spaces, capitalize each word) so "juan", "JUAN" and " Juan " are the same person. `releaseReward` reads the flag from the database, never from the client, and answers "This beneficiary has already received a reward".
+- Once a program has a release, its Continuous / One-time type cannot be changed (`updateProgram` returns 400). A non-boolean `allowDuplicates` is rejected at create.
+- `DELETE /rewards/release/:id` (CAPTAIN, SECRETARY, TREASURER, SK, same as the page) removes one release row, scoped to the caller's barangay. Stock and points are computed, so both come back by themselves. The confirm window lists what comes back (item, quantity to stock, points to the resident). A one-time beneficiary can receive again only after all of their release rows in that program are deleted (one visit can create several rows, one per item).
+- Program cards and the detail page show the Redemption Type and the Created date. The release history shows the beneficiary (not shown for continuous releases or releases made before this item).
+
 **Decided 2026-11-19 (closing the open questions)**
 - **Item 5 storage:** one `photoMismatch` flag on each pickup request plus one nullable `reactivatedAt` on the user. The count is computed, never stored (project rule).
 - **Item 8:** keep the `₱10.00` format. All numbers (prices, kg and other floats) show 2 decimals. Anything that shows currency or money is right-aligned, not only table columns (cards, summaries and modals too). Number columns in tables are right-aligned as well.
@@ -98,6 +106,7 @@ Items 14 and 15 were raised verbally by the panel (panelist not recorded) and ar
 ### Still open
 
 - **Item 5:** nothing open. Staff can correct a flag from the request detail page. Known limits are in section 7.
+- **Item 6:** nothing open. Known limits are in section 7. Bugs the production QA finds are tracked as separate fixes.
 
 ---
 
@@ -113,7 +122,7 @@ Keep these short. Go deeper right before building each one.
 - Done Nov 22 (Phase A and B). What was built is in section 2.
 
 **6. Parents and children**
-- Choose between (a) framing only, such as "household account" wording in the UI and docs, or (b) an optional "released to" name on a reward release.
+- Done Nov 25. What was built is in section 2.
 
 **7. SMS**
 - Blocked on the provider. Also decide the triggers (points milestone, new announcement) and whether residents can opt out.
@@ -205,6 +214,9 @@ All of it is committed and on `origin/main` (checked 2026-11-18).
 - **Production:** before the deployed backend runs this code (it now selects `middleName`), check that the production database has the middle name migration applied (`prisma migrate deploy`).
 - **Item 5 limits:** (1) nobody is recorded when a mismatch flag is corrected from the detail page. (2) The reject endpoint has no status guard, so a direct API call can reject a collected request (the pickup-request status guard is already an accepted risk above). (3) The forgot-password reply now tells anyone who types a phone number that the account is banned, which the old generic reply avoided on purpose. (4) Banned residents' open requests are hidden only from the collector request list. The dashboard and reports were not checked for them. (5) The Reject link in the request list rows (the plain-link version) has not been looked at in the browser.
 - **Line endings:** working files are CRLF but the repo stores LF, so `git status` lists about 31 files as modified while `git diff --ignore-space-at-eol` shows nothing. Settle `.gitattributes` or `core.autocrlf` before the next commit.
+- **Item 6 limits (not bugs):** (1) There is no cap on how many beneficiaries one household can register in a one-time program; points are the only limit. (2) Two releases for the same brand-new beneficiary at the same instant can both pass the check (marked `shortcut:` in `releaseReward`; move the check into the transaction if it ever happens). (3) Reports and the resident's own history do not show the beneficiary. (4) Releases made before item 6, and continuous releases, have no beneficiary. (5) Deleting a release returns points at the reward item's current `pointCost`, not a snapshot. (6) Names are cleaned but free text, so a misspelling is a different beneficiary. (7) No automated test covers `cleanInput.js`. (8) Production: apply migration `20261124105401_add_beneficiary_and_allow_duplicates` before the deployed backend runs this code.
+- **Technical debt, input cleaning (found 2026-11-24):** there is no shared rule for typed text, and nothing changes letter case anywhere. The backend trims only in a few places (resident profile edit, junkshop add). Saved as typed, with no trim: signup names (`auth.controller.js`), staff names and the barangay name (`barangay-accounts.controller.js`), the household name in manual intake (it is trimmed only to check it is not blank), the reward item name, announcements and program expenses (these are trimmed only in the frontend form). So "juan", "JUAN" and "Juan " are stored as three different values, which hurts search, duplicate checks and reports. Fix later: decide one rule (trim, collapse extra spaces, a case rule for personal names), apply it on the backend, and decide whether old rows get cleaned. Build it before any duplicate check that compares typed names (item 6 beneficiary).
+- **Technical debt, Terms and Conditions and policy update (noted 2026-11-24):** `termsContent.js` was last updated on September 5, 2026 and says nothing about household accounts. Item 6 is built as a household account with an optional beneficiary name, so the Terms need a clause saying the account holder answers for the contributions and rewards recorded under the account. Do this as one review of the Terms and the policy text: add that clause, remove the line repeated in section 4 ("Any activity performed using your account is your responsibility."), and change the last-updated date. The signup page gets no household note, because how the account is used depends on each barangay's program.
 
 ---
 
