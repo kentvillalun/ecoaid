@@ -36,6 +36,7 @@ const createProgram = async (req, res) => {
       description,
       isCashMode,
       announce,
+      allowDuplicates,
     } = req.body ?? {};
 
     const { barangayId, id: userId, role } = req.user;
@@ -124,6 +125,7 @@ const createProgram = async (req, res) => {
               data: programMaterial,
             },
           },
+          allowDuplicates,
         },
       });
 
@@ -221,8 +223,8 @@ const getProgram = async (req, res) => {
             },
           },
           orderBy: {
-            createdAt: "desc"
-          }
+            createdAt: "desc",
+          },
         },
       },
     });
@@ -243,15 +245,26 @@ const getProgram = async (req, res) => {
 const updateProgram = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, allotedBudget, description, maxPoints, isActive, materials, isCashMode } =
-      req.body ?? {};
+    const {
+      name,
+      allotedBudget,
+      description,
+      maxPoints,
+      isActive,
+      materials,
+      isCashMode,
+      allowDuplicates,
+    } = req.body ?? {};
     const { barangayId } = req.user;
 
     const program = await prisma.program.findUnique({
       where: { id, barangayId },
       select: {
         isCashMode: true,
-        _count: { select: { redemptionTransaction: true } },
+        allowDuplicates: true,
+        _count: {
+          select: { redemptionTransaction: true, rewardReleases: true },
+        },
       },
     });
 
@@ -266,6 +279,16 @@ const updateProgram = async (req, res) => {
     if (maxPoints !== undefined) data.maxPoints = maxPoints;
     if (isActive !== undefined) data.isActive = isActive;
 
+    const isAllowDuplicatesChanging =
+      typeof allowDuplicates === "boolean" && allowDuplicates !== program.allowDuplicates;
+
+    if (isAllowDuplicatesChanging) {
+      if (program._count.rewardReleases > 0) {
+        return res.status(400).json({ error: "Cannot change duplication configuration: the program has released rewards already"})
+      }
+
+      data.allowDuplicates = allowDuplicates
+    }
     // existing transactions store their values as points or as pesos, so the
     // mode can only change while the program has no transactions
     const isModeChanging =
@@ -274,21 +297,25 @@ const updateProgram = async (req, res) => {
     if (isModeChanging) {
       if (program._count.redemptionTransaction > 0) {
         return res.status(400).json({
-          error: "Cannot change the redemption mode: the program already has transactions",
+          error:
+            "Cannot change the redemption mode: the program already has transactions",
         });
       }
 
       // the old values are for the other mode, so new ones are required
       if (!materials) {
         return res.status(400).json({
-          error: "Material values are required when changing the redemption mode",
+          error:
+            "Material values are required when changing the redemption mode",
         });
       }
 
       data.isCashMode = isCashMode;
     }
 
-    const effectiveIsCashMode = isModeChanging ? isCashMode : program.isCashMode;
+    const effectiveIsCashMode = isModeChanging
+      ? isCashMode
+      : program.isCashMode;
 
     const operations = [
       prisma.program.update({
@@ -304,8 +331,9 @@ const updateProgram = async (req, res) => {
           .json({ error: "A program needs at least one material" });
       }
 
-  
-      const values = materials.map((m) => parseFloat(m.pointValue ?? m.cashValue));
+      const values = materials.map((m) =>
+        parseFloat(m.pointValue ?? m.cashValue),
+      );
       if (values.some((v) => !Number.isFinite(v))) {
         return res.status(400).json({ error: "Invalid material value" });
       }
@@ -319,7 +347,6 @@ const updateProgram = async (req, res) => {
         return res.status(404).json({ error: "Material not found" });
       }
 
-      
       const removed = await prisma.programMaterial.findMany({
         where: {
           programId: id,
@@ -332,7 +359,9 @@ const updateProgram = async (req, res) => {
         },
       });
 
-      const inUse = removed.filter((r) => r._count.redemptionTransactionItem > 0);
+      const inUse = removed.filter(
+        (r) => r._count.redemptionTransactionItem > 0,
+      );
       if (inUse.length > 0) {
         return res.status(400).json({
           error: `Cannot remove ${inUse
@@ -537,8 +566,8 @@ const getTransactions = async (req, res) => {
         },
       },
       orderBy: {
-        createdAt: "desc"
-      }
+        createdAt: "desc",
+      },
     });
 
     return res.status(200).json({

@@ -1,6 +1,6 @@
 import express from 'express'
 import { authenticateBarangay, authenticateResident, requireRoles } from "../middlewares/authMiddleware.js"
-import { addRewardItem, getRewardItems, getRewardReleases, getRewardSummary, releaseReward, searchResident } from '../controllers/reward-inventory.controller.js'
+import { addRewardItem, deleteRelease, getRewardItems, getRewardReleases, getRewardSummary, releaseReward, searchResident } from '../controllers/reward-inventory.controller.js'
 
 const router = express.Router()
 
@@ -10,5 +10,6 @@ router.post("/release", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETAR
 router.get("/release", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY", "TREASURER", "SK"]), getRewardReleases )
 router.get("/summary", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY", "TREASURER", "SK"]), getRewardSummary )
 router.get("/residents/search", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY", "TREASURER", "SK"]), searchResident )
+router.delete("/release/:id", authenticateBarangay, requireRoles(["CAPTAIN", "SECRETARY", "TREASURER", "SK"]), deleteRelease )
 
 export default router;

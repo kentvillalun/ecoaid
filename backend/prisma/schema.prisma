@@ -87,6 +87,7 @@ model Barangay {
   rewardItems RewardItem[]
   rewardReleases RewardRelease[]
   pickupRequests PickupRequests[]
+  beneficiaries Beneficiary[]
 }
 
 enum RedemptionMode {
@@ -172,6 +173,7 @@ model User {
   notification Notifications[]
   redemptionTransaction RedemptionTransaction[]
   deactivatedUsers User[] @relation("UserDeactivatedBy")
+  beneficiaries Beneficiary[]
   
   @@index([barangayId])
   @@index([sitioId])
@@ -292,12 +294,15 @@ model Program {
   isActive Boolean @default(true)
   isCashMode Boolean @default(false)
   createdAt DateTime @default(now()) 
+
+  allowDuplicates Boolean @default(true)
   
   programMaterial ProgramMaterial[]
   redemptionTransaction RedemptionTransaction[]
   expenses ProgramExpense[]
   rewardItems RewardItem[]
   rewardReleases RewardRelease[]
+  beneficiaries Beneficiary[]
 }
 
 model ProgramMaterial {
@@ -584,6 +589,9 @@ model RewardRelease {
   barangayId String @db.Uuid()
   barangay Barangay @relation(fields: [barangayId], references: [id])
 
+  beneficiaryId String? @db.Uuid()
+  beneficiary Beneficiary? @relation(fields: [beneficiaryId], references: [id])
+
   quantity Float
   residentName String
   performedBy String
@@ -592,6 +600,7 @@ model RewardRelease {
   createdAt DateTime @default(now())
 
   @@index([residentId, programId])
+  @@index([beneficiaryId])
 }
 
 model Notifications {
@@ -608,4 +617,27 @@ model Notifications {
   isRead Boolean @default(false)
 
   createdAt DateTime @default(now())
+}
+
+model Beneficiary {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  barangayId String @db.Uuid
+  barangay Barangay @relation(fields: [barangayId], references: [id])
+
+  programId String @db.Uuid
+  program Program @relation(fields: [programId], references: [id])
+
+  residentId String? @db.Uuid
+  resident User? @relation(fields: [residentId], references: [id])
+
+  firstName String
+  middleName String
+  lastName String
+
+  createdAt DateTime @default(now())
+
+  rewardReleases RewardRelease[]
+
+  @@unique([programId, firstName, middleName, lastName])
 }

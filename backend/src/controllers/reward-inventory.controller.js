@@ -1,4 +1,5 @@
 import { prisma } from "../config/db.js";
+import { cleanMiddleName, cleanName } from "../utils/cleanInput.js";
 import { formatFullName } from "../utils/formatFullName.js";
 import { getResidentProgramBalance } from "../utils/residentPoints.js";
 
@@ -61,8 +62,8 @@ const getRewardItems = async (req, res) => {
         },
       },
       orderBy: {
-        createdAt: "desc"
-      }
+        createdAt: "desc",
+      },
     });
 
     const rewardItems = items.map((r) => {
@@ -92,11 +93,44 @@ const getRewardItems = async (req, res) => {
 
 const releaseReward = async (req, res) => {
   try {
-    const { residentId, programId, items: requestedItems } = req.body ?? {};
+    const {
+      residentId,
+      programId,
+      items: requestedItems,
+      firstName,
+      middleName,
+      lastName,
+    } = req.body ?? {};
     const { barangayId, id, role } = req.user;
 
     if (!residentId || !programId || !requestedItems) {
       return res.status(400).json({ error: "Required fields are missing" });
+    }
+
+    const program = await prisma.program.findUnique({
+      where: {
+        id: programId,
+        barangayId,
+      },
+      select: {
+        allowDuplicates: true,
+      },
+    });
+
+    if (!program) {
+      return res.status(404).json({ error: "Program not found" });
+    }
+
+    let cleanedFirstName, cleanedMiddleName, cleanedLastName;
+
+    if (!program.allowDuplicates) {
+      cleanedFirstName = cleanName(firstName);
+      cleanedMiddleName = cleanMiddleName(middleName);
+      cleanedLastName = cleanName(lastName);
+
+      if (!cleanedFirstName || !cleanedMiddleName || !cleanedLastName) {
+        return res.status(400).json({ error: "Beneficiary name is required" });
+      }
     }
 
     // a zero or negative quantity would make the point cost zero or negative
@@ -183,9 +217,7 @@ const releaseReward = async (req, res) => {
     });
 
     if (!availabilityCheck) {
-      return res
-        .status(400)
-        .json({ error: "Not enough stock" });
+      return res.status(400).json({ error: "Not enough stock" });
     }
 
     const totalPointCost = items.reduce((total, item) => {
@@ -204,21 +236,83 @@ const releaseReward = async (req, res) => {
       return res.status(400).json({ error: "Not enough points" });
     }
 
-    await prisma.rewardRelease.createMany({
-      data: items.map((item) => ({
-        rewardItemId: item.rewardItemId,
-        residentId,
-        programId,
-        barangayId,
-        residentName: formatFullName(resident),
-        performedBy: formatFullName(user),
-        performedByRole: role,
-        quantity: item.quantity,
-      })),
+    if (!program.allowDuplicates) {
+      const existing = await prisma.beneficiary.findUnique({
+        where: {
+          programId_firstName_middleName_lastName: {
+            programId,
+            firstName: cleanedFirstName,
+            middleName: cleanedMiddleName,
+            lastName: cleanedLastName,
+          },
+        },
+        select: {
+          _count: {
+            select: {
+              rewardReleases: true,
+            },
+          },
+        },
+      });
+
+      if (existing && existing._count.rewardReleases > 0) {
+        return res
+          .status(400)
+          .json({ error: "This beneficiary has already received a reward" });
+      }
+    }
+
+    await prisma.$transaction(async (tx) => {
+      let beneficiaryId = null;
+
+      if (!program.allowDuplicates) {
+        const beneficiary = await tx.beneficiary.upsert({
+          where: {
+            programId_firstName_middleName_lastName: {
+              programId,
+              firstName: cleanedFirstName,
+              middleName: cleanedMiddleName,
+              lastName: cleanedLastName,
+            },
+          },
+          update: {},
+          create: {
+            barangayId,
+            residentId,
+            programId,
+            firstName: cleanedFirstName,
+            middleName: cleanedMiddleName,
+            lastName: cleanedLastName,
+          },
+        });
+        beneficiaryId = beneficiary.id;
+      }
+
+      await tx.rewardRelease.createMany({
+        data: items.map((item) => ({
+          rewardItemId: item.rewardItemId,
+          residentId,
+          programId,
+          barangayId,
+          residentName: formatFullName(resident),
+          performedBy: formatFullName(user),
+          performedByRole: role,
+          quantity: item.quantity,
+          beneficiaryId,
+        })),
+      });
     });
 
     return res.status(200).json({ message: "Reward released successful" });
   } catch (error) {
+    if (error.code === "P2002") {
+      return res
+        .status(400)
+        .json({
+          error:
+            "This beneficiary was just recorded. Please check and try again",
+        });
+    }
     return res.status(500).json({ error: error.message });
   }
 };
@@ -283,7 +377,7 @@ const getRewardReleases = async (req, res) => {
     const rewardReleases = await prisma.rewardRelease.findMany({
       where: { barangayId },
       orderBy: {
-        createdAt: "desc"
+        createdAt: "desc",
       },
       select: {
         id: true,
@@ -303,10 +397,17 @@ const getRewardReleases = async (req, res) => {
         performedBy: true,
         performedByRole: true,
         createdAt: true,
+        beneficiary: {
+          select: {
+            firstName: true,
+            middleName: true,
+            lastName: true
+          }
+        }
       },
       orderBy: {
-        createdAt: "desc"
-      }
+        createdAt: "desc",
+      },
     });
 
     return res
@@ -321,29 +422,25 @@ const getRewardSummary = async (req, res) => {
   try {
     const { barangayId } = req.user;
 
-    const [
-      totalItems,
-      totalReleasedResult,
-      totalAddedResult,
-      totalResidents,
-    ] = await Promise.all([
-      prisma.rewardItem.count({
-        where: { barangayId },
-      }),
-      prisma.rewardRelease.aggregate({
-        where: { barangayId },
-        _sum: { quantity: true },
-      }),
-      prisma.rewardItem.aggregate({
-        where: { barangayId },
-        _sum: { quantity: true },
-      }),
-      prisma.rewardRelease.groupBy({
-        by: ["residentId"],
-        where: { barangayId, residentId: { not: null } },
-        _count: { residentId: true },
-      }),
-    ]);
+    const [totalItems, totalReleasedResult, totalAddedResult, totalResidents] =
+      await Promise.all([
+        prisma.rewardItem.count({
+          where: { barangayId },
+        }),
+        prisma.rewardRelease.aggregate({
+          where: { barangayId },
+          _sum: { quantity: true },
+        }),
+        prisma.rewardItem.aggregate({
+          where: { barangayId },
+          _sum: { quantity: true },
+        }),
+        prisma.rewardRelease.groupBy({
+          by: ["residentId"],
+          where: { barangayId, residentId: { not: null } },
+          _count: { residentId: true },
+        }),
+      ]);
 
     const totalReleased = totalReleasedResult._sum.quantity ?? 0;
 
@@ -366,6 +463,35 @@ const getRewardSummary = async (req, res) => {
   }
 };
 
+const deleteRelease = async (req, res) => {
+  try {
+    const releaseId = req.params.id;
+    const { barangayId } = req.user;
+    
+    const rewardRelease = await prisma.rewardRelease.findUnique({
+      where: {
+        id: releaseId,
+        barangayId,
+      }
+    })
+
+    if (!rewardRelease) {
+      return res.status(404).json({ error: "Release not found" })
+    }
+
+    await prisma.rewardRelease.delete({
+      where: {
+        id: releaseId,
+        barangayId
+      }
+    })
+
+    return res.status(200).json({ message: "Release deleted" })
+  } catch (error) {
+    return res.status(500).json({ error: error.message })
+  }
+}
+
 export {
   getRewardItems,
   addRewardItem,
@@ -373,4 +499,5 @@ export {
   getRewardReleases,
   getRewardSummary,
   searchResident,
+  deleteRelease
 };
