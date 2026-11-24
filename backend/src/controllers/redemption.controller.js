@@ -45,6 +45,10 @@ const createProgram = async (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
+    if (allowDuplicates !== undefined && typeof allowDuplicates !== "boolean") {
+      return res.status(400).json({ error: "Invalid redemption type" });
+    }
+
     if (!Array.isArray(programMaterial) || programMaterial.length === 0) {
       return res
         .status(400)

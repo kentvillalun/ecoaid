@@ -262,6 +262,7 @@ const releaseReward = async (req, res) => {
       }
     }
 
+    // shortcut: two releases for the same new beneficiary at the same instant can both pass the check above, move the check into this transaction if it ever happens
     await prisma.$transaction(async (tx) => {
       let beneficiaryId = null;
 
@@ -384,6 +385,7 @@ const getRewardReleases = async (req, res) => {
         rewardItem: {
           select: {
             name: true,
+            pointCost: true,
           },
         },
         programId: true,
@@ -404,9 +406,6 @@ const getRewardReleases = async (req, res) => {
             lastName: true
           }
         }
-      },
-      orderBy: {
-        createdAt: "desc",
       },
     });
 
